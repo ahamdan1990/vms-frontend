@@ -1,8 +1,8 @@
+// src/pages/errors/NotFoundPage.js
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { NavigationHelper } from '../../routes/AppRoutes';
-import Button from '../../components/common/Button/Button';
+import { NavigationHelper } from '../../utils/navigationHelper';
 
 const NotFoundPage = () => {
   const { isAuthenticated, userRole } = useAuth();
@@ -27,27 +27,25 @@ const NotFoundPage = () => {
           {isAuthenticated ? (
             <Link 
               to={NavigationHelper.getDashboardRoute(userRole)}
-              className="block"
+              className="inline-block w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
-              <Button variant="primary" fullWidth>
-                Go to Dashboard
-              </Button>
+              Go to Dashboard
             </Link>
           ) : (
-            <Link to="/login" className="block">
-              <Button variant="primary" fullWidth>
-                Sign In
-              </Button>
+            <Link 
+              to="/login"
+              className="inline-block w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Sign In
             </Link>
           )}
           
-          <Button 
-            variant="outline" 
-            fullWidth
+          <button 
+            className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
             onClick={() => window.history.back()}
           >
             Go Back
-          </Button>
+          </button>
         </div>
       </div>
     </div>

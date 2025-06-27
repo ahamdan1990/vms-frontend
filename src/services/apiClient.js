@@ -1,3 +1,4 @@
+// src/services/apiClient.js
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import errorService from './errorService';
@@ -61,7 +62,7 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle ApiResponseDto structure
+// ✅ FIXED: Response interceptor to handle ApiResponseDto structure
 apiClient.interceptors.response.use(
   (response) => {
     // Calculate request duration
@@ -83,9 +84,6 @@ apiClient.interceptors.response.use(
         if (!response.data.success) {
           const errorMessage = response.data.message || ERROR_MESSAGES.GENERIC;
           const errors = response.data.errors || [errorMessage];
-          
-          // Show error toast for failed API calls
-          toast.error(errors[0] || errorMessage);
           
           // Log to errorService for monitoring
           errorService.logError({
@@ -124,44 +122,46 @@ apiClient.interceptors.response.use(
     // Log to errorService for monitoring
     errorService.processApiError(error);
     
-    // Handle different types of errors with immediate user feedback
+    // ✅ FIXED: Handle different types of errors
     if (error.response) {
-      const { status, data } = error.response;
+      const { status } = error.response;
       
       switch (status) {
         case HTTP_STATUS.UNAUTHORIZED: {
-          // Unauthorized - try to refresh token first
+          // ✅ FIXED: Unauthorized - try to refresh token first
           if (error.config.url !== AUTH_ENDPOINTS.REFRESH && !error.config._retry) {
             try {
               error.config._retry = true;
+              console.log('🔄 Attempting token refresh...');
               await refreshToken();
+              console.log('✅ Token refreshed, retrying request');
               return apiClient.request(error.config);
             } catch (refreshError) {
+              console.error('❌ Token refresh failed:', refreshError);
               // Refresh failed, logout user
               await handleAuthFailure();
-              toast.error(ERROR_MESSAGES.UNAUTHORIZED); 
               return Promise.reject(error);
             }
           } else {
             // Refresh token failed or this was already a retry
+            console.error('❌ Auth failure - redirecting to login');
             await handleAuthFailure();
-            toast.error(ERROR_MESSAGES.UNAUTHORIZED); 
           }
           break;
         }
         
         case HTTP_STATUS.FORBIDDEN: {
-          toast.error(ERROR_MESSAGES.FORBIDDEN); 
+          console.warn('⚠️ Access forbidden');
           break;
         }
         
         case HTTP_STATUS.NOT_FOUND: {
-          toast.error(ERROR_MESSAGES.NOT_FOUND); 
+          console.warn('⚠️ Resource not found');
           break;
         }
         
         case HTTP_STATUS.TOO_MANY_REQUESTS: {
-          toast.error(ERROR_MESSAGES.RATE_LIMIT); 
+          console.warn('⚠️ Rate limit exceeded');
           break;
         }
         
@@ -169,27 +169,20 @@ apiClient.interceptors.response.use(
         case HTTP_STATUS.BAD_GATEWAY:
         case HTTP_STATUS.SERVICE_UNAVAILABLE:
         case HTTP_STATUS.GATEWAY_TIMEOUT: {
-          toast.error(ERROR_MESSAGES.SERVER_ERROR); 
+          console.error('❌ Server error');
           break;
         }
         
         default: {
-          // Handle ApiResponseDto error format
-          if (data && data.errors && Array.isArray(data.errors)) {
-            data.errors.forEach(errorMsg => toast.error(errorMsg));
-          } else if (data && data.message) {
-            toast.error(data.message);
-          } else {
-            toast.error(`Request failed with status ${status}`);
-          }
+          console.error(`❌ API Error: ${status}`);
         }
       }
     } else if (error.request) {
       // Network error
-      toast.error(ERROR_MESSAGES.NETWORK_ERROR); 
+      console.error('❌ Network error:', error.message);
     } else {
       // Other error
-      toast.error(error.message || ERROR_MESSAGES.GENERIC); 
+      console.error('❌ Request setup error:', error.message);
     }
     
     return Promise.reject(error);
@@ -197,10 +190,11 @@ apiClient.interceptors.response.use(
 );
 
 /**
- * Function to refresh token
+ * ✅ FIXED: Function to refresh token
  */
 const refreshToken = async () => {
   try {
+    console.log('🔄 Refreshing token...');
     const response = await axios.post(AUTH_ENDPOINTS.REFRESH, {}, {
       baseURL: API_CONFIG.BASE_URL,
       withCredentials: true,
@@ -209,9 +203,11 @@ const refreshToken = async () => {
     
     // Update token service
     tokenService.handleTokenRefresh();
+    console.log('✅ Token refresh successful');
     
     return response;
   } catch (error) {
+    console.error('❌ Token refresh failed:', error);
     // Clear token service on refresh failure
     tokenService.handleLogout();
     throw error;
@@ -219,20 +215,28 @@ const refreshToken = async () => {
 };
 
 /**
- * Handle authentication failure
+ * ✅ FIXED: Handle authentication failure
  */
 const handleAuthFailure = async () => {
+  console.log('🚪 Handling auth failure...');
+  
   // Clear token service
   tokenService.handleLogout();
   
   // Dispatch logout action if store is available
   if (store) {
-    const { logout } = await import('../store/slices/authSlice');
-    store.dispatch(logout());
+    try {
+      const { logout } = await import('../store/slices/authSlice');
+      store.dispatch(logout());
+      console.log('✅ Logout dispatched to store');
+    } catch (error) {
+      console.error('❌ Failed to dispatch logout:', error);
+    }
   }
   
-  // Redirect to login if not already there
+  // Only redirect if not already on login page
   if (window.location.pathname !== '/login') {
+    console.log('🚪 Redirecting to login page');
     window.location.href = '/login';
   }
 };
@@ -268,8 +272,8 @@ export const startTokenRefresh = () => {
     try {
       await refreshToken();
     } catch (error) {
-      console.warn('Token refresh failed:', error);
-      // Don't handle auth failure here as it will be handled by interceptor
+      console.warn('Automatic token refresh failed:', error);
+      // Auth failure will be handled by the interceptor
     }
   });
 };
@@ -312,69 +316,6 @@ export const healthCheck = async () => {
   } catch (error) {
     return { healthy: false, error: error.message };
   }
-};
-
-/**
- * Check if request should be retried using constants
- */
-export const shouldRetryRequest = (error, attemptNumber, maxRetries = RETRY_CONFIG.MAX_RETRIES) => {
-  if (attemptNumber >= maxRetries) return false;
-  return shouldRetry(error, attemptNumber, error.config?.method);
-};
-
-/**
- * Get retry delay using constants
- */
-export const getRetryDelayTime = (attemptNumber, error) => {
-  return getRetryDelay(attemptNumber, RETRY_CONFIG.INITIAL_DELAY);
-};
-
-/**
- * Create API client with custom timeout
- */
-export const createApiClientWithTimeout = (timeout) => {
-  return axios.create({
-    ...apiClient.defaults,
-    timeout: timeout || TIMEOUT_CONFIG.DEFAULT
-  });
-};
-
-/**
- * ✅ ADDED: Upload-specific API client
- */
-export const createUploadClient = () => {
-  const uploadClient = axios.create({
-    ...apiClient.defaults,
-    timeout: TIMEOUT_CONFIG.UPLOAD,
-    headers: {
-      ...apiClient.defaults.headers,
-      [REQUEST_HEADERS.CONTENT_TYPE]: 'multipart/form-data'
-    }
-  });
-  
-  // Add progress tracking
-  uploadClient.interceptors.request.use((config) => {
-    if (config.onUploadProgress) {
-      config.onUploadProgress = (progressEvent) => {
-        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-        config.onUploadProgress({ progress, loaded: progressEvent.loaded, total: progressEvent.total });
-      };
-    }
-    return config;
-  });
-  
-  return uploadClient;
-};
-
-/**
- * ✅ ADDED: Download-specific API client
- */
-export const createDownloadClient = () => {
-  return axios.create({
-    ...apiClient.defaults,
-    timeout: TIMEOUT_CONFIG.DOWNLOAD,
-    responseType: 'blob'
-  });
 };
 
 export default apiClient;

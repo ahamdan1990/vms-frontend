@@ -1,3 +1,4 @@
+// src/store/middleware.js
 import { isRejectedWithValue } from '@reduxjs/toolkit';
 import { logout } from './slices/authSlice';
 import { incrementErrorCount, addSlowQuery, resetPerformanceCounters } from './slices/uiSlice';
@@ -205,50 +206,9 @@ export const notificationMiddleware = (store) => (next) => (action) => {
 };
 
 /**
- * State persistence middleware
+ * ✅ REMOVED: persistenceMiddleware - let store.js handle persistence
+ * This was causing conflicts with the main localStorage persistence
  */
-export const persistenceMiddleware = (store) => (next) => (action) => {
-  const result = next(action);
-  const state = store.getState();
-
-  // Persist specific state changes to memory
-  if (action.type.includes('auth/') || 
-      action.type.includes('ui/setTheme') || 
-      action.type.includes('ui/setPreferences') ||
-      action.type.includes('notifications/updateSettings')) {
-    
-    try {
-      // Store in memory (Claude.ai compatible)
-      const persistData = {
-        auth: {
-          user: state.auth.user,
-          isAuthenticated: state.auth.isAuthenticated,
-          permissions: state.auth.permissions
-        },
-        ui: {
-          theme: state.ui.theme,
-          preferences: state.ui.preferences,
-          sidebarCollapsed: state.ui.sidebarCollapsed,
-          tablePreferences: state.ui.tablePreferences
-        },
-        notifications: {
-          settings: state.notifications.settings
-        },
-        timestamp: Date.now()
-      };
-
-      // Store in memory (no localStorage for Claude.ai)
-      if (typeof window !== 'undefined') {
-        window._vmsPersistedState = persistData;
-      }
-      
-    } catch (error) {
-      console.warn('Failed to persist state:', error);
-    }
-  }
-
-  return result;
-};
 
 /**
  * Debug middleware (development only)
@@ -262,16 +222,17 @@ export const debugMiddleware = (store) => (next) => (action) => {
   const result = next(action);
   const nextState = store.getState();
 
-  // Log state changes for debugging
+  // ✅ REDUCED: Only log important auth actions to reduce noise
   if (action.type !== '@@redux/INIT' && action.type !== '@@INIT') {
     const isErrorAction = action.type.includes('rejected');
+    const isAuthAction = action.type.includes('auth/');
     const isSlowAction = debugMiddleware.lastActionTime && 
       (Date.now() - debugMiddleware.lastActionTime) > 1000;
 
-    if (isErrorAction || isSlowAction || action.type.includes('auth/')) {
+    // Only log auth actions, errors, or slow actions
+    if (isAuthAction || isErrorAction || isSlowAction) {
       console.group(`🔍 Action: ${action.type} ${isErrorAction ? '❌' : isSlowAction ? '🐌' : ''}`);
       console.log('Payload:', action.payload);
-      
       // Check for state changes
       const stateChanged = prevState !== nextState;
       if (stateChanged) {
@@ -390,7 +351,7 @@ export const rateLimitMiddleware = (store) => {
 };
 
 /**
- * Combined custom middleware
+ * ✅ FIXED: Combined custom middleware - removed persistenceMiddleware
  */
 export const customMiddleware = [
   // Order is important - validation first, then rate limiting
@@ -404,7 +365,7 @@ export const customMiddleware = [
   
   // Performance and debugging
   performanceMiddleware,
-  persistenceMiddleware,
+  // ✅ REMOVED: persistenceMiddleware - conflicts with store persistence
   
   // Debug only in development
   ...(process.env.NODE_ENV === 'development' ? [debugMiddleware] : [])
