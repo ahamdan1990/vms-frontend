@@ -1,5 +1,6 @@
+// src/hooks/useAuth.js
 import { useSelector, useDispatch } from 'react-redux';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   loginUser,
   logoutUser,
@@ -44,10 +45,12 @@ import {
 } from '../store/selectors/authSelectors';
 
 /**
- * Custom hook for authentication operations
+ * Custom hook for authentication operations - FINAL FIXED VERSION
  */
 export const useAuth = () => {
   const dispatch = useDispatch();
+  const initializationAttempted = useRef(false);
+  const isInitializing = useRef(false);
 
   const user = useSelector(selectUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -127,6 +130,7 @@ export const useAuth = () => {
   }, [dispatch]);
 
   const logoutImmediate = useCallback(() => {
+    console.log('🚪 Immediate logout triggered');
     // Stop token refresh
     stopTokenRefresh();
     
@@ -139,24 +143,21 @@ export const useAuth = () => {
 
   const checkAuth = useCallback(async () => {
     try {
-      // Check token validity first
-      const tokenValidation = tokenService.validateSession();
-      
-      if (!tokenValidation.isValid) {
-        logoutImmediate();
-        return null;
-      }
-
+      console.log('🔍 Checking authentication with server...');
       const result = await dispatch(getCurrentUser());
       
       if (result.payload) {
+        console.log('✅ Authentication check successful');
         // Start token refresh if not already running
         startTokenRefresh();
+        return result.payload;
+      } else {
+        console.log('❌ Authentication check failed - no payload');
+        logoutImmediate();
+        return null;
       }
-      
-      return result;
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error('❌ Auth check failed:', error);
       logoutImmediate();
       return null;
     }
@@ -226,20 +227,55 @@ export const useAuth = () => {
     dispatch(clearError());
   }, [dispatch]);
 
-  // Auto-check authentication status on app load
+  // ✅ FINAL FIX: Auto-check authentication status - PREVENT ALL MULTIPLE CALLS
   useEffect(() => {
-    if (!isAuthenticated && !loading) {
-      // Check if we have a valid session before making API call
-      const tokenValidation = tokenService.validateSession();
-      if (tokenValidation.isValid && !tokenValidation.isExpired) {
-        checkAuth();
+    const initializeAuth = async () => {
+      // ✅ STRONGEST protection against multiple calls
+      if (initializationAttempted.current || isInitializing.current) {
+        console.log('⏭️ Auth initialization already attempted or in progress');
+        return;
       }
-    }
-  }, [isAuthenticated, loading, checkAuth]);
 
-  // Set up token refresh for authenticated users
+      // Prevent any other calls
+      initializationAttempted.current = true;
+      isInitializing.current = true;
+
+      console.log('🔍 Initializing authentication check...');
+
+      try {
+        // ✅ FIXED: Check REAL localStorage first  
+        const storedData = localStorage.getItem('vms_app_state');
+        if (storedData) {
+          try {
+            const parsedData = JSON.parse(storedData);
+            if (parsedData?.auth?.isAuthenticated && parsedData?.auth?.user) {
+              console.log('💾 Found stored auth state, validating with server...');
+              await checkAuth();
+              return;
+            }
+          } catch (parseError) {
+            console.warn('Failed to parse stored auth data:', parseError);
+          }
+        }
+        
+        console.log('❌ No stored auth state found');
+      } catch (error) {
+        console.error('❌ Auth initialization error:', error);
+      } finally {
+        isInitializing.current = false;
+      }
+    };
+
+    // ✅ ONLY run if not authenticated and not loading
+    if (!isAuthenticated && !loading) {
+      initializeAuth();
+    }
+  }, []); // ✅ CRITICAL: Empty dependency array
+
+  // ✅ FIXED: Set up token refresh for authenticated users
   useEffect(() => {
     if (isAuthenticated && !loading) {
+      console.log('🔄 Starting token refresh for authenticated user');
       startTokenRefresh();
     } else {
       stopTokenRefresh();
@@ -249,7 +285,6 @@ export const useAuth = () => {
       stopTokenRefresh();
     };
   }, [isAuthenticated, loading]);
-
 
   const isRole = useCallback((role) => {
     return userRole === role;

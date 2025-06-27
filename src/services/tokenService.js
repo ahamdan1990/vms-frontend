@@ -1,7 +1,8 @@
+// src/services/tokenService.js
 /**
  * Token service for managing authentication tokens
  * Memory-based implementation for Claude.ai artifacts compatibility
- * FIXED: Consistent device fingerprinting
+ * FIXED: Better session validation and expiry logic
  */
 
 // Token refresh interval (14 minutes - tokens expire in 15 minutes)
@@ -217,11 +218,11 @@ class TokenService {
   }
 
   /**
-   * Check if token is likely expired
+   * ✅ FIXED: Check if token is likely expired
    */
   isTokenLikelyExpired() {
     const expiry = this.estimateTokenExpiry();
-    if (!expiry) return true;
+    if (!expiry) return true; // If no expiry estimate, consider expired
     
     return Date.now() > expiry.getTime();
   }
@@ -316,15 +317,18 @@ class TokenService {
   }
 
   /**
-   * Validate session data
+   * ✅ FIXED: Validate session data
    */
   validateSession() {
     const state = this.getAuthState();
+    const hasValidSession = state.hasSession && state.lastActivity;
+    const isExpired = hasValidSession ? this.isTokenLikelyExpired() : true;
+    const needsRefresh = hasValidSession ? this.getTimeUntilRefresh() < 60000 : false; // Less than 1 minute
     
     return {
-      isValid: state.hasSession && state.isActive && !this.isTokenLikelyExpired(),
-      needsRefresh: this.getTimeUntilRefresh() < 60000, // Less than 1 minute
-      isExpired: this.isTokenLikelyExpired(),
+      isValid: hasValidSession && state.isActive && !isExpired,
+      needsRefresh,
+      isExpired,
       state
     };
   }

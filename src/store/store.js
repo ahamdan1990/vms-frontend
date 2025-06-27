@@ -1,26 +1,33 @@
-// src/store/index.js
-
+// src/store/store.js
 import { configureStore } from '@reduxjs/toolkit';
 import rootReducer, { hydrateState, validateState } from './rootReducer';
 import customMiddleware from './middleware';
 
-// ✅ FIXED: Use real localStorage for Windows application
+// ✅ FIXED: Use REAL localStorage consistently
 const STORAGE_KEY = 'vms_app_state';
 
-// ✅ Production localStorage functions
+// ✅ PRODUCTION localStorage functions - REALLY USE localStorage
 const loadPersistedState = () => {
   try {
+    // Check if localStorage is available
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      console.warn('localStorage not available');
+      return undefined;
+    }
+
     const serializedState = localStorage.getItem(STORAGE_KEY);
     if (serializedState === null) {
+      console.log('📭 No persisted state found in localStorage');
       return undefined;
     }
     
     const persistedState = JSON.parse(serializedState);
+    console.log('📦 Loaded persisted state from localStorage:', persistedState);
     
     // Validate state structure
     if (!validateState(persistedState)) {
-      console.warn('Invalid persisted state structure, starting fresh');
-      localStorage.removeItem(STORAGE_KEY);
+      console.warn('❌ Invalid persisted state structure, starting fresh');
+
       return undefined;
     }
     
@@ -29,21 +36,29 @@ const loadPersistedState = () => {
     const maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
     
     if (stateAge > maxAge) {
-      console.info('Persisted state expired, starting fresh');
-      localStorage.removeItem(STORAGE_KEY);
+      console.info('⏰ Persisted state expired, starting fresh');
+
       return undefined;
     }
     
-    return hydrateState(persistedState);
+    const hydratedState = hydrateState(persistedState);
+    console.log('✅ State hydrated successfully');
+    return hydratedState;
   } catch (error) {
-    console.error('Failed to load persisted state:', error);
-    localStorage.removeItem(STORAGE_KEY);
+    console.error('❌ Failed to load persisted state:', error);
+
     return undefined;
   }
 };
 
 const saveStateToStorage = (state) => {
   try {
+    // Check if localStorage is available
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      console.warn('localStorage not available for saving');
+      return;
+    }
+
     const persistData = {
       auth: {
         user: state.auth.user,
@@ -64,8 +79,12 @@ const saveStateToStorage = (state) => {
     
     const serializedState = JSON.stringify(persistData);
     localStorage.setItem(STORAGE_KEY, serializedState);
+    console.log('💾 State saved to localStorage:', persistData);
+    
+    // ALSO save to window for immediate access (compatibility)
+    window._vmsPersistedState = persistData;
   } catch (error) {
-    console.error('Failed to save state to localStorage:', error);
+    console.error('❌ Failed to save state to localStorage:', error);
   }
 };
 
@@ -113,7 +132,7 @@ export const store = configureStore({
   }
 });
 
-// ✅ FIXED: Subscribe to store changes and save to localStorage
+// ✅ FIXED: Subscribe to store changes and save to REAL localStorage
 let currentState = store.getState();
 store.subscribe(() => {
   const nextState = store.getState();
@@ -140,6 +159,7 @@ store.subscribe(() => {
     );
     
     if (shouldPersist) {
+      console.log('💾 Persisting state changes...');
       saveStateToStorage(nextState);
     }
     
@@ -160,44 +180,27 @@ if (typeof window !== 'undefined') {
 export const getStoreState = () => store.getState();
 export const dispatchAction = (action) => store.dispatch(action);
 
-// ✅ ADDED: Storage management utilities for production
+// ✅ FIXED: Storage management utilities
 export const clearPersistedState = () => {
   try {
     localStorage.removeItem(STORAGE_KEY);
-    console.info('Persisted state cleared');
+    if (window._vmsPersistedState) {
+      delete window._vmsPersistedState;
+    }
+    console.info('✅ Persisted state cleared');
   } catch (error) {
-    console.error('Failed to clear persisted state:', error);
-  }
-};
-
-export const exportAppState = () => {
-  try {
-    const state = store.getState();
-    const exportData = {
-      ...state,
-      timestamp: Date.now(),
-      version: process.env.REACT_APP_VERSION || '1.0.0'
-    };
-    
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `vms-state-export-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error('Failed to export app state:', error);
+    console.error('❌ Failed to clear persisted state:', error);
   }
 };
 
 export const getStorageInfo = () => {
   try {
-    const used = new Blob([localStorage.getItem(STORAGE_KEY) || '']).size;
+    if (typeof localStorage === 'undefined') {
+      return { used: 0, total: 0, available: 0, usedPercent: 0, keys: 0 };
+    }
+
+    const stored = localStorage.getItem(STORAGE_KEY) || '';
+    const used = new Blob([stored]).size;
     const total = 5 * 1024 * 1024; // 5MB typical localStorage limit
     
     return {
@@ -205,11 +208,12 @@ export const getStorageInfo = () => {
       total,
       available: total - used,
       usedPercent: Math.round((used / total) * 100),
-      keys: Object.keys(localStorage).length
+      keys: Object.keys(localStorage).length,
+      hasData: stored.length > 0
     };
   } catch (error) {
     console.error('Failed to get storage info:', error);
-    return null;
+    return { used: 0, total: 0, available: 0, usedPercent: 0, keys: 0, hasData: false };
   }
 };
 
@@ -220,17 +224,15 @@ if (process.env.NODE_ENV === 'development') {
     window.__REDUX_STORE__ = store;
     window.__VMS_STORE_UTILS__ = {
       clearPersistedState,
-      exportAppState,
       getStorageInfo,
       getState: getStoreState
     };
   }
   
   // Log store initialization
-  console.log('🏪 Redux Store initialized with localStorage persistence');
+  console.log('🏪 Redux Store initialized with REAL localStorage persistence');
   console.log('📊 Initial State:', store.getState());
   console.log('💾 Storage Info:', getStorageInfo());
 }
-
 
 export default store;

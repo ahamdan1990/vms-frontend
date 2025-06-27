@@ -1,8 +1,8 @@
+// src/pages/errors/ServerErrorPage.js
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { NavigationHelper } from '../../routes/AppRoutes';
-import Button from '../../components/common/Button/Button';
+import { NavigationHelper } from '../../utils/navigationHelper';
 
 const ServerErrorPage = () => {
   const { isAuthenticated, userRole } = useAuth();
@@ -24,28 +24,26 @@ const ServerErrorPage = () => {
         </p>
 
         <div className="space-y-4">
-          <Button 
-            variant="primary" 
-            fullWidth
+          <button 
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             onClick={() => window.location.reload()}
           >
             Try Again
-          </Button>
+          </button>
           
           {isAuthenticated ? (
             <Link 
               to={NavigationHelper.getDashboardRoute(userRole)}
-              className="block"
+              className="inline-block w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
             >
-              <Button variant="outline" fullWidth>
-                Go to Dashboard
-              </Button>
+              Go to Dashboard
             </Link>
           ) : (
-            <Link to="/login" className="block">
-              <Button variant="outline" fullWidth>
-                Sign In
-              </Button>
+            <Link 
+              to="/login"
+              className="inline-block w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              Sign In
             </Link>
           )}
         </div>

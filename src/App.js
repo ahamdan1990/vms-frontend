@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useEffect, useRef } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
@@ -11,8 +12,7 @@ import { initializeNotifications } from './store/slices/notificationSlice';
 import Notification from './components/common/Notification/Notification';
 
 /**
- * App initialization component
- * FIXED: Hide HTML loading screen when React is ready
+ * App initialization component - FIXED VERSION
  */
 const AppInitializer = ({ children }) => {
   const dispatch = useDispatch();
@@ -43,10 +43,10 @@ const AppInitializer = ({ children }) => {
     }
   }, [dispatch]);
 
-  // Log authentication state changes for debugging
+  // ✅ FIXED: Reduce authentication state change logging
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`🔐 App: Authentication state changed - isAuthenticated: ${isAuthenticated}`);
+      console.log(`🔐 App: Authentication state - isAuthenticated: ${isAuthenticated}`);
     }
   }, [isAuthenticated]);
 
