@@ -1,0 +1,28 @@
+# Visitor Management System - Robots.txt
+# This is a private enterprise application
+
+User-agent: *
+Disallow: /
+
+# Security endpoints - explicitly disallow
+Disallow: /api/
+Disallow: /login
+Disallow: /auth/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /users/
+Disallow: /invitations/
+Disallow: /visitors/
+Disallow: /reports/
+Disallow: /checkin/
+Disallow: /settings/
+
+# Static assets that could be indexed for documentation purposes (if needed)
+# Allow: /static/docs/
+# Allow: /static/help/
+
+# Sitemap (if public documentation exists)
+# Sitemap: https://yourdomain.com/sitemap.xml
+
+# Crawl-delay for any allowed sections
+Crawl-delay: 86400

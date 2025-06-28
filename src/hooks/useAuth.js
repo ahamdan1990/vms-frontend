@@ -44,13 +44,14 @@ import {
   selectCanManageSystem
 } from '../store/selectors/authSelectors';
 
+// ✅ SOLUTION: Module-level lock to prevent multiple initializations
+let initializationPromise = null;
+
 /**
  * Custom hook for authentication operations - FINAL FIXED VERSION
  */
 export const useAuth = () => {
   const dispatch = useDispatch();
-  const initializationAttempted = useRef(false);
-  const isInitializing = useRef(false);
 
   const user = useSelector(selectUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -227,52 +228,37 @@ export const useAuth = () => {
     dispatch(clearError());
   }, [dispatch]);
 
-  // ✅ FINAL FIX: Auto-check authentication status - PREVENT ALL MULTIPLE CALLS
+  // ✅ FINAL FIX: Auto-check authentication status using a module-level lock
   useEffect(() => {
     const initializeAuth = async () => {
-      // ✅ STRONGEST protection against multiple calls
-      if (initializationAttempted.current || isInitializing.current) {
-        console.log('⏭️ Auth initialization already attempted or in progress');
-        return;
-      }
-
-      // Prevent any other calls
-      initializationAttempted.current = true;
-      isInitializing.current = true;
-
-      console.log('🔍 Initializing authentication check...');
-
       try {
-        // ✅ FIXED: Check REAL localStorage first  
         const storedData = localStorage.getItem('vms_app_state');
         if (storedData) {
-          try {
-            const parsedData = JSON.parse(storedData);
-            if (parsedData?.auth?.isAuthenticated && parsedData?.auth?.user) {
-              console.log('💾 Found stored auth state, validating with server...');
-              await checkAuth();
-              return;
-            }
-          } catch (parseError) {
-            console.warn('Failed to parse stored auth data:', parseError);
+          const parsedData = JSON.parse(storedData);
+          if (parsedData?.auth?.isAuthenticated && parsedData?.auth?.user) {
+            console.log('💾 Found stored auth state, validating with server...');
+            await checkAuth();
+            return;
           }
         }
-        
         console.log('❌ No stored auth state found');
       } catch (error) {
         console.error('❌ Auth initialization error:', error);
-      } finally {
-        isInitializing.current = false;
       }
     };
 
-    // ✅ ONLY run if not authenticated and not loading
     if (!isAuthenticated && !loading) {
-      initializeAuth();
+      if (!initializationPromise) {
+        console.log('🚀 Kicking off single authentication initialization...');
+        initializationPromise = initializeAuth().finally(() => {
+          // Reset the lock once the initialization is complete
+          initializationPromise = null;
+        });
+      }
     }
-  }, []); // ✅ CRITICAL: Empty dependency array
+  }, [isAuthenticated, loading, checkAuth]);
 
-  // ✅ FIXED: Set up token refresh for authenticated users
+  // Set up token refresh for authenticated users
   useEffect(() => {
     if (isAuthenticated && !loading) {
       console.log('🔄 Starting token refresh for authenticated user');

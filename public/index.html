@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="description" content="Visitor Management System - Secure, efficient visitor management with facial recognition integration" />
+    <meta name="keywords" content="visitor management, security, facial recognition, check-in, enterprise" />
+    <meta name="author" content="VMS Development Team" />
+    
+    <!-- Security headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:5000 https://localhost:7147 wss://localhost:7147; frame-src 'none'; object-src 'none';" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    
+    <!-- PWA and mobile optimization -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="VMS" />
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://localhost:7147" />
+    <link rel="dns-prefetch" href="https://localhost:7147" />
+    
+    <!-- Favicon and app icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png" />
+    
+    <title>Visitor Management System</title>
+    
+    <!-- Critical CSS for loading states -->
+    <style>
+      /* Critical loading styles */
+      .loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        opacity: 1;
+        transition: opacity 0.5s ease-in-out;
+      }
+      
+      .loading-screen.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .loading-logo {
+        width: 80px;
+        height: 80px;
+        background: white;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 24px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      }
+      
+      .loading-text {
+        color: white;
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 16px;
+      }
+      
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-top: 3px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .loading-version {
+        position: absolute;
+        bottom: 24px;
+        color: rgba(255,255,255,0.8);
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>
+      <div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;">
+        <h1>JavaScript Required</h1>
+        <p>You need to enable JavaScript to run the Visitor Management System.</p>
+        <p>Please enable JavaScript in your browser settings and reload the page.</p>
+      </div>
+    </noscript>
+    
+    <!-- Loading screen shown while React loads -->
+    <div id="loading-screen" class="loading-screen">
+      <div class="loading-logo">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#3b82f6" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M2 17L12 22L22 17" stroke="#3b82f6" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M2 12L12 17L22 12" stroke="#3b82f6" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="loading-text">Visitor Management System</div>
+      <div class="loading-spinner"></div>
+      <div class="loading-version">v1.0.0</div>
+    </div>
+    
+    <!-- React app root -->
+    <div id="root"></div>
+    
+    <!-- FIXED: Proper loading screen management -->
+    <script>
+      // Global function to hide loading screen (called by React)
+      window.hideLoadingScreen = function() {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          console.log('🎬 Hiding HTML loading screen...');
+          loadingScreen.classList.add('hidden');
+          
+          // Remove from DOM after animation
+          setTimeout(function() {
+            if (loadingScreen.parentNode) {
+              loadingScreen.parentNode.removeChild(loadingScreen);
+              console.log('🗑️ HTML loading screen removed from DOM');
+            }
+          }, 500);
+        }
+      };
+
+      // Fallback: Hide loading screen after maximum wait time
+      // let loadingTimeout = setTimeout(function() {
+      //   console.log('⏰ Loading screen timeout - forcing hide');
+      //   window.hideLoadingScreen();
+      // }, 5000); // 5 second maximum wait
+
+      // Clear timeout if React takes over sooner
+      window.clearLoadingTimeout = function() {
+        if (loadingTimeout) {
+          clearTimeout(loadingTimeout);
+          loadingTimeout = null;
+        }
+      };
+
+      // Monitor for React app mounting
+      // const observer = new MutationObserver(function(mutations) {
+      //   const root = document.getElementById('root');
+      //   if (root && root.children.length > 0) {
+      //     console.log('🚀 React app detected, hiding loading screen');
+      //     window.clearLoadingTimeout();
+      //     setTimeout(window.hideLoadingScreen, 100); // Small delay to let React settle
+      //     observer.disconnect();
+      //   }
+      // });
+
+      // Start observing when DOM is ready
+      // document.addEventListener('DOMContentLoaded', function() {
+      //   const root = document.getElementById('root');
+      //   if (root) {
+      //     // Check if React already mounted
+      //     if (root.children.length > 0) {
+      //       console.log('🚀 React app already mounted');
+      //       window.hideLoadingScreen();
+      //     } else {
+      //       // Start observing for React mounting
+      //       observer.observe(root, { childList: true, subtree: true });
+      //     }
+      //   }
+      // });
+    </script>
+  </body>
+</html>
