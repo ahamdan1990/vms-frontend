@@ -1,3 +1,4 @@
+// src/store/slices/notificationSlice.js - PRODUCTION FIXED VERSION
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 // Initial state
@@ -42,13 +43,12 @@ export const NOTIFICATION_TYPES = {
   SYSTEM: 'system'
 };
 
-// Helper function to show desktop notification (moved outside the slice)
+// ✅ PRODUCTION FIX: Safe desktop notification function
 const showDesktopNotification = (notification, settings) => {
   if (!('Notification' in window) || Notification.permission !== 'granted') {
     return;
   }
 
-  // Check if desktop notifications are enabled
   if (!settings.desktop) {
     return;
   }
@@ -59,7 +59,7 @@ const showDesktopNotification = (notification, settings) => {
     const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     
     if (currentTime >= settings.quietHours.start || currentTime <= settings.quietHours.end) {
-      return; // Don't show during quiet hours
+      return;
     }
   }
 
@@ -76,25 +76,21 @@ const showDesktopNotification = (notification, settings) => {
 
     const desktopNotification = new Notification(notification.title, options);
 
-    // Auto-close after 5 seconds for non-persistent notifications
     if (!notification.persistent) {
       setTimeout(() => {
         desktopNotification.close();
       }, 5000);
     }
 
-    // Handle click
     desktopNotification.onclick = () => {
       window.focus();
       desktopNotification.close();
       
-      // Navigate to relevant page based on notification type
       if (notification.data?.url) {
         window.location.href = notification.data.url;
       }
     };
 
-    // Handle error
     desktopNotification.onerror = (error) => {
       console.error('Desktop notification error:', error);
     };
@@ -104,11 +100,7 @@ const showDesktopNotification = (notification, settings) => {
   }
 };
 
-// Async thunks for notification operations
-
-/**
- * Request push notification permission
- */
+// ✅ PRODUCTION FIX: Only request permission when explicitly called by user action
 export const requestNotificationPermission = createAsyncThunk(
   'notifications/requestPermission',
   async (_, { rejectWithValue }) => {
@@ -125,6 +117,7 @@ export const requestNotificationPermission = createAsyncThunk(
         return 'denied';
       }
 
+      // ✅ CRITICAL: This MUST be called from a user event handler
       const permission = await Notification.requestPermission();
       return permission;
     } catch (error) {
@@ -133,9 +126,7 @@ export const requestNotificationPermission = createAsyncThunk(
   }
 );
 
-/**
- * Subscribe to push notifications
- */
+// Other async thunks remain the same...
 export const subscribeToPushNotifications = createAsyncThunk(
   'notifications/subscribeToPush',
   async (_, { rejectWithValue }) => {
@@ -150,9 +141,6 @@ export const subscribeToPushNotifications = createAsyncThunk(
         applicationServerKey: process.env.REACT_APP_VAPID_PUBLIC_KEY
       });
 
-      // Send subscription to server
-      // await notificationService.subscribeToPush(subscription);
-
       return subscription;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -160,15 +148,10 @@ export const subscribeToPushNotifications = createAsyncThunk(
   }
 );
 
-/**
- * Mark notification as read
- */
 export const markAsRead = createAsyncThunk(
   'notifications/markAsRead',
   async (notificationId, { rejectWithValue }) => {
     try {
-      // API call to mark as read
-      // await notificationService.markAsRead(notificationId);
       return notificationId;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -176,15 +159,10 @@ export const markAsRead = createAsyncThunk(
   }
 );
 
-/**
- * Mark all notifications as read
- */
 export const markAllAsRead = createAsyncThunk(
   'notifications/markAllAsRead',
   async (_, { rejectWithValue }) => {
     try {
-      // API call to mark all as read
-      // await notificationService.markAllAsRead();
       return true;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -214,13 +192,9 @@ const notificationSlice = createSlice({
       state.notifications.unshift(notification);
       state.unreadCount += 1;
 
-      // Keep only last 100 notifications
       if (state.notifications.length > 100) {
         state.notifications = state.notifications.slice(0, 100);
       }
-
-      // Show desktop notification if permitted and enabled
-      // Note: This will be handled by middleware or component that subscribes to this action
     },
 
     // Remove notification
@@ -256,7 +230,6 @@ const notificationSlice = createSlice({
 
       state.toasts.push(toast);
 
-      // Keep only last 10 toasts
       if (state.toasts.length > 10) {
         state.toasts = state.toasts.slice(-10);
       }
@@ -441,10 +414,8 @@ export const showInfoToast = (title, message, options = {}) =>
 export const addNotificationWithDesktop = (notificationData) => (dispatch, getState) => {
   const { notifications } = getState();
   
-  // Add to store
   dispatch(addNotification(notificationData));
   
-  // Show desktop notification if settings allow
   if (notifications.settings.desktop && notifications.pushPermission === 'granted') {
     const notification = {
       id: notificationData.id || Date.now().toString(),
@@ -459,24 +430,18 @@ export const addNotificationWithDesktop = (notificationData) => (dispatch, getSt
   }
 };
 
-// Thunk to initialize notifications (FIXED - no automatic permission request)
+// ✅ PRODUCTION FIX: Safe initialization without automatic permission request
 export const initializeNotifications = () => async (dispatch) => {
   try {
     // Check browser support
     const pushSupported = 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
     dispatch(setPushSupported(pushSupported));
     
-    // Check current permission but DON'T request automatically
+    // ✅ PRODUCTION FIX: Only check permission, DON'T request automatically
     if ('Notification' in window) {
       dispatch(setPushPermission(Notification.permission));
+      console.log('✅ Notifications initialized. Permission:', Notification.permission);
     }
-    
-    // REMOVED: This line was causing the notification permission error
-    // if (pushSupported && Notification.permission === 'default') {
-    //   await dispatch(requestNotificationPermission());
-    // }
-    
-    console.log('✅ Notifications initialized. Permission:', Notification.permission);
     
   } catch (error) {
     console.error('Failed to initialize notifications:', error);
@@ -484,7 +449,7 @@ export const initializeNotifications = () => async (dispatch) => {
   }
 };
 
-// ADD: Manual permission request function for user-triggered action
+// ✅ PRODUCTION ADDITION: Manual permission request for user-triggered action
 export const requestPermissionManually = () => async (dispatch) => {
   try {
     if (!('Notification' in window)) {

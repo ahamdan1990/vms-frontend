@@ -1,9 +1,5 @@
 import { useState, useCallback, useEffect, useRef, createContext, useContext } from 'react';
 
-/**
- * In-memory storage implementation for Claude.ai artifacts compatibility
- * Replaces localStorage/sessionStorage with memory-based storage
- */
 
 // Global in-memory storage
 const memoryStorage = new Map();

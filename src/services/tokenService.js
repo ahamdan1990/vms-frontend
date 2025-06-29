@@ -1,18 +1,19 @@
-// src/services/tokenService.js
+// src/services/tokenService.js - STABLE PRODUCTION VERSION
 /**
  * Token service for managing authentication tokens
- * Memory-based implementation for Claude.ai artifacts compatibility
- * FIXED: Better session validation and expiry logic
+ * Memory-based implementation with stable device fingerprinting
  */
 
-// Token refresh interval (14 minutes - tokens expire in 15 minutes)
-const TOKEN_REFRESH_INTERVAL = 14 * 60 * 1000;
+const TOKEN_REFRESH_INTERVAL = 14 * 60 * 1000; // 14 minutes
 
 class TokenService {
   constructor() {
     this.refreshTimer = null;
     this.isRefreshing = false;
     this.refreshPromise = null;
+    
+    // ✅ PRODUCTION FIX: Store device fingerprint in memory with fallback to localStorage
+    this.cachedFingerprint = null;
     
     // In-memory storage for session data
     this.sessionData = {
@@ -21,64 +22,104 @@ class TokenService {
       deviceFingerprint: null,
       rememberedEmail: null
     };
+
+    // ✅ PRODUCTION FIX: Initialize fingerprint immediately
+    this.initializeFingerprint();
   }
 
   /**
-   * Generate device fingerprint for security - COMPLETELY FIXED VERSION
+   * ✅ PRODUCTION FIX: Initialize device fingerprint with persistent storage
    */
-  generateDeviceFingerprint() {
+  initializeFingerprint() {
     try {
-      // Create a TRULY static fingerprint that never changes
-      const staticComponents = [
-        navigator.userAgent || 'unknown',
-        navigator.language || 'en',
-        window.screen.width || 0,
-        window.screen.height || 0,
+      // Try to load from localStorage first
+      const stored = localStorage.getItem('vms_device_fingerprint');
+      if (stored) {
+        this.cachedFingerprint = stored;
+        this.sessionData.deviceFingerprint = stored;
+        return;
+      }
+    } catch (error) {
+      // localStorage not available, continue with generation
+    }
+
+    // Generate new fingerprint
+    this.cachedFingerprint = this.generateStableFingerprint();
+    this.sessionData.deviceFingerprint = this.cachedFingerprint;
+
+    // Try to store it
+    try {
+      localStorage.setItem('vms_device_fingerprint', this.cachedFingerprint);
+    } catch (error) {
+      // localStorage not available, but we have the fingerprint in memory
+    }
+  }
+
+  /**
+   * ✅ PRODUCTION FIX: Generate truly stable device fingerprint
+   */
+  generateStableFingerprint() {
+    try {
+      // Use truly static components that never change
+      const components = [
+        navigator.userAgent || 'unknown-ua',
+        navigator.language || 'en-US',
+        navigator.platform || 'unknown-platform',
+        window.screen.width || 1920,
+        window.screen.height || 1080,
+        window.screen.colorDepth || 24,
         new Date().getTimezoneOffset() || 0,
-        navigator.platform || 'unknown'
+        navigator.hardwareConcurrency || 4,
+        navigator.maxTouchPoints || 0
       ];
       
-      // Create a simple, consistent hash
-      const fingerprint = staticComponents.join('|');
+      // Create a stable hash using a simple but effective algorithm
+      const input = components.join('|');
       let hash = 0;
       
-      for (let i = 0; i < fingerprint.length; i++) {
-        const char = fingerprint.charCodeAt(i);
+      for (let i = 0; i < input.length; i++) {
+        const char = input.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32-bit integer
+        hash = hash & hash; // Convert to 32bit integer
       }
       
-      // Convert to hex string
-      const result = Math.abs(hash).toString(16).padStart(8, '0');
+      // Convert to positive hex string
+      const fingerprint = (Math.abs(hash) >>> 0).toString(16).padStart(8, '0');
       
-      console.log('🔒 Generated device fingerprint:', result);
-      this.setDeviceFingerprint(result);
-      return result;
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔒 Generated stable device fingerprint:', fingerprint);
+      }
+      
+      return `fp_${fingerprint}`;
     } catch (error) {
       console.warn('Failed to generate device fingerprint:', error);
-      // Static fallback that never changes
-      const fallback = 'static-fallback-12345678';
-      this.setDeviceFingerprint(fallback);
-      return fallback;
+      // Ultra-stable fallback
+      return 'fp_fallback_00000000';
     }
   }
 
   /**
-   * Get stored device fingerprint or generate new one
-   * FIXED: Always return the same fingerprint for the session
+   * ✅ PRODUCTION FIX: Always return the same fingerprint
    */
   getDeviceFingerprint() {
-    if (!this.sessionData.deviceFingerprint) {
-      this.sessionData.deviceFingerprint = this.generateDeviceFingerprint();
+    if (!this.cachedFingerprint) {
+      this.initializeFingerprint();
     }
-    return this.sessionData.deviceFingerprint;
+    return this.cachedFingerprint;
   }
 
   /**
-   * Store device fingerprint
+   * Set device fingerprint (shouldn't be needed but kept for compatibility)
    */
   setDeviceFingerprint(fingerprint) {
+    this.cachedFingerprint = fingerprint;
     this.sessionData.deviceFingerprint = fingerprint;
+    
+    try {
+      localStorage.setItem('vms_device_fingerprint', fingerprint);
+    } catch (error) {
+      // Ignore localStorage errors
+    }
   }
 
   /**
@@ -107,7 +148,7 @@ class TokenService {
   }
 
   /**
-   * Set session ID (for tracking purposes)
+   * Set session ID
    */
   setSessionId(sessionId) {
     this.sessionData.sessionId = sessionId;
@@ -125,13 +166,39 @@ class TokenService {
    */
   rememberEmail(email) {
     this.sessionData.rememberedEmail = email || null;
+    
+    // ✅ PRODUCTION FIX: Also persist email to localStorage
+    try {
+      if (email) {
+        localStorage.setItem('vms_remembered_email', email);
+      } else {
+        localStorage.removeItem('vms_remembered_email');
+      }
+    } catch (error) {
+      // Ignore localStorage errors
+    }
   }
 
   /**
    * Get remembered email
    */
   getRememberedEmail() {
-    return this.sessionData.rememberedEmail;
+    // Try memory first, then localStorage
+    if (this.sessionData.rememberedEmail) {
+      return this.sessionData.rememberedEmail;
+    }
+    
+    try {
+      const stored = localStorage.getItem('vms_remembered_email');
+      if (stored) {
+        this.sessionData.rememberedEmail = stored;
+        return stored;
+      }
+    } catch (error) {
+      // Ignore localStorage errors
+    }
+    
+    return null;
   }
 
   /**
@@ -166,21 +233,21 @@ class TokenService {
   }
 
   /**
-   * Clear all stored data
+   * ✅ PRODUCTION FIX: Clear session data but preserve persistent data
    */
   clearAll() {
-    // Clear session storage but preserve fingerprint
-    const preservedFingerprint = this.sessionData.deviceFingerprint;
+    // Clear session data but preserve fingerprint and remembered email
+    const preservedFingerprint = this.cachedFingerprint;
+    const preservedEmail = this.sessionData.rememberedEmail;
+    
     this.sessionData = {
       sessionId: null,
       lastActivity: null,
-      deviceFingerprint: preservedFingerprint, // Keep the same fingerprint
-      rememberedEmail: this.sessionData.rememberedEmail // Keep remembered email
+      deviceFingerprint: preservedFingerprint,
+      rememberedEmail: preservedEmail
     };
     
-    // Stop refresh timer
     this.stopRefreshTimer();
-    
     this.isRefreshing = false;
     this.refreshPromise = null;
   }
@@ -192,7 +259,14 @@ class TokenService {
     const features = {
       cookies: navigator.cookieEnabled,
       fetch: typeof fetch !== 'undefined',
-      promises: typeof Promise !== 'undefined'
+      promises: typeof Promise !== 'undefined',
+      localStorage: (() => {
+        try {
+          return typeof localStorage !== 'undefined';
+        } catch {
+          return false;
+        }
+      })()
     };
 
     const unsupported = Object.entries(features)
@@ -207,22 +281,21 @@ class TokenService {
   }
 
   /**
-   * Get token expiry time estimate (since we can't read HTTP-only cookies)
+   * Get token expiry time estimate
    */
   estimateTokenExpiry() {
     const lastActivity = this.getLastActivity();
     if (!lastActivity) return null;
 
-    // Estimate token expiry (15 minutes from last activity)
     return new Date(lastActivity + (15 * 60 * 1000));
   }
 
   /**
-   * ✅ FIXED: Check if token is likely expired
+   * Check if token is likely expired
    */
   isTokenLikelyExpired() {
     const expiry = this.estimateTokenExpiry();
-    if (!expiry) return true; // If no expiry estimate, consider expired
+    if (!expiry) return true;
     
     return Date.now() > expiry.getTime();
   }
@@ -241,8 +314,7 @@ class TokenService {
   }
 
   /**
-   * Create login credentials object with device fingerprint
-   * FIXED: Use consistent device fingerprint
+   * ✅ PRODUCTION FIX: Create login credentials with stable fingerprint
    */
   createLoginCredentials(email, password, rememberMe = false) {
     this.updateLastActivity();
@@ -251,14 +323,11 @@ class TokenService {
       this.rememberEmail(email);
     }
 
-    // Ensure we use the same device fingerprint
-    const deviceFingerprint = this.getDeviceFingerprint();
-
     return {
       email,
       password,
       rememberMe,
-      deviceFingerprint
+      deviceFingerprint: this.getDeviceFingerprint() // Always stable
     };
   }
 
@@ -268,12 +337,10 @@ class TokenService {
   handleLoginSuccess(response) {
     this.updateLastActivity();
     
-    // Store session ID if provided
     if (response.sessionId) {
       this.setSessionId(response.sessionId);
     }
 
-    // Return success indicator for refresh timer setup
     return response.isSuccess;
   }
 
@@ -317,13 +384,13 @@ class TokenService {
   }
 
   /**
-   * ✅ FIXED: Validate session data
+   * Validate session data
    */
   validateSession() {
     const state = this.getAuthState();
     const hasValidSession = state.hasSession && state.lastActivity;
     const isExpired = hasValidSession ? this.isTokenLikelyExpired() : true;
-    const needsRefresh = hasValidSession ? this.getTimeUntilRefresh() < 60000 : false; // Less than 1 minute
+    const needsRefresh = hasValidSession ? this.getTimeUntilRefresh() < 60000 : false;
     
     return {
       isValid: hasValidSession && state.isActive && !isExpired,
@@ -334,11 +401,11 @@ class TokenService {
   }
 
   /**
-   * Reset session data (keep device fingerprint and remembered email)
+   * Reset session data (keep fingerprint and remembered email)
    */
   resetSession() {
     const rememberedEmail = this.sessionData.rememberedEmail;
-    const deviceFingerprint = this.sessionData.deviceFingerprint;
+    const deviceFingerprint = this.cachedFingerprint;
     
     this.sessionData = {
       sessionId: null,
@@ -366,7 +433,8 @@ class TokenService {
       hasRefreshTimer: !!this.refreshTimer,
       memoryUsage: {
         sessionDataSize: JSON.stringify(this.sessionData).length,
-        hasRefreshTimer: !!this.refreshTimer
+        hasRefreshTimer: !!this.refreshTimer,
+        fingerprintCached: !!this.cachedFingerprint
       }
     };
   }

@@ -1,61 +1,62 @@
-// src/store/store.js
+// src/store/store.js - PRODUCTION OPTIMIZED VERSION
 import { configureStore } from '@reduxjs/toolkit';
 import rootReducer, { hydrateState, validateState } from './rootReducer';
 import customMiddleware from './middleware';
 
-// ✅ FIXED: Use REAL localStorage consistently
 const STORAGE_KEY = 'vms_app_state';
 
-// ✅ PRODUCTION localStorage functions - REALLY USE localStorage
+// ✅ PRODUCTION FIX: Debounced persistence to prevent too frequent writes
+let persistenceTimer = null;
+const PERSISTENCE_DELAY = 1000; // 1 second delay
+
+// ✅ PRODUCTION OPTIMIZED: localStorage functions with error handling
 const loadPersistedState = () => {
   try {
-    // Check if localStorage is available
     if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
-      console.warn('localStorage not available');
       return undefined;
     }
 
     const serializedState = localStorage.getItem(STORAGE_KEY);
     if (serializedState === null) {
-      console.log('📭 No persisted state found in localStorage');
       return undefined;
     }
     
     const persistedState = JSON.parse(serializedState);
-    console.log('📦 Loaded persisted state from localStorage:', persistedState);
     
-    // Validate state structure
     if (!validateState(persistedState)) {
       console.warn('❌ Invalid persisted state structure, starting fresh');
-
       return undefined;
     }
     
-    // Check if state is too old (optional: expire after 30 days)
+    // ✅ PRODUCTION FIX: More reasonable expiry (7 days instead of 30)
     const stateAge = Date.now() - (persistedState.timestamp || 0);
-    const maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
     
     if (stateAge > maxAge) {
       console.info('⏰ Persisted state expired, starting fresh');
-
+      localStorage.removeItem(STORAGE_KEY);
       return undefined;
     }
     
     const hydratedState = hydrateState(persistedState);
-    console.log('✅ State hydrated successfully');
+    console.log('✅ State loaded from localStorage');
     return hydratedState;
   } catch (error) {
     console.error('❌ Failed to load persisted state:', error);
-
+    // Clear corrupted state
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      // Ignore cleanup errors
+    }
     return undefined;
   }
 };
 
+// ✅ PRODUCTION FIX: Optimized persistence with size limits
 const saveStateToStorage = (state) => {
   try {
-    // Check if localStorage is available
     if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
-      console.warn('localStorage not available for saving');
       return;
     }
 
@@ -78,17 +79,49 @@ const saveStateToStorage = (state) => {
     };
     
     const serializedState = JSON.stringify(persistData);
-    localStorage.setItem(STORAGE_KEY, serializedState);
-    console.log('💾 State saved to localStorage:', persistData);
     
-    // ALSO save to window for immediate access (compatibility)
-    window._vmsPersistedState = persistData;
+    // ✅ PRODUCTION FIX: Check size limit (5MB typical localStorage limit)
+    const sizeInMB = new Blob([serializedState]).size / (1024 * 1024);
+    if (sizeInMB > 4.5) { // Leave some buffer
+      console.warn('⚠️ State too large for localStorage, skipping persistence');
+      return;
+    }
+    
+    localStorage.setItem(STORAGE_KEY, serializedState);
+    
+    // ✅ PRODUCTION FIX: Reduced logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('💾 State persisted to localStorage');
+    }
+    
   } catch (error) {
     console.error('❌ Failed to save state to localStorage:', error);
+    
+    // ✅ PRODUCTION FIX: Handle quota exceeded error
+    if (error.name === 'QuotaExceededError') {
+      console.warn('⚠️ localStorage quota exceeded, clearing old data');
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {
+        // Ignore cleanup errors
+      }
+    }
   }
 };
 
-// Configure store with preloaded state from localStorage
+// ✅ PRODUCTION FIX: Debounced persistence function
+const debouncedSaveState = (state) => {
+  if (persistenceTimer) {
+    clearTimeout(persistenceTimer);
+  }
+  
+  persistenceTimer = setTimeout(() => {
+    saveStateToStorage(state);
+    persistenceTimer = null;
+  }, PERSISTENCE_DELAY);
+};
+
+// Configure store with preloaded state
 const preloadedState = loadPersistedState();
 
 export const store = configureStore({
@@ -105,6 +138,7 @@ export const store = configureStore({
           'notifications/addNotification',
           'ui/showConfirmDialog',
           'ui/showAlertDialog',
+          'persist/REHYDRATE', // Ignore persistence actions
         ],
         ignoredActionsPaths: ['meta.arg', 'payload.timestamp', 'payload.onConfirm', 'payload.onCancel'],
         ignoredPaths: [
@@ -132,47 +166,71 @@ export const store = configureStore({
   }
 });
 
-// ✅ FIXED: Subscribe to store changes and save to REAL localStorage
+// ✅ PRODUCTION FIX: Optimized store subscription with smart persistence
 let currentState = store.getState();
+let lastPersistedAuth = null;
+let lastPersistedUI = null;
+let lastPersistedNotifications = null;
+
 store.subscribe(() => {
   const nextState = store.getState();
   
-  // Only persist if state actually changed and is worth persisting
+  // ✅ PRODUCTION FIX: Only persist if truly important state changed
   if (currentState !== nextState) {
-    const prevAuth = currentState.auth;
     const nextAuth = nextState.auth;
-    const prevUI = currentState.ui;
     const nextUI = nextState.ui;
-    const prevNotifications = currentState.notifications;
     const nextNotifications = nextState.notifications;
     
-    // Only save if important state changed (not every action)
-    const shouldPersist = (
-      prevAuth.user !== nextAuth.user ||
-      prevAuth.isAuthenticated !== nextAuth.isAuthenticated ||
-      prevAuth.permissions !== nextAuth.permissions ||
-      prevUI.theme !== nextUI.theme ||
-      prevUI.preferences !== nextUI.preferences ||
-      prevUI.sidebarCollapsed !== nextUI.sidebarCollapsed ||
-      prevUI.tablePreferences !== nextUI.tablePreferences ||
-      prevNotifications.settings !== nextNotifications.settings
+    // ✅ PRODUCTION FIX: Deep comparison for important changes only
+    const authChanged = (
+      lastPersistedAuth?.user?.id !== nextAuth.user?.id ||
+      lastPersistedAuth?.isAuthenticated !== nextAuth.isAuthenticated ||
+      lastPersistedAuth?.permissions?.length !== nextAuth.permissions?.length
     );
     
-    if (shouldPersist) {
-      console.log('💾 Persisting state changes...');
-      saveStateToStorage(nextState);
+    const uiChanged = (
+      lastPersistedUI?.theme !== nextUI.theme ||
+      lastPersistedUI?.sidebarCollapsed !== nextUI.sidebarCollapsed ||
+      JSON.stringify(lastPersistedUI?.preferences) !== JSON.stringify(nextUI.preferences)
+    );
+    
+    const notificationSettingsChanged = (
+      JSON.stringify(lastPersistedNotifications?.settings) !== JSON.stringify(nextNotifications.settings)
+    );
+    
+    if (authChanged || uiChanged || notificationSettingsChanged) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('💾 Persisting important state changes...');
+      }
+      
+      // ✅ PRODUCTION FIX: Use debounced persistence
+      debouncedSaveState(nextState);
+      
+      // Update persistence tracking
+      lastPersistedAuth = { ...nextAuth };
+      lastPersistedUI = { 
+        theme: nextUI.theme, 
+        sidebarCollapsed: nextUI.sidebarCollapsed,
+        preferences: { ...nextUI.preferences }
+      };
+      lastPersistedNotifications = { 
+        settings: { ...nextNotifications.settings } 
+      };
     }
     
     currentState = nextState;
   }
 });
 
-// Configure API client with store reference
+// ✅ PRODUCTION FIX: Configure API client after store is ready
 if (typeof window !== 'undefined') {
-  import('../services/apiClient').then(({ configureApiClient }) => {
-    configureApiClient(store);
-  }).catch(error => {
-    console.error('Failed to configure API client:', error);
+  Promise.resolve().then(async () => {
+    try {
+      const { configureApiClient } = await import('../services/apiClient');
+      configureApiClient(store);
+    } catch (error) {
+      console.error('Failed to configure API client:', error);
+    }
   });
 }
 
@@ -180,13 +238,22 @@ if (typeof window !== 'undefined') {
 export const getStoreState = () => store.getState();
 export const dispatchAction = (action) => store.dispatch(action);
 
-// ✅ FIXED: Storage management utilities
+// ✅ PRODUCTION FIX: Enhanced storage management utilities
 export const clearPersistedState = () => {
   try {
     localStorage.removeItem(STORAGE_KEY);
-    if (window._vmsPersistedState) {
-      delete window._vmsPersistedState;
+    
+    // Clear debounced persistence
+    if (persistenceTimer) {
+      clearTimeout(persistenceTimer);
+      persistenceTimer = null;
     }
+    
+    // Reset tracking
+    lastPersistedAuth = null;
+    lastPersistedUI = null;
+    lastPersistedNotifications = null;
+    
     console.info('✅ Persisted state cleared');
   } catch (error) {
     console.error('❌ Failed to clear persisted state:', error);
@@ -196,7 +263,7 @@ export const clearPersistedState = () => {
 export const getStorageInfo = () => {
   try {
     if (typeof localStorage === 'undefined') {
-      return { used: 0, total: 0, available: 0, usedPercent: 0, keys: 0 };
+      return { used: 0, total: 0, available: 0, usedPercent: 0, keys: 0, hasData: false };
     }
 
     const stored = localStorage.getItem(STORAGE_KEY) || '';
@@ -209,7 +276,8 @@ export const getStorageInfo = () => {
       available: total - used,
       usedPercent: Math.round((used / total) * 100),
       keys: Object.keys(localStorage).length,
-      hasData: stored.length > 0
+      hasData: stored.length > 0,
+      sizeInMB: (used / (1024 * 1024)).toFixed(2)
     };
   } catch (error) {
     console.error('Failed to get storage info:', error);
@@ -217,21 +285,58 @@ export const getStorageInfo = () => {
   }
 };
 
+// ✅ PRODUCTION FIX: Safe storage operations
+export const exportState = () => {
+  try {
+    return {
+      state: store.getState(),
+      timestamp: new Date().toISOString(),
+      version: '1.0.0'
+    };
+  } catch (error) {
+    console.error('Failed to export state:', error);
+    return null;
+  }
+};
+
+export const importState = (exportedState) => {
+  try {
+    if (exportedState && exportedState.state) {
+      clearPersistedState();
+      saveStateToStorage(exportedState.state);
+      window.location.reload(); // Reload to apply imported state
+    }
+  } catch (error) {
+    console.error('Failed to import state:', error);
+  }
+};
+
+// ✅ PRODUCTION FIX: Cleanup on page unload
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
+    // Force save any pending persistence
+    if (persistenceTimer) {
+      clearTimeout(persistenceTimer);
+      saveStateToStorage(store.getState());
+    }
+  });
+}
+
 // Development utilities
 if (process.env.NODE_ENV === 'development') {
-  // Enable Redux DevTools Extension
   if (typeof window !== 'undefined') {
     window.__REDUX_STORE__ = store;
     window.__VMS_STORE_UTILS__ = {
       clearPersistedState,
       getStorageInfo,
-      getState: getStoreState
+      getState: getStoreState,
+      exportState,
+      importState
     };
   }
   
-  // Log store initialization
-  console.log('🏪 Redux Store initialized with REAL localStorage persistence');
-  console.log('📊 Initial State:', store.getState());
+  console.log('🏪 Redux Store initialized with optimized localStorage persistence');
+  console.log('📊 Initial State loaded');
   console.log('💾 Storage Info:', getStorageInfo());
 }
 

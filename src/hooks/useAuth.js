@@ -1,4 +1,4 @@
-// src/hooks/useAuth.js
+// src/hooks/useAuth.js - PRODUCTION FIXED VERSION
 import { useSelector, useDispatch } from 'react-redux';
 import { useCallback, useEffect, useRef } from 'react';
 import {
@@ -44,14 +44,16 @@ import {
   selectCanManageSystem
 } from '../store/selectors/authSelectors';
 
-// ✅ SOLUTION: Module-level lock to prevent multiple initializations
-let initializationPromise = null;
+// ✅ PRODUCTION FIX: Single global initialization lock
+let globalInitializationPromise = null;
+let isInitialized = false;
 
 /**
- * Custom hook for authentication operations - FINAL FIXED VERSION
+ * Custom hook for authentication operations - PRODUCTION READY VERSION
  */
 export const useAuth = () => {
   const dispatch = useDispatch();
+  const initRef = useRef(false);
 
   const user = useSelector(selectUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -85,7 +87,6 @@ export const useAuth = () => {
   // Authentication actions
   const login = useCallback(async (credentials) => {
     try {
-      // Create login credentials with device fingerprint
       const loginCredentials = tokenService.createLoginCredentials(
         credentials.email,
         credentials.password,
@@ -94,11 +95,8 @@ export const useAuth = () => {
 
       const result = await dispatch(loginUser(loginCredentials));
       
-      // Handle successful login
       if (result.payload?.loginResponse?.isSuccess) {
         tokenService.handleLoginSuccess(result.payload.loginResponse);
-        
-        // Start automatic token refresh
         startTokenRefresh();
       }
       
@@ -111,19 +109,12 @@ export const useAuth = () => {
 
   const logoutCurrentUser = useCallback(async (logoutFromAllDevices = false) => {
     try {
-      // Stop token refresh
       stopTokenRefresh();
-      
-      // Handle logout in token service
       tokenService.handleLogout();
-      
-      // Dispatch logout action
       const result = await dispatch(logoutUser(logoutFromAllDevices));
-      
       return result;
     } catch (error) {
       console.error('Logout failed:', error);
-      // Even if logout fails on server, clear local state
       tokenService.handleLogout();
       dispatch(logout());
       return { error };
@@ -131,39 +122,89 @@ export const useAuth = () => {
   }, [dispatch]);
 
   const logoutImmediate = useCallback(() => {
-    console.log('🚪 Immediate logout triggered');
-    // Stop token refresh
     stopTokenRefresh();
-    
-    // Handle logout in token service
     tokenService.handleLogout();
-    
-    // Dispatch immediate logout
     dispatch(logout());
   }, [dispatch]);
 
   const checkAuth = useCallback(async () => {
     try {
-      console.log('🔍 Checking authentication with server...');
       const result = await dispatch(getCurrentUser());
       
       if (result.payload) {
-        console.log('✅ Authentication check successful');
-        // Start token refresh if not already running
         startTokenRefresh();
         return result.payload;
       } else {
-        console.log('❌ Authentication check failed - no payload');
         logoutImmediate();
         return null;
       }
     } catch (error) {
-      console.error('❌ Auth check failed:', error);
+      console.error('Auth check failed:', error);
       logoutImmediate();
       return null;
     }
   }, [dispatch, logoutImmediate]);
 
+  // ✅ PRODUCTION FIX: Single global initialization with proper cleanup
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        // ✅ Check if already initialized globally
+        if (isInitialized) {
+          return;
+        }
+
+        // ✅ Check for stored auth state
+        const storedData = localStorage.getItem('vms_app_state');
+        if (!storedData) {
+          return;
+        }
+
+        const parsedData = JSON.parse(storedData);
+        if (parsedData?.auth?.isAuthenticated && parsedData?.auth?.user) {
+          await checkAuth();
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+      } finally {
+        isInitialized = true;
+      }
+    };
+
+    // ✅ Only initialize once per component mount and if not authenticated
+    if (!isAuthenticated && !loading && !initRef.current) {
+      initRef.current = true;
+      
+      if (!globalInitializationPromise) {
+        globalInitializationPromise = initializeAuth().finally(() => {
+          globalInitializationPromise = null;
+        });
+      }
+    }
+  }, [isAuthenticated, loading, checkAuth]);
+
+  // ✅ PRODUCTION FIX: Debounced token refresh
+  useEffect(() => {
+    let refreshTimeout;
+
+    if (isAuthenticated && !loading) {
+      // Delay token refresh start to avoid race conditions
+      refreshTimeout = setTimeout(() => {
+        startTokenRefresh();
+      }, 100);
+    } else {
+      stopTokenRefresh();
+    }
+
+    return () => {
+      if (refreshTimeout) {
+        clearTimeout(refreshTimeout);
+      }
+      stopTokenRefresh();
+    };
+  }, [isAuthenticated, loading]);
+
+  // Other authentication methods remain the same...
   const updatePassword = useCallback(async (passwordData) => {
     try {
       const result = await dispatch(changePassword(passwordData));
@@ -228,50 +269,6 @@ export const useAuth = () => {
     dispatch(clearError());
   }, [dispatch]);
 
-  // ✅ FINAL FIX: Auto-check authentication status using a module-level lock
-  useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        const storedData = localStorage.getItem('vms_app_state');
-        if (storedData) {
-          const parsedData = JSON.parse(storedData);
-          if (parsedData?.auth?.isAuthenticated && parsedData?.auth?.user) {
-            console.log('💾 Found stored auth state, validating with server...');
-            await checkAuth();
-            return;
-          }
-        }
-        console.log('❌ No stored auth state found');
-      } catch (error) {
-        console.error('❌ Auth initialization error:', error);
-      }
-    };
-
-    if (!isAuthenticated && !loading) {
-      if (!initializationPromise) {
-        console.log('🚀 Kicking off single authentication initialization...');
-        initializationPromise = initializeAuth().finally(() => {
-          // Reset the lock once the initialization is complete
-          initializationPromise = null;
-        });
-      }
-    }
-  }, [isAuthenticated, loading, checkAuth]);
-
-  // Set up token refresh for authenticated users
-  useEffect(() => {
-    if (isAuthenticated && !loading) {
-      console.log('🔄 Starting token refresh for authenticated user');
-      startTokenRefresh();
-    } else {
-      stopTokenRefresh();
-    }
-
-    return () => {
-      stopTokenRefresh();
-    };
-  }, [isAuthenticated, loading]);
-
   const isRole = useCallback((role) => {
     return userRole === role;
   }, [userRole]);
@@ -303,18 +300,16 @@ export const useAuth = () => {
     }
   }, [checkTokenValidity]);
 
-  // Get remembered email for login form
   const getRememberedEmail = useCallback(() => {
     return tokenService.getRememberedEmail();
   }, []);
 
-  // Check if session is active
   const isSessionActive = useCallback(() => {
     return tokenService.isSessionActive();
   }, []);
 
   return {
-    // State (from selectors)
+    // State
     user,
     isAuthenticated,
     loading,
@@ -339,19 +334,19 @@ export const useAuth = () => {
     terminateSession: endSession,
     clearError: clearAuthError,
 
-    // Permission checks (from selectors)
+    // Permission checks
     hasPermission,
     hasAnyPermission,
     hasAllPermissions,
     isRole,
     isAnyRole,
 
-    // Computed role checks (from selectors)
+    // Role checks
     isAdmin,
     isStaff,
     isOperator,
 
-    // Computed permission checks (from selectors)
+    // Permission checks
     canManageUsers,
     canViewReports,
     canManageSystem,
@@ -362,7 +357,7 @@ export const useAuth = () => {
     isSessionActive,
     getRememberedEmail,
 
-    // User info shortcuts (from selectors)
+    // User info shortcuts
     userId,
     userEmail,
     userName,
