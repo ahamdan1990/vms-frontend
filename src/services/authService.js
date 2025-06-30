@@ -1,6 +1,6 @@
 import apiClient, { extractApiData } from './apiClient';
 import { AUTH_ENDPOINTS } from './apiEndpoints';
-
+import tokenService from './tokenService';
 /**
  * Authentication service that matches the backend API endpoints exactly
  * All endpoints use HTTP-only cookies for JWT token management
@@ -19,7 +19,14 @@ const authService = {
       deviceFingerprint: credentials.deviceFingerprint || null
     });
     
-    return extractApiData(response);
+    const result = extractApiData(response);
+    
+    // 🔧 Store the backend's fingerprint for future use
+    if (result.deviceFingerprint) {
+      tokenService.setDeviceFingerprint(result.deviceFingerprint);
+    }
+    
+    return result;
   },
 
   /**

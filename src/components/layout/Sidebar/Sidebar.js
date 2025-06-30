@@ -7,10 +7,151 @@ import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { setSidebarOpen } from '../../../store/slices/uiSlice';
 import classNames from 'classnames';
-import { NavItem } from 'reactstrap';  
+
 /**
- * Professional Sidebar Component with role-based navigation
- * Responsive design with collapsible functionality
+ * FIXED NavItem Component - moved to top level
+ */
+const NavItem = ({ item, isCollapsed = false }) => {
+  const location = useLocation();
+  const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
+  
+  const linkClasses = classNames(
+    'flex items-center text-sm font-medium rounded-xl transition-all duration-200 group relative',
+    'mx-3 my-1',
+    {
+      // Active state
+      'bg-primary-100 text-primary-900 shadow-sm dark:bg-primary-900/30 dark:text-primary-100': isActive,
+      // Inactive state  
+      'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700/50 dark:hover:text-white': !isActive,
+      // Collapsed sidebar
+      'px-3 py-3 justify-center': isCollapsed,
+      // Expanded sidebar
+      'px-4 py-3 space-x-3': !isCollapsed
+    }
+  );
+
+  return (
+    <NavLink to={item.href} className={linkClasses}>
+      <span className="flex-shrink-0">{item.icon}</span>
+      {!isCollapsed && (
+        <>
+          <span className="flex-1 truncate">{item.name}</span>
+          {item.badge && (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200">
+              {item.badge}
+            </span>
+          )}
+        </>
+      )}
+      
+      {/* Tooltip for collapsed state */}
+      {isCollapsed && (
+        <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+          {item.name}
+        </div>
+      )}
+    </NavLink>
+  );
+};
+
+/**
+ * FIXED SidebarContent Component
+ */
+const SidebarContent = ({ navItems, bottomItems, isCollapsed }) => {
+  return (
+    <div className="flex flex-col h-full">
+      {/* Logo/Brand */}
+      <div className={classNames(
+        'flex items-center border-b border-gray-200 dark:border-gray-700',
+        {
+          'px-6 py-4': !isCollapsed,
+          'px-3 py-4 justify-center': isCollapsed
+        }
+      )}>
+        {!isCollapsed ? (
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <span className="text-xl font-bold text-gray-900 dark:text-white">VMS</span>
+          </div>
+        ) : (
+          <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 py-4 overflow-y-auto custom-scrollbar">
+        {/* Role indicator */}
+        {!isCollapsed && (
+          <div className="px-3 mb-4">
+            <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Navigation
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-1">
+          {navItems.map((item) => (
+            <div key={item.name}>
+              <NavItem item={item} isCollapsed={isCollapsed} />
+              
+              {/* Sub-navigation items */}
+              {item.children && !isCollapsed && (
+                <div className="ml-6 mt-1 space-y-1">
+                  {item.children.filter(child => child.show).map((child) => (
+                    <NavLink
+                      key={child.name}
+                      to={child.href}
+                      className={({ isActive }) => classNames(
+                        'flex items-center px-4 py-2 text-xs font-medium rounded-lg transition-colors duration-200 mx-3',
+                        {
+                          'text-primary-700 bg-primary-50 dark:text-primary-200 dark:bg-primary-900/20': isActive,
+                          'text-gray-600 hover:text-primary-700 hover:bg-primary-50 dark:text-gray-400 dark:hover:text-primary-200 dark:hover:bg-primary-900/20': !isActive
+                        }
+                      )}
+                    >
+                      {child.name}
+                    </NavLink>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </nav>
+
+      {/* Bottom navigation */}
+      <div className="border-t border-gray-200 dark:border-gray-700 py-4">
+        <div className="space-y-1">
+          {bottomItems.map((item) => (
+            <NavItem key={item.name} item={item} isCollapsed={isCollapsed} />
+          ))}
+        </div>
+        
+        {/* Version info */}
+        {!isCollapsed && (
+          <div className="pt-4 px-3">
+            <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
+              VMS v1.0.0
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/**
+ * FIXED Main Sidebar Component
  */
 const Sidebar = () => {
   const location = useLocation();
@@ -30,7 +171,6 @@ const Sidebar = () => {
 
   // Navigation items based on user role and permissions
   const navigationItems = [
-    // Dashboard - Always visible for authenticated users
     {
       name: 'Dashboard',
       href: '/dashboard',
@@ -42,21 +182,6 @@ const Sidebar = () => {
       ),
       show: true
     },
-
-    // Invitations - Staff and above
-    {
-      name: 'Invitations',
-      href: '/invitations',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-        </svg>
-      ),
-      show: invitationPermissions.canRead || invitationPermissions.canCreate,
-      badge: null
-    },
-
-    // Visitors - Operator and above
     {
       name: 'Visitors',
       href: '/visitors',
@@ -67,8 +192,6 @@ const Sidebar = () => {
       ),
       show: visitorPermissions.canRead || isOperator || isAdmin
     },
-
-    // Check-in - Operator and above
     {
       name: 'Check-in',
       href: '/checkin',
@@ -79,8 +202,6 @@ const Sidebar = () => {
       ),
       show: checkinPermissions.canProcess || isOperator || isAdmin
     },
-
-    // Users - Admin only
     {
       name: 'Users',
       href: '/users',
@@ -91,20 +212,6 @@ const Sidebar = () => {
       ),
       show: userPermissions.canRead || isAdmin
     },
-
-    // Reports - Based on permissions
-    {
-      name: 'Reports',
-      href: '/reports',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-      ),
-      show: reportPermissions.canView || reportPermissions.canGenerate
-    },
-
-    // System - Admin only
     {
       name: 'System',
       href: '/system',
@@ -161,6 +268,7 @@ const Sidebar = () => {
   const visibleNavItems = navigationItems.filter(item => item.show);
   const visibleBottomItems = bottomNavigationItems.filter(item => item.show);
 
+  // Animation variants
   const sidebarVariants = {
     open: { 
       x: 0,
@@ -180,57 +288,21 @@ const Sidebar = () => {
     }
   };
 
-  const sidebarClasses = classNames(
-    'bg-white border-r border-gray-200 flex flex-col h-full',
-    {
-      'w-64': !sidebarCollapsed,
-      'w-16': sidebarCollapsed && !isMobile
-    }
-  );
-
-  const NavItem = ({ item, isCollapsed = false }) => {
-    const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
-    
-    const linkClasses = classNames(
-      'flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200',
-      {
-        'text-blue-700 bg-blue-50 border-r-2 border-blue-700': isActive,
-        'text-gray-700 hover:text-blue-700 hover:bg-blue-50': !isActive,
-        'justify-center': isCollapsed,
-        'space-x-3': !isCollapsed
-      }
-    );
-
-    return (
-      <NavLink to={item.href} className={linkClasses}>
-        <span className="flex-shrink-0">{item.icon}</span>
-        {!isCollapsed && (
-          <>
-            <span className="flex-1">{item.name}</span>
-            {item.badge && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                {item.badge}
-              </span>
-            )}
-          </>
-        )}
-      </NavLink>
-    );
-  };
-
   // Mobile backdrop
   if (isMobile && sidebarOpen) {
     return (
       <>
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={() => dispatch(setSidebarOpen(false))}
         />
+        
         <motion.aside
           variants={sidebarVariants}
           animate="open"
           initial="closed"
-          className="fixed left-0 top-0 z-50 h-full w-64 bg-white border-r border-gray-200"
+          exit="closed"
+          className="fixed left-0 top-0 z-50 h-full w-72 bg-white dark:bg-gray-800 shadow-strong border-r border-gray-200 dark:border-gray-700 lg:hidden"
         >
           <SidebarContent 
             navItems={visibleNavItems}
@@ -245,7 +317,13 @@ const Sidebar = () => {
   // Desktop sidebar
   if (!isMobile && sidebarOpen) {
     return (
-      <aside className={sidebarClasses}>
+      <aside className={classNames(
+        'fixed left-0 top-0 z-30 h-full bg-white dark:bg-gray-800 shadow-strong border-r border-gray-200 dark:border-gray-700 transform transition-all duration-300 ease-in-out',
+        {
+          'w-72': !sidebarCollapsed,
+          'w-16': sidebarCollapsed
+        }
+      )}>
         <SidebarContent 
           navItems={visibleNavItems}
           bottomItems={visibleBottomItems}
@@ -256,67 +334,6 @@ const Sidebar = () => {
   }
 
   return null;
-};
-
-const SidebarContent = ({ navItems, bottomItems, isCollapsed }) => {
-  return (
-    <>
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {/* Role indicator */}
-        {!isCollapsed && (
-          <div className="mb-4 px-3 py-2 bg-gray-50 rounded-lg">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Navigation
-            </p>
-          </div>
-        )}
-
-        {navItems.map((item) => (
-          <div key={item.name}>
-            <NavItem item={item} isCollapsed={isCollapsed} />
-            
-            {/* Sub-navigation items */}
-            {item.children && !isCollapsed && (
-              <div className="ml-6 mt-1 space-y-1">
-                {item.children.filter(child => child.show).map((child) => (
-                  <NavLink
-                    key={child.name}
-                    to={child.href}
-                    className={({ isActive }) => classNames(
-                      'flex items-center px-3 py-2 text-xs font-medium rounded-md transition-colors duration-200',
-                      {
-                        'text-blue-700 bg-blue-50': isActive,
-                        'text-gray-600 hover:text-blue-700 hover:bg-blue-50': !isActive
-                      }
-                    )}
-                  >
-                    {child.name}
-                  </NavLink>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </nav>
-
-      {/* Bottom navigation */}
-      <div className="px-3 py-4 border-t border-gray-200 space-y-1">
-        {bottomItems.map((item) => (
-          <NavItem key={item.name} item={item} isCollapsed={isCollapsed} />
-        ))}
-        
-        {/* Version info */}
-        {!isCollapsed && (
-          <div className="pt-4">
-            <p className="text-xs text-gray-400 text-center">
-              VMS v1.0.0
-            </p>
-          </div>
-        )}
-      </div>
-    </>
-  );
 };
 
 export default Sidebar;

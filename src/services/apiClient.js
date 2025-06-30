@@ -224,15 +224,15 @@ const handleAuthFailure = async () => {
   tokenService.handleLogout();
   
   // Dispatch logout action if store is available
-  if (store) {
-    try {
-      const { logout } = await import('../store/slices/authSlice');
-      store.dispatch(logout());
-      console.log('✅ Logout dispatched to store');
-    } catch (error) {
-      console.error('❌ Failed to dispatch logout:', error);
-    }
-  }
+  // if (store) {
+  //   try {
+  //     const { logout } = await import('../store/slices/authSlice');
+  //     store.dispatch(logout());
+  //     console.log('✅ Logout dispatched to store');
+  //   } catch (error) {
+  //     console.error('❌ Failed to dispatch logout:', error);
+  //   }
+  // }
   
   // Only redirect if not already on login page
   if (window.location.pathname !== '/login') {
