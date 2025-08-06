@@ -144,29 +144,47 @@ class ErrorService {
   }
 
   /**
-   * Extract error message from API response
+   * ✅ ENHANCED: Extract error message from API response with better format support
    */
   extractErrorMessage(data, defaultMessage) {
     if (!data) return defaultMessage;
 
-    // Check for ApiResponseDto format
+    // Check for ApiResponseDto format (standard backend format)
     if (data.message) {
       return data.message;
     }
 
-    // Check for errors array
+    // Check for errors array (ApiResponseDto format)
     if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
       return data.errors[0];
     }
 
-    // Check for error string
-    if (typeof data.error === 'string') {
+    // Check for rate limiting format (enhanced format)
+    if (data.error && typeof data.error === 'string') {
       return data.error;
     }
 
-    // Check for title (sometimes used in validation errors)
+    // Check for validation errors object (ASP.NET format)
+    if (data.errors && typeof data.errors === 'object') {
+      const firstError = Object.values(data.errors)[0];
+      if (Array.isArray(firstError) && firstError.length > 0) {
+        return firstError[0];
+      }
+    }
+
+    // Check for title (Problem Details format from ASP.NET)
     if (data.title) {
       return data.title;
+    }
+
+    // Check for detail (Problem Details format)
+    if (data.detail) {
+      return data.detail;
+    }
+
+    // Check for legacy 'error' field
+    if (data.error) {
+      return data.error;
     }
 
     return defaultMessage;

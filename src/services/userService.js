@@ -91,7 +91,7 @@ const userService = {
       language: userData.language || null,
       theme: userData.theme || null
     });
-    
+    console.log(response);
     return extractApiData(response);
   },
 
@@ -176,6 +176,51 @@ const userService = {
       notifyUser: resetData.notifyUser || true
     });
     
+    return extractApiData(response);
+  },
+
+  /**
+   * Gets current user's profile
+   * GET /api/Users/profile
+   */
+  async getCurrentUserProfile() {
+    const response = await apiClient.get(USER_ENDPOINTS.PROFILE);
+    return extractApiData(response);
+  },
+
+  /**
+   * Updates current user's profile (self-service)
+   * PUT /api/Users/profile
+   */
+  async updateCurrentUserProfile(profileData) {
+    const response = await apiClient.put(USER_ENDPOINTS.PROFILE, {
+      firstName: profileData.firstName,
+      lastName: profileData.lastName,
+      email: profileData.email,
+      phoneNumber: profileData.phoneNumber || null,
+      department: profileData.department || null,
+      jobTitle: profileData.jobTitle || null,
+      employeeId: profileData.employeeId || null,
+      street1: profileData.street1 || null,
+      street2: profileData.street2 || null,
+      city: profileData.city || null,
+      state: profileData.state || null,
+      postalCode: profileData.postalCode || null,
+      country: profileData.country || null
+    });
+    return extractApiData(response);
+  },
+
+  /**
+   * Updates current user's preferences
+   * PUT /api/Users/profile/preferences
+   */
+  async updateCurrentUserPreferences(preferences) {
+    const response = await apiClient.put(USER_ENDPOINTS.PROFILE_PREFERENCES, {
+      timeZone: preferences.timeZone || 'UTC',
+      language: preferences.language || 'en-US',
+      theme: preferences.theme || 'light'
+    });
     return extractApiData(response);
   },
 

@@ -134,6 +134,15 @@ const authService = {
   async terminateSession(sessionId) {
     const response = await apiClient.delete(AUTH_ENDPOINTS.TERMINATE_SESSION(sessionId));
     return extractApiData(response);
+  },
+
+  /**
+   * Debug endpoint to view user claims (development only)
+   * GET /api/Auth/debug-claims
+   */
+  async getDebugClaims() {
+    const response = await apiClient.get('/api/Auth/debug-claims');
+    return extractApiData(response);
   }
 };
 

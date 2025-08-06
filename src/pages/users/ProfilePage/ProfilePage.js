@@ -13,12 +13,15 @@ import {
   changePassword,
   getUserSessions,
   terminateSession,
+  getCurrentUser,
   clearError as clearAuthError
 } from '../../../store/slices/authSlice';
 import { showSuccessToast, showErrorToast } from '../../../store/slices/notificationSlice';
 import { setPageTitle } from '../../../store/slices/uiSlice';
 import { formatName, formatDate, formatDateTime } from '../../../utils/formatters';
 import { validatePasswordChange, validateUserData } from '../../../utils/validators';
+import userService from '../../../services/userService';
+import fileUploadService from '../../../services/fileUploadService';
 
 // Components
 import Button from '../../../components/common/Button/Button';
@@ -26,6 +29,8 @@ import Input from '../../../components/common/Input/Input';
 import Modal, { ConfirmModal } from '../../../components/common/Modal/Modal';
 import Table from '../../../components/common/Table/Table';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
+import AddressForm from '../../../components/common/AddressForm/AddressForm';
+import ProfilePhotoUpload from '../../../components/common/ProfilePhotoUpload/ProfilePhotoUpload';
 
 /**
  * Professional Profile Page for current user self-management
@@ -64,9 +69,19 @@ const ProfilePage = () => {
     phoneNumber: '',
     department: '',
     jobTitle: '',
-    employeeId: ''
+    employeeId: '',
+    // Address fields
+    street1: '',
+    street2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: '',
+    // Profile photo URL
+    profilePhotoUrl: ''
   });
   const [profileErrors, setProfileErrors] = useState({});
+  const [profileLoading, setProfileLoading] = useState(false);
 
   // Password change state
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -87,43 +102,59 @@ const ProfilePage = () => {
   // Preferences state
   const [preferences, setPreferences] = useState({
     theme: 'light',
-    language: 'en',
-    timeZone: 'UTC',
-    emailNotifications: true,
-    browserNotifications: true,
-    weeklyReports: false
+    language: 'en-US',
+    timeZone: 'UTC'
   });
+  const [preferencesLoading, setPreferencesLoading] = useState(false);
 
   // Initialize page
   useEffect(() => {
     dispatch(setPageTitle('My Profile'));
-    
-    if (user) {
-      setProfileData({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        email: user.email || '',
-        phoneNumber: user.phoneNumber || '',
-        department: user.department || '',
-        jobTitle: user.jobTitle || '',
-        employeeId: user.employeeId || ''
-      });
-      
-      setPreferences({
-        theme: user.theme || 'light',
-        language: user.language || 'en',
-        timeZone: user.timeZone || 'UTC',
-        emailNotifications: true,
-        browserNotifications: true,
-        weeklyReports: false
-      });
-    }
+    loadProfileData();
 
     return () => {
       dispatch(clearError());
       dispatch(clearAuthError());
     };
-  }, [dispatch, user]);
+  }, [dispatch]);
+
+  // Load profile data from new profile endpoint
+  const loadProfileData = async () => {
+    try {
+      setProfileLoading(true);
+      const profile = await userService.getCurrentUserProfile();
+      
+      console.log('Loaded profile data:', profile); // Debug log
+      
+      setProfileData({
+        firstName: profile.firstName || '',
+        lastName: profile.lastName || '',
+        email: profile.email || '',
+        phoneNumber: profile.phoneNumber || '',
+        department: profile.department || '',
+        jobTitle: profile.jobTitle || '',
+        employeeId: profile.employeeId || '',
+        street1: profile.street1 || '',
+        street2: profile.street2 || '',
+        city: profile.city || '',
+        state: profile.state || '',
+        postalCode: profile.postalCode || '',
+        country: profile.country || '',
+        profilePhotoUrl: profile.profilePhotoUrl || ''
+      });
+      
+      setPreferences({
+        theme: profile.theme || 'light',
+        language: profile.language || 'en-US',
+        timeZone: profile.timeZone || 'UTC'
+      });
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+      dispatch(showErrorToast('Error', 'Failed to load profile data'));
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   // Load data based on active tab
   useEffect(() => {
@@ -168,6 +199,8 @@ const ProfilePage = () => {
   // Save profile changes
   const handleSaveProfile = async () => {
     try {
+      setProfileLoading(true);
+      
       // Validate profile data
       const validation = validateUserData(profileData, true);
       if (!validation.isValid) {
@@ -175,12 +208,88 @@ const ProfilePage = () => {
         return;
       }
 
-      await dispatch(updateUser({ id: userId, userData: profileData })).unwrap();
+      await userService.updateCurrentUserProfile(profileData);
       dispatch(showSuccessToast('Success', 'Profile updated successfully'));
       setIsEditingProfile(false);
       setProfileErrors({});
+      
+      // Reload profile data to get updated values
+      await loadProfileData();
     } catch (error) {
+      console.error('Profile update failed:', error);
       dispatch(showErrorToast('Error', 'Failed to update profile'));
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  // Save preferences
+  const handleSavePreferences = async () => {
+    try {
+      setPreferencesLoading(true);
+      await userService.updateCurrentUserPreferences(preferences);
+      dispatch(showSuccessToast('Success', 'Preferences updated successfully'));
+    } catch (error) {
+      console.error('Preferences update failed:', error);
+      dispatch(showErrorToast('Error', 'Failed to update preferences'));
+    } finally {
+      setPreferencesLoading(false);
+    }
+  };
+
+  // Profile photo upload handler
+  const handlePhotoUpload = async (file) => {
+    try {
+      // Validate file
+      const validation = fileUploadService.validateImageFile(file);
+      if (!validation.isValid) {
+        throw new Error(validation.error);
+      }
+
+      // Upload photo
+      const photoUrl = await fileUploadService.uploadProfilePhoto(file);
+      console.log('Photo uploaded, returned URL:', photoUrl); // Debug log
+      dispatch(showSuccessToast('Success', 'Profile photo uploaded successfully'));
+      
+      // Reload profile data to get updated photo URL
+      await loadProfileData();
+      
+      // Refresh auth state so header gets updated
+      await dispatch(getCurrentUser());
+      
+      return photoUrl;
+    } catch (error) {
+      console.error('Photo upload failed:', error);
+      dispatch(showErrorToast('Error', error.message || 'Failed to upload profile photo'));
+      throw error;
+    }
+  };
+
+  // Profile photo remove handler
+  const handlePhotoRemove = async () => {
+    try {
+      await fileUploadService.removeProfilePhoto();
+      dispatch(showSuccessToast('Success', 'Profile photo removed successfully'));
+      
+      // Reload profile data to update UI
+      await loadProfileData();
+      
+      // Refresh auth state so header gets updated
+      await dispatch(getCurrentUser());
+    } catch (error) {
+      console.error('Photo removal failed:', error);
+      dispatch(showErrorToast('Error', 'Failed to remove profile photo'));
+      throw error;
+    }
+  };
+
+  // Handle address form changes
+  const handleAddressChange = (fieldName, value) => {
+    setProfileData(prev => ({ ...prev, [fieldName]: value }));
+    
+    // Clear field error when user starts typing
+    if (profileErrors[fieldName]) {
+      setProfileErrors(prev => ({ ...prev, [fieldName]: null }));
     }
   };
 
@@ -358,27 +467,32 @@ const ProfilePage = () => {
     </button>
   );
 
-  const ProfileField = ({ label, value, isEditing, name, type = 'text', onChange, error, ...props }) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      {isEditing ? (
-        <Input
-          type={type}
-          name={name}
-          value={value}
-          onChange={onChange}
-          error={error}
-          {...props}
-        />
-      ) : (
-        <p className="text-gray-900 py-2.5 px-4 bg-gray-50 rounded-lg">
-          {value || 'Not provided'}
-        </p>
-      )}
-    </div>
-  );
+  const ProfileField = React.memo(({ label, value, isEditing, name, type = 'text', onChange, error, ...props }) => {
+    // Ensure error is always a string or null
+    const errorMessage = error && typeof error === 'object' ? error.message || JSON.stringify(error) : error;
+    
+    return (
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+        {isEditing ? (
+          <Input
+            type={type}
+            name={name}
+            value={value || ''}
+            onChange={onChange}
+            error={errorMessage}
+            {...props}
+          />
+        ) : (
+          <p className="text-gray-900 py-2.5 px-4 bg-gray-50 rounded-lg">
+            {value || 'Not provided'}
+          </p>
+        )}
+      </div>
+    );
+  });
 
-  if (authLoading || !user) {
+  if (authLoading || profileLoading || !user) {
     return (
       <div className="flex items-center justify-center min-h-96">
         <LoadingSpinner text="Loading profile..." />
@@ -396,8 +510,35 @@ const ProfilePage = () => {
       >
         <div className="flex items-center space-x-4">
           {/* Profile Avatar */}
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
-            {user.firstName?.charAt(0) || '?'}{user.lastName?.charAt(0) || ''}
+          <div className="relative">
+            {profileData.profilePhotoUrl ? (
+              <>
+                <img
+                  src={profileData.profilePhotoUrl}
+                  alt="Profile"
+                  className="w-16 h-16 object-cover rounded-full border-2 border-gray-200"
+                  onError={(e) => {
+                    console.error('Failed to load profile photo:', profileData.profilePhotoUrl);
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                  onLoad={(e) => {
+                    console.log('Profile photo loaded successfully:', profileData.profilePhotoUrl);
+                    e.target.nextSibling.style.display = 'none';
+                  }}
+                />
+                <div 
+                  className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold"
+                  style={{ display: 'none' }}
+                >
+                  {user.firstName?.charAt(0) || '?'}{user.lastName?.charAt(0) || ''}
+                </div>
+              </>
+            ) : (
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                {user.firstName?.charAt(0) || '?'}{user.lastName?.charAt(0) || ''}
+              </div>
+            )}
           </div>
           
           <div>
@@ -471,23 +612,16 @@ const ProfilePage = () => {
                                 setIsEditingProfile(false);
                                 setProfileErrors({});
                                 // Reset form data
-                                setProfileData({
-                                  firstName: user.firstName || '',
-                                  lastName: user.lastName || '',
-                                  email: user.email || '',
-                                  phoneNumber: user.phoneNumber || '',
-                                  department: user.department || '',
-                                  jobTitle: user.jobTitle || '',
-                                  employeeId: user.employeeId || ''
-                                });
+                                loadProfileData();
                               }}
+                              disabled={profileLoading}
                             >
                               Cancel
                             </Button>
                             <Button
                               variant="primary"
                               onClick={handleSaveProfile}
-                              loading={updateLoading}
+                              loading={profileLoading}
                             >
                               Save Changes
                             </Button>
@@ -496,6 +630,7 @@ const ProfilePage = () => {
                           <Button
                             variant="primary"
                             onClick={() => setIsEditingProfile(true)}
+                            loading={profileLoading}
                             icon={
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -505,6 +640,21 @@ const ProfilePage = () => {
                             Edit Profile
                           </Button>
                         )}
+                      </div>
+                    </div>
+
+                    {/* Profile Photo Section */}
+                    <div className="mb-8 p-6 bg-gray-50 rounded-lg">
+                      <h4 className="text-md font-medium text-gray-900 mb-4">Profile Photo</h4>
+                      <div className="flex justify-center">
+                        <ProfilePhotoUpload
+                          currentPhotoUrl={profileData.profilePhotoUrl}
+                          userInitials={`${user?.firstName?.charAt(0) || ''}${user?.lastName?.charAt(0) || ''}`}
+                          onPhotoUpload={handlePhotoUpload}
+                          onPhotoRemove={handlePhotoRemove}
+                          disabled={!isEditingProfile}
+                          size="large"
+                        />
                       </div>
                     </div>
 
@@ -566,6 +716,17 @@ const ProfilePage = () => {
                         name="jobTitle"
                         onChange={handleProfileChange}
                         error={profileErrors.jobTitle}
+                      />
+                    </div>
+
+                    {/* Address Section */}
+                    <div className="mt-8 pt-6 border-t border-gray-200">
+                      <AddressForm
+                        addressData={profileData}
+                        onChange={handleAddressChange}
+                        errors={profileErrors}
+                        disabled={!isEditingProfile}
+                        showTitle={true}
                       />
                     </div>
 
@@ -754,9 +915,9 @@ const ProfilePage = () => {
                               onChange={(e) => handlePreferenceChange('language', e.target.value)}
                               className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             >
-                              <option value="en">English</option>
-                              <option value="es">Spanish</option>
-                              <option value="fr">French</option>
+                              <option value="en-US">English</option>
+                              <option value="es-ES">Spanish</option>
+                              <option value="fr-FR">French</option>
                             </select>
                           </div>
 
@@ -777,55 +938,13 @@ const ProfilePage = () => {
                         </div>
                       </div>
 
-                      {/* Notifications */}
-                      <div className="bg-gray-50 rounded-lg p-6">
-                        <h4 className="text-md font-medium text-gray-900 mb-4">Notifications</h4>
-                        
-                        <div className="space-y-4">
-                          <label className="flex items-center space-x-3 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={preferences.emailNotifications}
-                              onChange={(e) => handlePreferenceChange('emailNotifications', e.target.checked)}
-                              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                            />
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">Email Notifications</div>
-                              <div className="text-xs text-gray-500">Receive important updates via email</div>
-                            </div>
-                          </label>
-
-                          <label className="flex items-center space-x-3 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={preferences.browserNotifications}
-                              onChange={(e) => handlePreferenceChange('browserNotifications', e.target.checked)}
-                              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                            />
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">Browser Notifications</div>
-                              <div className="text-xs text-gray-500">Show notifications in your browser</div>
-                            </div>
-                          </label>
-
-                          <label className="flex items-center space-x-3 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={preferences.weeklyReports}
-                              onChange={(e) => handlePreferenceChange('weeklyReports', e.target.checked)}
-                              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                            />
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">Weekly Reports</div>
-                              <div className="text-xs text-gray-500">Receive weekly activity summaries</div>
-                            </div>
-                          </label>
-                        </div>
-                      </div>
-
                       {/* Save Preferences */}
-                      <div className="flex justify-end">
-                        <Button variant="primary">
+                      <div className="flex justify-end mt-6">
+                        <Button 
+                          variant="primary" 
+                          onClick={handleSavePreferences}
+                          loading={preferencesLoading}
+                        >
                           Save Preferences
                         </Button>
                       </div>

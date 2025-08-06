@@ -29,6 +29,9 @@ export const AUTH_ENDPOINTS = {
 export const USER_ENDPOINTS = {
   BASE: '/api/Users',
   BY_ID: (id) => `/api/Users/${id}`,
+  PROFILE: '/api/Users/profile',
+  PROFILE_PREFERENCES: '/api/Users/profile/preferences',
+  PROFILE_PHOTO: '/api/Users/profile/photo',
   ACTIVATE: (id) => `/api/Users/${id}/activate`,
   DEACTIVATE: (id) => `/api/Users/${id}/deactivate`,
   UNLOCK: (id) => `/api/Users/${id}/unlock`,
@@ -183,6 +186,17 @@ export const ADMIN_ENDPOINTS = {
   COMPLIANCE_REPORT: '/api/Compliance/report'
 };
 
+// Configuration management endpoints
+export const CONFIGURATION_ENDPOINTS = {
+  BASE: '/api/admin/configuration',
+  BY_CATEGORY: (category) => `/api/admin/configuration/${category}`,
+  BY_KEY: (category, key) => `/api/admin/configuration/${category}/${key}`,
+  HISTORY: (category, key) => `/api/admin/configuration/${category}/${key}/history`,
+  SEARCH: '/api/admin/configuration/search',
+  VALIDATE: (category, key) => `/api/admin/configuration/${category}/${key}/validate`,
+  CACHE_INVALIDATE: '/api/admin/configuration/cache/invalidate'
+};
+
 // File upload endpoints
 export const FILE_ENDPOINTS = {
   UPLOAD: '/api/Files/upload',
@@ -266,6 +280,7 @@ export const API_ENDPOINTS = {
   CUSTOM_FIELDS: CUSTOM_FIELD_ENDPOINTS,
   REPORTS: REPORT_ENDPOINTS,
   ADMIN: ADMIN_ENDPOINTS,
+  CONFIGURATION: CONFIGURATION_ENDPOINTS,
   FILES: FILE_ENDPOINTS,
   NOTIFICATIONS: NOTIFICATION_ENDPOINTS
 };

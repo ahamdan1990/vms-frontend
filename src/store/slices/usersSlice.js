@@ -445,8 +445,21 @@ const usersSlice = createSlice({
       })
       .addCase(createUser.rejected, (state, action) => {
         state.createLoading = false;
-        state.createError = Array.isArray(action.payload) ? 
-          action.payload : [action.payload || 'Failed to create user'];
+        
+        // Handle different types of error payloads
+        if (Array.isArray(action.payload)) {
+          // Validation errors array
+          state.createError = action.payload;
+        } else if (typeof action.payload === 'object' && action.payload.message) {
+          // Error object with message
+          state.createError = [action.payload.message];
+        } else if (typeof action.payload === 'string') {
+          // String error
+          state.createError = [action.payload];
+        } else {
+          // Fallback
+          state.createError = ['Failed to create user'];
+        }
       });
 
     // Update user
@@ -474,8 +487,21 @@ const usersSlice = createSlice({
       })
       .addCase(updateUser.rejected, (state, action) => {
         state.updateLoading = false;
-        state.updateError = Array.isArray(action.payload) ? 
-          action.payload : [action.payload || 'Failed to update user'];
+        
+        // Handle different types of error payloads
+        if (Array.isArray(action.payload)) {
+          // Validation errors array
+          state.updateError = action.payload;
+        } else if (typeof action.payload === 'object' && action.payload.message) {
+          // Error object with message
+          state.updateError = [action.payload.message];
+        } else if (typeof action.payload === 'string') {
+          // String error
+          state.updateError = [action.payload];
+        } else {
+          // Fallback
+          state.updateError = ['Failed to update user'];
+        }
       });
 
     // Delete user

@@ -43,6 +43,10 @@ const UserDetailPage = lazy(() => import('../pages/users/UserDetailPage/UserDeta
 // Profile pages
 const ProfilePage = lazy(() => import('../pages/users/ProfilePage/ProfilePage'));
 
+// System pages
+const ConfigurationPage = lazy(() => import('../pages/system/ConfigurationPage/ConfigurationPage'));
+const AuditPage = lazy(() => import('../pages/system/AuditPage/AuditPage'));
+
 // Error pages
 const AccessDeniedPage = lazy(() => import('../pages/errors/AccessDeniedPage'));
 const NotFoundPage = lazy(() => import('../pages/errors/NotFoundPage'));
@@ -212,6 +216,31 @@ const AppRoutes = () => {
               <ProfilePage />
             </Suspense>
           </Layout>
+        </AuthGuard>
+      } />
+
+      {/* System Administration Routes */}
+      <Route path="/system/config" element={
+        <AuthGuard>
+          <PermissionGuard permission="Configuration.Read">
+            <Layout>
+              <Suspense fallback={<LoadingFallback />}>
+                <ConfigurationPage />
+              </Suspense>
+            </Layout>
+          </PermissionGuard>
+        </AuthGuard>
+      } />
+
+      <Route path="/system/audit" element={
+        <AuthGuard>
+          <PermissionGuard permission="Audit.Read.All">
+            <Layout>
+              <Suspense fallback={<LoadingFallback />}>
+                <AuditPage />
+              </Suspense>
+            </Layout>
+          </PermissionGuard>
         </AuthGuard>
       } />
 

@@ -3,6 +3,8 @@ import authReducer from './slices/authSlice';
 import usersReducer from './slices/usersSlice';
 import uiReducer from './slices/uiSlice';
 import notificationReducer from './slices/notificationSlice';
+import configurationReducer from './slices/configurationSlice';
+import auditReducer from './slices/auditSlice';
 
 /**
  * Root reducer that combines all feature slices
@@ -13,6 +15,8 @@ const rootReducer = combineReducers({
   users: usersReducer,
   ui: uiReducer,
   notifications: notificationReducer,
+  configuration: configurationReducer,
+  audit: auditReducer,
 });
 
 /**
@@ -77,6 +81,85 @@ export const getInitialState = () => ({
     showEditModal: false,
     showDeleteModal: false,
     showActivityModal: false
+  },
+  configuration: {
+    configurations: {},
+    currentConfiguration: null,
+    configurationHistory: [],
+    searchResults: [],
+    loading: false,
+    listLoading: false,
+    createLoading: false,
+    updateLoading: false,
+    deleteLoading: false,
+    historyLoading: false,
+    searchLoading: false,
+    validateLoading: false,
+    cacheLoading: false,
+    error: null,
+    listError: null,
+    createError: null,
+    updateError: null,
+    deleteError: null,
+    historyError: null,
+    searchError: null,
+    validateError: null,
+    selectedCategory: null,
+    searchQuery: '',
+    showSensitive: false,
+    cacheLastInvalidated: null,
+    validationResult: null,
+    pendingRestarts: []
+  },
+  audit: {
+    auditLogs: [],
+    currentAuditLog: null,
+    userActivity: [],
+    systemEvents: [],
+    securityEvents: [],
+    searchResults: [],
+    pagination: {
+      pageIndex: 0,
+      pageSize: 20,
+      totalPages: 0,
+      totalCount: 0,
+      hasNext: false,
+      hasPrevious: false
+    },
+    loading: false,
+    listLoading: false,
+    detailLoading: false,
+    userActivityLoading: false,
+    systemEventsLoading: false,
+    securityEventsLoading: false,
+    searchLoading: false,
+    exportLoading: false,
+    error: null,
+    listError: null,
+    detailError: null,
+    userActivityError: null,
+    systemEventsError: null,
+    securityEventsError: null,
+    searchError: null,
+    exportError: null,
+    filters: {
+      searchTerm: '',
+      category: '',
+      userId: null,
+      action: '',
+      dateFrom: null,
+      dateTo: null,
+      severity: '',
+      eventType: '',
+      ipAddress: '',
+      riskLevel: '',
+      sortBy: 'Timestamp',
+      sortDescending: true
+    },
+    selectedCategory: 'all',
+    availableCategories: [],
+    statistics: null,
+    lastExportUrl: null
   },
   ui: {
     sidebarOpen: true,
@@ -249,6 +332,28 @@ export const hydrateState = (persistedState) => {
       loading: false,
       error: null
     },
+    configuration: {
+      ...initialState.configuration,
+      // Don't persist config data (always fresh from server)
+      configurations: {},
+      currentConfiguration: null,
+      configurationHistory: [],
+      searchResults: [],
+      loading: false,
+      error: null
+    },
+    audit: {
+      ...initialState.audit,
+      // Don't persist audit data (always fresh from server)
+      auditLogs: [],
+      currentAuditLog: null,
+      userActivity: [],
+      systemEvents: [],
+      securityEvents: [],
+      searchResults: [],
+      loading: false,
+      error: null
+    },
     notifications: {
       ...initialState.notifications,
       ...persistedState.notifications,
@@ -264,7 +369,7 @@ export const hydrateState = (persistedState) => {
  * Validates restored state structure
  */
 export const validateState = (state) => {
-  const requiredSlices = ['auth', 'users', 'ui', 'notifications'];
+  const requiredSlices = ['auth', 'users', 'ui', 'notifications', 'configuration', 'audit'];
   
   if (!state || typeof state !== 'object') {
     return false;

@@ -7,14 +7,18 @@
 export const USER_PERMISSIONS = {
   CREATE: 'User.Create',
   READ: 'User.Read',
+  READ_ALL: 'User.Read.All',
   UPDATE: 'User.Update',
+  UPDATE_ALL: 'User.Update.All',
   DELETE: 'User.Delete',
+  DELETE_ALL: 'User.Delete.All',
   ACTIVATE: 'User.Activate',
   DEACTIVATE: 'User.Deactivate',
   UNLOCK: 'User.Unlock',
   RESET_PASSWORD: 'User.ResetPassword',
   VIEW_ACTIVITY: 'User.ViewActivity',
-  MANAGE_ROLES: 'User.ManageRoles'
+  MANAGE_ROLES: 'User.ManageRoles',
+  MANAGE_PERMISSIONS: 'User.ManagePermissions'
 };
 
 // Invitation Management Permissions
@@ -165,11 +169,41 @@ export const SYSTEM_CONFIG_PERMISSIONS = {
   MAINTAIN: 'SystemConfig.Maintain'
 };
 
+// Configuration Management Permissions (matches backend exactly)
+export const CONFIGURATION_PERMISSIONS = {
+  READ: 'Configuration.Read',
+  READ_ALL: 'Configuration.Read.All',
+  UPDATE: 'Configuration.Update',
+  UPDATE_ALL: 'Configuration.Update.All',
+  CREATE: 'Configuration.Create',
+  DELETE: 'Configuration.Delete',
+  VIEW_HISTORY: 'Configuration.ViewHistory',
+  VIEW_AUDIT: 'Configuration.ViewAudit',
+  MANAGE_ENCRYPTED: 'Configuration.ManageEncrypted',
+  MANAGE_SECURITY: 'Configuration.ManageSecurity',
+  MANAGE_JWT: 'Configuration.ManageJWT',
+  MANAGE_PASSWORD: 'Configuration.ManagePassword',
+  MANAGE_LOCKOUT: 'Configuration.ManageLockout',
+  MANAGE_RATE_LIMIT: 'Configuration.ManageRateLimit',
+  MANAGE_LOGGING: 'Configuration.ManageLogging',
+  EXPORT: 'Configuration.Export',
+  IMPORT: 'Configuration.Import',
+  INVALIDATE_CACHE: 'Configuration.InvalidateCache',
+  VIEW_SENSITIVE: 'Configuration.ViewSensitive',
+  RESET_TO_DEFAULTS: 'Configuration.ResetToDefaults'
+};
+
 // Audit Permissions
 export const AUDIT_PERMISSIONS = {
-  READ: 'Audit.Read',
+  READ: 'Audit.Read.All',
   EXPORT: 'Audit.Export',
-  MANAGE: 'Audit.Manage'
+  VIEW_USER_ACTIVITY: 'Audit.ViewUserActivity',
+  VIEW_SYSTEM_EVENTS: 'Audit.ViewSystemEvents',
+  VIEW_SECURITY_EVENTS: 'Audit.ViewSecurityEvents',
+  SEARCH: 'Audit.Search',
+  REVIEW: 'Audit.Review',
+  ARCHIVE: 'Audit.Archive',
+  PURGE: 'Audit.Purge'
 };
 
 // Integration Permissions
@@ -227,6 +261,7 @@ export const ALL_PERMISSIONS = {
   ...DASHBOARD_PERMISSIONS,
   ...CALENDAR_PERMISSIONS,
   ...SYSTEM_CONFIG_PERMISSIONS,
+  ...CONFIGURATION_PERMISSIONS,
   ...AUDIT_PERMISSIONS,
   ...INTEGRATION_PERMISSIONS,
   ...PROFILE_PERMISSIONS,
@@ -338,6 +373,10 @@ export const PERMISSION_CATEGORIES = {
     name: 'System Administration',
     permissions: Object.values(SYSTEM_CONFIG_PERMISSIONS)
   },
+  CONFIGURATION_MANAGEMENT: {
+    name: 'Configuration Management',
+    permissions: Object.values(CONFIGURATION_PERMISSIONS)
+  },
   AUDIT: {
     name: 'Audit',
     permissions: Object.values(AUDIT_PERMISSIONS)
@@ -425,6 +464,7 @@ export default {
   DASHBOARD_PERMISSIONS,
   CALENDAR_PERMISSIONS,
   SYSTEM_CONFIG_PERMISSIONS,
+  CONFIGURATION_PERMISSIONS,
   AUDIT_PERMISSIONS,
   INTEGRATION_PERMISSIONS,
   PROFILE_PERMISSIONS,

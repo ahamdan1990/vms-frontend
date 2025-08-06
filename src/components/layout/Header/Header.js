@@ -216,7 +216,26 @@ const Header = () => {
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="flex items-center space-x-3 p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-medium">
+              {user?.profilePhotoUrl ? (
+                <img
+                  src={user.profilePhotoUrl}
+                  alt="Profile"
+                  className="w-8 h-8 object-cover rounded-full border-2 border-gray-200"
+                  onError={(e) => {
+                    console.error('Failed to load profile photo:', user.profilePhotoUrl);
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                  onLoad={(e) => {
+                    console.log('Profile photo loaded successfully:', user.profilePhotoUrl);
+                    e.target.nextSibling.style.display = 'none';
+                  }}
+                />
+              ) : null}
+              <div 
+                className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-medium"
+                style={{ display: user?.profilePhotoUrl ? 'none' : 'flex' }}
+              >
                 {userInitials}
               </div>
               <div className="hidden sm:block text-left">

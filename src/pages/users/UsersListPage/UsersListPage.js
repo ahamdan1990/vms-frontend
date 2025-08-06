@@ -61,6 +61,7 @@ import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpi
 // Utils
 import { formatters } from '../../../utils/formatters';
 import { validateUserData } from '../../../utils/validators';
+import { extractErrorMessage } from '../../../utils/errorUtils';
 
 /**
  * Professional Users List Page with comprehensive user management
@@ -86,9 +87,9 @@ const UsersListPage = () => {
   const userStats = useSelector(selectUsersStatsSummary);
   
   // Modal states
-  const showCreateModal = useSelector(selectShowCreateModal);
-  const showEditModal = useSelector(selectShowEditModal);
-  const showDeleteModal = useSelector(selectShowDeleteModal);
+  const isCreateModalOpen = useSelector(selectShowCreateModal);
+  const isEditModalOpen = useSelector(selectShowEditModal);
+  const isDeleteModalOpen = useSelector(selectShowDeleteModal);
   
   // Error states
   const createError = useSelector(selectUsersCreateError);
@@ -111,7 +112,11 @@ const UsersListPage = () => {
     jobTitle: '',
     employeeId: '',
     mustChangePassword: true,
-    sendWelcomeEmail: true
+    sendWelcomeEmail: true,
+    // Add missing required fields
+    theme: 'light',
+    language: 'en-US',
+    timeZone: 'UTC'
   });
 
   const [formErrors, setFormErrors] = useState({});
@@ -195,7 +200,11 @@ const UsersListPage = () => {
           jobTitle: '',
           employeeId: '',
           mustChangePassword: true,
-          sendWelcomeEmail: true
+          sendWelcomeEmail: true,
+          // Add missing required fields
+          theme: 'light',
+          language: 'en-US',
+          timeZone: 'UTC'
         });
         setFormErrors({});
       }
@@ -714,7 +723,7 @@ const UsersListPage = () => {
 
       {/* Create User Modal */}
       <Modal
-        isOpen={showCreateModal}
+        isOpen={isCreateModalOpen}
         onClose={() => dispatch(hideCreateModal())}
         title="Create New User"
         size="lg"
@@ -830,7 +839,9 @@ const UsersListPage = () => {
                   <div className="mt-2 text-sm text-red-700">
                     <ul className="list-disc pl-5 space-y-1">
                       {createError.map((error, index) => (
-                        <li key={index}>{error}</li>
+                        <li key={index}>
+                          {extractErrorMessage(error)}
+                        </li>
                       ))}
                     </ul>
                   </div>

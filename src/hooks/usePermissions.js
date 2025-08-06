@@ -270,7 +270,13 @@ export const usePermissions = () => {
   const auditPermissions = useMemo(() => ({
     canRead: hasPermission(AUDIT_PERMISSIONS.READ),
     canExport: hasPermission(AUDIT_PERMISSIONS.EXPORT),
-    canManage: hasPermission(AUDIT_PERMISSIONS.MANAGE)
+    canViewUserActivity: hasPermission(AUDIT_PERMISSIONS.VIEW_USER_ACTIVITY),
+    canViewSystemEvents: hasPermission(AUDIT_PERMISSIONS.VIEW_SYSTEM_EVENTS),
+    canViewSecurityEvents: hasPermission(AUDIT_PERMISSIONS.VIEW_SECURITY_EVENTS),
+    canSearch: hasPermission(AUDIT_PERMISSIONS.SEARCH),
+    canReview: hasPermission(AUDIT_PERMISSIONS.REVIEW),
+    canArchive: hasPermission(AUDIT_PERMISSIONS.ARCHIVE),
+    canPurge: hasPermission(AUDIT_PERMISSIONS.PURGE)
   }), [hasPermission]);
 
   // Integration Permissions
