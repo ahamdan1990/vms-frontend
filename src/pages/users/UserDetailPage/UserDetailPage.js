@@ -14,6 +14,7 @@ import {
   unlockUser,
   adminResetPassword,
   getUserActivity,
+  getAvailableRoles,
   clearError,
   setCurrentUser,
   clearCurrentUser
@@ -44,16 +45,18 @@ const UserDetailPage = () => {
   
   const { user: currentAuthUser, userId: currentUserId } = useAuth();
   const { 
-    user: userPermissions,
-    canManageUsers,
-    canUpdateUsers,
-    canDeleteUsers,
-    canActivateUsers,
-    canDeactivateUsers,
-    canUnlockUsers,
-    canResetPasswords,
-    canViewUserActivity
+    user: userPermissions
   } = usePermissions();
+
+  // Extract specific permissions for easier use
+  const canManageUsers = userPermissions.canManage;
+  const canUpdateUsers = userPermissions.canUpdate;
+  const canDeleteUsers = userPermissions.canDelete;
+  const canActivateUsers = userPermissions.canActivate;
+  const canDeactivateUsers = userPermissions.canDeactivate;
+  const canUnlockUsers = userPermissions.canUnlock;
+  const canResetPasswords = userPermissions.canResetPassword;
+  const canViewUserActivity = userPermissions.canViewActivity;
 
   // Redux state
   const {
@@ -64,6 +67,8 @@ const UserDetailPage = () => {
     deleteLoading,
     userActivity
   } = useSelector(state => state.users);
+  
+  const availableRoles = useSelector(state => state.users.availableRoles || []);
 
   // Local state
   const [activeTab, setActiveTab] = useState('overview');
@@ -95,6 +100,9 @@ const UserDetailPage = () => {
       dispatch(setPageTitle('User Details'));
       dispatch(getUserById(id));
     }
+    
+    // Load available roles for role selection
+    dispatch(getAvailableRoles());
 
     return () => {
       dispatch(clearCurrentUser());
@@ -205,12 +213,12 @@ const UserDetailPage = () => {
   // Activity table columns
   const activityColumns = [
     {
-      key: 'eventType',
+      key: 'action',
       header: 'Event',
       sortable: true,
-      render: (eventType) => (
+      render: (action) => (
         <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-          {eventType}
+          {action}
         </span>
       )
     },
@@ -488,6 +496,7 @@ const UserDetailPage = () => {
               {isEditing ? (
                 <UserForm
                   user={currentUser}
+                  availableRoles={availableRoles}
                   onSubmit={handleSave}
                   onCancel={() => {
                     setIsEditing(false);
@@ -608,17 +617,37 @@ const UserDetailPage = () => {
                       
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Total Sessions</span>
-                          <span className="font-medium text-gray-900">24</span>
+                          <span className="text-sm text-gray-600">Login Count</span>
+                          <span className="font-medium text-gray-900">
+                            {currentUser.activitySummary?.loginCount || 0}
+                          </span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600">Failed Login Attempts</span>
-                          <span className="font-medium text-gray-900">{currentUser.failedLoginAttempts || 0}</span>
+                          <span className="font-medium text-gray-900">
+                            {currentUser.activitySummary?.failedLoginAttempts || currentUser.failedLoginAttempts || 0}
+                          </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Last IP Address</span>
-                          <span className="font-medium text-gray-900">192.168.1.100</span>
+                          <span className="text-sm text-gray-600">Invitations Created</span>
+                          <span className="font-medium text-gray-900">
+                            {currentUser.activitySummary?.invitationsCreated || 0}
+                          </span>
                         </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Password Changes</span>
+                          <span className="font-medium text-gray-900">
+                            {currentUser.activitySummary?.passwordChanges || 0}
+                          </span>
+                        </div>
+                        {currentUser.activitySummary?.lastFailedLogin && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Last Failed Login</span>
+                            <span className="font-medium text-gray-900">
+                              {formatDateTime(currentUser.activitySummary.lastFailedLogin)}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -216,32 +216,43 @@ const Header = () => {
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="flex items-center space-x-3 p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              {user?.profilePhotoUrl ? (
-                <img
-                  src={user.profilePhotoUrl}
-                  alt="Profile"
-                  className="w-8 h-8 object-cover rounded-full border-2 border-gray-200"
-                  onError={(e) => {
-                    console.error('Failed to load profile photo:', user.profilePhotoUrl);
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                  onLoad={(e) => {
-                    console.log('Profile photo loaded successfully:', user.profilePhotoUrl);
-                    e.target.nextSibling.style.display = 'none';
-                  }}
-                />
-              ) : null}
-              <div 
-                className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-medium"
-                style={{ display: user?.profilePhotoUrl ? 'none' : 'flex' }}
-              >
-                {userInitials}
-              </div>
+              {(() => {
+                const photoUrl = user?.profilePhotoUrl || user?.ProfilePhotoUrl;
+                
+                return photoUrl ? (
+                  <>
+                    <img
+                      src={photoUrl}
+                      alt="Profile"
+                      className="w-8 h-8 object-cover rounded-full border-2 border-gray-200"
+                      onError={(e) => {
+                        console.error('Failed to load profile photo:', photoUrl);
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                      onLoad={(e) => {
+                        e.target.nextSibling.style.display = 'none';
+                      }}
+                    />
+                    <div 
+                      className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-medium"
+                      style={{ display: 'none' }}
+                    >
+                      {userInitials}
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-medium">
+                    {userInitials}
+                  </div>
+                );
+              })()}
+              
               <div className="hidden sm:block text-left">
                 <p className="text-sm font-medium text-gray-900">{userName}</p>
                 <p className="text-xs text-gray-500">{user?.role}</p>
               </div>
+              
               <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>

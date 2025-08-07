@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
+import '../../../styles/mobile-table.css'; // Import mobile responsive styles
 
 // Redux actions and selectors
 import {
@@ -108,18 +109,20 @@ const UsersListPage = () => {
     email: '',
     phoneNumber: '',
     role: 'Staff',
+    status: 'Active',
     department: '',
     jobTitle: '',
     employeeId: '',
-    mustChangePassword: true,
-    sendWelcomeEmail: true,
-    // Add missing required fields
     theme: 'light',
     language: 'en-US',
-    timeZone: 'UTC'
+    timeZone: 'UTC',
+    mustChangePassword: true,
+    sendWelcomeEmail: true
   });
 
   const [formErrors, setFormErrors] = useState({});
+  const [currentEditUser, setCurrentEditUser] = useState(null);
+  const [currentDeleteUser, setCurrentDeleteUser] = useState(null);
 
   // Load initial data
   useEffect(() => {
@@ -139,6 +142,32 @@ const UsersListPage = () => {
 
     return () => clearTimeout(debounceTimer);
   }, [searchInput, filters.searchTerm, dispatch]);
+
+  // Watch for edit modal opening and ensure form data is populated
+  useEffect(() => {
+    if (isEditModalOpen && currentEditUser) {
+      
+      const populatedData = {
+        id: currentEditUser.id,
+        firstName: currentEditUser.firstName || currentEditUser.FirstName || '',
+        lastName: currentEditUser.lastName || currentEditUser.LastName || '',
+        email: currentEditUser.email || currentEditUser.Email || '',
+        phoneNumber: currentEditUser.phoneNumber || currentEditUser.PhoneNumber || '',
+        role: currentEditUser.role || currentEditUser.Role || 'Staff',
+        status: currentEditUser.isActive !== undefined ? (currentEditUser.isActive ? 'Active' : 'Inactive') : 'Active',
+        department: currentEditUser.department || currentEditUser.Department || '',
+        jobTitle: currentEditUser.jobTitle || currentEditUser.JobTitle || '',
+        employeeId: currentEditUser.employeeId || currentEditUser.EmployeeId || '',
+        theme: currentEditUser.theme || currentEditUser.Theme || 'light',
+        language: currentEditUser.language || currentEditUser.Language || 'en-US',
+        timeZone: currentEditUser.timeZone || currentEditUser.TimeZone || 'UTC',
+        mustChangePassword: false,
+        sendWelcomeEmail: false
+      };
+      
+      setFormData(populatedData);
+    }
+  }, [isEditModalOpen, currentEditUser]);
 
   // Handle filter changes
   const handleFilterChange = (filterName, value) => {
@@ -245,6 +274,61 @@ const UsersListPage = () => {
     }
   };
 
+  // Handle update user
+  const handleUpdateUser = async () => {
+    dispatch(clearError());
+    const validation = validateUserData(formData, true);
+    
+    if (!validation.isValid) {
+      setFormErrors(validation.errors);
+      return;
+    }
+
+    try {
+      if (currentEditUser) {
+        await dispatch(updateUser({ id: currentEditUser.id, userData: formData })).unwrap();
+        dispatch(hideEditModal());
+        setCurrentEditUser(null);
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phoneNumber: '',
+          role: 'Staff',
+          department: '',
+          jobTitle: '',
+          employeeId: '',
+          mustChangePassword: true,
+          sendWelcomeEmail: true,
+          theme: 'light',
+          language: 'en-US',
+          timeZone: 'UTC'
+        });
+        setFormErrors({});
+        // Refresh users list
+        dispatch(getUsers());
+        dispatch(getUserStats());
+      }
+    } catch (error) {
+      console.error('Failed to update user:', error);
+    }
+  };
+
+  // Handle delete user
+  const handleDeleteUser = async () => {
+    try {
+      if (currentDeleteUser) {
+        await dispatch(deleteUser(currentDeleteUser.id)).unwrap();
+        dispatch(hideDeleteModal());
+        setCurrentDeleteUser(null);
+        // Refresh users list
+        dispatch(getUsers());
+      }
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+    }
+  };
+
   // User actions
   const handleUserAction = async (action, user) => {
     try {
@@ -259,20 +343,34 @@ const UsersListPage = () => {
           await dispatch(unlockUser({ id: user.id, reason: 'Manual unlock' }));
           break;
         case 'edit':
-          setFormData({
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            phoneNumber: user.phoneNumber || '',
-            role: user.role,
-            department: user.department || '',
-            jobTitle: user.jobTitle || '',
-            employeeId: user.employeeId || '',
-            status: user.isActive ? 'Active' : 'Inactive'
-          });
-          dispatch(showEditModal(user));
+          setCurrentEditUser(user);
+          const editFormData = {
+            id: user.id,
+            firstName: user.firstName || user.FirstName || user.first_name || '',
+            lastName: user.lastName || user.LastName || user.last_name || '',
+            email: user.email || user.Email || '',
+            phoneNumber: user.phoneNumber || user.PhoneNumber || user.phone_number || '',
+            role: user.role || user.Role || 'Staff',
+            status: user.isActive !== undefined ? (user.isActive ? 'Active' : 'Inactive') : 'Active',
+            department: user.department || user.Department || '',
+            jobTitle: user.jobTitle || user.JobTitle || user.job_title || '',
+            employeeId: user.employeeId || user.EmployeeId || user.employee_id || '',
+            theme: user.theme || user.Theme || 'light',
+            language: user.language || user.Language || 'en-US',
+            timeZone: user.timeZone || user.TimeZone || user.time_zone || 'UTC',
+            mustChangePassword: user.mustChangePassword !== undefined ? user.mustChangePassword : false,
+            sendWelcomeEmail: false
+          };
+          
+          setFormData(editFormData);
+          
+          // Force re-render after a small delay to ensure state is set
+          setTimeout(() => {
+            dispatch(showEditModal(user));
+          }, 10);
           break;
         case 'delete':
+          setCurrentDeleteUser(user);
           dispatch(showDeleteModal(user));
           break;
         default:
@@ -289,6 +387,7 @@ const UsersListPage = () => {
       key: 'avatar',
       header: '',
       width: '60px',
+      className: 'sticky-left',
       render: (_, user) => (
         <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-medium text-sm">
           {user.initials}
@@ -299,6 +398,7 @@ const UsersListPage = () => {
       key: 'fullName',
       header: 'Name',
       sortable: true,
+      className: 'min-w-[200px]',
       render: (_, user) => (
         <div>
           <Link 
@@ -308,6 +408,16 @@ const UsersListPage = () => {
             {user.displayName}
           </Link>
           <p className="text-sm text-gray-500">{user.email}</p>
+          {/* Show role on mobile */}
+          <div className="sm:hidden">
+            <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 ${
+              user.role === 'Administrator' ? 'bg-purple-100 text-purple-800' :
+              user.role === 'Operator' ? 'bg-blue-100 text-blue-800' :
+              'bg-green-100 text-green-800'
+            }`}>
+              {user.role}
+            </span>
+          </div>
         </div>
       )
     },
@@ -315,6 +425,7 @@ const UsersListPage = () => {
       key: 'role',
       header: 'Role',
       sortable: true,
+      className: 'hidden sm:table-cell',
       render: (role) => (
         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
           role === 'Administrator' ? 'bg-purple-100 text-purple-800' :
@@ -329,11 +440,13 @@ const UsersListPage = () => {
       key: 'department',
       header: 'Department',
       sortable: true,
+      className: 'hidden md:table-cell',
       render: (department) => department || <span className="text-gray-400">—</span>
     },
     {
       key: 'isActive',
       header: 'Status',
+      className: 'hidden sm:table-cell',
       render: (_, user) => (
         <div className="flex items-center space-x-2">
           {user.statusBadge && (
@@ -355,6 +468,7 @@ const UsersListPage = () => {
       key: 'lastLoginDate',
       header: 'Last Login',
       sortable: true,
+      className: 'hidden lg:table-cell',
       render: (_, user) => (
         <span className="text-sm text-gray-600">{user.lastLoginFormatted}</span>
       )
@@ -362,13 +476,29 @@ const UsersListPage = () => {
     {
       key: 'actions',
       header: 'Actions',
-      width: '120px',
+      width: '200px',
+      className: 'sticky-right',
       render: (_, user) => (
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center justify-center space-x-1">
+          <Link
+            to={`/users/${user.id}`}
+            className="inline-flex items-center justify-center p-2 text-gray-400 hover:text-blue-600 transition-colors rounded-md hover:bg-blue-50"
+            title="View user details"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </Link>
+
           {userPermissions.canUpdate && (
             <button
-              onClick={() => handleUserAction('edit', user)}
-              className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleUserAction('edit', user);
+              }}
+              className="inline-flex items-center justify-center p-2 text-gray-400 hover:text-blue-600 transition-colors rounded-md hover:bg-blue-50"
               title="Edit user"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -379,8 +509,12 @@ const UsersListPage = () => {
           
           {user.isLockedOut && userPermissions.canUnlock && (
             <button
-              onClick={() => handleUserAction('unlock', user)}
-              className="p-1 text-gray-400 hover:text-green-600 transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleUserAction('unlock', user);
+              }}
+              className="inline-flex items-center justify-center p-2 text-gray-400 hover:text-green-600 transition-colors rounded-md hover:bg-green-50"
               title="Unlock user"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -391,8 +525,12 @@ const UsersListPage = () => {
           
           {user.role !== 'Administrator' && userPermissions.canDelete && (
             <button
-              onClick={() => handleUserAction('delete', user)}
-              className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleUserAction('delete', user);
+              }}
+              className="inline-flex items-center justify-center p-2 text-gray-400 hover:text-red-600 transition-colors rounded-md hover:bg-red-50"
               title="Delete user"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -438,7 +576,7 @@ const UsersListPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         {userStats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -521,9 +659,9 @@ const UsersListPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6"
+          className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6"
         >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
             <div className="flex-1 max-w-lg">
               <Input
                 type="text"
@@ -538,7 +676,7 @@ const UsersListPage = () => {
               />
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
@@ -547,6 +685,7 @@ const UsersListPage = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
                   </svg>
                 }
+                className="w-full sm:w-auto"
               >
                 Filters
               </Button>
@@ -559,6 +698,7 @@ const UsersListPage = () => {
                     setSearchInput('');
                     dispatch(getUsers());
                   }}
+                  className="w-full sm:w-auto"
                 >
                   Clear Filters
                 </Button>
@@ -575,7 +715,7 @@ const UsersListPage = () => {
                 transition={{ duration: 0.3 }}
                 className="mt-6 pt-6 border-t border-gray-200"
               >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
                     <select
@@ -630,7 +770,7 @@ const UsersListPage = () => {
             animate={{ opacity: 1, y: 0 }}
             className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
               <div className="flex items-center">
                 <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -640,12 +780,13 @@ const UsersListPage = () => {
                 </span>
               </div>
               
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
                 {canBulkActivate && (
                   <Button
                     size="sm"
                     variant="success"
                     onClick={() => handleBulkAction('activate')}
+                    className="w-full sm:w-auto"
                   >
                     Activate
                   </Button>
@@ -656,6 +797,7 @@ const UsersListPage = () => {
                     size="sm"
                     variant="warning"
                     onClick={() => handleBulkAction('deactivate')}
+                    className="w-full sm:w-auto"
                   >
                     Deactivate
                   </Button>
@@ -666,6 +808,7 @@ const UsersListPage = () => {
                     size="sm"
                     variant="danger"
                     onClick={() => handleBulkAction('delete')}
+                    className="w-full sm:w-auto"
                   >
                     Delete
                   </Button>
@@ -675,6 +818,7 @@ const UsersListPage = () => {
                   size="sm"
                   variant="outline"
                   onClick={() => dispatch(clearSelections())}
+                  className="w-full sm:w-auto"
                 >
                   Clear Selection
                 </Button>
@@ -690,20 +834,23 @@ const UsersListPage = () => {
           transition={{ delay: 0.5 }}
           className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
         >
-          <Table
-            data={users}
-            columns={columns}
-            loading={loading}
-            selectable={userPermissions.canUpdate || userPermissions.canDelete}
-            selectedRows={selectedUsers}
-            onSelectionChange={handleUserSelection}
-            onSort={handleSort}
-            sortBy={filters.sortBy}
-            sortDirection={filters.sortDescending ? 'desc' : 'asc'}
-            emptyMessage="No users found. Try adjusting your search or filters."
-            hover
-            bordered
-          />
+          <div className="mobile-table">
+            <Table
+              data={users}
+              columns={columns}
+              loading={loading}
+              selectable={userPermissions.canUpdate || userPermissions.canDelete}
+              selectedRows={selectedUsers}
+              onSelectionChange={handleUserSelection}
+              onSort={handleSort}
+              sortBy={filters.sortBy}
+              sortDirection={filters.sortDescending ? 'desc' : 'asc'}
+              emptyMessage="No users found. Try adjusting your search or filters."
+              hover
+              bordered
+              className="min-w-full"
+            />
+          </div>
           
           {pagination.totalPages > 1 && (
             <div className="px-6 py-4 border-t border-gray-200">
@@ -866,6 +1013,174 @@ const UsersListPage = () => {
           </Button>
         </div>
       </Modal>
+
+      {/* Edit User Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          dispatch(hideEditModal());
+          setCurrentEditUser(null);
+          setFormErrors({});
+        }}
+        title={`Edit User${currentEditUser ? ` - ${currentEditUser.firstName || currentEditUser.FirstName || ''} ${currentEditUser.lastName || currentEditUser.LastName || ''}` : ''}`}
+        size="lg"
+      >
+        
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="First Name"
+              required
+              value={formData.firstName || ''}
+              onChange={(e) => handleFormChange('firstName', e.target.value)}
+              error={formErrors.firstName}
+            />
+            
+            <Input
+              label="Last Name"
+              required
+              value={formData.lastName || ''}
+              onChange={(e) => handleFormChange('lastName', e.target.value)}
+              error={formErrors.lastName}
+            />
+          </div>
+          
+          <Input
+            label="Email Address"
+            type="email"
+            required
+            value={formData.email || ''}
+            onChange={(e) => handleFormChange('email', e.target.value)}
+            error={formErrors.email}
+          />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="Phone Number"
+              value={formData.phoneNumber || ''}
+              onChange={(e) => handleFormChange('phoneNumber', e.target.value)}
+              error={formErrors.phoneNumber}
+            />
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Role <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.role || 'Staff'}
+                onChange={(e) => handleFormChange('role', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {availableRoles.map(role => (
+                  <option key={role.name} value={role.name}>{role.name}</option>
+                ))}
+              </select>
+              {formErrors.role && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.role}</p>
+              )}
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Status <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.status || 'Active'}
+                onChange={(e) => handleFormChange('status', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+              {formErrors.status && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.status}</p>
+              )}
+            </div>
+
+            <Input
+              label="Employee ID"
+              value={formData.employeeId || ''}
+              onChange={(e) => handleFormChange('employeeId', e.target.value)}
+              error={formErrors.employeeId}
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="Department"
+              value={formData.department || ''}
+              onChange={(e) => handleFormChange('department', e.target.value)}
+              error={formErrors.department}
+            />
+            
+            <Input
+              label="Job Title"
+              value={formData.jobTitle || ''}
+              onChange={(e) => handleFormChange('jobTitle', e.target.value)}
+              error={formErrors.jobTitle}
+            />
+          </div>
+          
+          {updateError && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+              <div className="flex">
+                <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">Error updating user</h3>
+                  <div className="mt-2 text-sm text-red-700">
+                    <ul className="list-disc pl-5 space-y-1">
+                      {updateError.map((error, index) => (
+                        <li key={index}>
+                          {extractErrorMessage(error)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex justify-end space-x-3 pt-6">
+          <Button
+            variant="outline"
+            onClick={() => {
+              dispatch(hideEditModal());
+              setCurrentEditUser(null);
+              setFormErrors({});
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleUpdateUser}
+            loading={loading}
+          >
+            Update User
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Delete User Modal */}
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          dispatch(hideDeleteModal());
+          setCurrentDeleteUser(null);
+        }}
+        onConfirm={handleDeleteUser}
+        title="Delete User"
+        message={`Are you sure you want to delete ${currentDeleteUser ? `${currentDeleteUser.firstName || currentDeleteUser.FirstName || ''} ${currentDeleteUser.lastName || currentDeleteUser.LastName || ''}` : 'this user'}? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+        loading={loading}
+      />
 
       {/* Bulk Action Confirmation Modal */}
       <ConfirmModal

@@ -90,6 +90,7 @@ export const getUsers = createAsyncThunk(
       };
       
       const response = await userService.getUsers(queryParams);
+      console.log(response)
       return { response, queryParams };
     } catch (error) {
       return rejectWithValue(handleApiError(error));

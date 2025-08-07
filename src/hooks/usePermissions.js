@@ -84,8 +84,8 @@ export const usePermissions = () => {
   const userPermissions = useMemo(() => ({
     canCreate: hasPermission(USER_PERMISSIONS.CREATE),
     canRead: hasPermission(USER_PERMISSIONS.READ),
-    canUpdate: hasPermission(USER_PERMISSIONS.UPDATE),
-    canDelete: hasPermission(USER_PERMISSIONS.DELETE),
+    canUpdate: hasAnyPermission([USER_PERMISSIONS.UPDATE, USER_PERMISSIONS.UPDATE_ALL]),
+    canDelete: hasAnyPermission([USER_PERMISSIONS.DELETE, USER_PERMISSIONS.DELETE_ALL]),
     canActivate: hasPermission(USER_PERMISSIONS.ACTIVATE),
     canDeactivate: hasPermission(USER_PERMISSIONS.DEACTIVATE),
     canUnlock: hasPermission(USER_PERMISSIONS.UNLOCK),
@@ -95,7 +95,9 @@ export const usePermissions = () => {
     canManage: hasAnyPermission([
       USER_PERMISSIONS.CREATE,
       USER_PERMISSIONS.UPDATE,
-      USER_PERMISSIONS.DELETE
+      USER_PERMISSIONS.UPDATE_ALL,
+      USER_PERMISSIONS.DELETE,
+      USER_PERMISSIONS.DELETE_ALL
     ])
   }), [hasPermission, hasAnyPermission]);
 
