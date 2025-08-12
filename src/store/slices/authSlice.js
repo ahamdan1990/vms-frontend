@@ -239,8 +239,8 @@ const authSlice = createSlice({
           state.isAuthenticated = true;
           state.user = user;
           state.permissions = permissions || [];
-          state.passwordChangeRequired = loginResponse.requiresPasswordChange || false;
-          state.twoFactorRequired = loginResponse.requiresTwoFactor || false;
+          state.passwordChangeRequired = loginResponse.requiresPasswordChange?? false;
+          state.twoFactorRequired = loginResponse.requiresTwoFactor?? false;
           state.error = null;
           
           // Clear any remaining lockout time on successful login
@@ -255,7 +255,7 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.[0] || 'Login failed';
+        state.error = action.payload?.message || 'Login failed';
         state.isAuthenticated = false;
         state.user = null;
         state.permissions = [];
@@ -304,7 +304,7 @@ const authSlice = createSlice({
       })
       .addCase(getCurrentUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.[0] || 'Failed to get user info';
+        state.error = action.payload?.message || 'Failed to get user info';
         state.isAuthenticated = false;
         state.user = null;
         state.permissions = [];
@@ -323,7 +323,7 @@ const authSlice = createSlice({
       })
       .addCase(changePassword.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.[0] || 'Password change failed';
+        state.error = action.payload?.message || 'Password change failed';
       });
 
     // Forgot password
@@ -338,7 +338,7 @@ const authSlice = createSlice({
       })
       .addCase(forgotPassword.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.[0] || 'Password reset request failed';
+        state.error = action.payload?.message || 'Password reset request failed';
       });
 
     // Reset password
@@ -385,7 +385,7 @@ const authSlice = createSlice({
         state.sessions = action.payload || [];
       })
       .addCase(getUserSessions.rejected, (state, action) => {
-        state.error = action.payload?.[0] || 'Failed to get user sessions';
+        state.error = action.payload?.message || 'Failed to get user sessions';
       });
 
     // Terminate session
@@ -396,7 +396,7 @@ const authSlice = createSlice({
         );
       })
       .addCase(terminateSession.rejected, (state, action) => {
-        state.error = action.payload?.[0] || 'Failed to terminate session';
+        state.error = action.payload?.message || 'Failed to terminate session';
       });
   }
 });

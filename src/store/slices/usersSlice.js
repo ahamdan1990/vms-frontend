@@ -90,7 +90,7 @@ export const getUsers = createAsyncThunk(
       };
       
       const response = await userService.getUsers(queryParams);
-      console.log(response)
+
       return { response, queryParams };
     } catch (error) {
       return rejectWithValue(handleApiError(error));
@@ -218,12 +218,13 @@ export const unlockUser = createAsyncThunk(
  */
 export const adminResetPassword = createAsyncThunk(
   'users/adminResetPassword',
-  async ({ id, newPassword, mustChangePassword, notifyUser }, { rejectWithValue }) => {
+  async ({ id, newPassword, mustChangePassword, notifyUser,reason }, { rejectWithValue }) => {
     try {
       const response = await userService.adminResetPassword(id, {
         newPassword,
         mustChangePassword,
-        notifyUser
+        notifyUser,
+        reason
       });
       return { id, result: response };
     } catch (error) {
@@ -414,7 +415,7 @@ const usersSlice = createSlice({
       })
       .addCase(getUsers.rejected, (state, action) => {
         state.listLoading = false;
-        state.listError = action.payload?.[0] || 'Failed to load users';
+        state.listError = action.payload?.message || 'Failed to load users';
       });
 
     // Get user by ID
@@ -429,7 +430,7 @@ const usersSlice = createSlice({
       })
       .addCase(getUserById.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.[0] || 'Failed to load user';
+        state.error = action.payload?.message || 'Failed to load user';
       });
 
     // Create user
@@ -531,7 +532,7 @@ const usersSlice = createSlice({
       })
       .addCase(deleteUser.rejected, (state, action) => {
         state.deleteLoading = false;
-        state.deleteError = action.payload?.[0] || 'Failed to delete user';
+        state.deleteError = action.payload?.message || 'Failed to delete user';
       });
 
     // Activate user
@@ -600,7 +601,7 @@ const usersSlice = createSlice({
       })
       .addCase(getUserActivity.rejected, (state, action) => {
         state.userActivity.loading = false;
-        state.userActivity.error = action.payload?.[0] || 'Failed to load user activity';
+        state.userActivity.error = action.payload?.message || 'Failed to load user activity';
       });
 
     // Get user stats

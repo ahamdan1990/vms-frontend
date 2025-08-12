@@ -158,11 +158,12 @@ const ConfigurationPage = () => {
       toast.success('Configuration updated successfully');
       setShowEditModal(false);
       setEditingConfig(null);
+      dispatch(fetchAllConfigurations());
     } catch (error) {
       toast.error('Failed to update configuration');
     }
   };
-  console.log(configurations);
+
   if (!canRead && !canReadAll) {
     return (
       <div className="max-w-4xl mx-auto p-6">
@@ -414,7 +415,7 @@ const ConfigurationItem = ({
     
     switch (dataType) {
       case 'Boolean':
-        return value === 'true' ? 'Yes' : 'No';
+        return value === true ? 'Yes' : 'No';
       case 'DateTime':
         return new Date(value).toLocaleString();
       case 'JSON':
@@ -575,8 +576,8 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
             onChange={(e) => handleValueChange(e.target.value)}
             error={formErrors.value}
             options={[
-              { value: 'true', label: 'True' },
-              { value: 'false', label: 'False' }
+              { value: true, label: 'True' },
+              { value: false, label: 'False' }
             ]}
             required
           />

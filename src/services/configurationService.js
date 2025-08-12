@@ -25,7 +25,6 @@ const configurationService = {
    */
   async getAllConfigurations() {
     const response = await apiClient.get(CONFIG_ENDPOINTS.BASE);
-    console.log(response);
     return extractApiData(response);
   },
 

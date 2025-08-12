@@ -88,7 +88,7 @@ export const usePermissions = () => {
     canDelete: hasAnyPermission([USER_PERMISSIONS.DELETE, USER_PERMISSIONS.DELETE_ALL]),
     canActivate: hasPermission(USER_PERMISSIONS.ACTIVATE),
     canDeactivate: hasPermission(USER_PERMISSIONS.DEACTIVATE),
-    canUnlock: hasPermission(USER_PERMISSIONS.UNLOCK),
+    canUnlock: hasPermission(USER_PERMISSIONS.ACTIVATE),
     canResetPassword: hasPermission(USER_PERMISSIONS.RESET_PASSWORD),
     canViewActivity: hasPermission(USER_PERMISSIONS.VIEW_ACTIVITY),
     canManageRoles: hasPermission(USER_PERMISSIONS.MANAGE_ROLES),

@@ -1,8 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { useDispatch } from 'react-redux';
-import { setPageLoading } from '../store/slices/uiSlice';
 import PropTypes from 'prop-types';
 
 /**
@@ -18,13 +16,6 @@ const GuestGuard = ({
   const { isAuthenticated, loading, userRole } = useAuth();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const dispatch = useDispatch();
-
-  // Manage global loading state
-  useEffect(() => {
-    dispatch(setPageLoading(loading));
-    return () => dispatch(setPageLoading(false));
-  }, [loading, dispatch]);
 
   // Show loading state while checking authentication
   if (loading) {
@@ -69,6 +60,7 @@ const GuestGuard = ({
       destination = getRoleBasedRedirect(userRole);
     }
 
+    console.log('🔄 Authenticated user on guest page, redirecting to:', destination);
     return <Navigate to={destination} replace />;
   }
 

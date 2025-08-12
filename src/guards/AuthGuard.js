@@ -2,8 +2,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { useDispatch } from 'react-redux';
-import { setPageLoading } from '../store/slices/uiSlice';
 import PropTypes from 'prop-types';
 
 /**
@@ -13,25 +11,8 @@ import PropTypes from 'prop-types';
 const AuthGuard = ({ children, fallback = null, redirectTo = '/login' }) => {
   const { isAuthenticated, loading, needsPasswordChange, needsTwoFactor } = useAuth();
   const location = useLocation();
-  const dispatch = useDispatch();
   const mountedRef = useRef(true);
   const redirectRef = useRef(false);
-
-  // ✅ PRODUCTION FIX: Debounced loading state management
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (mountedRef.current) {
-        dispatch(setPageLoading(loading));
-      }
-    }, 50); // Small delay to prevent rapid state changes
-
-    return () => {
-      clearTimeout(timer);
-      if (mountedRef.current) {
-        dispatch(setPageLoading(false));
-      }
-    };
-  }, [loading, dispatch]);
 
   // ✅ PRODUCTION FIX: Cleanup on unmount
   useEffect(() => {
@@ -56,35 +37,48 @@ const AuthGuard = ({ children, fallback = null, redirectTo = '/login' }) => {
     return fallback || <LoadingComponent />;
   }
 
-  // ✅ PRODUCTION FIX: Handle authentication redirect with cleanup
+  // ✅ PRODUCTION FIX: Handle authentication redirect with single redirect prevention
   if (!isAuthenticated) {
+    const currentPath = location.pathname;
+    const isAlreadyOnLogin = currentPath === '/login';
+    
+    // Don't redirect if already on login page
+    if (isAlreadyOnLogin) {
+      return fallback || <LoadingComponent />;
+    }
+    
+    // Prevent multiple simultaneous redirects
     if (!redirectRef.current) {
       redirectRef.current = true;
       
-      // Clean up any query parameters from previous failed redirects
-      const currentPath = location.pathname;
-      const isAlreadyOnLogin = currentPath === '/login';
+      // Clean redirect path
+      const from = currentPath === '/' ? '/dashboard' : currentPath;
+      const cleanFrom = from.split('?')[0]; // Remove any existing query params
+      const loginPath = `${redirectTo}?from=${encodeURIComponent(cleanFrom)}`;
       
-      if (!isAlreadyOnLogin) {
-        // Preserve the intended destination, but clean up the URL
-        const from = currentPath === '/' ? '/dashboard' : currentPath;
-        const cleanFrom = from.split('?')[0]; // Remove any existing query params
-        const loginPath = `${redirectTo}?from=${encodeURIComponent(cleanFrom)}`;
-        
-        console.log('🚪 Not authenticated, redirecting to:', loginPath);
-        return <Navigate to={loginPath} replace />;
-      }
+      console.log('🚪 Not authenticated, redirecting to:', loginPath);
       
-      // Already on login page, don't redirect
-      return <Navigate to="/login" replace />;
+      // Reset redirect flag after navigation
+      setTimeout(() => {
+        redirectRef.current = false;
+      }, 100);
+      
+      return <Navigate to={loginPath} replace />;
     }
+    
+    // Redirect already in progress, show loading
+    return fallback || <LoadingComponent />;
   }
 
   // ✅ PRODUCTION FIX: Handle special authentication states
   if (needsPasswordChange) {
-    return <Navigate to="/change-password" replace />;
+    // Only redirect if not already on change password page
+    if (location.pathname !== '/change-password') {
+      return <Navigate to="/change-password" replace />;
+    }
+    // If already on change password page, allow access
   }
-
+  
   if (needsTwoFactor) {
     return <Navigate to="/two-factor" replace />;
   }
@@ -95,6 +89,7 @@ const AuthGuard = ({ children, fallback = null, redirectTo = '/login' }) => {
   }
 
   // User is authenticated, render children
+  console.log('✅ AuthGuard allowing access - user is authenticated');
   return children;
 };
 

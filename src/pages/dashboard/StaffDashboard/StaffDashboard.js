@@ -12,12 +12,15 @@ import Button from '../../../components/common/Button/Button';
  * Beautiful Staff Dashboard with role-specific widgets and quick actions
  */
 const StaffDashboard = () => {
+  console.log('🏠 StaffDashboard component rendering...');
+  
   const dispatch = useDispatch();
   const { user, userName } = useAuth();
   const { invitation, profile, calendar } = usePermissions();
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
+    console.log('🏠 StaffDashboard useEffect running, setting page title');
     dispatch(setPageTitle('Staff Dashboard'));
     
     // Update time every minute

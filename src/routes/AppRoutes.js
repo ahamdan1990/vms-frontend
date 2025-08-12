@@ -29,12 +29,14 @@ const LoadingFallback = () => (
 const LoginPage = lazy(() => import('../pages/auth/LoginPage/LoginPage'));
 const ForgotPasswordPage = lazy(() => import('../pages/auth/ForgotPasswordPage/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('../pages/auth/ResetPasswordPage/ResetPasswordPage'));
+const ChangePasswordPage = lazy(() => import('../pages/auth/ChangePasswordPage/ChangePasswordPage'));
 
 // Dashboard pages
 const DashboardPage = lazy(() => import('../pages/dashboard/DashboardPage/DashboardPage'));
 const StaffDashboard = lazy(() => import('../pages/dashboard/StaffDashboard/StaffDashboard'));
 const OperatorDashboard = lazy(() => import('../pages/dashboard/OperatorDashboard/OperatorDashboard'));
 const AdminDashboard = lazy(() => import('../pages/dashboard/AdminDashboard/AdminDashboard'));
+
 
 // User management pages
 const UsersListPage = lazy(() => import('../pages/users/UsersListPage/UsersListPage'));
@@ -55,6 +57,7 @@ const ServerErrorPage = lazy(() => import('../pages/errors/ServerErrorPage'));
 /**
  * Role-based dashboard routing component
  */
+
 const DashboardRouter = () => {
   const { userRole, loading } = useAuth();
 
@@ -73,6 +76,7 @@ const DashboardRouter = () => {
       return <DashboardPage />;
   }
 };
+
 
 /**
  * Main application routes component
@@ -111,6 +115,16 @@ const AppRoutes = () => {
           </Suspense>
         </GuestGuard>
       } />
+
+    <Route path="/change-password" element={
+      <AuthGuard>
+        <Layout>
+          <Suspense fallback={<LoadingFallback />}>
+            <ChangePasswordPage />
+          </Suspense>
+        </Layout>
+      </AuthGuard>
+    } />
 
       {/* Protected Routes - wrapped with AuthGuard and Layout */}
       <Route path="/dashboard" element={
@@ -263,18 +277,16 @@ const AppRoutes = () => {
         </Suspense>
       } />
 
-      {/* Root redirect */}
+      {/* Root redirect - let AuthGuard handle authentication logic */}
       <Route path="/" element={
-        isAuthenticated 
-          ? <Navigate to="/dashboard" replace />
-          : <Navigate to="/login" replace />
+        <AuthGuard fallback={<LoadingFallback />}>
+          <Navigate to="/dashboard" replace />
+        </AuthGuard>
       } />
 
-      {/* Catch all - redirect based on auth status */}
+      {/* Catch all - redirect to not found for unknown routes */}
       <Route path="*" element={
-        isAuthenticated 
-          ? <Navigate to="/dashboard" replace />
-          : <Navigate to="/login" replace />
+        <Navigate to="/not-found" replace />
       } />
     </Routes>
   );

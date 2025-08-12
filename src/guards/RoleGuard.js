@@ -65,6 +65,15 @@ const RoleGuard = ({
 
   // Handle access denial
   if (!hasAccess) {
+    console.log('🚫 RoleGuard DENIED access:', {
+      userRole,
+      userRoleLevel,
+      requiredRole: role,
+      requiredRoles: roles,
+      allowHigher,
+      hasAccess
+    });
+    
     if (redirect) {
       return <Navigate to={redirectTo} replace />;
     }
@@ -98,6 +107,7 @@ const RoleGuard = ({
     );
   }
 
+  console.log('✅ RoleGuard allowing access - rendering children');
   return children;
 };
 

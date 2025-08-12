@@ -82,7 +82,8 @@ const UserDetailPage = () => {
   const [passwordResetData, setPasswordResetData] = useState({
     newPassword: '',
     mustChangePassword: true,
-    notifyUser: true
+    notifyUser: true,
+    reason:''
   });
   const [actionReason, setActionReason] = useState('');
 
@@ -121,6 +122,17 @@ const UserDetailPage = () => {
     }
   }, [activeTab, currentUser, canViewUserActivity, activityPage, dispatch]);
 
+  useEffect(() => {
+  if (!showPasswordResetModal) {
+    // Reset form when modal closes
+    setPasswordResetData({
+      newPassword: '',
+      mustChangePassword: true,
+      notifyUser: true,
+      reason: ''
+    });
+  }
+}, [showPasswordResetModal]);
   // Handle user actions
   const handleSave = async (userData) => {
     try {
@@ -203,7 +215,8 @@ const UserDetailPage = () => {
       setPasswordResetData({
         newPassword: '',
         mustChangePassword: true,
-        notifyUser: true
+        notifyUser: true,
+        reason:''
       });
     } catch (error) {
       dispatch(showErrorToast('Error', 'Failed to reset password'));
@@ -847,59 +860,67 @@ const UserDetailPage = () => {
         </div>
       </Modal>
 
-      {/* Password Reset Modal */}
-      <Modal
-        isOpen={showPasswordResetModal}
-        onClose={() => setShowPasswordResetModal(false)}
-        title="Reset Password"
-        size="md"
-      >
-        <div className="space-y-4">
-          <p className="text-gray-600">
-            Reset the user's password. They will be required to change it on their next login.
-          </p>
-          
-          <Input
-            type="password"
-            label="New Password (Optional)"
-            placeholder="Leave empty to generate a temporary password"
-            value={passwordResetData.newPassword}
-            onChange={(e) => setPasswordResetData(prev => ({ ...prev, newPassword: e.target.value }))}
-            helperText="If left empty, a secure temporary password will be generated"
+  {/* Password Reset Modal */}
+  <Modal
+    isOpen={showPasswordResetModal}
+    onClose={() => setShowPasswordResetModal(false)}
+    title="Reset Password"
+    size="md"
+  >
+    <div className="space-y-4">
+      <p className="text-gray-600">
+        Reset the user's password. They will be required to change it on their next login.
+      </p>
+      
+      <Input
+        type="password"
+        label="New Password (Optional)"
+        placeholder="Leave empty to generate a temporary password"
+        value={passwordResetData.newPassword}
+        onChange={(e) => setPasswordResetData(prev => ({ ...prev, newPassword: e.target.value }))}
+        helperText="If left empty, a secure temporary password will be generated"
+      />
+      
+      <Input
+        label="Reason (Optional)"
+        placeholder="Enter reason for password reset"
+        value={passwordResetData.reason}
+        onChange={(e) => setPasswordResetData(prev => ({ ...prev, reason: e.target.value }))}
+        helperText="Provide a reason for this password reset action"
+      />
+      
+      <div className="space-y-3">
+        <label className="flex items-center space-x-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={passwordResetData.mustChangePassword}
+            onChange={(e) => setPasswordResetData(prev => ({ ...prev, mustChangePassword: e.target.checked }))}
+            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
-          
-          <div className="space-y-3">
-            <label className="flex items-center space-x-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={passwordResetData.mustChangePassword}
-                onChange={(e) => setPasswordResetData(prev => ({ ...prev, mustChangePassword: e.target.checked }))}
-                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-700">Require password change on next login</span>
-            </label>
-            
-            <label className="flex items-center space-x-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={passwordResetData.notifyUser}
-                onChange={(e) => setPasswordResetData(prev => ({ ...prev, notifyUser: e.target.checked }))}
-                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-700">Send email notification to user</span>
-            </label>
-          </div>
-          
-          <div className="flex justify-end space-x-3 pt-4">
-            <Button variant="secondary" onClick={() => setShowPasswordResetModal(false)}>
-              Cancel
-            </Button>
-            <Button variant="danger" onClick={handlePasswordReset}>
-              Reset Password
-            </Button>
-          </div>
-        </div>
-      </Modal>
+          <span className="text-sm text-gray-700">Require password change on next login</span>
+        </label>
+        
+        <label className="flex items-center space-x-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={passwordResetData.notifyUser}
+            onChange={(e) => setPasswordResetData(prev => ({ ...prev, notifyUser: e.target.checked }))}
+            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <span className="text-sm text-gray-700">Send email notification to user</span>
+        </label>
+      </div>
+      
+      <div className="flex justify-end space-x-3 pt-4">
+        <Button variant="secondary" onClick={() => setShowPasswordResetModal(false)}>
+          Cancel
+        </Button>
+        <Button variant="danger" onClick={handlePasswordReset}>
+          Reset Password
+        </Button>
+      </div>
+    </div>
+  </Modal>
     </div>
   );
 };

@@ -196,8 +196,16 @@ export const debugMiddleware = (store) => (next) => (action) => {
 
   // ✅ PRODUCTION FIX: Detect rapid actions with higher threshold
   const now = Date.now();
-  if (debugMiddleware.lastActionTime && (now - debugMiddleware.lastActionTime) < 5) {
-    console.warn('⚠️  Rapid successive actions detected:', action.type);
+  if (debugMiddleware.lastActionTime && (now - debugMiddleware.lastActionTime) < 10) {
+    // Only warn for truly problematic rapid actions
+    const problematicActions = ['auth/', 'users/'];
+    if (problematicActions.some(prefix => action.type.includes(prefix))) {
+      console.warn('⚠️  Rapid successive actions detected:', action.type, 
+        debugMiddleware.actionCount || 1);
+      debugMiddleware.actionCount = (debugMiddleware.actionCount || 1) + 1;
+    }
+  } else {
+    debugMiddleware.actionCount = 1;
   }
   debugMiddleware.lastActionTime = now;
 
@@ -236,14 +244,14 @@ export const validationMiddleware = (store) => (next) => (action) => {
 export const rateLimitMiddleware = (store) => {
   const actionTimestamps = new Map();
   const RATE_LIMITS = {
-    default: 500,           // Reduced from 1000ms
-    'auth/loginUser': 3000, // Reduced from 5000ms
-    'users/createUser': 1000,
-    'users/updateUser': 500,
+    default: 200,           // Reduced for better responsiveness
+    'auth/loginUser': 2000, // Reduced from 3000ms
+    'users/createUser': 500,
+    'users/updateUser': 300,
   };
 
   return (next) => (action) => {
-    // Only apply to API actions
+    // Only apply to API actions (exclude UI actions completely)
     if (!action.type.includes('pending')) {
       return next(action);
     }
@@ -255,7 +263,7 @@ export const rateLimitMiddleware = (store) => {
 
     if (lastCall && (now - lastCall) < rateLimit) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`⚠️  Rate limited action: ${actionKey}`);
+        console.warn(`⚠️  Rate limited action: ${actionKey}`, (now - lastCall) + 'ms ago');
       }
       
       return Promise.resolve({ 
@@ -268,9 +276,9 @@ export const rateLimitMiddleware = (store) => {
     actionTimestamps.set(actionKey, now);
     
     // ✅ PRODUCTION FIX: Cleanup old timestamps more aggressively
-    const fiveMinutesAgo = now - (5 * 60 * 1000);
+    const twoMinutesAgo = now - (2 * 60 * 1000); // Reduced from 5 minutes
     for (const [key, timestamp] of actionTimestamps.entries()) {
-      if (timestamp < fiveMinutesAgo) {
+      if (timestamp < twoMinutesAgo) {
         actionTimestamps.delete(key);
       }
     }

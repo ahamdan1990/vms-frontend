@@ -1,6 +1,6 @@
 // src/hooks/useAuth.js - PRODUCTION FIXED VERSION
 import { useSelector, useDispatch } from 'react-redux';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useMemo } from 'react';
 import {
   loginUser,
   logoutUser,
@@ -127,6 +127,7 @@ export const useAuth = () => {
     dispatch(logout());
   }, [dispatch]);
 
+  // ✅ PRODUCTION FIX: Stable checkAuth function
   const checkAuth = useCallback(async () => {
     try {
       const result = await dispatch(getCurrentUser());
@@ -145,18 +146,21 @@ export const useAuth = () => {
     }
   }, [dispatch, logoutImmediate]);
 
-  // ✅ PRODUCTION FIX: Single global initialization with proper cleanup
+  // ✅ PRODUCTION FIX: Single initialization with proper dependency management
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        // ✅ Check if already initialized globally
-        if (isInitialized) {
+        // Check if already initialized globally
+        if (isInitialized || initRef.current) {
           return;
         }
 
-        // ✅ Check for stored auth state
+        initRef.current = true;
+
+        // Check for stored auth state
         const storedData = localStorage.getItem('vms_app_state');
         if (!storedData) {
+          isInitialized = true;
           return;
         }
 
@@ -171,27 +175,27 @@ export const useAuth = () => {
       }
     };
 
-    // ✅ Only initialize once per component mount and if not authenticated
-    if (!isAuthenticated && !loading && !initRef.current) {
-      initRef.current = true;
-      
+    // Only initialize if not authenticated and not loading
+    if (!isAuthenticated && !loading && !isInitialized) {
       if (!globalInitializationPromise) {
         globalInitializationPromise = initializeAuth().finally(() => {
           globalInitializationPromise = null;
         });
       }
     }
-  }, [isAuthenticated, loading, checkAuth]);
+  }, []); // Empty dependency array - only run once per component mount
 
-  // ✅ PRODUCTION FIX: Debounced token refresh
+  // ✅ PRODUCTION FIX: Separate effect for token refresh with proper timing
   useEffect(() => {
     let refreshTimeout;
 
     if (isAuthenticated && !loading) {
       // Delay token refresh start to avoid race conditions
       refreshTimeout = setTimeout(() => {
-        startTokenRefresh();
-      }, 100);
+        if (isAuthenticated) { // Double-check auth state
+          startTokenRefresh();
+        }
+      }, 500); // Longer delay to ensure auth state is stable
     } else {
       stopTokenRefresh();
     }
@@ -200,9 +204,9 @@ export const useAuth = () => {
       if (refreshTimeout) {
         clearTimeout(refreshTimeout);
       }
-      stopTokenRefresh();
+      stopTokenRefresh(); // Always stop on cleanup
     };
-  }, [isAuthenticated, loading]);
+  }, [isAuthenticated, loading]); // Proper dependencies
 
   // Other authentication methods remain the same...
   const updatePassword = useCallback(async (passwordData) => {

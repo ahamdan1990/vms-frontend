@@ -15,6 +15,8 @@ import classNames from 'classnames';
  * FIXED Main Layout Component with proper sidebar handling
  */
 const Layout = ({ children, title, showFooter = true, className = '' }) => {
+  console.log('📐 Layout component rendering...');
+  
   const dispatch = useDispatch();
   const location = useLocation();
   

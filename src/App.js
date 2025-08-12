@@ -8,7 +8,7 @@ import { useTheme } from './hooks/useTheme'; // ✅ Import useTheme
 import AppRoutes from './routes/AppRoutes';
 import { useAuth } from './hooks/useAuth';
 import { useDispatch } from 'react-redux';
-import { initializeUI } from './store/slices/uiSlice';
+import { initializeUI, setPageLoading } from './store/slices/uiSlice';
 import { initializeNotifications } from './store/slices/notificationSlice';
 import Notification from './components/common/Notification/Notification';
 
@@ -17,7 +17,7 @@ import Notification from './components/common/Notification/Notification';
  */
 const AppInitializer = ({ children }) => {
   const dispatch = useDispatch();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const theme = useTheme(); 
   const initialized = useRef(false);
 
@@ -38,6 +38,14 @@ const AppInitializer = ({ children }) => {
       }, 100);
     }
   }, [dispatch]);
+
+  // ✅ CENTRALIZED LOADING MANAGEMENT: Single source of truth for page loading
+  useEffect(() => {
+    dispatch(setPageLoading(loading));
+    return () => {
+      dispatch(setPageLoading(false));
+    };
+  }, [loading, dispatch]);
 
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {

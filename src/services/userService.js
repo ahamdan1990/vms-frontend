@@ -160,7 +160,7 @@ const userService = {
 
     const queryString = buildQueryString(queryParams);
     const response = await apiClient.get(`${USER_ENDPOINTS.ACTIVITY(id)}${queryString}`);
-    
+    console.log(response);
     return extractApiData(response);
   },
 
@@ -172,8 +172,9 @@ const userService = {
   async adminResetPassword(id, resetData) {
     const response = await apiClient.post(USER_ENDPOINTS.RESET_PASSWORD(id), {
       newPassword: resetData.newPassword || null,
-      mustChangePassword: resetData.mustChangePassword || true,
-      notifyUser: resetData.notifyUser || true
+      mustChangePassword: resetData.mustChangePassword ?? true,
+      notifyUser: resetData.notifyUser ?? true,
+      reason: resetData.reason
     });
     
     return extractApiData(response);
