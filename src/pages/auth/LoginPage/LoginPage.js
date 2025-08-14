@@ -99,7 +99,7 @@ const LoginPage = () => {
             <div className="text-center text-sm text-gray-600">
               <p className="mb-2">Having trouble accessing your account?</p>
               <Link
-                to="/forgot-password"
+                to="/reset-password"
                 className="text-blue-600 hover:text-blue-500 font-medium transition-colors"
               >
                 Reset your password

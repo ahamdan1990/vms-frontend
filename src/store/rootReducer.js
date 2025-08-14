@@ -5,6 +5,11 @@ import uiReducer from './slices/uiSlice';
 import notificationReducer from './slices/notificationSlice';
 import configurationReducer from './slices/configurationSlice';
 import auditReducer from './slices/auditSlice';
+import visitPurposesReducer from './slices/visitPurposesSlice';
+import locationsReducer from './slices/locationsSlice';
+import visitorsReducer from './slices/visitorsSlice';
+import emergencyContactsReducer from './slices/emergencyContactsSlice';
+import invitationsReducer from './slices/invitationsSlice';
 
 /**
  * Root reducer that combines all feature slices
@@ -17,6 +22,11 @@ const rootReducer = combineReducers({
   notifications: notificationReducer,
   configuration: configurationReducer,
   audit: auditReducer,
+  visitPurposes: visitPurposesReducer,
+  locations: locationsReducer,
+  visitors: visitorsReducer,
+  emergencyContacts: emergencyContactsReducer,
+  invitations: invitationsReducer,
 });
 
 /**
@@ -81,6 +91,227 @@ export const getInitialState = () => ({
     showEditModal: false,
     showDeleteModal: false,
     showActivityModal: false
+  },
+  visitPurposes: {
+    list: [],
+    total: 0,
+    currentVisitPurpose: null,
+    loading: false,
+    listLoading: false,
+    createLoading: false,
+    updateLoading: false,
+    deleteLoading: false,
+    error: null,
+    listError: null,
+    createError: null,
+    updateError: null,
+    deleteError: null,
+    filters: {
+      requiresApproval: null,
+      includeInactive: false,
+      searchTerm: ''
+    },
+    selectedVisitPurposes: [],
+    showCreateModal: false,
+    showEditModal: false,
+    showDeleteModal: false,
+    activePurposes: [],
+    activePurposesLoading: false,
+    activePurposesError: null,
+    activePurposesLastFetch: null,
+    lastUpdated: null
+  },
+  locations: {
+    list: [],
+    total: 0,
+    tree: [],
+    currentLocation: null,
+    loading: false,
+    listLoading: false,
+    treeLoading: false,
+    createLoading: false,
+    updateLoading: false,
+    deleteLoading: false,
+    error: null,
+    listError: null,
+    treeError: null,
+    createError: null,
+    updateError: null,
+    deleteError: null,
+    filters: {
+      locationType: '',
+      rootOnly: false,
+      includeChildren: true,
+      includeInactive: false,
+      searchTerm: ''
+    },
+    selectedLocations: [],
+    showCreateModal: false,
+    showEditModal: false,
+    showDeleteModal: false,
+    activeLocations: [],
+    activeLocationsLoading: false,
+    activeLocationsError: null,
+    activeLocationsLastFetch: null,
+    rootLocations: [],
+    rootLocationsLoading: false,
+    rootLocationsError: null,
+    rootLocationsLastFetch: null,
+    lastUpdated: null
+  },
+  visitors: {
+    list: [],
+    total: 0,
+    pageIndex: 0,
+    pageSize: 20,
+    currentVisitor: null,
+    loading: false,
+    listLoading: false,
+    createLoading: false,
+    updateLoading: false,
+    deleteLoading: false,
+    searchLoading: false,
+    statusChangeLoading: false,
+    error: null,
+    listError: null,
+    createError: null,
+    updateError: null,
+    deleteError: null,
+    searchError: null,
+    statusChangeError: null,
+    filters: {
+      searchTerm: '',
+      company: '',
+      isVip: null,
+      isBlacklisted: null,
+      isActive: true,
+      nationality: '',
+      securityClearance: '',
+      sortBy: 'FullName',
+      sortDirection: 'asc',
+      includeDeleted: false
+    },
+    advancedSearch: {
+      isActive: false,
+      results: [],
+      loading: false,
+      error: null,
+      lastSearchParams: null
+    },
+    selectedVisitors: [],
+    showCreateModal: false,
+    showEditModal: false,
+    showDeleteModal: false,
+    showDetailsModal: false,
+    showBlacklistModal: false,
+    showAdvancedSearchModal: false,
+    vipVisitors: [],
+    vipVisitorsLoading: false,
+    vipVisitorsError: null,
+    vipVisitorsLastFetch: null,
+    blacklistedVisitors: [],
+    blacklistedVisitorsLoading: false,
+    blacklistedVisitorsError: null,
+    blacklistedVisitorsLastFetch: null,
+    statistics: null,
+    statisticsLoading: false,
+    statisticsError: null,
+    statisticsLastFetch: null,
+    quickSearchResults: [],
+    quickSearchLoading: false,
+    quickSearchTerm: '',
+    lastUpdated: null
+  },
+  emergencyContacts: {
+    list: [],
+    total: 0,
+    currentVisitorId: null,
+    currentContact: null,
+    loading: false,
+    listLoading: false,
+    createLoading: false,
+    updateLoading: false,
+    deleteLoading: false,
+    error: null,
+    listError: null,
+    createError: null,
+    updateError: null,
+    deleteError: null,
+    showCreateModal: false,
+    showEditModal: false,
+    showDeleteModal: false,
+    selectedContacts: [],
+    lastUpdated: null
+  },
+  invitations: {
+    list: [],
+    total: 0,
+    pageIndex: 0,
+    pageSize: 20,
+    currentInvitation: null,
+    loading: false,
+    listLoading: false,
+    createLoading: false,
+    updateLoading: false,
+    deleteLoading: false,
+    approvalLoading: false,
+    qrLoading: false,
+    checkInLoading: false,
+    error: null,
+    listError: null,
+    createError: null,
+    updateError: null,
+    deleteError: null,
+    approvalError: null,
+    qrError: null,
+    checkInError: null,
+    filters: {
+      searchTerm: '',
+      status: null,
+      type: null,
+      hostId: null,
+      visitorId: null,
+      visitPurposeId: null,
+      locationId: null,
+      startDate: '',
+      endDate: '',
+      includeDeleted: false,
+      pendingApprovalsOnly: false,
+      activeOnly: false,
+      expiredOnly: false,
+      sortBy: 'ScheduledStartTime',
+      sortDirection: 'desc'
+    },
+    showCreateModal: false,
+    showEditModal: false,
+    showDeleteModal: false,
+    showDetailsModal: false,
+    showApprovalModal: false,
+    showQrModal: false,
+    selectedInvitations: [],
+    pendingApprovals: [],
+    pendingApprovalsLoading: false,
+    pendingApprovalsError: null,
+    pendingApprovalsLastFetch: null,
+    activeInvitations: [],
+    activeInvitationsLoading: false,
+    activeInvitationsError: null,
+    activeInvitationsLastFetch: null,
+    upcomingInvitations: [],
+    upcomingInvitationsLoading: false,
+    upcomingInvitationsError: null,
+    upcomingInvitationsLastFetch: null,
+    templates: [],
+    templatesLoading: false,
+    templatesError: null,
+    templatesLastFetch: null,
+    qrCodeData: null,
+    checkInData: null,
+    statistics: null,
+    statisticsLoading: false,
+    statisticsError: null,
+    statisticsLastFetch: null,
+    lastUpdated: null
   },
   configuration: {
     configurations: {},
@@ -332,6 +563,70 @@ export const hydrateState = (persistedState) => {
       loading: false,
       error: null
     },
+    visitPurposes: {
+      ...initialState.visitPurposes,
+      // Don't persist visit purpose data (always fresh from server)
+      list: [],
+      currentVisitPurpose: null,
+      activePurposes: [],
+      activePurposesLastFetch: null,
+      loading: false,
+      error: null
+    },
+    locations: {
+      ...initialState.locations,
+      // Don't persist location data (always fresh from server)
+      list: [],
+      tree: [],
+      currentLocation: null,
+      activeLocations: [],
+      activeLocationsLastFetch: null,
+      rootLocations: [],
+      rootLocationsLastFetch: null,
+      loading: false,
+      error: null
+    },
+    visitors: {
+      ...initialState.visitors,
+      // Don't persist visitor data (always fresh from server)
+      list: [],
+      currentVisitor: null,
+      vipVisitors: [],
+      vipVisitorsLastFetch: null,
+      blacklistedVisitors: [],
+      blacklistedVisitorsLastFetch: null,
+      statistics: null,
+      statisticsLastFetch: null,
+      quickSearchResults: [],
+      loading: false,
+      error: null
+    },
+    emergencyContacts: {
+      ...initialState.emergencyContacts,
+      // Don't persist emergency contact data (always fresh from server)
+      list: [],
+      currentContact: null,
+      currentVisitorId: null,
+      selectedContacts: [],
+      loading: false,
+      error: null
+    },
+    invitations: {
+      ...initialState.invitations,
+      // Don't persist invitation data (always fresh from server)
+      list: [],
+      currentInvitation: null,
+      selectedInvitations: [],
+      pendingApprovals: [],
+      activeInvitations: [],
+      upcomingInvitations: [],
+      templates: [],
+      qrCodeData: null,
+      checkInData: null,
+      statistics: null,
+      loading: false,
+      error: null
+    },
     configuration: {
       ...initialState.configuration,
       // Don't persist config data (always fresh from server)
@@ -369,7 +664,7 @@ export const hydrateState = (persistedState) => {
  * Validates restored state structure
  */
 export const validateState = (state) => {
-  const requiredSlices = ['auth', 'users', 'ui', 'notifications', 'configuration', 'audit'];
+  const requiredSlices = ['auth', 'users', 'ui', 'notifications', 'configuration', 'audit', 'visitPurposes', 'locations', 'visitors', 'emergencyContacts', 'invitations'];
   
   if (!state || typeof state !== 'object') {
     return false;

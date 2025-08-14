@@ -4,10 +4,18 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setPageTitle } from '../../../store/slices/uiSlice';
 import Button from '../../../components/common/Button/Button';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
+
+// Import stats selectors
+import { selectUsersStatsSummary } from '../../../store/selectors/userSelectors';
+import { selectVisitorStatistics } from '../../../store/selectors/visitorSelectors';
+
+// Import actions to load stats
+import { getUserStats } from '../../../store/slices/usersSlice';
+import { getVisitorStatistics } from '../../../store/slices/visitorsSlice';
 
 /**
  * Beautiful Admin Dashboard with comprehensive system overview and management tools
@@ -24,17 +32,30 @@ const AdminDashboard = () => {
     customField 
   } = usePermissions();
   
+  // Get real data from selectors
+  const userStats = useSelector(selectUsersStatsSummary);
+  const visitorStats = useSelector(selectVisitorStatistics);
+  
   const [currentTime, setCurrentTime] = useState(new Date());
   const [systemData, setSystemData] = useState({
-    totalUsers: 248,
-    activeUsers: 195,
-    totalVisitors: 1847,
-    todaysVisitors: 42,
     systemHealth: 98.5,
     securityAlerts: 2,
-    pendingApprovals: 8,
     storageUsed: 65.2
   });
+
+  // Load real data on mount
+  useEffect(() => {
+    dispatch(setPageTitle('Admin Dashboard'));
+    dispatch(getUserStats());
+    dispatch(getVisitorStatistics());
+    
+    // Update time every minute
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+    
+    return () => clearInterval(timer);
+  }, [dispatch]);
 
   const [recentActivity, setRecentActivity] = useState([
     {
@@ -342,20 +363,20 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Total Users"
-            value={systemData.totalUsers}
+            value={userStats?.total || 0}
             icon={
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
               </svg>
             }
             color="bg-blue-500"
-            trend="+12 this month"
-            trendColor="text-green-600"
+            trend={userStats?.totalChange ? `${userStats.totalChange > 0 ? '+' : ''}${userStats.totalChange} this month` : undefined}
+            trendColor={userStats?.totalChange > 0 ? "text-green-600" : "text-red-600"}
           />
           
           <StatCard
             title="Active Users"
-            value={systemData.activeUsers}
+            value={userStats?.active || 0}
             icon={
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -366,15 +387,16 @@ const AdminDashboard = () => {
           />
           
           <StatCard
-            title="Security Alerts"
-            value={systemData.securityAlerts}
+            title="Total Visitors"
+            value={visitorStats?.total || 0}
             icon={
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             }
-            color="bg-red-500"
-            isLive={true}
+            color="bg-indigo-500"
+            trend={visitorStats?.todayCount ? `${visitorStats.todayCount} today` : undefined}
+            trendColor="text-blue-600"
           />
           
           <StatCard
@@ -519,7 +541,7 @@ const AdminDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Pending Approvals</p>
-                <p className="text-2xl font-bold text-orange-600">{systemData.pendingApprovals}</p>
+                <p className="text-2xl font-bold text-orange-600">0</p>
               </div>
               <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
                 <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -55,6 +55,14 @@ export const VISITOR_PERMISSIONS = {
   MANAGE_DOCUMENTS: 'Visitor.ManageDocuments'
 };
 
+// Emergency Contact Permissions
+export const EMERGENCY_CONTACT_PERMISSIONS = {
+  CREATE: 'EmergencyContact.Create',
+  READ: 'EmergencyContact.Read',
+  UPDATE: 'EmergencyContact.Update',
+  DELETE: 'EmergencyContact.Delete'
+};
+
 // Check-in/out Permissions
 export const CHECKIN_PERMISSIONS = {
   PROCESS: 'CheckIn.Process',
@@ -166,8 +174,16 @@ export const SYSTEM_CONFIG_PERMISSIONS = {
   MANAGE: 'SystemConfig.Manage',
   BACKUP: 'SystemConfig.Backup',
   RESTORE: 'SystemConfig.Restore',
-  MAINTAIN: 'SystemConfig.Maintain'
+  MAINTAIN: 'SystemConfig.Maintain',
+  VIEW_ALL: 'SystemConfig.ViewAll',
+  MANAGE_INTEGRATIONS: 'SystemConfig.ManageIntegrations',
+  MANAGE_NOTIFICATIONS: 'SystemConfig.ManageNotifications',
+  MANAGE_SECURITY: 'SystemConfig.ManageSecurity',
+  MANAGE_CAPACITY: 'SystemConfig.ManageCapacity',
+  VIEW_LOGS: 'SystemConfig.ViewLogs',
+  CREATE: 'SystemConfig.Create',
 };
+
 
 // Configuration Management Permissions (matches backend exactly)
 export const CONFIGURATION_PERMISSIONS = {
@@ -249,6 +265,7 @@ export const ALL_PERMISSIONS = {
   ...USER_PERMISSIONS,
   ...INVITATION_PERMISSIONS,
   ...VISITOR_PERMISSIONS,
+  ...EMERGENCY_CONTACT_PERMISSIONS,
   ...CHECKIN_PERMISSIONS,
   ...ALERT_PERMISSIONS,
   ...EMERGENCY_PERMISSIONS,
@@ -280,12 +297,16 @@ export const STAFF_PERMISSIONS = [
   PROFILE_PERMISSIONS.UPDATE_OWN,
   ALERT_PERMISSIONS.NOTIFICATION_READ_OWN,
   REPORT_PERMISSIONS.GENERATE_OWN,
+  EMERGENCY_CONTACT_PERMISSIONS.READ,
+  EMERGENCY_CONTACT_PERMISSIONS.CREATE,
   ROLE_PERMISSIONS.STAFF_ACCESS
 ];
 
 export const OPERATOR_PERMISSIONS = [
   ...STAFF_PERMISSIONS,
   VISITOR_PERMISSIONS.READ_TODAY,
+  EMERGENCY_CONTACT_PERMISSIONS.UPDATE,
+  EMERGENCY_CONTACT_PERMISSIONS.DELETE,
   ALERT_PERMISSIONS.RECEIVE_FR_EVENTS,
   CHECKIN_PERMISSIONS.PROCESS,
   CHECKIN_PERMISSIONS.CHECKOUT_PROCESS,
@@ -324,6 +345,10 @@ export const PERMISSION_CATEGORIES = {
   VISITOR_MANAGEMENT: {
     name: 'Visitor Management',
     permissions: Object.values(VISITOR_PERMISSIONS)
+  },
+  EMERGENCY_CONTACT_MANAGEMENT: {
+    name: 'Emergency Contact Management',
+    permissions: Object.values(EMERGENCY_CONTACT_PERMISSIONS)
   },
   CHECK_IN_OPERATIONS: {
     name: 'Check-in Operations',
@@ -452,6 +477,7 @@ export default {
   USER_PERMISSIONS,
   INVITATION_PERMISSIONS,
   VISITOR_PERMISSIONS,
+  EMERGENCY_CONTACT_PERMISSIONS,
   CHECKIN_PERMISSIONS,
   ALERT_PERMISSIONS,
   EMERGENCY_PERMISSIONS,

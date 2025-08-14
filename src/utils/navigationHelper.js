@@ -2,20 +2,13 @@
 /**
  * Navigation helper utilities for programmatic routing
  */
+import { 
+  DASHBOARD_ROUTES, 
+  AUTH_ROUTES, 
+  PUBLIC_ROUTES
+} from '../constants/routeConstants';
 
-// Route constants (you may need to adjust these based on your routeConstants.js)
-export const DASHBOARD_ROUTES = {
-  DEFAULT: '/dashboard',
-  STAFF: '/staff/dashboard',
-  OPERATOR: '/operator/dashboard',
-  ADMIN: '/admin/dashboard'
-};
-
-export const AUTH_ROUTES = {
-  LOGIN: '/login',
-  FORGOT_PASSWORD: '/forgot-password',
-  RESET_PASSWORD: '/reset-password'
-};
+import { ROLES } from '../constants/role';
 
 /**
  * Navigation helper for programmatic routing
@@ -24,11 +17,11 @@ export const NavigationHelper = {
   // Get the appropriate dashboard route for a user role
   getDashboardRoute: (userRole) => {
     switch (userRole) {
-      case 'Staff':
+      case ROLES.STAFF:
         return DASHBOARD_ROUTES.STAFF;
-      case 'Operator':
+      case ROLES.OPERATOR:
         return DASHBOARD_ROUTES.OPERATOR;
-      case 'Administrator':
+      case ROLES.ADMINISTRATOR:
         return DASHBOARD_ROUTES.ADMIN;
       default:
         return DASHBOARD_ROUTES.DEFAULT;

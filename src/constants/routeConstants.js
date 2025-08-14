@@ -139,6 +139,9 @@ export const SYSTEM_ROUTES = {
   INTEGRATIONS: '/system/integrations',
   CUSTOMFIELDS: '/system/custom-fields',
   TEMPLATES: '/system/templates',
+  VISIT_PURPOSES: '/system/visit-purposes',
+  LOCATIONS: '/system/locations',
+  MANAGEMENT: '/system/management', // New consolidated management page
   
   // Facial Recognition System routes
   FR_SYSTEM: '/system/facial-recognition',
@@ -262,6 +265,22 @@ export const ROUTE_METADATA = {
     permissions: ['User.Create']
   },
   
+  [VISITOR_ROUTES.LIST]: {
+    title: 'Visitors',
+    breadcrumb: 'Visitors',
+    requiresAuth: true,
+    roles: ['Staff', 'Operator', 'Administrator'],
+    permissions: ['Visitor.Read']
+  },
+  
+  [VISITOR_ROUTES.CREATE]: {
+    title: 'Create Visitor',
+    breadcrumb: 'Create Visitor',
+    requiresAuth: true,
+    roles: ['Staff', 'Operator', 'Administrator'],
+    permissions: ['Visitor.Create']
+  },
+  
   [PROFILE_ROUTES.VIEW]: {
     title: 'Profile',
     breadcrumb: 'Profile',
@@ -272,6 +291,22 @@ export const ROUTE_METADATA = {
   [SYSTEM_ROUTES.OVERVIEW]: {
     title: 'System Administration',
     breadcrumb: 'System',
+    requiresAuth: true,
+    roles: ['Administrator'],
+    permissions: ['SystemConfig.Read']
+  },
+  
+  [SYSTEM_ROUTES.VISIT_PURPOSES]: {
+    title: 'Visit Purposes',
+    breadcrumb: 'Visit Purposes',
+    requiresAuth: true,
+    roles: ['Administrator'],
+    permissions: ['SystemConfig.Read']
+  },
+  
+  [SYSTEM_ROUTES.LOCATIONS]: {
+    title: 'Locations',
+    breadcrumb: 'Locations',
     requiresAuth: true,
     roles: ['Administrator'],
     permissions: ['SystemConfig.Read']
@@ -320,7 +355,21 @@ export const NAVIGATION_MENU = {
       label: 'Visitors',
       path: VISITOR_ROUTES.LIST,
       icon: 'users',
-      roles: ['Operator', 'Administrator']
+      roles: ['Staff', 'Operator', 'Administrator'],
+      children: [
+        {
+          id: 'visitors-list',
+          label: 'All Visitors',
+          path: VISITOR_ROUTES.LIST,
+          roles: ['Staff', 'Operator', 'Administrator']
+        },
+        {
+          id: 'visitors-create',
+          label: 'Add Visitor',
+          path: VISITOR_ROUTES.CREATE,
+          roles: ['Staff', 'Operator', 'Administrator']
+        }
+      ]
     },
     {
       id: 'checkin',
@@ -351,9 +400,27 @@ export const NAVIGATION_MENU = {
       roles: ['Administrator'],
       children: [
         {
+          id: 'system-management',
+          label: 'Management',
+          path: SYSTEM_ROUTES.MANAGEMENT,
+          roles: ['Administrator']
+        },
+        {
           id: 'system-config',
           label: 'Configuration',
           path: SYSTEM_ROUTES.CONFIG,
+          roles: ['Administrator']
+        },
+        {
+          id: 'system-visit-purposes',
+          label: 'Visit Purposes',
+          path: SYSTEM_ROUTES.VISIT_PURPOSES,
+          roles: ['Administrator']
+        },
+        {
+          id: 'system-locations',
+          label: 'Locations',
+          path: SYSTEM_ROUTES.LOCATIONS,
           roles: ['Administrator']
         },
         {

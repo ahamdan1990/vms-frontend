@@ -193,6 +193,16 @@ const Sidebar = () => {
       show: visitorPermissions.canRead || isOperator || isAdmin
     },
     {
+      name: 'Invitations',
+      href: '/invitations',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+        </svg>
+      ),
+      show: invitationPermissions.canRead || isOperator || isAdmin
+    },
+    {
       name: 'Check-in',
       href: '/checkin',
       icon: (
@@ -227,6 +237,16 @@ const Sidebar = () => {
           name: 'Configuration',
           href: '/system/config',
           show: systemPermissions.canUpdate || isAdmin
+        },
+        {
+          name: 'Visit Purposes',
+          href: '/system/visit-purposes',
+          show: systemPermissions.canRead || isAdmin
+        },
+        {
+          name: 'Locations',
+          href: '/system/locations',
+          show: systemPermissions.canRead || isAdmin
         },
         {
           name: 'Audit Logs',

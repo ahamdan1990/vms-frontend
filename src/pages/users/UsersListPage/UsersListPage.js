@@ -60,7 +60,7 @@ import Modal, { ConfirmModal } from '../../../components/common/Modal/Modal';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 
 // Utils
-import { formatters } from '../../../utils/formatters';
+import formatters from '../../../utils/formatters';
 import { validateUserData } from '../../../utils/validators';
 import { extractErrorMessage } from '../../../utils/errorUtils';
 

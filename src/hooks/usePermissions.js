@@ -258,15 +258,22 @@ export const usePermissions = () => {
     canViewAnalytics: hasPermission(DASHBOARD_PERMISSIONS.VIEW_ANALYTICS)
   }), [hasPermission]);
 
-  // System Configuration Permissions
-  const systemConfigPermissions = useMemo(() => ({
-    canRead: hasPermission(SYSTEM_CONFIG_PERMISSIONS.READ),
-    canUpdate: hasPermission(SYSTEM_CONFIG_PERMISSIONS.UPDATE),
-    canManage: hasPermission(SYSTEM_CONFIG_PERMISSIONS.MANAGE),
-    canBackup: hasPermission(SYSTEM_CONFIG_PERMISSIONS.BACKUP),
-    canRestore: hasPermission(SYSTEM_CONFIG_PERMISSIONS.RESTORE),
-    canMaintain: hasPermission(SYSTEM_CONFIG_PERMISSIONS.MAINTAIN)
-  }), [hasPermission]);
+    // System Configuration Permissions
+    const systemConfigPermissions = useMemo(() => ({
+      canRead: hasPermission(SYSTEM_CONFIG_PERMISSIONS.READ),
+      canUpdate: hasPermission(SYSTEM_CONFIG_PERMISSIONS.UPDATE),
+      canManage: hasPermission(SYSTEM_CONFIG_PERMISSIONS.MANAGE),
+      canBackup: hasPermission(SYSTEM_CONFIG_PERMISSIONS.BACKUP),
+      canRestore: hasPermission(SYSTEM_CONFIG_PERMISSIONS.RESTORE),
+      canMaintain: hasPermission(SYSTEM_CONFIG_PERMISSIONS.MAINTAIN),
+      canViewAll: hasPermission(SYSTEM_CONFIG_PERMISSIONS.VIEW_ALL),
+      canManageIntegrations: hasPermission(SYSTEM_CONFIG_PERMISSIONS.MANAGE_INTEGRATIONS),
+      canManageNotifications: hasPermission(SYSTEM_CONFIG_PERMISSIONS.MANAGE_NOTIFICATIONS),
+      canManageSecurity: hasPermission(SYSTEM_CONFIG_PERMISSIONS.MANAGE_SECURITY),
+      canManageCapacity: hasPermission(SYSTEM_CONFIG_PERMISSIONS.MANAGE_CAPACITY),
+      canViewLogs: hasPermission(SYSTEM_CONFIG_PERMISSIONS.VIEW_LOGS)
+    }), [hasPermission]);
+
 
   // Audit Permissions
   const auditPermissions = useMemo(() => ({

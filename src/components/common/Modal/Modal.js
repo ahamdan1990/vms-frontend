@@ -7,8 +7,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Button from '../Button/Button';
 
 /**
- * Professional Modal Component with animations and accessibility
- * Supports different sizes, variants, and custom content
+ * Professional Modal Component with animations, accessibility, and scrolling support
+ * 
+ * Features:
+ * - Responsive design with proper mobile support
+ * - Automatic scrolling for content that exceeds viewport height
+ * - Fixed header and footer with scrollable content area
+ * - Custom scrollbar styling for better UX
+ * - Full keyboard navigation and focus management
+ * - Support for different sizes and variants
  */
 const Modal = ({
   isOpen,
@@ -51,14 +58,14 @@ const Modal = ({
   };
 
   const modalClasses = classNames(
-    'relative w-full rounded-xl shadow-2xl transform',
+    'relative w-full rounded-xl shadow-2xl transform my-2 sm:my-8 max-h-[calc(100vh-1rem)] sm:max-h-[calc(100vh-4rem)] flex flex-col',
     sizeClasses[size],
     variantClasses[variant],
     className
   );
 
   const overlayClasses = classNames(
-    'fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center p-4',
+    'fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-50 flex items-start justify-center p-2 sm:p-4 overflow-y-auto modal-scroll',
     overlayClassName
   );
 
@@ -164,7 +171,7 @@ const Modal = ({
           >
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
                 {title && (
                   <h3 id="modal-title" className="text-lg font-semibold text-gray-900">
                     {title}
@@ -187,13 +194,13 @@ const Modal = ({
             )}
 
             {/* Content */}
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto flex-1 min-h-0 modal-scroll modal-content">
               {children}
             </div>
 
             {/* Footer */}
             {footer && (
-              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl flex-shrink-0">
                 {footer}
               </div>
             )}

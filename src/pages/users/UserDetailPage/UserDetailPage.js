@@ -21,7 +21,7 @@ import {
 } from '../../../store/slices/usersSlice';
 import { showSuccessToast, showErrorToast } from '../../../store/slices/notificationSlice';
 import { setPageTitle } from '../../../store/slices/uiSlice';
-import { USER_ROUTES } from '../../../routes/routeConstants';
+import { USER_ROUTES } from '../../../constants/routeConstants';
 import { formatName, formatDate, formatDateTime } from '../../../utils/formatters';
 import { validateUserData } from '../../../utils/validators';
 
