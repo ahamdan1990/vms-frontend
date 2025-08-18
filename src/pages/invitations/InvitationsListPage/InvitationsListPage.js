@@ -1,9 +1,13 @@
 // src/pages/invitations/InvitationsListPage/InvitationsListPage.js
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+
+// Services
+import invitationService from '../../../services/invitationService';
 
 // Redux imports
 import {
+  getInvitations,
   createInvitation,
   updateInvitation,
   deleteInvitation,
@@ -15,6 +19,7 @@ import {
   hideQrModal,
   clearError,
   getQrCode,
+  getInvitationQrCodeImage,
   approveInvitation,
   rejectInvitation
 } from '../../../store/slices/invitationsSlice';
@@ -26,6 +31,12 @@ import { getVisitPurposes } from '../../../store/slices/visitPurposesSlice';
 
 // Selectors
 import {
+  selectInvitationsList,
+  selectInvitationsTotal,
+  selectInvitationsPageIndex,
+  selectInvitationsPageSize,
+  selectInvitationsLoading,
+  selectInvitationsError,
   selectShowCreateModal,
   selectShowEditModal,
   selectShowDeleteModal,
@@ -43,7 +54,8 @@ import {
   selectInvitationsApprovalError,
   selectQrCodeData,
   selectInvitationsQrLoading,
-  selectInvitationsQrError
+  selectInvitationsQrError,
+  selectQrCodeImage
 } from '../../../store/selectors/invitationSelectors';
 
 // Components
@@ -71,7 +83,8 @@ import {
   MapPinIcon,
   DocumentTextIcon,
   InformationCircleIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  EnvelopeIcon
 } from '@heroicons/react/24/outline';
 
 // Utils
@@ -90,13 +103,21 @@ import { extractErrorMessage } from '../../../utils/errorUtils';
 const InvitationsListPage = () => {
   const dispatch = useDispatch();
 
+  // Invitations data
+  const invitations = useSelector(selectInvitationsList);
+  const totalInvitations = useSelector(selectInvitationsTotal);
+  const pageIndex = useSelector(selectInvitationsPageIndex);
+  const pageSize = useSelector(selectInvitationsPageSize);
+  const loading = useSelector(selectInvitationsLoading);
+  const error = useSelector(selectInvitationsError);
+
   // Modal states
   const showCreateModalState = useSelector(selectShowCreateModal);
-  const showEditModal = useSelector(selectShowEditModal);
+  const showEditModalState = useSelector(selectShowEditModal);
   const showDeleteModal = useSelector(selectShowDeleteModal);
-  const showDetailsModal = useSelector(selectShowDetailsModal);
+  const showDetailsModalState = useSelector(selectShowDetailsModal);
   const showApprovalModal = useSelector(selectShowApprovalModal);
-  const showQrModal = useSelector(selectShowQrModal);
+  const showQrModalState = useSelector(selectShowQrModal);
   const currentInvitation = useSelector(selectCurrentInvitation);
 
   // Loading and error states
@@ -108,6 +129,7 @@ const InvitationsListPage = () => {
   const deleteError = useSelector(selectInvitationsDeleteError);
   const approvalLoading = useSelector(selectInvitationsApprovalLoading);
   const approvalError = useSelector(selectInvitationsApprovalError);
+  const qrCodeImage = useSelector(selectQrCodeImage);
   const qrCodeData = useSelector(selectQrCodeData);
   const qrLoading = useSelector(selectInvitationsQrLoading);
   const qrError = useSelector(selectInvitationsQrError);
@@ -116,9 +138,15 @@ const InvitationsListPage = () => {
   const [approvalComments, setApprovalComments] = React.useState('');
   const [approvalReason, setApprovalReason] = React.useState('');
   const [approvalAction, setApprovalAction] = React.useState('approve'); // 'approve' or 'reject'
+  
+  // QR Email state
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailError, setEmailError] = useState(null);
+  const [emailSuccess, setEmailSuccess] = useState(false);
 
-  // Load supporting data on mount
+  // Load initial data on mount
   useEffect(() => {
+    dispatch(getInvitations());
     dispatch(getVisitors({ pageSize: 1000, isActive: true }));
     dispatch(getLocations({ pageSize: 1000, isActive: true }));
     dispatch(getVisitPurposes({ pageSize: 1000, isActive: true }));
@@ -126,10 +154,12 @@ const InvitationsListPage = () => {
 
   // Load QR code when QR modal opens
   useEffect(() => {
-    if (showQrModal && currentInvitation && !qrCodeData) {
+    if (showQrModalState && currentInvitation && !qrCodeData) {
+      console.log(currentInvitation)
       dispatch(getQrCode(currentInvitation.id));
+      dispatch(getInvitationQrCodeImage({ id: currentInvitation.id }));
     }
-  }, [showQrModal, currentInvitation, qrCodeData, dispatch]);
+  }, [showQrModalState, currentInvitation, qrCodeData, dispatch]);
 
   // Action handlers
   const handleCreateInvitation = async (invitationData) => {
@@ -216,6 +246,33 @@ const InvitationsListPage = () => {
 
   const handleCloseQrModal = () => {
     dispatch(hideQrModal());
+    setEmailError(null);
+    setEmailSuccess(false);
+  };
+
+  // Handle QR code email sending
+  const handleSendQrEmail = async () => {
+    if (!currentInvitation?.id) return;
+    
+    try {
+      setEmailSending(true);
+      setEmailError(null);
+      setEmailSuccess(false);
+
+      await invitationService.sendQrCodeEmail(currentInvitation.id, {
+        customMessage: `Please use this QR code for your visit on ${formatters.formatDate(currentInvitation.scheduledStartTime)}.`,
+        includeQrImage: true
+      });
+
+      setEmailSuccess(true);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setEmailSuccess(false), 3000);
+    } catch (error) {
+      setEmailError(extractErrorMessage(error));
+    } finally {
+      setEmailSending(false);
+    }
   };
 
   // Status badge helper
@@ -525,13 +582,16 @@ const InvitationsListPage = () => {
   // Render QR code modal content
   const renderQrModal = () => {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="text-center">
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             QR Code for Invitation
           </h3>
           <p className="text-sm text-gray-600">
             {currentInvitation?.subject} - #{currentInvitation?.invitationNumber}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            Visitor: {currentInvitation?.visitor?.fullName}
           </p>
         </div>
 
@@ -549,31 +609,97 @@ const InvitationsListPage = () => {
           </div>
         )}
 
-        {qrCodeData && (
-          <div className="text-center">
-            <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg">
-              <img
-                src={`data:image/png;base64,${qrCodeData.qrCode}`}
-                alt="QR Code"
-                className="w-48 h-48 mx-auto"
-              />
+        {emailError && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="text-sm text-red-700">
+              Email Error: {emailError}
             </div>
-            <p className="mt-4 text-sm text-gray-600">
-              Scan this QR code to check in for the visit
-            </p>
-            <div className="mt-4 space-x-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const link = document.createElement('a');
-                  link.href = `data:image/png;base64,${qrCodeData.qrCode}`;
-                  link.download = `invitation-${currentInvitation.invitationNumber}-qr.png`;
-                  link.click();
-                }}
-              >
-                Download QR Code
-              </Button>
+          </div>
+        )}
+
+        {emailSuccess && (
+          <div className="bg-green-50 border border-green-200 rounded-md p-4">
+            <div className="text-sm text-green-700">
+              QR code sent successfully to {currentInvitation?.visitor?.email}!
+            </div>
+          </div>
+        )}
+
+        {qrCodeData && (
+          <div className="space-y-6">
+            <div className="text-center">
+              <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg shadow-sm">
+                <img
+                  src={`data:image/png;base64,${qrCodeImage}`}
+                  alt="QR Code"
+                  className="w-48 h-48 mx-auto"
+                />
+              </div>
+              <p className="mt-4 text-sm text-gray-600">
+                Scan this QR code to check in for the visit
+              </p>
+            </div>
+
+            {/* QR Code Actions */}
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-medium text-gray-900 mb-4">QR Code Actions</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Download QR Code */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = `data:image/png;base64,${qrCodeImage}`;
+                    link.download = `invitation-${currentInvitation.invitationNumber}-qr.png`;
+                    link.click();
+                  }}
+                  icon={<DocumentTextIcon className="w-4 h-4" />}
+                  className="justify-center"
+                >
+                  Download QR Code
+                </Button>
+
+                {/* Send QR Code via Email */}
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleSendQrEmail}
+                  loading={emailSending}
+                  disabled={emailSending || !currentInvitation?.visitor?.email}
+                  icon={<EnvelopeIcon className="w-4 h-4" />}
+                  className="justify-center"
+                >
+                  {emailSending ? 'Sending...' : 'Email to Visitor'}
+                </Button>
+              </div>
+
+              {/* Email recipient info */}
+              {currentInvitation?.visitor?.email && (
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  Will be sent to: {currentInvitation.visitor.email}
+                </p>
+              )}
+              
+              {!currentInvitation?.visitor?.email && (
+                <p className="text-xs text-red-500 mt-2 text-center">
+                  No email address available for this visitor
+                </p>
+              )}
+            </div>
+
+            {/* QR Code Data */}
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-medium text-gray-900 mb-2">QR Code Data</h4>
+              <div className="bg-gray-50 rounded-md p-3">
+                <code className="text-xs text-gray-600 break-all">
+                  {qrCodeData.qrCode?.substring(0, 100)}...
+                </code>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                This code contains encrypted invitation details for secure check-in
+              </p>
             </div>
           </div>
         )}
@@ -604,7 +730,7 @@ const InvitationsListPage = () => {
 
       {/* Edit Modal */}
       <Modal
-        isOpen={showEditModal}
+        isOpen={showEditModalState}
         onClose={handleCloseEditModal}
         title="Edit Invitation"
         size="full"
@@ -623,7 +749,7 @@ const InvitationsListPage = () => {
 
       {/* Details Modal */}
       <Modal
-        isOpen={showDetailsModal}
+        isOpen={showDetailsModalState}
         onClose={handleCloseDetailsModal}
         title="Invitation Details"
         size="xl"
@@ -643,7 +769,7 @@ const InvitationsListPage = () => {
 
       {/* QR Code Modal */}
       <Modal
-        isOpen={showQrModal}
+        isOpen={showQrModalState}
         onClose={handleCloseQrModal}
         title="QR Code"
         size="md"

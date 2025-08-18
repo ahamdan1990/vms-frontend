@@ -10,6 +10,10 @@ import { getVisitPurposes } from '../../../store/slices/visitPurposesSlice';
 import { selectLocationsList } from '../../../store/selectors/locationSelectors';
 import { selectVisitPurposesList } from '../../../store/selectors/visitPurposeSelectors';
 
+// Services
+import visitorDocumentService from '../../../services/visitorDocumentService';
+import visitorNoteService from '../../../services/visitorNoteService';
+
 // Components
 import Button from '../../common/Button/Button';
 import Input from '../../common/Input/Input';
@@ -127,6 +131,13 @@ const EnhancedVisitorForm = ({
   const [completedSteps, setCompletedSteps] = useState(new Set());
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedVisitPurpose, setSelectedVisitPurpose] = useState(null);
+  
+  // Document and photo management state
+  const [uploadingDocument, setUploadingDocument] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [documentError, setDocumentError] = useState(null);
+  const [photoError, setPhotoError] = useState(null);
+  const [uploadInfo, setUploadInfo] = useState(null);
 
   // Form steps configuration
   const steps = [
@@ -225,6 +236,45 @@ const EnhancedVisitorForm = ({
     }
   }, [initialData, locations, visitPurposes]);
 
+  // Load existing documents and upload info when editing
+  useEffect(() => {
+    const loadDocumentsAndUploadInfo = async () => {
+      if (isEdit && initialData?.id) {
+        try {
+          // Load existing documents
+          const documents = await visitorDocumentService.getVisitorDocuments(initialData.id);
+          
+          // Separate photos from other documents
+          const photos = documents.filter(doc => doc.documentType === 'Photo');
+          const otherDocuments = documents.filter(doc => doc.documentType !== 'Photo');
+          
+          setFormData(prev => ({
+            ...prev,
+            photo: photos.length > 0 ? photos[0] : null, // Use first photo as profile photo
+            documents: otherDocuments
+          }));
+
+          // Load upload info
+          const uploadInfoData = await visitorDocumentService.getUploadInfo(initialData.id);
+          setUploadInfo(uploadInfoData);
+        } catch (error) {
+          setDocumentError('Failed to load existing documents: ' + extractErrorMessage(error));
+        }
+      } else if (!isEdit) {
+        // For new visitors, just load upload info (using visitor ID 1 as placeholder)
+        try {
+          const uploadInfoData = await visitorDocumentService.getUploadInfo(1);
+          setUploadInfo(uploadInfoData);
+        } catch (error) {
+          // Ignore error for new visitors, upload info is not critical
+          console.warn('Failed to load upload info:', error);
+        }
+      }
+    };
+
+    loadDocumentsAndUploadInfo();
+  }, [isEdit, initialData?.id]);
+
   // Handle form field changes
   const handleChange = (field, value) => {
     if (field.includes('.')) {
@@ -253,35 +303,141 @@ const EnhancedVisitorForm = ({
   };
 
   // Handle photo upload
-  const handlePhotoUpload = (photoData) => {
-    setFormData(prev => ({
-      ...prev,
-      photo: photoData
-    }));
+  const handlePhotoUpload = async (photoData) => {
+    if (!initialData?.id) {
+      // For new visitors, just store photo locally until visitor is created
+      setFormData(prev => ({
+        ...prev,
+        photo: photoData
+      }));
+      return;
+    }
+
+    try {
+      setUploadingPhoto(true);
+      setPhotoError(null);
+
+      // Upload photo as document
+      const result = await visitorDocumentService.uploadVisitorPhoto(
+        initialData.id,
+        photoData.file,
+        {
+          description: 'Visitor profile photo',
+          isSensitive: false,
+          isRequired: false
+        }
+      );
+
+      setFormData(prev => ({
+        ...prev,
+        photo: {
+          ...photoData,
+          id: result.id,
+          filePath: result.filePath
+        }
+      }));
+    } catch (error) {
+      setPhotoError(extractErrorMessage(error));
+    } finally {
+      setUploadingPhoto(false);
+    }
   };
 
   // Handle photo removal
-  const handlePhotoRemove = () => {
+  const handlePhotoRemove = async () => {
+    const currentPhoto = formData.photo;
+    
+    // Remove from UI immediately
     setFormData(prev => ({
       ...prev,
       photo: null
     }));
+
+    // If photo was uploaded to server, delete it
+    if (currentPhoto?.id && initialData?.id) {
+      try {
+        await visitorDocumentService.deleteVisitorDocument(
+          initialData.id,
+          currentPhoto.id,
+          false // soft delete
+        );
+      } catch (error) {
+        // If deletion fails, restore the photo in UI
+        setFormData(prev => ({
+          ...prev,
+          photo: currentPhoto
+        }));
+        setPhotoError('Failed to remove photo: ' + extractErrorMessage(error));
+      }
+    }
   };
 
   // Handle document upload
-  const handleDocumentUpload = (documentData) => {
-    setFormData(prev => ({
-      ...prev,
-      documents: [...prev.documents, documentData]
-    }));
+  const handleDocumentUpload = async (documentData) => {
+    if (!initialData?.id) {
+      // For new visitors, just store document locally until visitor is created
+      setFormData(prev => ({
+        ...prev,
+        documents: [...prev.documents, { ...documentData, id: Date.now() }]
+      }));
+      return;
+    }
+
+    try {
+      setUploadingDocument(true);
+      setDocumentError(null);
+
+      const result = await visitorDocumentService.uploadVisitorDocument(
+        initialData.id,
+        documentData.file,
+        documentData.title || documentData.file.name,
+        documentData.documentType || 'Other',
+        {
+          description: documentData.description,
+          isSensitive: documentData.isSensitive || false,
+          isRequired: documentData.isRequired || false,
+          tags: documentData.tags
+        }
+      );
+
+      setFormData(prev => ({
+        ...prev,
+        documents: [...prev.documents, result]
+      }));
+    } catch (error) {
+      setDocumentError(extractErrorMessage(error));
+    } finally {
+      setUploadingDocument(false);
+    }
   };
 
   // Handle document removal
-  const handleDocumentRemove = (documentId) => {
+  const handleDocumentRemove = async (documentId) => {
+    const documentToRemove = formData.documents.find(doc => doc.id === documentId);
+    
+    // Remove from UI immediately
     setFormData(prev => ({
       ...prev,
       documents: prev.documents.filter(doc => doc.id !== documentId)
     }));
+
+    // If document was uploaded to server, delete it
+    if (documentToRemove?.filePath && initialData?.id) {
+      try {
+        await visitorDocumentService.deleteVisitorDocument(
+          initialData.id,
+          documentId,
+          false // soft delete
+        );
+      } catch (error) {
+        // If deletion fails, restore the document in UI
+        setFormData(prev => ({
+          ...prev,
+          documents: [...prev.documents, documentToRemove]
+        }));
+        setDocumentError('Failed to remove document: ' + extractErrorMessage(error));
+      }
+    }
   };
 
   // Handle location selection

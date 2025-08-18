@@ -1,12 +1,17 @@
 // src/components/checkin/QrCodeScanner/QrCodeScanner.js
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Services
+import invitationService from '../../../services/invitationService';
 
 // Components
 import Button from '../../common/Button/Button';
 import Input from '../../common/Input/Input';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
+import Card from '../../common/Card/Card';
+import Badge from '../../common/Badge/Badge';
 
 // Icons
 import {
@@ -14,8 +19,18 @@ import {
   CameraIcon,
   DocumentTextIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  XMarkIcon,
+  EyeIcon,
+  UserIcon,
+  BuildingOfficeIcon,
+  CalendarIcon,
+  StopIcon
 } from '@heroicons/react/24/outline';
+
+// Utils
+import { extractErrorMessage } from '../../../utils/errorUtils';
+import formatters from '../../../utils/formatters';
 
 /**
  * QR Code Scanner Component

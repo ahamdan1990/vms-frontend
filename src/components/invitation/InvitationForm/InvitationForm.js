@@ -603,7 +603,7 @@ const InvitationForm = ({
                 onBlur={() => handleBlur('scheduledStartTime')}
                 error={touched.scheduledStartTime ? formErrors.scheduledStartTime : undefined}
                 min={new Date().toISOString().slice(0, 16)} // Prevent past dates
-                step="300" // 5-minute intervals
+                // Removed step constraint for maximum flexibility
                 required
                 placeholder="YYYY-MM-DDTHH:MM"
               />
@@ -621,7 +621,7 @@ const InvitationForm = ({
                 onBlur={() => handleBlur('scheduledEndTime')}
                 error={touched.scheduledEndTime ? formErrors.scheduledEndTime : undefined}
                 min={formData.scheduledStartTime || new Date().toISOString().slice(0, 16)} // Must be after start time
-                step="300" // 5-minute intervals
+                // Removed step constraint for maximum flexibility
                 required
                 placeholder="YYYY-MM-DDTHH:MM"
               />
@@ -818,6 +818,20 @@ const InvitationForm = ({
             {isEdit ? 'Update Invitation' : 'Create Invitation'}
           </Button>
         </div>
+
+        {/* Debug info for development */}
+        {process.env.NODE_ENV === 'development' && Object.keys(formErrors).length > 0 && (
+          <div className="mt-4 bg-red-50 border border-red-200 rounded p-3 text-sm text-red-700">
+            <strong>Form Validation Errors ({Object.keys(formErrors).length}):</strong>
+            <ul className="list-disc list-inside mt-2 space-y-1">
+              {Object.entries(formErrors).map(([field, error]) => (
+                <li key={field}>
+                  <strong>{field}:</strong> {error}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </form>
     </div>
   );

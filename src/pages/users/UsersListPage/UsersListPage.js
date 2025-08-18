@@ -3,9 +3,8 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
-import '../../../styles/mobile-table.css'; // Import mobile responsive styles
+import '../../../styles/mobile-table.css';
 
 // Redux actions and selectors
 import {
@@ -21,7 +20,6 @@ import {
   updateFilters,
   resetFilters,
   setSelectedUsers,
-  toggleUserSelection,
   clearSelections,
   showCreateModal,
   hideCreateModal,
@@ -45,11 +43,17 @@ import {
   selectShowDeleteModal,
   selectUsersCreateError,
   selectUsersUpdateError,
-  selectUsersDeleteError,
   selectCanBulkActivate,
   selectCanBulkDeactivate,
   selectCanBulkDelete
 } from '../../../store/selectors/userSelectors';
+
+// Notification actions
+import {
+  showSuccessToast,
+  showErrorToast,
+  showWarningToast,
+} from '../../../store/slices/notificationSlice';
 
 // Components
 import Button from '../../../components/common/Button/Button';
@@ -57,19 +61,17 @@ import Input from '../../../components/common/Input/Input';
 import Table from '../../../components/common/Table/Table';
 import Pagination from '../../../components/common/Pagination/Pagination';
 import Modal, { ConfirmModal } from '../../../components/common/Modal/Modal';
-import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
+import UserForm from '../../../components/forms/UserForm/UserForm';
 
 // Utils
-import formatters from '../../../utils/formatters';
-import { validateUserData } from '../../../utils/validators';
 import { extractErrorMessage } from '../../../utils/errorUtils';
 
 /**
  * Professional Users List Page with comprehensive user management
+ * Enhanced with notification integration and new UserForm component
  */
 const UsersListPage = () => {
   const dispatch = useDispatch();
-  const { user: currentUser } = useAuth();
   const { user: userPermissions } = usePermissions();
 
   // Local state
@@ -95,32 +97,14 @@ const UsersListPage = () => {
   // Error states
   const createError = useSelector(selectUsersCreateError);
   const updateError = useSelector(selectUsersUpdateError);
-  const deleteError = useSelector(selectUsersDeleteError);
+
 
   // Bulk action permissions
   const canBulkActivate = useSelector(selectCanBulkActivate);
   const canBulkDeactivate = useSelector(selectCanBulkDeactivate);
   const canBulkDelete = useSelector(selectCanBulkDelete);
 
-  // Form state for create/edit
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phoneNumber: '',
-    role: 'Staff',
-    status: 'Active',
-    department: '',
-    jobTitle: '',
-    employeeId: '',
-    theme: 'light',
-    language: 'en-US',
-    timeZone: 'UTC',
-    mustChangePassword: true,
-    sendWelcomeEmail: true
-  });
-
-  const [formErrors, setFormErrors] = useState({});
+  // Form state for edit
   const [currentEditUser, setCurrentEditUser] = useState(null);
   const [currentDeleteUser, setCurrentDeleteUser] = useState(null);
 
@@ -142,32 +126,6 @@ const UsersListPage = () => {
 
     return () => clearTimeout(debounceTimer);
   }, [searchInput, filters.searchTerm, dispatch]);
-
-  // Watch for edit modal opening and ensure form data is populated
-  useEffect(() => {
-    if (isEditModalOpen && currentEditUser) {
-      
-      const populatedData = {
-        id: currentEditUser.id,
-        firstName: currentEditUser.firstName || currentEditUser.FirstName || '',
-        lastName: currentEditUser.lastName || currentEditUser.LastName || '',
-        email: currentEditUser.email || currentEditUser.Email || '',
-        phoneNumber: currentEditUser.phoneNumber || currentEditUser.PhoneNumber || '',
-        role: currentEditUser.role || currentEditUser.Role || 'Staff',
-        status: currentEditUser.isActive !== undefined ? (currentEditUser.isActive ? 'Active' : 'Inactive') : 'Active',
-        department: currentEditUser.department || currentEditUser.Department || '',
-        jobTitle: currentEditUser.jobTitle || currentEditUser.JobTitle || '',
-        employeeId: currentEditUser.employeeId || currentEditUser.EmployeeId || '',
-        theme: currentEditUser.theme || currentEditUser.Theme || 'light',
-        language: currentEditUser.language || currentEditUser.Language || 'en-US',
-        timeZone: currentEditUser.timeZone || currentEditUser.TimeZone || 'UTC',
-        mustChangePassword: false,
-        sendWelcomeEmail: false
-      };
-      
-      setFormData(populatedData);
-    }
-  }, [isEditModalOpen, currentEditUser]);
 
   // Handle filter changes
   const handleFilterChange = (filterName, value) => {
@@ -197,52 +155,93 @@ const UsersListPage = () => {
     dispatch(setSelectedUsers(selectedRows));
   };
 
-  // Form handlers
-  const handleFormChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Clear field error when user starts typing
-    if (formErrors[field]) {
-      setFormErrors(prev => ({ ...prev, [field]: null }));
-    }
-  };
-
-  const handleCreateUser = async () => {
-    dispatch(clearError());
-    const validation = validateUserData(formData, false);
-    
-    if (!validation.isValid) {
-      setFormErrors(validation.errors);
-      return;
-    }
-
+  // Enhanced user creation handler
+  const handleCreateUser = async (formData) => {
     try {
+      dispatch(clearError());
       const result = await dispatch(createUser(formData));
+      
       if (result.type === 'users/createUser/fulfilled') {
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          phoneNumber: '',
-          role: 'Staff',
-          department: '',
-          jobTitle: '',
-          employeeId: '',
-          mustChangePassword: true,
-          sendWelcomeEmail: true,
-          // Add missing required fields
-          theme: 'light',
-          language: 'en-US',
-          timeZone: 'UTC'
-        });
-        setFormErrors({});
+        dispatch(hideCreateModal());
+        
+        // Show success notification
+        dispatch(showSuccessToast(
+          'User Created Successfully',
+          `${formData.firstName} ${formData.lastName} has been created.${formData.sendWelcomeEmail ? ' Welcome email sent.' : ''}`,
+          {
+            duration: 6000,
+            actions: [
+              {
+                label: 'Create Another',
+                onClick: () => {
+                  dispatch(showCreateModal());
+                },
+                dismissOnClick: true
+              }
+            ]
+          }
+        ));
+
+        // Refresh data
+        dispatch(getUsers());
+        dispatch(getUserStats());
       }
     } catch (error) {
       console.error('Failed to create user:', error);
+      dispatch(showErrorToast(
+        'User Creation Failed',
+        extractErrorMessage(error) || 'An unexpected error occurred',
+        {
+          persistent: true
+        }
+      ));
+      throw error; // Re-throw to let UserForm handle it
     }
   };
 
-  // Bulk actions
+  // Enhanced user update handler
+  const handleUpdateUser = async (formData) => {
+    try {
+      dispatch(clearError());
+      
+      if (currentEditUser) {
+        const result = await dispatch(updateUser({ 
+          id: currentEditUser.id, 
+          userData: formData 
+        }));
+        
+        if (result.type === 'users/updateUser/fulfilled') {
+          dispatch(hideEditModal());
+          setCurrentEditUser(null);
+          
+          // Show success notification
+          dispatch(showSuccessToast(
+            'User Updated Successfully',
+            `${formData.firstName} ${formData.lastName} has been updated.`,
+            {
+              duration: 5000
+            }
+          ));
+
+          // Refresh data
+          dispatch(getUsers());
+          dispatch(getUserStats());
+        }
+      }
+    } catch (error) {
+      console.error('Failed to update user:', error);
+      dispatch(showErrorToast(
+        'User Update Failed',
+        extractErrorMessage(error) || 'An unexpected error occurred',
+        {
+          persistent: true
+        }
+      ));
+      throw error; // Re-throw to let UserForm handle it
+    }
+  };
+
+  // Bulk actions with notifications
   const handleBulkAction = async (action) => {
     if (selectedUsers.length === 0) return;
 
@@ -269,115 +268,117 @@ const UsersListPage = () => {
       dispatch(clearSelections());
       setShowBulkConfirm(false);
       setBulkAction('');
+
+      // Show success notification
+      dispatch(showSuccessToast(
+        'Bulk Action Completed',
+        `Successfully ${bulkAction}d ${selectedUsers.length} user${selectedUsers.length > 1 ? 's' : ''}.`,
+        {
+          duration: 5000
+        }
+      ));
+
+      // Refresh data
+      dispatch(getUsers());
+      dispatch(getUserStats());
     } catch (error) {
       console.error('Bulk action failed:', error);
+      dispatch(showErrorToast(
+        'Bulk Action Failed',
+        `Failed to ${bulkAction} some users. Please try again.`,
+        {
+          persistent: true
+        }
+      ));
     }
   };
 
-  // Handle update user
-  const handleUpdateUser = async () => {
-    dispatch(clearError());
-    const validation = validateUserData(formData, true);
-    
-    if (!validation.isValid) {
-      setFormErrors(validation.errors);
-      return;
-    }
-
-    try {
-      if (currentEditUser) {
-        await dispatch(updateUser({ id: currentEditUser.id, userData: formData })).unwrap();
-        dispatch(hideEditModal());
-        setCurrentEditUser(null);
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          phoneNumber: '',
-          role: 'Staff',
-          department: '',
-          jobTitle: '',
-          employeeId: '',
-          mustChangePassword: true,
-          sendWelcomeEmail: true,
-          theme: 'light',
-          language: 'en-US',
-          timeZone: 'UTC'
-        });
-        setFormErrors({});
-        // Refresh users list
-        dispatch(getUsers());
-        dispatch(getUserStats());
-      }
-    } catch (error) {
-      console.error('Failed to update user:', error);
-    }
-  };
-
-  // Handle delete user
+  // Handle delete user with notification
   const handleDeleteUser = async () => {
     try {
       if (currentDeleteUser) {
         await dispatch(deleteUser(currentDeleteUser.id)).unwrap();
         dispatch(hideDeleteModal());
+        
+        const userName = `${currentDeleteUser.firstName || currentDeleteUser.FirstName || ''} ${currentDeleteUser.lastName || currentDeleteUser.LastName || ''}`.trim();
+        
+        // Show success notification
+        dispatch(showSuccessToast(
+          'User Deleted',
+          `${userName || 'User'} has been deleted successfully.`,
+          {
+            duration: 5000
+          }
+        ));
+
         setCurrentDeleteUser(null);
-        // Refresh users list
         dispatch(getUsers());
+        dispatch(getUserStats());
       }
     } catch (error) {
       console.error('Failed to delete user:', error);
+      dispatch(showErrorToast(
+        'Delete Failed',
+        extractErrorMessage(error) || 'Failed to delete user',
+        {
+          persistent: true
+        }
+      ));
     }
   };
 
-  // User actions
+  // User actions with notifications
   const handleUserAction = async (action, user) => {
     try {
+      const userName = `${user.firstName || user.FirstName || ''} ${user.lastName || user.LastName || ''}`.trim();
+      
       switch (action) {
         case 'activate':
           await dispatch(activateUser({ id: user.id, reason: 'Manual activation' }));
+          dispatch(showSuccessToast(
+            'User Activated',
+            `${userName} has been activated successfully.`
+          ));
           break;
+          
         case 'deactivate':
           await dispatch(deactivateUser({ id: user.id, reason: 'Manual deactivation', revokeAllSessions: true }));
+          dispatch(showWarningToast(
+            'User Deactivated',
+            `${userName} has been deactivated. All sessions revoked.`
+          ));
           break;
+          
         case 'unlock':
           await dispatch(unlockUser({ id: user.id, reason: 'Manual unlock' }));
+          dispatch(showSuccessToast(
+            'User Unlocked',
+            `${userName} account has been unlocked.`
+          ));
           break;
+          
         case 'edit':
           setCurrentEditUser(user);
-          const editFormData = {
-            id: user.id,
-            firstName: user.firstName || user.FirstName || user.first_name || '',
-            lastName: user.lastName || user.LastName || user.last_name || '',
-            email: user.email || user.Email || '',
-            phoneNumber: user.phoneNumber || user.PhoneNumber || user.phone_number || '',
-            role: user.role || user.Role || 'Staff',
-            status: user.isActive !== undefined ? (user.isActive ? 'Active' : 'Inactive') : 'Active',
-            department: user.department || user.Department || '',
-            jobTitle: user.jobTitle || user.JobTitle || user.job_title || '',
-            employeeId: user.employeeId || user.EmployeeId || user.employee_id || '',
-            theme: user.theme || user.Theme || 'light',
-            language: user.language || user.Language || 'en-US',
-            timeZone: user.timeZone || user.TimeZone || user.time_zone || 'UTC',
-            mustChangePassword: user.mustChangePassword !== undefined ? user.mustChangePassword : false,
-            sendWelcomeEmail: false
-          };
-          
-          setFormData(editFormData);
-          
-          // Force re-render after a small delay to ensure state is set
-          setTimeout(() => {
-            dispatch(showEditModal(user));
-          }, 10);
+          dispatch(showEditModal(user));
           break;
+          
         case 'delete':
           setCurrentDeleteUser(user);
           dispatch(showDeleteModal(user));
           break;
+          
         default:
           break;
       }
     } catch (error) {
       console.error('User action failed:', error);
+      dispatch(showErrorToast(
+        'Action Failed',
+        extractErrorMessage(error) || `Failed to ${action} user`,
+        {
+          persistent: true
+        }
+      ));
     }
   };
 
@@ -868,302 +869,45 @@ const UsersListPage = () => {
         </motion.div>
       </div>
 
-      {/* Create User Modal */}
+      {/* Create User Modal with Enhanced UserForm */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => dispatch(hideCreateModal())}
         title="Create New User"
-        size="lg"
+        size="4xl"
+        className="max-h-[90vh]"
       >
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="First Name"
-              required
-              value={formData.firstName}
-              onChange={(e) => handleFormChange('firstName', e.target.value)}
-              error={formErrors.firstName}
-            />
-            
-            <Input
-              label="Last Name"
-              required
-              value={formData.lastName}
-              onChange={(e) => handleFormChange('lastName', e.target.value)}
-              error={formErrors.lastName}
-            />
-          </div>
-          
-          <Input
-            label="Email Address"
-            type="email"
-            required
-            value={formData.email}
-            onChange={(e) => handleFormChange('email', e.target.value)}
-            error={formErrors.email}
-          />
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Phone Number"
-              value={formData.phoneNumber}
-              onChange={(e) => handleFormChange('phoneNumber', e.target.value)}
-              error={formErrors.phoneNumber}
-            />
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Role <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.role}
-                onChange={(e) => handleFormChange('role', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                {availableRoles.map(role => (
-                  <option key={role.name} value={role.name}>{role.name}</option>
-                ))}
-              </select>
-              {formErrors.role && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.role}</p>
-              )}
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Department"
-              value={formData.department}
-              onChange={(e) => handleFormChange('department', e.target.value)}
-              error={formErrors.department}
-            />
-            
-            <Input
-              label="Job Title"
-              value={formData.jobTitle}
-              onChange={(e) => handleFormChange('jobTitle', e.target.value)}
-              error={formErrors.jobTitle}
-            />
-          </div>
-          
-          <Input
-            label="Employee ID"
-            value={formData.employeeId}
-            onChange={(e) => handleFormChange('employeeId', e.target.value)}
-            error={formErrors.employeeId}
-          />
-          
-          <div className="space-y-3">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.mustChangePassword}
-                onChange={(e) => handleFormChange('mustChangePassword', e.target.checked)}
-                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700">Require password change on first login</span>
-            </label>
-            
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.sendWelcomeEmail}
-                onChange={(e) => handleFormChange('sendWelcomeEmail', e.target.checked)}
-                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700">Send welcome email to user</span>
-            </label>
-          </div>
-          
-          {createError && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-4">
-              <div className="flex">
-                <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">Error creating user</h3>
-                  <div className="mt-2 text-sm text-red-700">
-                    <ul className="list-disc pl-5 space-y-1">
-                      {createError.map((error, index) => (
-                        <li key={index}>
-                          {extractErrorMessage(error)}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="flex justify-end space-x-3 pt-6">
-          <Button
-            variant="outline"
-            onClick={() => dispatch(hideCreateModal())}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleCreateUser}
-            loading={loading}
-          >
-            Create User
-          </Button>
-        </div>
+        <UserForm
+          availableRoles={availableRoles}
+          onSubmit={handleCreateUser}
+          onCancel={() => dispatch(hideCreateModal())}
+          loading={loading}
+          error={createError}
+        />
       </Modal>
 
-      {/* Edit User Modal */}
+      {/* Edit User Modal with Enhanced UserForm */}
       <Modal
         isOpen={isEditModalOpen}
         onClose={() => {
           dispatch(hideEditModal());
           setCurrentEditUser(null);
-          setFormErrors({});
         }}
         title={`Edit User${currentEditUser ? ` - ${currentEditUser.firstName || currentEditUser.FirstName || ''} ${currentEditUser.lastName || currentEditUser.LastName || ''}` : ''}`}
-        size="lg"
+        size="4xl"
+        className="max-h-[90vh]"
       >
-        
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="First Name"
-              required
-              value={formData.firstName || ''}
-              onChange={(e) => handleFormChange('firstName', e.target.value)}
-              error={formErrors.firstName}
-            />
-            
-            <Input
-              label="Last Name"
-              required
-              value={formData.lastName || ''}
-              onChange={(e) => handleFormChange('lastName', e.target.value)}
-              error={formErrors.lastName}
-            />
-          </div>
-          
-          <Input
-            label="Email Address"
-            type="email"
-            required
-            value={formData.email || ''}
-            onChange={(e) => handleFormChange('email', e.target.value)}
-            error={formErrors.email}
-          />
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Phone Number"
-              value={formData.phoneNumber || ''}
-              onChange={(e) => handleFormChange('phoneNumber', e.target.value)}
-              error={formErrors.phoneNumber}
-            />
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Role <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.role || 'Staff'}
-                onChange={(e) => handleFormChange('role', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                {availableRoles.map(role => (
-                  <option key={role.name} value={role.name}>{role.name}</option>
-                ))}
-              </select>
-              {formErrors.role && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.role}</p>
-              )}
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.status || 'Active'}
-                onChange={(e) => handleFormChange('status', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-              {formErrors.status && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.status}</p>
-              )}
-            </div>
-
-            <Input
-              label="Employee ID"
-              value={formData.employeeId || ''}
-              onChange={(e) => handleFormChange('employeeId', e.target.value)}
-              error={formErrors.employeeId}
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Department"
-              value={formData.department || ''}
-              onChange={(e) => handleFormChange('department', e.target.value)}
-              error={formErrors.department}
-            />
-            
-            <Input
-              label="Job Title"
-              value={formData.jobTitle || ''}
-              onChange={(e) => handleFormChange('jobTitle', e.target.value)}
-              error={formErrors.jobTitle}
-            />
-          </div>
-          
-          {updateError && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-4">
-              <div className="flex">
-                <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">Error updating user</h3>
-                  <div className="mt-2 text-sm text-red-700">
-                    <ul className="list-disc pl-5 space-y-1">
-                      {updateError.map((error, index) => (
-                        <li key={index}>
-                          {extractErrorMessage(error)}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="flex justify-end space-x-3 pt-6">
-          <Button
-            variant="outline"
-            onClick={() => {
-              dispatch(hideEditModal());
-              setCurrentEditUser(null);
-              setFormErrors({});
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleUpdateUser}
-            loading={loading}
-          >
-            Update User
-          </Button>
-        </div>
+        <UserForm
+          user={currentEditUser}
+          availableRoles={availableRoles}
+          onSubmit={handleUpdateUser}
+          onCancel={() => {
+            dispatch(hideEditModal());
+            setCurrentEditUser(null);
+          }}
+          loading={loading}
+          error={updateError}
+        />
       </Modal>
 
       {/* Delete User Modal */}

@@ -120,6 +120,21 @@ export const EMERGENCY_CONTACT_ENDPOINTS = {
   BY_ID: (visitorId, contactId) => `/api/visitors/${visitorId}/emergency-contacts/${contactId}`
 };
 
+// Visitor Document endpoints (nested under visitors)
+export const VISITOR_DOCUMENT_ENDPOINTS = {
+  BASE: (visitorId) => `/api/visitors/${visitorId}/documents`,
+  BY_ID: (visitorId, docId) => `/api/visitors/${visitorId}/documents/${docId}`,
+  UPLOAD: (visitorId) => `/api/visitors/${visitorId}/documents/upload`,
+  DOWNLOAD: (visitorId, docId) => `/api/visitors/${visitorId}/documents/${docId}/download`,
+  UPLOAD_INFO: (visitorId) => `/api/visitors/${visitorId}/documents/upload-info`
+};
+
+// Visitor Note endpoints (nested under visitors)
+export const VISITOR_NOTE_ENDPOINTS = {
+  BASE: (visitorId) => `/api/visitors/${visitorId}/notes`,
+  BY_ID: (visitorId, noteId) => `/api/visitors/${visitorId}/notes/${noteId}`
+};
+
 // Invitation endpoints
 export const INVITATION_ENDPOINTS = {
   BASE: '/api/invitations',
@@ -129,14 +144,24 @@ export const INVITATION_ENDPOINTS = {
   SUBMIT: (id) => `/api/invitations/${id}/submit`,
   CANCEL: (id) => `/api/invitations/${id}/cancel`,
   QR_CODE: (id) => `/api/invitations/${id}/qr-code`,
-  QR_IMAGE: (id) => `/api/invitations/${id}/qr-image`,
-  VALIDATE_QR: '/api/invitations/validate-qr',
+  QR_IMAGE: (id) => `/api/invitations/${id}/qr-code/image`, // Fixed path
+  QR_DATA: (id) => `/api/invitations/${id}/qr-code/data`, // New endpoint
+  QR_EMAIL: (id) => `/api/invitations/${id}/send-qr-email`, // New endpoint
+  VALIDATE_QR: '/api/invitations/qr-code/validate', // Fixed path
   CHECK_IN: '/api/invitations/check-in',
   CHECK_OUT: (id) => `/api/invitations/${id}/check-out`,
   RESEND: (id) => `/api/invitations/${id}/resend`,
   TEMPLATES: '/api/invitations/templates',
   BULK_CREATE: '/api/invitations/bulk',
   EXPORT: '/api/invitations/export'
+};
+
+// Excel/XLSX endpoints
+export const EXCEL_ENDPOINTS = {
+  DOWNLOAD_TEMPLATE: '/api/xlsx/invitation-template',
+  UPLOAD_INVITATION: '/api/xlsx/upload-invitation',
+  SEND_TEMPLATE: '/api/xlsx/send-template',
+  VALIDATE: '/api/xlsx/validate'
 };
 
 
@@ -198,7 +223,10 @@ export const API_ENDPOINTS = {
   LOCATIONS: LOCATION_ENDPOINTS,
   VISITORS: VISITOR_ENDPOINTS,
   EMERGENCY_CONTACTS: EMERGENCY_CONTACT_ENDPOINTS,
+  VISITOR_DOCUMENTS: VISITOR_DOCUMENT_ENDPOINTS,
+  VISITOR_NOTES: VISITOR_NOTE_ENDPOINTS,
   INVITATIONS: INVITATION_ENDPOINTS,
+  EXCEL: EXCEL_ENDPOINTS,
   ADMIN: ADMIN_ENDPOINTS,
   CONFIGURATION: CONFIGURATION_ENDPOINTS,
   FILES: FILE_ENDPOINTS,

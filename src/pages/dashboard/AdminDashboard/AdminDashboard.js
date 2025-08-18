@@ -11,7 +11,11 @@ import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpi
 
 // Import stats selectors
 import { selectUsersStatsSummary } from '../../../store/selectors/userSelectors';
-import { selectVisitorStatistics } from '../../../store/selectors/visitorSelectors';
+import { 
+  selectVisitorStatistics, 
+  selectVisitorStatisticsLoading, 
+  selectVisitorStatisticsError 
+} from '../../../store/selectors/visitorSelectors';
 
 // Import actions to load stats
 import { getUserStats } from '../../../store/slices/usersSlice';
@@ -35,12 +39,17 @@ const AdminDashboard = () => {
   // Get real data from selectors
   const userStats = useSelector(selectUsersStatsSummary);
   const visitorStats = useSelector(selectVisitorStatistics);
+  const visitorStatsLoading = useSelector(selectVisitorStatisticsLoading);
+  const visitorStatsError = useSelector(selectVisitorStatisticsError);
   
   const [currentTime, setCurrentTime] = useState(new Date());
   const [systemData, setSystemData] = useState({
     systemHealth: 98.5,
     securityAlerts: 2,
-    storageUsed: 65.2
+    storageUsed: 65.2,
+    todaysVisitors: 0,
+    totalVisitors: 0,
+    activeUsers: 0
   });
 
   // Load real data on mount
@@ -56,6 +65,26 @@ const AdminDashboard = () => {
     
     return () => clearInterval(timer);
   }, [dispatch]);
+
+  // Update systemData when Redux stats are loaded
+  useEffect(() => {
+    if (visitorStats) {
+      setSystemData(prev => ({
+        ...prev,
+        totalVisitors: visitorStats.total || 0,
+        todaysVisitors: visitorStats.todaysVisitors || visitorStats.today || 0
+      }));
+    }
+  }, [visitorStats]);
+
+  useEffect(() => {
+    if (userStats) {
+      setSystemData(prev => ({
+        ...prev,
+        activeUsers: userStats.active || 0
+      }));
+    }
+  }, [userStats]);
 
   const [recentActivity, setRecentActivity] = useState([
     {
@@ -555,7 +584,18 @@ const AdminDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Today's Visitors</p>
-                <p className="text-2xl font-bold text-blue-600">{systemData.todaysVisitors}</p>
+                {visitorStatsLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <LoadingSpinner size="sm" />
+                    <span className="text-sm text-gray-500">Loading...</span>
+                  </div>
+                ) : visitorStatsError ? (
+                  <p className="text-2xl font-bold text-red-500">Error</p>
+                ) : (
+                  <p className="text-2xl font-bold text-blue-600">
+                    {systemData?.todaysVisitors?.toLocaleString() || visitorStats?.todaysVisitors?.toLocaleString() || '0'}
+                  </p>
+                )}
               </div>
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -569,7 +609,18 @@ const AdminDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Visitors</p>
-                <p className="text-2xl font-bold text-green-600">{systemData.totalVisitors.toLocaleString()}</p>
+                {visitorStatsLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <LoadingSpinner size="sm" />
+                    <span className="text-sm text-gray-500">Loading...</span>
+                  </div>
+                ) : visitorStatsError ? (
+                  <p className="text-2xl font-bold text-red-500">Error</p>
+                ) : (
+                  <p className="text-2xl font-bold text-green-600">
+                    {systemData?.totalVisitors?.toLocaleString() || visitorStats?.total?.toLocaleString() || '0'}
+                  </p>
+                )}
               </div>
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                 <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

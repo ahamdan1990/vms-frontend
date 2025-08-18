@@ -63,6 +63,7 @@ const invitationService = {
    * Requires: Invitation.Create permission
    */
   async createInvitation(invitationData) {
+    console.log(invitationData)
     const response = await apiClient.post(INVITATION_ENDPOINTS.BASE, invitationData);
     return extractApiData(response);
   },
@@ -145,14 +146,42 @@ const invitationService = {
 
   /**
    * Gets QR code image for an invitation
-   * GET /api/invitations/{id}/qr-image
+   * GET /api/invitations/{id}/qr-code/image
    * Requires: Invitation.Read permission
    */
-  async getQrImage(id) {
-    const response = await apiClient.get(INVITATION_ENDPOINTS.QR_IMAGE(id), {
+  async getQrImage(id, size = 300, branded = false) {
+    const queryParams = { size, branded };
+    const queryString = buildQueryString(queryParams);
+    const response = await apiClient.get(`${INVITATION_ENDPOINTS.QR_IMAGE(id)}${queryString}`, {
       responseType: 'blob'
     });
     return response.data; // Return blob directly
+  },
+
+  /**
+   * Gets QR code data for an invitation
+   * GET /api/invitations/{id}/qr-code/data
+   * Requires: Invitation.Read permission
+   */
+  async getQrData(id) {
+    const response = await apiClient.get(INVITATION_ENDPOINTS.QR_DATA(id));
+    return extractApiData(response);
+  },
+
+  /**
+   * Sends QR code to visitor via email
+   * POST /api/invitations/{id}/send-qr-email
+   * Requires: Invitation.Read permission
+   */
+  async sendQrCodeEmail(id, options = {}) {
+    const emailData = {
+      customMessage: options.customMessage || null,
+      includeQrImage: options.includeQrImage !== undefined ? options.includeQrImage : true,
+      alternativeEmail: options.alternativeEmail || null
+    };
+    
+    const response = await apiClient.post(INVITATION_ENDPOINTS.QR_EMAIL(id), emailData);
+    return extractApiData(response);
   },
 
   /**

@@ -40,13 +40,10 @@ import UserForm from '../../../components/forms/UserForm/UserForm';
 const UserDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const dispatch = useDispatch();
   
   const { user: currentAuthUser, userId: currentUserId } = useAuth();
-  const { 
-    user: userPermissions
-  } = usePermissions();
+  const { user: userPermissions } = usePermissions();
 
   // Extract specific permissions for easier use
   const canManageUsers = userPermissions.canManage;
@@ -67,7 +64,7 @@ const UserDetailPage = () => {
     deleteLoading,
     userActivity
   } = useSelector(state => state.users);
-  
+
   const availableRoles = useSelector(state => state.users.availableRoles || []);
 
   // Local state
@@ -550,6 +547,7 @@ const UserDetailPage = () => {
                       </div>
                     </div>
 
+                    {console.log(currentUser)}
                     {/* Work Information */}
                     <div className="bg-gray-50 rounded-lg p-6">
                       <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
@@ -598,7 +596,7 @@ const UserDetailPage = () => {
                         </div>
                         
                         <div>
-                          <label className="block text-sm font-medium text-gray-600">Created</label>
+                          <label className="block text-sm font-medium text-gray-600">Created On</label>
                           <p className="text-gray-900">{formatDate(currentUser.createdOn)}</p>
                         </div>
                         

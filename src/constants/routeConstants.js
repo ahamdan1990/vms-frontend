@@ -31,7 +31,13 @@ export const DASHBOARD_ROUTES = {
   // Role-specific dashboards
   STAFF: '/staff/dashboard',
   OPERATOR: '/operator/dashboard',
-  ADMIN: '/admin/dashboard'
+  ADMIN: '/admin/dashboard',
+  
+  // New advanced dashboards
+  RECEPTIONIST: '/receptionist',
+  ANALYTICS: '/analytics',
+  INTEGRATED: '/integrated-management',
+  EXCEL_MANAGEMENT: '/excel-management'
 };
 
 // User management routes
@@ -248,6 +254,38 @@ export const ROUTE_METADATA = {
     requiresAuth: true,
     roles: ['Staff', 'Operator', 'Administrator']
   },
+
+  [DASHBOARD_ROUTES.RECEPTIONIST]: {
+    title: 'Receptionist Dashboard',
+    breadcrumb: 'Receptionist',
+    requiresAuth: true,
+    roles: ['Operator', 'Administrator'],
+    permissions: ['CheckIn.Process']
+  },
+
+  [DASHBOARD_ROUTES.ANALYTICS]: {
+    title: 'Visitor Analytics',
+    breadcrumb: 'Analytics',
+    requiresAuth: true,
+    roles: ['Staff', 'Operator', 'Administrator'],
+    permissions: ['Visitor.Read']
+  },
+
+  [DASHBOARD_ROUTES.EXCEL_MANAGEMENT]: {
+    title: 'Excel Management',
+    breadcrumb: 'Excel Management',
+    requiresAuth: true,
+    roles: ['Administrator'],
+    permissions: ['Invitation.BulkImport']
+  },
+
+  [DASHBOARD_ROUTES.INTEGRATED]: {
+    title: 'Integrated Management',
+    breadcrumb: 'Integrated Management',
+    requiresAuth: true,
+    roles: ['Operator', 'Administrator'],
+    permissions: ['Visitor.Read']
+  },
   
   [USER_ROUTES.LIST]: {
     title: 'Users',
@@ -324,6 +362,20 @@ export const NAVIGATION_MENU = {
       roles: ['Staff', 'Operator', 'Administrator']
     },
     {
+      id: 'integrated-management',
+      label: 'Integrated Management',
+      path: DASHBOARD_ROUTES.INTEGRATED,
+      icon: 'squares-2x2',
+      roles: ['Operator', 'Administrator']
+    },
+    {
+      id: 'receptionist',
+      label: 'Receptionist',
+      path: DASHBOARD_ROUTES.RECEPTIONIST,
+      icon: 'user-check',
+      roles: ['Operator', 'Administrator']
+    },
+    {
       id: 'invitations',
       label: 'Invitations',
       path: INVITATION_ROUTES.LIST,
@@ -379,10 +431,17 @@ export const NAVIGATION_MENU = {
       roles: ['Operator', 'Administrator']
     },
     {
+      id: 'analytics',
+      label: 'Analytics',
+      path: DASHBOARD_ROUTES.ANALYTICS,
+      icon: 'chart-bar',
+      roles: ['Staff', 'Operator', 'Administrator']
+    },
+    {
       id: 'reports',
       label: 'Reports',
       path: REPORT_ROUTES.LIST,
-      icon: 'chart-bar',
+      icon: 'document-chart-bar',
       roles: ['Staff', 'Operator', 'Administrator']
     },
     {
@@ -390,6 +449,13 @@ export const NAVIGATION_MENU = {
       label: 'Users',
       path: USER_ROUTES.LIST,
       icon: 'user-group',
+      roles: ['Administrator']
+    },
+    {
+      id: 'excel-management',
+      label: 'Excel Management',
+      path: DASHBOARD_ROUTES.EXCEL_MANAGEMENT,
+      icon: 'document-arrow-down',
       roles: ['Administrator']
     },
     {

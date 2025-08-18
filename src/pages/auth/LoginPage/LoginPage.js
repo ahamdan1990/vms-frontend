@@ -6,6 +6,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../../store/slices/uiSlice';
 import LoginForm from '../../../components/forms/LoginForm/LoginForm';
+import { useTheme } from '../../../hooks/useTheme'; 
 
 /**
  * Beautiful Login Page with animations and professional design
@@ -15,7 +16,7 @@ const LoginPage = () => {
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const { login, loading, error } = useAuth();
-
+  const {setThemeMode } = useTheme(); 
   useEffect(() => {
     dispatch(setPageTitle('Sign In'));
   }, [dispatch]);
@@ -23,12 +24,14 @@ const LoginPage = () => {
   const handleLogin = async (credentials) => {
     try {
       const result = await login(credentials);
-      
+
       if (result.payload?.loginResponse?.isSuccess) {
         // Get intended destination or default based on role
+        const user = result.payload.user;
         const from = searchParams.get('from');
         const destination = from ? decodeURIComponent(from) : '/dashboard';
-        
+
+        setThemeMode(user.theme || 'auto');
         navigate(destination, { replace: true });
       }
     } catch (error) {

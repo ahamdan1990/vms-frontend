@@ -34,7 +34,7 @@ import ProfilePhotoUpload from '../../../components/common/ProfilePhotoUpload/Pr
 
 /**
  * Professional Profile Page for current user self-management
- * Features: Profile editing, password change, activity history, session management, preferences
+ * Enhanced with Lebanese address and phone number support
  */
 const ProfilePage = () => {
   const dispatch = useDispatch();
@@ -60,25 +60,49 @@ const ProfilePage = () => {
   // Local state for tabs
   const [activeTab, setActiveTab] = useState('profile');
   
-  // Profile editing state
+  // Enhanced profile editing state with all fields
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileData, setProfileData] = useState({
     firstName: '',
     lastName: '',
     email: '',
+
+    // Enhanced phone fields
     phoneNumber: '',
+    phoneCountryCode: '961', // Default to Lebanon
+    phoneType: 'Mobile',
+    
+    // User preferences
+    timeZone: 'Asia/Beirut',
+    language: 'en-US',
+    theme: 'light',
+    
+    // Work information
     department: '',
     jobTitle: '',
     employeeId: '',
-    // Address fields
+    
+    // Enhanced address fields
+    addressType: 'Home',
     street1: '',
     street2: '',
     city: '',
-    state: '',
+    state: '', // For backend compatibility
+    governorate: '', // Lebanon-specific
     postalCode: '',
-    country: '',
-    // Profile photo URL
-    profilePhotoUrl: ''
+    country: 'Lebanon',
+    latitude: '',
+    longitude: '',
+    
+    // Profile photo
+    profilePhotoUrl: '',
+    
+    // Status (required by backend)
+    status: 'Active',
+
+    //Dates
+    createdOn:'',
+    passwordChangedDate: ""
   });
   const [profileErrors, setProfileErrors] = useState({});
   const [profileLoading, setProfileLoading] = useState(false);
@@ -103,7 +127,7 @@ const ProfilePage = () => {
   const [preferences, setPreferences] = useState({
     theme: 'light',
     language: 'en-US',
-    timeZone: 'UTC'
+    timeZone: 'Asia/Beirut'
   });
   const [preferencesLoading, setPreferencesLoading] = useState(false);
 
@@ -118,7 +142,7 @@ const ProfilePage = () => {
     };
   }, [dispatch]);
 
-  // Load profile data from new profile endpoint
+  // Enhanced profile data loading
   const loadProfileData = async () => {
     try {
       setProfileLoading(true);
@@ -130,23 +154,49 @@ const ProfilePage = () => {
         firstName: profile.firstName || '',
         lastName: profile.lastName || '',
         email: profile.email || '',
+        
+        // Enhanced phone fields
         phoneNumber: profile.phoneNumber || '',
+        phoneCountryCode: profile.phoneCountryCode || '961',
+        phoneType: profile.phoneType || 'Mobile',
+        
+        // User preferences
+        timeZone: profile.timeZone || 'Asia/Beirut',
+        language: profile.language || 'en-US',
+        theme: profile.theme || 'light',
+        
+        // Work information
         department: profile.department || '',
         jobTitle: profile.jobTitle || '',
         employeeId: profile.employeeId || '',
+        
+        // Enhanced address fields
+        addressType: profile.addressType || 'Home',
         street1: profile.street1 || '',
         street2: profile.street2 || '',
         city: profile.city || '',
-        state: profile.state || '',
+        state: profile.state || profile.governorate || '', // Support both
+        governorate: profile.governorate || profile.state || '', // Lebanon-specific
         postalCode: profile.postalCode || '',
-        country: profile.country || '',
-        profilePhotoUrl: profile.profilePhotoUrl || ''
+        country: profile.country || 'Lebanon',
+        latitude: profile.latitude || '',
+        longitude: profile.longitude || '',
+        
+        // Profile photo
+        profilePhotoUrl: profile.profilePhotoUrl || '',
+        
+        // Status (required by backend)
+        status: profile.isActive ? 'Active' : 'Inactive',
+
+        //Dates
+        createdOn: profile.createdOn || '',
+        passwordChangedDate: profile.passwordChangedDate || ""
       });
       
       setPreferences({
         theme: profile.theme || 'light',
         language: profile.language || 'en-US',
-        timeZone: profile.timeZone || 'UTC'
+        timeZone: profile.timeZone || 'Asia/Beirut'
       });
     } catch (error) {
       console.error('Failed to load profile:', error);
@@ -196,28 +246,51 @@ const ProfilePage = () => {
     setPreferences(prev => ({ ...prev, [key]: value }));
   };
 
-  // Save profile changes
+  // Enhanced save profile with all fields
   const handleSaveProfile = async () => {
     try {
       setProfileLoading(true);
       
+      // Prepare submission data with status field and governorate mapping
+      const submissionData = {
+        ...profileData,
+        // Map governorate to state for backend compatibility
+        state: profileData.governorate || profileData.state,
+        // Ensure status is included
+        status: profileData.status || 'Active',
+        // Convert status to isActive boolean for backend
+        isActive: profileData.status === 'Active'
+      };
+      
       // Validate profile data
-      const validation = validateUserData(profileData, true);
+      const validation = validateUserData(submissionData, true);
       if (!validation.isValid) {
         setProfileErrors(validation.errors);
+        dispatch(showErrorToast('Validation Error', 'Please fix the errors in the form'));
         return;
       }
 
-      await userService.updateCurrentUserProfile(profileData);
+      console.log('Submitting profile data:', submissionData); // Debug log
+
+      await userService.updateCurrentUserProfile(submissionData);
       dispatch(showSuccessToast('Success', 'Profile updated successfully'));
       setIsEditingProfile(false);
       setProfileErrors({});
       
       // Reload profile data to get updated values
       await loadProfileData();
+      
+      // Refresh auth state to update header
+      dispatch(getCurrentUser());
     } catch (error) {
       console.error('Profile update failed:', error);
-      dispatch(showErrorToast('Error', 'Failed to update profile'));
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to update profile';
+      dispatch(showErrorToast('Error', errorMessage));
+      
+      // If there are specific field errors, show them
+      if (error.response?.data?.errors) {
+        setProfileErrors(error.response.data.errors);
+      }
     } finally {
       setProfileLoading(false);
     }
@@ -283,9 +356,18 @@ const ProfilePage = () => {
     }
   };
 
-  // Handle address form changes
+  // Enhanced address form changes handler
   const handleAddressChange = (fieldName, value) => {
-    setProfileData(prev => ({ ...prev, [fieldName]: value }));
+    setProfileData(prev => {
+      const newData = { ...prev, [fieldName]: value };
+      
+      // If governorate changes, also update state for backend compatibility
+      if (fieldName === 'governorate') {
+        newData.state = value;
+      }
+      
+      return newData;
+    });
     
     // Clear field error when user starts typing
     if (profileErrors[fieldName]) {
@@ -431,7 +513,7 @@ const ProfilePage = () => {
     { 
       id: 'security', 
       label: 'Security', 
-      icon: '🔒',
+      icon: '🔐',
       description: 'Password and session management'
     },
     { 
@@ -698,6 +780,7 @@ const ProfilePage = () => {
                         type="tel"
                         onChange={handleProfileChange}
                         error={profileErrors.phoneNumber}
+                        placeholder="03 962 114"
                       />
                       
                       <ProfileField
@@ -719,15 +802,156 @@ const ProfilePage = () => {
                       />
                     </div>
 
-                    {/* Address Section */}
+                    {/* Enhanced Address Section */}
                     <div className="mt-8 pt-6 border-t border-gray-200">
-                      <AddressForm
-                        addressData={profileData}
-                        onChange={handleAddressChange}
-                        errors={profileErrors}
-                        disabled={!isEditingProfile}
-                        showTitle={true}
-                      />
+                      <h4 className="text-md font-medium text-gray-900 mb-4">Address Information</h4>
+                      
+                      {isEditingProfile ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <ProfileField
+                            label="Street Address"
+                            value={profileData.street1}
+                            isEditing={isEditingProfile}
+                            name="street1"
+                            onChange={handleProfileChange}
+                            error={profileErrors.street1}
+                            placeholder="Building name, Street name"
+                          />
+                          
+                          <ProfileField
+                            label="Address Line 2 (Optional)"
+                            value={profileData.street2}
+                            isEditing={isEditingProfile}
+                            name="street2"
+                            onChange={handleProfileChange}
+                            error={profileErrors.street2}
+                            placeholder="Floor, Apartment, Unit"
+                          />
+                          
+                          <ProfileField
+                            label="City"
+                            value={profileData.city}
+                            isEditing={isEditingProfile}
+                            name="city"
+                            onChange={handleProfileChange}
+                            error={profileErrors.city}
+                            placeholder="e.g., Beirut, Tripoli, Sidon"
+                          />
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Governorate</label>
+                            <select
+                              name="governorate"
+                              value={profileData.governorate}
+                              onChange={handleProfileChange}
+                              className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                              <option value="">Select Governorate</option>
+                              <option value="Beirut">Beirut</option>
+                              <option value="Mount Lebanon">Mount Lebanon</option>
+                              <option value="North Lebanon">North Lebanon</option>
+                              <option value="South Lebanon">South Lebanon</option>
+                              <option value="Beqaa">Beqaa</option>
+                              <option value="Akkar">Akkar</option>
+                              <option value="Baalbek-Hermel">Baalbek-Hermel</option>
+                              <option value="Nabatieh">Nabatieh</option>
+                            </select>
+                            {profileErrors.governorate && (
+                              <p className="text-red-600 text-sm mt-1">{profileErrors.governorate}</p>
+                            )}
+                          </div>
+                          
+                          <ProfileField
+                            label="Postal Code (Optional)"
+                            value={profileData.postalCode}
+                            isEditing={isEditingProfile}
+                            name="postalCode"
+                            onChange={handleProfileChange}
+                            error={profileErrors.postalCode}
+                            placeholder="e.g., 1107-2180"
+                          />
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                            <select
+                              name="country"
+                              value={profileData.country}
+                              onChange={handleProfileChange}
+                              className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                              <option value="Lebanon">🇱🇧 Lebanon</option>
+                              <option value="Syria">🇸🇾 Syria</option>
+                              <option value="Jordan">🇯🇴 Jordan</option>
+                              <option value="United States">🇺🇸 United States</option>
+                              <option value="Canada">🇨🇦 Canada</option>
+                              <option value="Other">🌍 Other</option>
+                            </select>
+                          </div>
+
+                            <ProfileField
+                              label="Latitude (Optional)"
+                              value={profileData.latitude}
+                              isEditing={isEditingProfile}
+                              name="latitude"
+                              onChange={handleProfileChange}
+                              error={profileErrors.latitude}
+                              placeholder="e.g., 33.8885"
+                            />
+
+                            <ProfileField
+                              label="Longitude (Optional)"
+                              value={profileData.longitude}
+                              isEditing={isEditingProfile}
+                              name="longitude"
+                              onChange={handleProfileChange}
+                              error={profileErrors.longitude}
+                              placeholder="e.g., 35.47490"
+                            />
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <ProfileField
+                            label="Street Address"
+                            value={profileData.street1}
+                            isEditing={false}
+                          />
+                          <ProfileField
+                            label="City"
+                            value={profileData.city}
+                            isEditing={false}
+                          />
+                          <ProfileField
+                            label="Governorate"
+                            value={profileData.governorate}
+                            isEditing={false}
+                          />
+                          <ProfileField
+                            label="Country"
+                            value={profileData.country}
+                            isEditing={false}
+                          />
+                          <ProfileField
+                            label="Latitude"
+                            value={profileData.latitude}
+                            isEditing={false}
+                          />
+                          <ProfileField
+                            label="Longitude"
+                            value={profileData.longitude}
+                            isEditing={false}
+                          />
+                          <ProfileField
+                            label="Postal Code"
+                            value={profileData.postalCode}
+                            isEditing={false}
+                          />
+                          <ProfileField
+                            label="Address Type"
+                            value={profileData.addressType}
+                            isEditing={false}
+                          />
+                        </div>
+                      )}
                     </div>
 
                     {/* Account Information (Read Only) */}
@@ -740,16 +964,19 @@ const ProfilePage = () => {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
-                          <p className="text-gray-900 py-2.5 px-4 bg-gray-50 rounded-lg">{user.employeeId || 'Not assigned'}</p>
+                          <p className="text-gray-900 py-2.5 px-4 bg-gray-50 rounded-lg">{profileData.employeeId || 'Not assigned'}</p>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Member Since</label>
-                          <p className="text-gray-900 py-2.5 px-4 bg-gray-50 rounded-lg">{formatDate(user.createdOn)}</p>
+                          <p className="text-gray-900 py-2.5 px-4 bg-gray-50 rounded-lg">
+                            {console.log(profileData)}
+                            {formatDate(profileData.createdOn || profileData.createdDate || profileData.registrationDate)}
+                          </p>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Last Login</label>
                           <p className="text-gray-900 py-2.5 px-4 bg-gray-50 rounded-lg">
-                            {user.lastLoginDate ? formatDateTime(user.lastLoginDate) : 'Never'}
+                            {profileData.lastLoginDate ? formatDateTime(profileData.lastLoginDate) : 'Never'}
                           </p>
                         </div>
                       </div>
@@ -915,9 +1142,11 @@ const ProfilePage = () => {
                               onChange={(e) => handlePreferenceChange('language', e.target.value)}
                               className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             >
-                              <option value="en-US">English</option>
-                              <option value="es-ES">Spanish</option>
-                              <option value="fr-FR">French</option>
+                              <option value="en-US">🇺🇸 English (US)</option>
+                              <option value="ar-LB">🇱🇧 Arabic (Lebanon)</option>
+                              <option value="ar-SA">🇸🇦 Arabic (Standard)</option>
+                              <option value="en-GB">🇬🇧 English (UK)</option>
+                              <option value="fr-FR">🇫🇷 French</option>
                             </select>
                           </div>
 
@@ -928,11 +1157,13 @@ const ProfilePage = () => {
                               onChange={(e) => handlePreferenceChange('timeZone', e.target.value)}
                               className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             >
+                              <option value="Asia/Beirut">🇱🇧 Beirut Time (EET)</option>
+                              <option value="Asia/Damascus">🇸🇾 Damascus</option>
+                              <option value="Asia/Amman">🇯🇴 Amman</option>
                               <option value="UTC">UTC</option>
                               <option value="America/New_York">Eastern Time</option>
-                              <option value="America/Chicago">Central Time</option>
-                              <option value="America/Denver">Mountain Time</option>
                               <option value="America/Los_Angeles">Pacific Time</option>
+                              <option value="Europe/London">London</option>
                             </select>
                           </div>
                         </div>

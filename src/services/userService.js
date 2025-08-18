@@ -1,10 +1,11 @@
+// src/services/userService.js
 import apiClient, { extractApiData } from './apiClient';
 import { USER_ENDPOINTS, buildQueryString } from './apiEndpoints';
 
 /**
  * User management service that matches the backend API endpoints exactly
  * All endpoints require appropriate permissions as defined in the backend
- * Now properly integrated with apiEndpoints constants
+ * Enhanced with phone number and address support
  */
 const userService = {
   /**
@@ -47,7 +48,7 @@ const userService = {
   },
 
   /**
-   * Creates a new user
+   * Creates a new user with enhanced phone and address support
    * POST /api/Users
    * Requires: User.Create permission
    */
@@ -56,14 +57,33 @@ const userService = {
       firstName: userData.firstName,
       lastName: userData.lastName,
       email: userData.email,
+      
+      // Enhanced phone fields
       phoneNumber: userData.phoneNumber || null,
+      phoneCountryCode: userData.phoneCountryCode || null,
+      phoneType: userData.phoneType || 'Mobile',
+      
       role: userData.role,
       department: userData.department || null,
       jobTitle: userData.jobTitle || null,
       employeeId: userData.employeeId || null,
-      timeZone: userData.timeZone || null,
-      language: userData.language || null,
-      theme: userData.theme || null,
+      
+      // User preferences
+      timeZone: userData.timeZone || 'UTC',
+      language: userData.language || 'en-US',
+      theme: userData.theme || 'light',
+      
+      // Enhanced address fields
+      addressType: userData.addressType || 'Home',
+      street1: userData.street1 || null,
+      street2: userData.street2 || null,
+      city: userData.city || null,
+      state: userData.state || null,
+      postalCode: userData.postalCode || null,
+      country: userData.country || null,
+      latitude: userData.latitude || null,
+      longitude: userData.longitude || null,
+      
       mustChangePassword: userData.mustChangePassword || false,
       sendWelcomeEmail: userData.sendWelcomeEmail || true
     });
@@ -72,7 +92,7 @@ const userService = {
   },
 
   /**
-   * Updates an existing user
+   * Updates an existing user with enhanced phone and address support
    * PUT /api/Users/{id}
    * Requires: User.Update permission
    */
@@ -81,17 +101,35 @@ const userService = {
       firstName: userData.firstName,
       lastName: userData.lastName,
       email: userData.email,
+      
+      // Enhanced phone fields
       phoneNumber: userData.phoneNumber || null,
+      phoneCountryCode: userData.phoneCountryCode || null,
+      phoneType: userData.phoneType || 'Mobile',
+      
       role: userData.role,
       status: userData.status,
       department: userData.department || null,
       jobTitle: userData.jobTitle || null,
       employeeId: userData.employeeId || null,
-      timeZone: userData.timeZone || null,
-      language: userData.language || null,
-      theme: userData.theme || null
+      
+      // User preferences
+      timeZone: userData.timeZone || 'UTC',
+      language: userData.language || 'en-US',
+      theme: userData.theme || 'light',
+      
+      // Enhanced address fields
+      addressType: userData.addressType || 'Home',
+      street1: userData.street1 || null,
+      street2: userData.street2 || null,
+      city: userData.city || null,
+      state: userData.state || null,
+      postalCode: userData.postalCode || null,
+      country: userData.country || null,
+      latitude: userData.latitude || null,
+      longitude: userData.longitude || null
     });
-    console.log(response);
+    
     return extractApiData(response);
   },
 
@@ -160,7 +198,6 @@ const userService = {
 
     const queryString = buildQueryString(queryParams);
     const response = await apiClient.get(`${USER_ENDPOINTS.ACTIVITY(id)}${queryString}`);
-    console.log(response);
     return extractApiData(response);
   },
 
@@ -199,6 +236,8 @@ const userService = {
       lastName: profileData.lastName,
       email: profileData.email,
       phoneNumber: profileData.phoneNumber || null,
+      phoneCountryCode: profileData.phoneCountryCode || null,
+      phoneType: profileData.phoneType || 'Mobile',
       department: profileData.department || null,
       jobTitle: profileData.jobTitle || null,
       employeeId: profileData.employeeId || null,
@@ -207,7 +246,9 @@ const userService = {
       city: profileData.city || null,
       state: profileData.state || null,
       postalCode: profileData.postalCode || null,
-      country: profileData.country || null
+      country: profileData.country || null,
+      latitude: profileData.latitude || null,
+      longitude: profileData.longitude || null
     });
     return extractApiData(response);
   },
@@ -323,24 +364,24 @@ const userService = {
   },
 
   /**
-   * Validate user data before submission
+   * Enhanced validation for user data including phone and address
    */
   validateUserData(userData, isUpdate = false) {
-    const errors = [];
+    const errors = {};
 
     // Required fields for creation
     if (!isUpdate) {
       if (!userData.firstName?.trim()) {
-        errors.push('First name is required');
+        errors.firstName = 'First name is required';
       }
       if (!userData.lastName?.trim()) {
-        errors.push('Last name is required');
+        errors.lastName = 'Last name is required';
       }
       if (!userData.email?.trim()) {
-        errors.push('Email is required');
+        errors.email = 'Email is required';
       }
       if (!userData.role?.trim()) {
-        errors.push('Role is required');
+        errors.role = 'Role is required';
       }
     }
 
@@ -348,41 +389,75 @@ const userService = {
     if (userData.email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(userData.email)) {
-        errors.push('Please enter a valid email address');
+        errors.email = 'Please enter a valid email address';
       }
     }
 
-    // Phone number validation (if provided)
+    // Enhanced phone number validation
     if (userData.phoneNumber) {
-      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-      if (!phoneRegex.test(userData.phoneNumber.replace(/[\s\-\(\)]/g, ''))) {
-        errors.push('Please enter a valid phone number');
+      const phoneRegex = /^[\+]?[0-9\s\-\(\)]{7,20}$/;
+      if (!phoneRegex.test(userData.phoneNumber)) {
+        errors.phoneNumber = 'Please enter a valid phone number';
+      }
+    }
+
+    // Address validation
+    if (userData.street1 && userData.street1.length > 100) {
+      errors.street1 = 'Street address cannot exceed 100 characters';
+    }
+    if (userData.street2 && userData.street2.length > 100) {
+      errors.street2 = 'Street address line 2 cannot exceed 100 characters';
+    }
+    if (userData.city && userData.city.length > 50) {
+      errors.city = 'City cannot exceed 50 characters';
+    }
+    if (userData.state && userData.state.length > 50) {
+      errors.state = 'State cannot exceed 50 characters';
+    }
+    if (userData.postalCode && userData.postalCode.length > 20) {
+      errors.postalCode = 'Postal code cannot exceed 20 characters';
+    }
+    if (userData.country && userData.country.length > 50) {
+      errors.country = 'Country cannot exceed 50 characters';
+    }
+
+    // Coordinate validation
+    if (userData.latitude !== null && userData.latitude !== undefined && userData.latitude !== '') {
+      const lat = parseFloat(userData.latitude);
+      if (isNaN(lat) || lat < -90 || lat > 90) {
+        errors.latitude = 'Latitude must be between -90 and 90 degrees';
+      }
+    }
+    if (userData.longitude !== null && userData.longitude !== undefined && userData.longitude !== '') {
+      const lng = parseFloat(userData.longitude);
+      if (isNaN(lng) || lng < -180 || lng > 180) {
+        errors.longitude = 'Longitude must be between -180 and 180 degrees';
       }
     }
 
     // Name length validation
     if (userData.firstName && userData.firstName.length > 50) {
-      errors.push('First name cannot exceed 50 characters');
+      errors.firstName = 'First name cannot exceed 50 characters';
     }
     if (userData.lastName && userData.lastName.length > 50) {
-      errors.push('Last name cannot exceed 50 characters');
+      errors.lastName = 'Last name cannot exceed 50 characters';
     }
 
     // Department and job title length
     if (userData.department && userData.department.length > 100) {
-      errors.push('Department cannot exceed 100 characters');
+      errors.department = 'Department cannot exceed 100 characters';
     }
     if (userData.jobTitle && userData.jobTitle.length > 100) {
-      errors.push('Job title cannot exceed 100 characters');
+      errors.jobTitle = 'Job title cannot exceed 100 characters';
     }
 
     // Employee ID length
     if (userData.employeeId && userData.employeeId.length > 50) {
-      errors.push('Employee ID cannot exceed 50 characters');
+      errors.employeeId = 'Employee ID cannot exceed 50 characters';
     }
 
     return {
-      isValid: errors.length === 0,
+      isValid: Object.keys(errors).length === 0,
       errors
     };
   }

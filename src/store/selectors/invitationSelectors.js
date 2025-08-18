@@ -200,6 +200,13 @@ export const selectQrCodeData = createSelector(
   (invitations) => invitations.qrCodeData
 );
 
+// QR code Image
+export const selectQrCodeImage = createSelector(
+  [selectInvitationsState],
+  (invitations) => invitations.qrCodeImage
+);
+
+
 // Check-in data
 export const selectCheckInData = createSelector(
   [selectInvitationsState],

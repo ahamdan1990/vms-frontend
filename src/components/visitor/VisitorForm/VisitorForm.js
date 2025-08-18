@@ -5,6 +5,10 @@ import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Services
+import visitorDocumentService from '../../../services/visitorDocumentService';
+import visitorNoteService from '../../../services/visitorNoteService';
+
 // Components
 import Button from '../../common/Button/Button';
 import Input from '../../common/Input/Input';
@@ -246,6 +250,33 @@ const VisitorForm = ({
     }
   }, [initialData]);
 
+  // Load existing documents and upload info when editing
+  useEffect(() => {
+    const loadDocumentsAndUploadInfo = async () => {
+      if (isEdit && initialData?.id) {
+        try {
+          // Load existing documents
+          const documents = await visitorDocumentService.getVisitorDocuments(initialData.id);
+          
+          // Separate photos from other documents
+          const photos = documents.filter(doc => doc.documentType === 'Photo');
+          const otherDocuments = documents.filter(doc => doc.documentType !== 'Photo');
+          
+          setFormData(prev => ({
+            ...prev,
+            photo: photos.length > 0 ? photos[0] : prev.photo, // Use first photo as profile photo
+            documents: [...prev.documents, ...otherDocuments] // Add to existing documents
+          }));
+        } catch (error) {
+          console.error('Failed to load existing documents:', error);
+          // Continue with form operation, document loading is not critical
+        }
+      }
+    };
+
+    loadDocumentsAndUploadInfo();
+  }, [isEdit, initialData?.id]);
+
   // Track form changes
   useEffect(() => {
     if (!initialFormData) return;
@@ -405,36 +436,136 @@ const VisitorForm = ({
     return errors;
   };
 
-  // File upload handlers
-  const handlePhotoUpload = (files) => {
+  // Enhanced file upload handlers with API integration
+  const handlePhotoUpload = async (files) => {
     if (files.length > 0) {
       const file = files[0];
+      
+      // Always update local state first
       setFormData(prev => ({
         ...prev,
         photoFile: file
       }));
+
+      // If editing existing visitor, upload to server immediately
+      if (isEdit && initialData?.id) {
+        try {
+          const result = await visitorDocumentService.uploadVisitorPhoto(
+            initialData.id,
+            file,
+            {
+              description: 'Visitor profile photo',
+              isSensitive: false,
+              isRequired: false
+            }
+          );
+
+          // Update with server response
+          setFormData(prev => ({
+            ...prev,
+            photo: result,
+            photoFile: file // Keep file for potential re-upload
+          }));
+        } catch (error) {
+          console.error('Photo upload failed:', error);
+          // Keep local file, will be uploaded when visitor is saved
+        }
+      }
     }
   };
 
-  const handlePhotoRemove = () => {
+  const handlePhotoRemove = async () => {
+    const currentPhoto = formData.photo;
+    
+    // Remove from UI immediately
     setFormData(prev => ({
       ...prev,
+      photo: null,
       photoFile: null
     }));
+
+    // If photo was uploaded to server, delete it
+    if (currentPhoto?.id && isEdit && initialData?.id) {
+      try {
+        await visitorDocumentService.deleteVisitorDocument(
+          initialData.id,
+          currentPhoto.id,
+          false // soft delete
+        );
+      } catch (error) {
+        console.error('Photo deletion failed:', error);
+        // Photo removed from UI, but may still exist on server
+      }
+    }
   };
 
-  const handleDocumentUpload = (files) => {
+  const handleDocumentUpload = async (files) => {
+    // Always update local state first
     setFormData(prev => ({
       ...prev,
       documentFiles: [...prev.documentFiles, ...files]
     }));
+
+    // If editing existing visitor, upload to server immediately
+    if (isEdit && initialData?.id) {
+      try {
+        const uploadPromises = files.map(file => 
+          visitorDocumentService.uploadVisitorDocument(
+            initialData.id,
+            file,
+            file.name,
+            'Other', // Default document type
+            {
+              description: `Document: ${file.name}`,
+              isSensitive: false,
+              isRequired: false
+            }
+          )
+        );
+
+        const results = await Promise.allSettled(uploadPromises);
+        const successful = results.filter(r => r.status === 'fulfilled').map(r => r.value);
+        
+        // Update documents list with successful uploads
+        if (successful.length > 0) {
+          setFormData(prev => ({
+            ...prev,
+            documents: [...prev.documents, ...successful]
+          }));
+        }
+      } catch (error) {
+        console.error('Document upload failed:', error);
+        // Keep local files, will be uploaded when visitor is saved
+      }
+    }
   };
 
-  const handleDocumentRemove = (index) => {
+  const handleDocumentRemove = async (index) => {
+    const documentToRemove = formData.documentFiles[index];
+    const serverDocument = formData.documents.find(doc => 
+      doc.originalFileName === documentToRemove?.name
+    );
+    
+    // Remove from local state
     setFormData(prev => ({
       ...prev,
-      documentFiles: prev.documentFiles.filter((_, i) => i !== index)
+      documentFiles: prev.documentFiles.filter((_, i) => i !== index),
+      documents: serverDocument ? prev.documents.filter(doc => doc.id !== serverDocument.id) : prev.documents
     }));
+
+    // If document was uploaded to server, delete it
+    if (serverDocument?.id && isEdit && initialData?.id) {
+      try {
+        await visitorDocumentService.deleteVisitorDocument(
+          initialData.id,
+          serverDocument.id,
+          false // soft delete
+        );
+      } catch (error) {
+        console.error('Document deletion failed:', error);
+        // Document removed from UI, but may still exist on server
+      }
+    }
   };
 
   // Location and visit purpose handlers

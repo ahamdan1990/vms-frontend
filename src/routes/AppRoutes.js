@@ -79,6 +79,12 @@ const StaffDashboard = lazy(() => import('../pages/dashboard/StaffDashboard/Staf
 const OperatorDashboard = lazy(() => import('../pages/dashboard/OperatorDashboard/OperatorDashboard'));
 const AdminDashboard = lazy(() => import('../pages/dashboard/AdminDashboard/AdminDashboard'));
 
+// Advanced Dashboard Pages
+const ReceptionistDashboard = lazy(() => import('../pages/receptionist/ReceptionistDashboard'));
+const VisitorAnalyticsDashboard = lazy(() => import('../components/analytics/VisitorAnalyticsDashboard'));
+const ExcelManagementPage = lazy(() => import('../pages/admin/ExcelManagementPage'));
+const IntegratedVisitorManagement = lazy(() => import('../pages/IntegratedVisitorManagement'));
+
 // User Management Pages
 const UsersListPage = lazy(() => import('../pages/users/UsersListPage/UsersListPage'));
 const UserDetailPage = lazy(() => import('../pages/users/UserDetailPage/UserDetailPage'));
@@ -249,6 +255,67 @@ const AppRoutes = () => {
                 </Suspense>
               </Layout>
             </RoleGuard>
+          </AuthGuard>
+        } 
+      />
+
+      {/* === ADVANCED DASHBOARD ROUTES === */}
+      <Route 
+        path={DASHBOARD_ROUTES.RECEPTIONIST} 
+        element={
+          <AuthGuard>
+            <PermissionGuard permission={CHECKIN_PERMISSIONS.PROCESS}>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <ReceptionistDashboard />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        } 
+      />
+
+      <Route 
+        path={DASHBOARD_ROUTES.ANALYTICS} 
+        element={
+          <AuthGuard>
+            <PermissionGuard permission={VISITOR_PERMISSIONS.READ}>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <VisitorAnalyticsDashboard />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        } 
+      />
+
+      <Route 
+        path={DASHBOARD_ROUTES.EXCEL_MANAGEMENT} 
+        element={
+          <AuthGuard>
+            <RoleGuard role={ROLES.ADMINISTRATOR}>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <ExcelManagementPage />
+                </Suspense>
+              </Layout>
+            </RoleGuard>
+          </AuthGuard>
+        } 
+      />
+
+      <Route 
+        path={DASHBOARD_ROUTES.INTEGRATED} 
+        element={
+          <AuthGuard>
+            <PermissionGuard permission={VISITOR_PERMISSIONS.READ}>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <IntegratedVisitorManagement />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
           </AuthGuard>
         } 
       />

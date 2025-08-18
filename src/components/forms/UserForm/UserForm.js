@@ -1,15 +1,17 @@
 // src/components/forms/UserForm/UserForm.js
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useDispatch } from 'react-redux';
 import { validateUserData } from '../../../utils/validators';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { showSuccessToast, showErrorToast, showWarningToast } from '../../../store/slices/notificationSlice';
 import Input from '../../common/Input/Input';
 import Button from '../../common/Button/Button';
 import PropTypes from 'prop-types';
 
 /**
- * Professional User Form Component for Creating/Editing Users
- * Features: Validation, role management, field dependencies, animations
+ * Enhanced User Form Component - Lebanon Specific
+ * Features: Lebanon-focused phone codes, addresses, timezones, and languages
  */
 const UserForm = ({
   user = null,
@@ -20,6 +22,7 @@ const UserForm = ({
   error = null,
   className = ''
 }) => {
+  const dispatch = useDispatch();
   const { user: userPermissions } = usePermissions();
   const isEditing = Boolean(user);
 
@@ -27,13 +30,40 @@ const UserForm = ({
     firstName: '',
     lastName: '',
     email: '',
+    
+    // Enhanced phone number fields with Lebanon default
     phoneNumber: '',
+    phoneCountryCode: '961', // Lebanon default
+    phoneType: 'Mobile',
+    
     role: 'Staff',
+    status: 'Active',
     department: '',
     jobTitle: '',
     employeeId: '',
     isActive: true,
-    mustChangePassword: !isEditing, // New users must change password
+    mustChangePassword: !isEditing,
+    
+    // User preferences with Lebanon defaults
+    timeZone: 'Asia/Beirut', // Lebanon timezone
+    language: 'en-US', // Default to English, but Arabic available
+    theme: 'light',
+    
+    // Enhanced address fields with Lebanon defaults
+    addressType: 'Home',
+    street1: '',
+    street2: '',
+    city: '',
+    governorate: '', // Lebanon uses governorates instead of states
+    postalCode: '',
+    country: 'Lebanon', // Default to Lebanon
+    enableCoordinates: false,
+    latitude: '',
+    longitude: '',
+    
+    // Email preferences
+    sendWelcomeEmail: true,
+    
     ...user
   });
 
@@ -41,21 +71,49 @@ const UserForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [touchedFields, setTouchedFields] = useState(new Set());
 
+  // Lebanon-specific data
+  const lebaneseGovernorates = [
+    'Beirut',
+    'Mount Lebanon',
+    'North Lebanon',
+    'South Lebanon',
+    'Beqaa',
+    'Akkar',
+    'Baalbek-Hermel',
+    'Nabatieh'
+  ];
+
   // Reset form when user prop changes
   useEffect(() => {
     if (user) {
       setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
-        role: 'Staff',
-        department: '',
-        jobTitle: '',
-        employeeId: '',
-        isActive: true,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phoneNumber: user.phoneNumber || '',
+        phoneCountryCode: user.phoneCountryCode || '961',
+        phoneType: user.phoneType || 'Mobile',
+        role: user.role || 'Staff',
+        status: user.status || 'Active', 
+        department: user.department || '',
+        jobTitle: user.jobTitle || '',
+        employeeId: user.employeeId || '',
+        isActive: user.isActive !== undefined ? user.isActive : true,
         mustChangePassword: false,
-        ...user
+        timeZone: user.timeZone || 'Asia/Beirut',
+        language: user.language || 'en-US',
+        theme: user.theme || 'light',
+        addressType: user.addressType || 'Home',
+        street1: user.street1 || '',
+        street2: user.street2 || '',
+        city: user.city || '',
+        governorate: user.state || user.governorate || '', // Support both for backward compatibility
+        postalCode: user.postalCode || '',
+        country: user.country || 'Lebanon',
+        enableCoordinates: user.latitude && user.longitude,
+        latitude: user.latitude || '',
+        longitude: user.longitude || '',
+        sendWelcomeEmail: false
       });
     }
     setErrors({});
@@ -120,13 +178,24 @@ const UserForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Map governorate to state for backend compatibility
+    const submissionData = {
+      ...formData,
+      state: formData.governorate // Map governorate to state field for backend
+    };
+
     // Validate all fields
-    const validation = validateUserData(formData, isEditing);
+    const validation = validateUserData(submissionData, isEditing);
     
     if (!validation.isValid) {
       setErrors(validation.errors);
-      // Mark all fields as touched to show errors
       setTouchedFields(new Set(Object.keys(formData)));
+      
+      // Show validation error notification
+      dispatch(showErrorToast(
+        'Validation Error',
+        'Please fix the errors in the form before submitting.'
+      ));
       return;
     }
 
@@ -134,10 +203,77 @@ const UserForm = ({
     setErrors({});
 
     try {
-      await onSubmit(formData);
+      await onSubmit(submissionData);
+      
+      // Show success notification
+      dispatch(showSuccessToast(
+        isEditing ? 'User Updated' : 'User Created',
+        isEditing 
+          ? `${formData.firstName} ${formData.lastName} has been updated successfully.`
+          : `${formData.firstName} ${formData.lastName} has been created successfully.${formData.sendWelcomeEmail ? ' Welcome email sent.' : ''}`,
+        {
+          duration: 6000,
+          actions: isEditing ? [] : [
+            {
+              label: 'Create Another',
+              onClick: () => {
+                // Reset form for creating another user
+                setFormData({
+                  firstName: '',
+                  lastName: '',
+                  email: '',
+                  phoneNumber: '',
+                  phoneCountryCode: '961',
+                  phoneType: 'Mobile',
+                  role: 'Staff',
+                  department: '',
+                  jobTitle: '',
+                  employeeId: '',
+                  isActive: true,
+                  mustChangePassword: true,
+                  timeZone: 'Asia/Beirut',
+                  language: 'en-US',
+                  theme: 'light',
+                  addressType: 'Home',
+                  street1: '',
+                  street2: '',
+                  city: '',
+                  governorate: '',
+                  postalCode: '',
+                  country: 'Lebanon',
+                  enableCoordinates: false,
+                  latitude: '',
+                  longitude: '',
+                  sendWelcomeEmail: true
+                });
+                setTouchedFields(new Set());
+              },
+              dismissOnClick: true
+            }
+          ]
+        }
+      ));
+
     } catch (error) {
-      // Error handling is done by parent component
-      setErrors(prev => ({ ...prev, global: error.message }));
+      // Error handling with notification
+      const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred';
+      
+      dispatch(showErrorToast(
+        isEditing ? 'Update Failed' : 'Creation Failed',
+        errorMessage,
+        {
+          persistent: true,
+          actions: [
+            {
+              label: 'Try Again',
+              onClick: () => handleSubmit(e),
+              dismissOnClick: true
+            }
+          ]
+        }
+      ));
+      
+      setErrors(prev => ({ ...prev, global: errorMessage }));
     } finally {
       setIsSubmitting(false);
     }
@@ -155,7 +291,6 @@ const UserForm = ({
 
   // Filter available roles based on permissions
   const selectableRoles = availableRoles.filter(role => {
-    // Users can't assign higher roles than their own
     if (!userPermissions.canManageRoles) {
       return ['Staff'].includes(role.name);
     }
@@ -278,29 +413,87 @@ const UserForm = ({
               />
             </motion.div>
 
-            {/* Phone Number */}
+            {/* Enhanced Phone Number - Lebanon Focused */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.25, duration: 0.3 }}
+              className="md:col-span-2"
             >
-              <Input
-                type="tel"
-                name="phoneNumber"
-                label="Phone Number"
-                placeholder="(555) 123-4567"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touchedFields.has('phoneNumber') ? errors.phoneNumber : null}
-                disabled={isLoading}
-                autoComplete="tel"
-                leftIcon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Phone Number
+              </label>
+              
+              <div className="flex space-x-2">
+                {/* Country Code Selector - Lebanon First */}
+                <select
+                  name="phoneCountryCode"
+                  value={formData.phoneCountryCode}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  disabled={isLoading}
+                  className="w-32 px-3 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="961">🇱🇧 +961</option>
+                  <option value="963">🇸🇾 +963</option>
+                  <option value="962">🇯🇴 +962</option>
+                  <option value="972">🇮🇱 +972</option>
+                  <option value="90">🇹🇷 +90</option>
+                  <option value="20">🇪🇬 +20</option>
+                  <option value="966">🇸🇦 +966</option>
+                  <option value="971">🇦🇪 +971</option>
+                  <option value="965">🇰🇼 +965</option>
+                  <option value="974">🇶🇦 +974</option>
+                  <option value="1">🇺🇸 +1</option>
+                  <option value="44">🇬🇧 +44</option>
+                  <option value="33">🇫🇷 +33</option>
+                  <option value="49">🇩🇪 +49</option>
+                  <option value="39">🇮🇹 +39</option>
+                </select>
+
+                {/* Phone Number Input */}
+                <div className="flex-1">
+                  <Input
+                    type="tel"
+                    name="phoneNumber"
+                    placeholder="71 123 456"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touchedFields.has('phoneNumber') ? errors.phoneNumber : null}
+                    disabled={isLoading}
+                    autoComplete="tel"
+                    leftIcon={
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                    }
+                  />
+                </div>
+
+                {/* Phone Type Selector */}
+                <select
+                  name="phoneType"
+                  value={formData.phoneType}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  disabled={isLoading}
+                  className="w-32 px-3 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="Mobile">📱 Mobile</option>
+                  <option value="Landline">☎️ Landline</option>
+                  <option value="Unknown">❓ Unknown</option>
+                </select>
+              </div>
+              
+              {touchedFields.has('phoneNumber') && errors.phoneNumber && (
+                <p className="text-red-600 text-sm mt-1 flex items-center">
+                  <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
-                }
-              />
+                  {errors.phoneNumber}
+                </p>
+              )}
             </motion.div>
           </div>
         </div>
@@ -407,6 +600,305 @@ const UserForm = ({
             </motion.div>
           </div>
         </div>
+        
+        {/* Status Field - ADD THIS */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Status <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            disabled={isLoading}
+            className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="Suspended">Suspended</option>
+          </select>
+          {touchedFields.has('status') && errors.status && (
+            <p className="text-red-600 text-sm mt-1">{errors.status}</p>
+          )}
+        </div>
+        
+        {/* Enhanced Address Section - Lebanon Specific */}
+        <div className="bg-gray-50 rounded-lg p-6">
+          <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
+            <svg className="w-5 h-5 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Address Information
+          </h4>
+
+          {/* Address Type Selector */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Address Type</label>
+            <select
+              name="addressType"
+              value={formData.addressType}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              disabled={isLoading}
+              className="w-full md:w-48 px-3 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="Home">🏠 Home</option>
+              <option value="Work">🏢 Work</option>
+              <option value="Billing">💳 Billing</option>
+              <option value="Shipping">📦 Shipping</option>
+              <option value="Other">📍 Other</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              type="text"
+              name="street1"
+              label="Street Address"
+              placeholder="Building name, Street name"
+              value={formData.street1}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={touchedFields.has('street1') ? errors.street1 : null}
+              disabled={isLoading}
+            />
+
+            <Input
+              type="text" 
+              name="street2"
+              label="Additional Address (Optional)"
+              placeholder="Floor, Apartment, Unit"
+              value={formData.street2}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={touchedFields.has('street2') ? errors.street2 : null}
+              disabled={isLoading}
+            />
+
+            <Input
+              type="text"
+              name="city"
+              label="City"
+              placeholder="e.g., Beirut, Tripoli, Sidon"
+              value={formData.city}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={touchedFields.has('city') ? errors.city : null}
+              disabled={isLoading}
+            />
+
+            {/* Lebanese Governorates */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Governorate
+              </label>
+              <select
+                name="governorate"
+                value={formData.governorate}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                disabled={isLoading}
+                className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Select Governorate</option>
+                {lebaneseGovernorates.map(governorate => (
+                  <option key={governorate} value={governorate}>
+                    {governorate}
+                  </option>
+                ))}
+              </select>
+              {touchedFields.has('governorate') && errors.governorate && (
+                <p className="text-red-600 text-sm mt-1">{errors.governorate}</p>
+              )}
+            </div>
+
+            <Input
+              type="text"
+              name="postalCode"
+              label="Postal Code (Optional)"
+              placeholder="e.g., 1107-2180"
+              value={formData.postalCode}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={touchedFields.has('postalCode') ? errors.postalCode : null}
+              disabled={isLoading}
+              helperText="Lebanon postal codes are optional"
+            />
+
+            {/* Enhanced Country Selector - Lebanon and Region First */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Country
+              </label>
+              <select
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                disabled={isLoading}
+                className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="Lebanon">🇱🇧 Lebanon</option>
+                <option value="">--- Middle East ---</option>
+                <option value="Syria">🇸🇾 Syria</option>
+                <option value="Jordan">🇯🇴 Jordan</option>
+                <option value="Israel">🇮🇱 Israel</option>
+                <option value="Turkey">🇹🇷 Turkey</option>
+                <option value="Cyprus">🇨🇾 Cyprus</option>
+                <option value="Egypt">🇪🇬 Egypt</option>
+                <option value="Saudi Arabia">🇸🇦 Saudi Arabia</option>
+                <option value="United Arab Emirates">🇦🇪 United Arab Emirates</option>
+                <option value="Kuwait">🇰🇼 Kuwait</option>
+                <option value="Qatar">🇶🇦 Qatar</option>
+                <option value="Bahrain">🇧🇭 Bahrain</option>
+                <option value="Oman">🇴🇲 Oman</option>
+                <option value="Iraq">🇮🇶 Iraq</option>
+                <option value="Iran">🇮🇷 Iran</option>
+                <option value="">--- International ---</option>
+                <option value="United States">🇺🇸 United States</option>
+                <option value="Canada">🇨🇦 Canada</option>
+                <option value="United Kingdom">🇬🇧 United Kingdom</option>
+                <option value="France">🇫🇷 France</option>
+                <option value="Germany">🇩🇪 Germany</option>
+                <option value="Italy">🇮🇹 Italy</option>
+                <option value="Australia">🇦🇺 Australia</option>
+                <option value="Brazil">🇧🇷 Brazil</option>
+                <option value="Other">🌍 Other</option>
+              </select>
+              {touchedFields.has('country') && errors.country && (
+                <p className="text-red-600 text-sm mt-1">{errors.country}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Optional: Coordinates for precise location */}
+          <div className="mt-4">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                name="enableCoordinates"
+                checked={formData.enableCoordinates}
+                onChange={handleChange}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Add precise location coordinates</span>
+            </label>
+            
+            {formData.enableCoordinates && (
+              <div className="grid grid-cols-2 gap-4 mt-3">
+                <Input
+                  type="number"
+                  name="latitude"
+                  label="Latitude"
+                  placeholder="33.8938"
+                  step="any"
+                  value={formData.latitude}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touchedFields.has('latitude') ? errors.latitude : null}
+                  disabled={isLoading}
+                  helperText="Beirut: ~33.8938"
+                />
+                <Input
+                  type="number"
+                  name="longitude"
+                  label="Longitude"
+                  placeholder="35.5018"
+                  step="any"
+                  value={formData.longitude}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touchedFields.has('longitude') ? errors.longitude : null}
+                  disabled={isLoading}
+                  helperText="Beirut: ~35.5018"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* User Preferences Section - Lebanon Localized */}
+        <div className="bg-gray-50 rounded-lg p-6">
+          <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
+            <svg className="w-5 h-5 text-indigo-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+            </svg>
+            User Preferences
+          </h4>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Time Zone - Lebanon First */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Time Zone</label>
+              <select
+                name="timeZone"
+                value={formData.timeZone}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                disabled={isLoading}
+                className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="Asia/Beirut">🇱🇧 Beirut Time (EET)</option>
+                <option value="">--- Regional ---</option>
+                <option value="Asia/Damascus">🇸🇾 Damascus</option>
+                <option value="Asia/Amman">🇯🇴 Amman</option>
+                <option value="Asia/Jerusalem">🇮🇱 Jerusalem</option>
+                <option value="Europe/Istanbul">🇹🇷 Istanbul</option>
+                <option value="Asia/Riyadh">🇸🇦 Riyadh</option>
+                <option value="Asia/Dubai">🇦🇪 Dubai</option>
+                <option value="Asia/Kuwait">🇰🇼 Kuwait</option>
+                <option value="">--- International ---</option>
+                <option value="UTC">UTC</option>
+                <option value="America/New_York">Eastern Time</option>
+                <option value="America/Chicago">Central Time</option>
+                <option value="America/Los_Angeles">Pacific Time</option>
+                <option value="Europe/London">London</option>
+                <option value="Europe/Paris">Paris</option>
+              </select>
+            </div>
+
+            {/* Language - Arabic and English Priority */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Language</label>
+              <select
+                name="language"
+                value={formData.language}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                disabled={isLoading}
+                className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="en-US">🇺🇸 English (US)</option>
+                <option value="ar-LB">🇱🇧 Arabic (Lebanon)</option>
+                <option value="ar-SA">🇸🇦 Arabic (Standard)</option>
+                <option value="en-GB">🇬🇧 English (UK)</option>
+                <option value="fr-FR">🇫🇷 French</option>
+                <option value="tr-TR">🇹🇷 Turkish</option>
+                <option value="es-ES">🇪🇸 Spanish</option>
+                <option value="de-DE">🇩🇪 German</option>
+                <option value="it-IT">🇮🇹 Italian</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Theme</label>
+              <select
+                name="theme"
+                value={formData.theme}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                disabled={isLoading}
+                className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="light">☀️ Light</option>
+                <option value="dark">🌙 Dark</option>
+                <option value="auto">🔄 Auto</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
         {/* Account Settings Section */}
         <div className="bg-gray-50 rounded-lg p-6">
@@ -460,6 +952,30 @@ const UserForm = ({
                   <div>
                     <span className="text-sm font-medium text-gray-900">Require Password Change</span>
                     <p className="text-xs text-gray-500">User must change password on first login</p>
+                  </div>
+                </label>
+              </motion.div>
+            )}
+
+            {/* Send Welcome Email */}
+            {!isEditing && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6, duration: 0.3 }}
+              >
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="sendWelcomeEmail"
+                    checked={formData.sendWelcomeEmail}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                  />
+                  <div>
+                    <span className="text-sm font-medium text-gray-900">Send Welcome Email</span>
+                    <p className="text-xs text-gray-500">Send welcome email with login credentials</p>
                   </div>
                 </label>
               </motion.div>

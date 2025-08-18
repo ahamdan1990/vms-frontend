@@ -116,11 +116,11 @@ const InvitationsList = () => {
 
   // Modal states
   const showCreateModalState = useSelector(selectShowCreateModal);
-  const showEditModal = useSelector(selectShowEditModal);
+  const showEditModalState = useSelector(selectShowEditModal);
   const showDeleteModal = useSelector(selectShowDeleteModal);
-  const showDetailsModal = useSelector(selectShowDetailsModal);
+  const showDetailsModalState = useSelector(selectShowDetailsModal);
   const showApprovalModal = useSelector(selectShowApprovalModal);
-  const showQrModal = useSelector(selectShowQrModal);
+  const showQrModalState = useSelector(selectShowQrModal);
   const currentInvitation = useSelector(selectCurrentInvitation);
 
   // Loading states
@@ -172,6 +172,19 @@ const InvitationsList = () => {
 
   const handleSelectInvitation = (id) => {
     dispatch(toggleInvitationSelection(id));
+  };
+
+  // Table handlers for consistency with Table component expectations
+  const handleSelectionChange = (selectedIds) => {
+    dispatch(setSelectedInvitations(selectedIds));
+  };
+
+  const handleSort = (sortBy, sortDirection) => {
+    dispatch(updateFilters({ 
+      sortBy, 
+      sortDirection,
+      pageIndex: 0 // Reset to first page when sorting
+    }));
   };
 
   // Action handlers
@@ -372,32 +385,33 @@ const InvitationsList = () => {
   // Table columns definition
   const columns = [
     {
-      id: 'select',
-      header: ({ table }) => (
+      key: 'select',
+      header: '',
+      width: '50px',
+      render: (_, invitation) => (
         <input
           type="checkbox"
-          checked={table.getIsAllPageRowsSelected()}
+          checked={selectedInvitations.includes(invitation.id)}
+          onChange={() => handleSelectInvitation(invitation.id)}
+          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+        />
+      ),
+      headerRender: () => (
+        <input
+          type="checkbox"
+          checked={invitations.length > 0 && selectedInvitations.length === invitations.length}
           onChange={(e) => handleSelectAll(e.target.checked)}
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
         />
       ),
-      cell: ({ row }) => (
-        <input
-          type="checkbox"
-          checked={selectedInvitations.includes(row.original.id)}
-          onChange={() => handleSelectInvitation(row.original.id)}
-          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-        />
-      ),
-      enableSorting: false,
-      enableResizing: false,
-      size: 50
+      sortable: false
     },
     {
-      id: 'invitation',
+      key: 'invitation',
       header: 'Invitation',
-      cell: ({ row }) => {
-        const invitation = row.original;
+      sortable: true,
+      className: 'min-w-[250px]',
+      render: (_, invitation) => {
         return (
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
@@ -415,35 +429,46 @@ const InvitationsList = () => {
       }
     },
     {
-      id: 'visitor',
+      key: 'visitor',
       header: 'Visitor',
-      cell: ({ row }) => formatVisitorInfo(row.original)
+      sortable: true,
+      className: 'min-w-[200px]',
+      render: (_, invitation) => formatVisitorInfo(invitation)
     },
     {
-      id: 'host',
+      key: 'host',
       header: 'Host',
-      cell: ({ row }) => formatHostInfo(row.original)
+      sortable: true,
+      className: 'min-w-[150px]',
+      render: (_, invitation) => formatHostInfo(invitation)
     },
     {
-      id: 'schedule',
+      key: 'schedule',
       header: 'Schedule',
-      cell: ({ row }) => formatVisitTime(row.original)
+      sortable: true,
+      className: 'min-w-[180px]',
+      render: (_, invitation) => formatVisitTime(invitation)
     },
     {
-      id: 'location',
+      key: 'location',
       header: 'Location',
-      cell: ({ row }) => formatLocationInfo(row.original)
+      sortable: true,
+      className: 'min-w-[150px]',
+      render: (_, invitation) => formatLocationInfo(invitation)
     },
     {
-      id: 'status',
+      key: 'status',
       header: 'Status',
-      cell: ({ row }) => getStatusBadge(row.original)
+      sortable: true,
+      className: 'min-w-[120px]',
+      render: (_, invitation) => getStatusBadge(invitation)
     },
     {
-      id: 'actions',
+      key: 'actions',
       header: 'Actions',
-      cell: ({ row }) => {
-        const invitation = row.original;
+      sortable: false,
+      className: 'min-w-[120px]',
+      render: (_, invitation) => {
         return (
           <div className="flex items-center space-x-1">
             <Tooltip content="View Details">
@@ -501,9 +526,7 @@ const InvitationsList = () => {
             )}
           </div>
         );
-      },
-      enableSorting: false,
-      size: 200
+      }
     }
   ];
   // Main render
@@ -814,7 +837,16 @@ const InvitationsList = () => {
             <Table
               data={invitations}
               columns={columns}
+              loading={loading}
+              selectable={true}
+              selectedRows={selectedInvitations}
+              onSelectionChange={handleSelectionChange}
+              onSort={handleSort}
+              sortBy={filters.sortBy}
+              sortDirection={filters.sortDirection}
               emptyMessage="No invitations found"
+              hover
+              bordered
               className="invitations-table"
             />
             

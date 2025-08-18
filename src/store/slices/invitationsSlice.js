@@ -87,7 +87,10 @@ const initialState = {
   
   // QR code data
   qrCodeData: null,
-  
+
+  // QR code image
+  qrCodeImage: null,
+
   // Check-in state
   checkInData: null,
   
@@ -246,6 +249,32 @@ export const getQrCode = createAsyncThunk(
     }
   }
 );
+
+// Get QR code image
+export const getInvitationQrCodeImage = createAsyncThunk(
+  'invitations/getInvitationQrCodeImage',
+  async ({ id, size = 300, branded = false }, { rejectWithValue }) => {
+    try {
+      console.log(id);
+      // Get blob from API
+      const blob = await invitationService.getQrImage(id, size, branded);
+
+      // Convert blob → base64
+      const base64Data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]); // strip "data:image/png;base64,"
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+
+      return base64Data;
+    } catch (error) {
+      const errorMessage = handleApiError(error);
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 
 // Check-in/Check-out thunks
 
@@ -520,6 +549,7 @@ const invitationsSlice = createSlice({
       })
       .addCase(getInvitationById.fulfilled, (state, action) => {
         state.loading = false;
+        console.log(action.payload)
         state.currentInvitation = action.payload;
         state.error = null;
       })
@@ -762,6 +792,20 @@ const invitationsSlice = createSlice({
         state.qrLoading = false;
         state.qrError = action.payload;
         state.qrCodeData = null;
+      })
+      
+      //QR Image
+      .addCase(getInvitationQrCodeImage.pending, (state) => {
+      state.qrLoading = true;
+      state.qrError = null;
+      })
+      .addCase(getInvitationQrCodeImage.fulfilled, (state, action) => {
+        state.qrLoading = false;
+        state.qrCodeImage = action.payload; // base64 string
+      })
+      .addCase(getInvitationQrCodeImage.rejected, (state, action) => {
+        state.qrLoading = false;
+        state.qrError = action.payload || 'Failed to fetch QR code image';
       })
       
       // Check-in

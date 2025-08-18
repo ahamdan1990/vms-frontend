@@ -10,16 +10,21 @@
     <meta name="author" content="VMS Development Team" />
     
     <!-- Security headers -->
-      <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval';
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        img-src 'self' data: https: http://localhost:5000;
-        font-src 'self' data: https://fonts.gstatic.com;
-        connect-src 'self' http://localhost:5000 https://localhost:7147 wss://localhost:7147;
-        frame-src 'none';
-        object-src 'none';
-      " />
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval';
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      img-src 'self' data: https: http://localhost:5000 http://192.168.0.59:5000;
+      font-src 'self' data: https://fonts.gstatic.com;
+      connect-src 'self'
+        http://localhost:5000
+        http://192.168.0.59:5000
+        https://localhost:7147
+        wss://localhost:7147
+        ws://192.168.0.59:7147;
+      frame-src 'none';
+      object-src 'none';
+    " />
 
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="DENY" />
@@ -38,8 +43,8 @@
     <link rel="dns-prefetch" href="https://localhost:7147" />
     
     <!-- Favicon and app icons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png" />
+    <!-- link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png" /-->
+    <!-- link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png" /-->
     
     <title>Visitor Management System</title>
     

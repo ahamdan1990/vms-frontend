@@ -1,6 +1,7 @@
 /**
  * Form validation utilities for consistent validation across the application
  * Provides validators for common input types and custom validation rules
+ * Enhanced with Lebanon-specific phone number validation
  */
 
 // Basic validation functions
@@ -157,13 +158,17 @@ export const passwordsMatch = (password, confirmPassword) => {
   return password === confirmPassword;
 };
 
-// Phone number validation
-export const isValidPhone = (phone, format = 'US') => {
+// Enhanced phone number validation with Lebanon support
+export const isValidPhone = (phone, countryCode = 'US') => {
   if (!phone) return false;
+  
+  if (countryCode === '961' || countryCode === 'LB' || countryCode === 'Lebanon') {
+    return validateLebanesePhoneNumber(phone, '961');
+  }
   
   const cleaned = phone.replace(/\D/g, '');
   
-  switch (format) {
+  switch (countryCode) {
     case 'US':
       // US: 10 digits or 11 digits starting with 1
       return cleaned.length === 10 || (cleaned.length === 11 && cleaned.startsWith('1'));
@@ -175,6 +180,134 @@ export const isValidPhone = (phone, format = 'US') => {
     default:
       return cleaned.length >= 7 && cleaned.length <= 15;
   }
+};
+
+/**
+ * Validates Lebanese phone numbers according to Lebanese numbering plan
+ * @param {string} phoneNumber - The phone number to validate
+ * @param {string} countryCode - The country code (961 for Lebanon)
+ * @returns {boolean} - True if valid Lebanese phone number
+ */
+export const validateLebanesePhoneNumber = (phoneNumber, countryCode = '961') => {
+  if (!phoneNumber || typeof phoneNumber !== 'string') {
+    return false;
+  }
+
+  // Clean the phone number - remove all non-digit characters
+  const cleanNumber = phoneNumber.replace(/\D/g, '');
+  
+  // If empty after cleaning, invalid
+  if (!cleanNumber) {
+    return false;
+  }
+
+  // Lebanese phone number validation based on country code
+  if (countryCode === '961') {
+    // Lebanon-specific validation
+    return validateLebaneseNumber(cleanNumber);
+  } else {
+    // For other countries, use a more generic validation
+    return validateInternationalNumber(cleanNumber, countryCode);
+  }
+};
+
+/**
+ * Validates Lebanese phone numbers (country code 961)
+ * Lebanese format: National Significant Number (NSN) is 8 digits
+ * Mobile prefixes: 03, 70, 71, 76, 78, 79, 81
+ * Landline prefixes: 01, 04, 05, 06, 07, 08, 09
+ */
+const validateLebaneseNumber = (cleanNumber) => {
+  // Lebanese phone number patterns
+  const lebanesePatterns = [
+    // National format (8 digits starting with 0)
+    /^0([1-9]|70|71|76|78|79|81)\d{6}$/,
+    
+    // International format without country code (7-8 digits)
+    /^([1-9]|70|71|76|78|79|81)\d{6}$/,
+    
+    // With country code 961 (11-12 digits total)
+    /^961([1-9]|70|71|76|78|79|81)\d{6}$/
+  ];
+
+  // Test against Lebanese patterns
+  for (const pattern of lebanesePatterns) {
+    if (pattern.test(cleanNumber)) {
+      return true;
+    }
+  }
+
+  // More comprehensive Lebanese regex that handles all valid formats
+  // This regex covers all Lebanese mobile and landline prefixes
+  const comprehensiveLebaneseRegex = /^((\+?961|961|0)?([1-9]|03|70|71|76|78|79|81)\d{6})$/;
+  
+  return comprehensiveLebaneseRegex.test(cleanNumber);
+};
+
+/**
+ * Generic international phone number validation for non-Lebanese numbers
+ */
+const validateInternationalNumber = (cleanNumber, countryCode) => {
+  // Remove country code if present
+  const numberWithoutCountryCode = cleanNumber.startsWith(countryCode) 
+    ? cleanNumber.substring(countryCode.length) 
+    : cleanNumber;
+
+  // Basic international validation - between 6 and 15 digits
+  return /^\d{6,15}$/.test(numberWithoutCountryCode);
+};
+
+/**
+ * Formats a Lebanese phone number for display
+ * @param {string} phoneNumber - Raw phone number
+ * @param {string} countryCode - Country code
+ * @param {string} format - 'national' or 'international'
+ * @returns {string} - Formatted phone number
+ */
+export const formatLebanesePhoneNumber = (phoneNumber, countryCode = '961', format = 'national') => {
+  if (!phoneNumber) return '';
+
+  const cleanNumber = phoneNumber.replace(/\D/g, '');
+  
+  if (countryCode === '961' && cleanNumber) {
+    // Handle Lebanese numbers
+    let nationalNumber = cleanNumber;
+    
+    // Remove country code if present
+    if (nationalNumber.startsWith('961')) {
+      nationalNumber = nationalNumber.substring(3);
+    }
+    
+    // Add leading zero if not present for national format
+    if (!nationalNumber.startsWith('0') && format === 'national') {
+      nationalNumber = '0' + nationalNumber;
+    }
+    
+    // Remove leading zero for international format
+    if (nationalNumber.startsWith('0') && format === 'international') {
+      nationalNumber = nationalNumber.substring(1);
+    }
+
+    if (format === 'international') {
+      // Format as +961 XX XXX XXX
+      if (nationalNumber.length >= 7) {
+        const areaCode = nationalNumber.substring(0, 2);
+        const number = nationalNumber.substring(2);
+        return `+961 ${areaCode} ${number.substring(0, 3)} ${number.substring(3)}`;
+      }
+      return `+961 ${nationalNumber}`;
+    } else {
+      // Format as 0XX XXX XXX
+      if (nationalNumber.length === 8) {
+        const areaCode = nationalNumber.substring(0, 3);
+        const number = nationalNumber.substring(3);
+        return `${areaCode} ${number.substring(0, 3)} ${number.substring(3)}`;
+      }
+      return nationalNumber;
+    }
+  }
+  
+  return phoneNumber; // Return as-is for non-Lebanese numbers
 };
 
 // URL validation
@@ -348,12 +481,15 @@ export const requiredPassword = (requirements = {}) =>
     )
   );
 
-export const requiredPhone = combineValidators(
+export const requiredPhone = (countryCode = 'US') => combineValidators(
   createValidator(isRequired, 'Phone number is required'),
-  createValidator(isValidPhone, 'Please enter a valid phone number')
+  createValidator(
+    (value) => isValidPhone(value, countryCode), 
+    'Please enter a valid phone number'
+  )
 );
 
-// User-specific validators
+// Enhanced user-specific validators with Lebanese phone support
 export const validateUserData = (userData, isUpdate = false) => {
   const errors = {};
 
@@ -386,9 +522,21 @@ export const validateUserData = (userData, isUpdate = false) => {
     }
   }
 
-  // Phone validation (optional)
-  if (userData.phoneNumber && !isValidPhone(userData.phoneNumber)) {
-    errors.phoneNumber = 'Please enter a valid phone number';
+  // Enhanced phone validation with Lebanese support
+  if (userData.phoneNumber) {
+    const countryCode = userData.phoneCountryCode || '961'; // Default to Lebanon
+    const isValidLebanesePhone = validateLebanesePhoneNumber(userData.phoneNumber, countryCode);
+    
+    if (countryCode === '961') {
+      if (!isValidLebanesePhone) {
+        errors.phoneNumber = 'Please enter a valid Lebanese phone number';
+      }
+    } else {
+      // For other countries, use general phone validation
+      if (!isValidPhone(userData.phoneNumber, countryCode)) {
+        errors.phoneNumber = 'Please enter a valid phone number';
+      }
+    }
   }
 
   // Role validation
@@ -414,6 +562,43 @@ export const validateUserData = (userData, isUpdate = false) => {
   // Employee ID validation (optional)
   if (userData.employeeId && !hasMaxLength(userData.employeeId, 50)) {
     errors.employeeId = 'Employee ID cannot exceed 50 characters';
+  }
+
+  // Address validation
+  if (userData.street1 && !hasMaxLength(userData.street1, 100)) {
+    errors.street1 = 'Street address cannot exceed 100 characters';
+  }
+  if (userData.street2 && !hasMaxLength(userData.street2, 100)) {
+    errors.street2 = 'Street address line 2 cannot exceed 100 characters';
+  }
+  if (userData.city && !hasMaxLength(userData.city, 50)) {
+    errors.city = 'City cannot exceed 50 characters';
+  }
+  if (userData.state && !hasMaxLength(userData.state, 50)) {
+    errors.state = 'State cannot exceed 50 characters';
+  }
+  if (userData.governorate && !hasMaxLength(userData.governorate, 50)) {
+    errors.governorate = 'Governorate cannot exceed 50 characters';
+  }
+  if (userData.postalCode && !hasMaxLength(userData.postalCode, 20)) {
+    errors.postalCode = 'Postal code cannot exceed 20 characters';
+  }
+  if (userData.country && !hasMaxLength(userData.country, 50)) {
+    errors.country = 'Country cannot exceed 50 characters';
+  }
+
+  // Coordinate validation
+  if (userData.latitude !== null && userData.latitude !== undefined && userData.latitude !== '') {
+    const lat = parseFloat(userData.latitude);
+    if (isNaN(lat) || lat < -90 || lat > 90) {
+      errors.latitude = 'Latitude must be between -90 and 90 degrees';
+    }
+  }
+  if (userData.longitude !== null && userData.longitude !== undefined && userData.longitude !== '') {
+    const lng = parseFloat(userData.longitude);
+    if (isNaN(lng) || lng < -180 || lng > 180) {
+      errors.longitude = 'Longitude must be between -180 and 180 degrees';
+    }
   }
 
   return {
@@ -474,6 +659,10 @@ export const commonValidators = {
   required: createValidator(isRequired, 'This field is required'),
   email: createValidator(isValidEmail, 'Please enter a valid email address'),
   phone: createValidator(isValidPhone, 'Please enter a valid phone number'),
+  lebanesePhone: createValidator(
+    (value) => validateLebanesePhoneNumber(value, '961'), 
+    'Please enter a valid Lebanese phone number'
+  ),
   url: createValidator(isValidUrl, 'Please enter a valid URL'),
   number: createValidator(isValidNumber, 'Please enter a valid number'),
   integer: createValidator(isInteger, 'Please enter a whole number'),
@@ -527,6 +716,8 @@ export default {
   calculatePasswordStrength,
   passwordsMatch,
   isValidPhone,
+  validateLebanesePhoneNumber,
+  formatLebanesePhoneNumber,
   isValidUrl,
   isValidHttpUrl,
   isValidDate,

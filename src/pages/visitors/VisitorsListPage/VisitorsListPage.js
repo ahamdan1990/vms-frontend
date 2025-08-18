@@ -164,9 +164,9 @@ const VisitorsListPage = () => {
   const selectedVisitors = useSelector(selectSelectedVisitors);
   const statistics = useSelector(selectVisitorStatistics);
   const showCreateModalState = useSelector(selectShowCreateModal);
-  const showEditModal = useSelector(selectShowEditModal);
-  const showDeleteModal = useSelector(selectShowDeleteModal);
-  const showDetailsModal = useSelector(selectShowDetailsModal);
+  const showEditModalState = useSelector(selectShowEditModal);
+  const showDeleteModalState = useSelector(selectShowDeleteModal);
+  const showDetailsModalState = useSelector(selectShowDetailsModal);
   const showBlacklistModal = useSelector(selectShowBlacklistModal);
   const currentVisitor = useSelector(selectCurrentVisitor);
   const createError = useSelector(selectVisitorsCreateError);
@@ -394,7 +394,7 @@ const VisitorsListPage = () => {
 
   // Helper function to format visitor name with title
   const formatVisitorName = (visitor) => {
-    const fullName = `${visitor.firstName} ${visitor.lastName}`;
+    const fullName = `${visitor.fullName}`;
     return (
       <div className="flex items-center space-x-2">
         {visitor.isVip && (
@@ -983,35 +983,37 @@ const VisitorsListPage = () => {
       </Modal>
 
       {/* Edit Modal */}
-      <Modal
-        isOpen={showEditModal}
-        onClose={() => dispatch(hideEditModal())}
-        title="Edit Visitor"
-        size="full"
-        hasUnsavedChanges={hasUnsavedEditChanges}
-        confirmCloseMessage="You have unsaved changes to this visitor. Are you sure you want to close without saving?"
-      >
-        {currentVisitor && (
-          <VisitorForm
-            initialData={currentVisitor}
-            onSubmit={handleUpdateVisitor}
-            onCancel={() => dispatch(hideEditModal())}
-            onFormChange={setHasUnsavedEditChanges}
-            loading={updateLoading}
-            error={updateError}
-            isEdit={true}
-          />
-        )}
-      </Modal>
+      {currentVisitor && (
+        <Modal
+          isOpen={showEditModalState}
+          onClose={() => dispatch(hideEditModal())}
+          title="Edit Visitor"
+          size="full"
+          hasUnsavedChanges={hasUnsavedEditChanges}
+          confirmCloseMessage="You have unsaved changes to this visitor. Are you sure you want to close without saving?"
+        >
+
+            <VisitorForm
+              initialData={currentVisitor}
+              onSubmit={handleUpdateVisitor}
+              onCancel={() => dispatch(hideEditModal())}
+              onFormChange={setHasUnsavedEditChanges}
+              loading={updateLoading}
+              error={updateError}
+              isEdit={true}
+            />
+
+        </Modal>
+      )}
 
       {/* Details Modal */}
+      {currentVisitor && (
       <Modal
-        isOpen={showDetailsModal}
+        isOpen={showDetailsModalState}
         onClose={() => dispatch(hideDetailsModal())}
         title="Visitor Details"
         size="xl"
       >
-        {currentVisitor && (
           <div>
             {/* Visitor Information */}
             <div className="p-6 border-b border-gray-200">
@@ -1073,12 +1075,11 @@ const VisitorsListPage = () => {
               />
             </div>
           </div>
-        )}
       </Modal>
-
+      )}
       {/* Delete Confirmation Modal */}
       <ConfirmModal
-        isOpen={showDeleteModal}
+        isOpen={showDeleteModalState}
         onClose={() => dispatch(hideDeleteModal())}
         onConfirm={() => handleDeleteVisitor(false)}
         title="Delete Visitor"
