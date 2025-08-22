@@ -125,6 +125,7 @@ const capacityService = {
 
     const queryString = buildQueryString(queryParams);
     const response = await apiClient.get(`${CAPACITY_ENDPOINTS.OVERVIEW}${queryString}`);
+    console.log(response)
     return extractApiData(response);
   },
 

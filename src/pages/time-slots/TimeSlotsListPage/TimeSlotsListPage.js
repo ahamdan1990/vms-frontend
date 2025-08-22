@@ -1,8 +1,21 @@
 // src/pages/time-slots/TimeSlotsListPage/TimeSlotsListPage.js
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePermissions } from '../../../hooks/usePermissions';
+
+// Icons
+import {
+  PlusIcon,
+  MagnifyingGlassIcon,
+  AdjustmentsHorizontalIcon,
+  ClockIcon,
+  CalendarDaysIcon,
+  EyeIcon,
+  PencilIcon,
+  TrashIcon,
+  XMarkIcon
+} from '@heroicons/react/24/outline';
 
 // Redux actions
 import {
@@ -27,6 +40,33 @@ import {
 } from '../../../store/slices/timeSlotsSlice';
 
 import { getLocations } from '../../../store/slices/locationsSlice';
+
+// Import selectors
+import {
+  selectTimeSlotsList,
+  selectTimeSlotsTotal,
+  selectTimeSlotsPagination,
+  selectTimeSlotsFilters,
+  selectTimeSlotsListLoading,
+  selectTimeSlotsCreateLoading,
+  selectTimeSlotsUpdateLoading,
+  selectTimeSlotsDeleteLoading,
+  selectTimeSlotsListError,
+  selectTimeSlotsCreateError,
+  selectTimeSlotsUpdateError,
+  selectTimeSlotsDeleteError,
+  selectCurrentTimeSlot,
+  selectSelectedTimeSlots,
+  selectShowCreateModal,
+  selectShowEditModal,
+  selectShowDeleteModal,
+  selectShowAvailabilityModal,
+  selectAvailableSlotsList,
+  selectAvailableSlotsLoading,
+  selectAvailableSlotsError
+} from '../../../store/selectors/timeSlotsSelectors';
+
+import { selectLocationsList } from '../../../store/selectors/locationSelectors';
 
 // Notification actions
 import {
@@ -66,39 +106,40 @@ const TimeSlotsListPage = () => {
   const [bulkAction, setBulkAction] = useState('');
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const [availabilityDate, setAvailabilityDate] = useState(new Date().toISOString().split('T')[0]);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingTimeSlot, setViewingTimeSlot] = useState(null);
 
-  // Redux state - Time Slots
-  const {
-    list: timeSlots,
-    total,
-    pagination,
-    filters,
-    loading,
-    listLoading,
-    createLoading,
-    updateLoading,
-    deleteLoading,
-    error,
-    listError,
-    createError,
-    updateError,
-    deleteError,
-    currentTimeSlot,
-    selectedTimeSlots,
-    showCreateModal: isCreateModalOpen,
-    showEditModal: isEditModalOpen,
-    showDeleteModal: isDeleteModalOpen,
-    showAvailabilityModal: isAvailabilityModalOpen,
-    availableSlots
-  } = useSelector(state => state.timeSlots);
+  // Redux state using selectors
+  const timeSlots = useSelector(selectTimeSlotsList);
+  const total = useSelector(selectTimeSlotsTotal);
+  const pagination = useSelector(selectTimeSlotsPagination);
+  const filters = useSelector(selectTimeSlotsFilters);
+  const listLoading = useSelector(selectTimeSlotsListLoading);
+  const createLoading = useSelector(selectTimeSlotsCreateLoading);
+  const updateLoading = useSelector(selectTimeSlotsUpdateLoading);
+  const deleteLoading = useSelector(selectTimeSlotsDeleteLoading);
+  const listError = useSelector(selectTimeSlotsListError);
+  const createError = useSelector(selectTimeSlotsCreateError);
+  const updateError = useSelector(selectTimeSlotsUpdateError);
+  const deleteError = useSelector(selectTimeSlotsDeleteError);
+  const currentTimeSlot = useSelector(selectCurrentTimeSlot);
+  const selectedTimeSlots = useSelector(selectSelectedTimeSlots);
+  const isCreateModalOpen = useSelector(selectShowCreateModal);
+  const isEditModalOpen = useSelector(selectShowEditModal);
+  const isDeleteModalOpen = useSelector(selectShowDeleteModal);
+  const isAvailabilityModalOpen = useSelector(selectShowAvailabilityModal);
+  const availableSlotsList = useSelector(selectAvailableSlotsList);
+  const availableSlotsLoading = useSelector(selectAvailableSlotsLoading);
+  const availableSlotsError = useSelector(selectAvailableSlotsError);
 
   // Redux state - Locations
-  const { list: locations, loading: locationsLoading } = useSelector(state => state.locations);
+  const locations = useSelector(selectLocationsList);
+  const locationsLoading = useSelector(state => state.locations.loading);
 
   // Check permissions
   const canRead = userPermissions.canActivate;
   const canCreate = userPermissions.canCreate;
-  const canEdit = userPermissions.canEdit;
+  const canEdit = userPermissions.canUpdate || userPermissions.canEdit;
   const canDelete = userPermissions.canDelete;
 
   // Initialize data
@@ -208,6 +249,36 @@ const TimeSlotsListPage = () => {
     }
   };
 
+  // Helper function to get day names from active days string
+  const getActiveDayNames = useCallback((activeDaysString) => {
+    if (!activeDaysString) return 'None';
+    
+    const dayNames = {
+      1: 'Monday',
+      2: 'Tuesday', 
+      3: 'Wednesday',
+      4: 'Thursday',
+      5: 'Friday',
+      6: 'Saturday',
+      7: 'Sunday'
+    };
+    
+    try {
+      const days = activeDaysString
+        .split(',')
+        .map(day => parseInt(day.trim()))
+        .filter(day => day >= 1 && day <= 7)
+        .sort((a, b) => a - b)
+        .map(day => dayNames[day])
+        .filter(Boolean);
+        
+      return days.length > 0 ? days.join(', ') : 'None';
+    } catch (error) {
+      console.error('Error parsing active days:', error);
+      return 'Invalid format';
+    }
+  }, []);
+
   // Handle check availability
   const handleCheckAvailability = () => {
     if (availabilityDate) {
@@ -217,6 +288,27 @@ const TimeSlotsListPage = () => {
       }));
     }
   };
+
+  // Handle time slot actions (view, edit, delete)
+  const handleTimeSlotAction = useCallback((action, timeSlot) => {
+    switch (action) {
+      case 'view':
+        setViewingTimeSlot(timeSlot);
+        setShowViewModal(true);
+        break;
+      case 'availability':
+        dispatch(showAvailabilityModal({ timeSlot, date: availabilityDate }));
+        break;
+      case 'edit':
+        dispatch(showEditModal(timeSlot));
+        break;
+      case 'delete':
+        dispatch(showDeleteModal(timeSlot));
+        break;
+      default:
+        break;
+    }
+  }, [dispatch, availabilityDate]);
 
   // Clear errors when modals open/close
   useEffect(() => {
@@ -237,97 +329,163 @@ const TimeSlotsListPage = () => {
   // Table columns configuration
   const columns = useMemo(() => [
     {
+      key: 'selection',
+      header: '',
+      width: '50px',
+      sortable: false,
+      render: (value, timeSlot) => (
+        <input
+          type="checkbox"
+          checked={selectedTimeSlots.includes(timeSlot.id)}
+          onChange={(e) => {
+            if (e.target.checked) {
+              dispatch(setSelectedTimeSlots([...selectedTimeSlots, timeSlot.id]));
+            } else {
+              dispatch(setSelectedTimeSlots(selectedTimeSlots.filter(id => id !== timeSlot.id)));
+            }
+          }}
+          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+      )
+    },
+    {
       key: 'name',
-      label: 'Name',
+      header: 'Time Slot',
       sortable: true,
-      render: (_, timeSlot) => (
-        <div className="flex flex-col">
-          <span className="font-medium text-gray-900">{timeSlot.name}</span>
+      render: (value, timeSlot) => (
+        <div>
+          <div className="font-medium text-gray-900">{timeSlot.name}</div>
           {timeSlot.locationName && (
-            <span className="text-sm text-gray-500">{timeSlot.locationName}</span>
+            <div className="text-sm text-gray-500 flex items-center mt-1">
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              {timeSlot.locationName}
+            </div>
           )}
         </div>
       )
     },
     {
       key: 'timeRange',
-      label: 'Time Range',
-      render: (_, timeSlot) => (
-        <div className="flex flex-col">
-          <span className="text-sm text-gray-900">
-            {timeSlotsService.formatTimeForDisplay(timeSlot.startTime)} - {timeSlotsService.formatTimeForDisplay(timeSlot.endTime)}
-          </span>
-          <span className="text-xs text-gray-500">
-            {timeSlotsService.calculateDuration(timeSlot.startTime, timeSlot.endTime)} minutes
-          </span>
+      header: 'Time Range',
+      sortable: true,
+      render: (value, timeSlot) => (
+        <div className="space-y-1">
+          <div className="flex items-center space-x-1 text-sm">
+            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="font-medium">
+              {timeSlotsService.formatTimeForDisplay(timeSlot.startTime)} - {timeSlotsService.formatTimeForDisplay(timeSlot.endTime)}
+            </span>
+          </div>
+          <div className="text-xs text-gray-500">
+            Duration: {timeSlotsService.calculateDuration(timeSlot.startTime, timeSlot.endTime)} min
+          </div>
         </div>
       )
     },
     {
-      key: 'maxVisitors',
-      label: 'Max Visitors',
+      key: 'capacity',
+      header: 'Capacity',
       sortable: true,
-      render: (_, timeSlot) => (
-        <Badge variant="neutral" size="sm">
-          {timeSlot.maxVisitors}
-        </Badge>
+      render: (value, timeSlot) => (
+        <div className="text-center">
+          <Badge variant="neutral" size="sm">
+            {timeSlot.maxVisitors} visitors
+          </Badge>
+          {timeSlot.bufferTime && (
+            <div className="text-xs text-gray-500 mt-1">
+              Buffer: {timeSlot.bufferTime}min
+            </div>
+          )}
+        </div>
       )
     },
     {
       key: 'activeDays',
-      label: 'Active Days',
-      render: (_, timeSlot) => (
-        <span className="text-sm text-gray-600">
-          {timeSlotsService.getActiveDayNames(timeSlot.activeDays)}
-        </span>
+      header: 'Active Days',
+      sortable: false,
+      render: (value, timeSlot) => (
+        <div className="space-y-1">
+          <div className="flex items-center space-x-1 text-sm">
+            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5a2.25 2.25 0 002.25-2.25m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5a2.25 2.25 0 012.25 2.25v7.5" />
+            </svg>
+            <span className="text-gray-600">
+              {getActiveDayNames(timeSlot.activeDays)}
+            </span>
+          </div>
+        </div>
       )
     },
     {
       key: 'status',
-      label: 'Status',
-      render: (_, timeSlot) => {
-        const status = timeSlotsService.getTimeSlotStatus(timeSlot);
-        const statusText = timeSlotsService.getStatusDisplayText(status);
-        const colorClass = timeSlotsService.getStatusColorClass(status);
-        
-        return (
-          <Badge 
-            variant={status === 'available' ? 'success' : status === 'warning' ? 'warning' : status === 'full' ? 'error' : 'neutral'}
-            size="sm"
-          >
-            {statusText}
-          </Badge>
-        );
-      }
+      header: 'Status',
+      sortable: true,
+      render: (value, timeSlot) => (
+        <Badge 
+          variant={timeSlot.isActive ? 'success' : 'secondary'}
+          size="sm"
+        >
+          {timeSlot.isActive ? 'Active' : 'Inactive'}
+        </Badge>
+      )
     },
     {
       key: 'actions',
-      label: 'Actions',
-      render: (_, timeSlot) => (
-        <div className="flex gap-2">
+      header: 'Actions',
+      width: '120px',
+      sortable: false,
+      render: (value, timeSlot) => (
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => handleTimeSlotAction('view', timeSlot)}
+            className="text-gray-600 hover:text-gray-900 transition-colors"
+            title="View details"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+          <button
+            onClick={() => handleTimeSlotAction('availability', timeSlot)}
+            className="text-green-600 hover:text-green-900 transition-colors"
+            title="Check availability"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </button>
           {canEdit && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => dispatch(showEditModal(timeSlot))}
+            <button
+              onClick={() => handleTimeSlotAction('edit', timeSlot)}
+              className="text-blue-600 hover:text-blue-900 transition-colors"
+              title="Edit time slot"
             >
-              Edit
-            </Button>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
           )}
           {canDelete && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => dispatch(showDeleteModal(timeSlot))}
-              className="text-red-600 hover:text-red-700"
+            <button
+              onClick={() => handleTimeSlotAction('delete', timeSlot)}
+              className="text-red-600 hover:text-red-900 transition-colors"
+              title="Delete time slot"
             >
-              Delete
-            </Button>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
           )}
         </div>
       )
     }
-  ], [canEdit, canDelete, dispatch]);
+  ], [selectedTimeSlots, canEdit, canDelete, handleTimeSlotAction]);
   
   if (!canRead) {
     return (
@@ -571,7 +729,7 @@ const TimeSlotsListPage = () => {
 
           <Button
             onClick={handleCheckAvailability}
-            loading={availableSlots.loading}
+            loading={availableSlotsLoading}
             disabled={!availabilityDate}
             className="w-full"
           >
@@ -579,11 +737,11 @@ const TimeSlotsListPage = () => {
           </Button>
 
           {/* Available Slots Results */}
-          {availableSlots.list.length > 0 && (
+          {availableSlotsList && availableSlotsList.length > 0 && (
             <div className="space-y-4">
               <h4 className="font-medium text-gray-900">Available Time Slots</h4>
               <div className="grid gap-3">
-                {availableSlots.list.map((slot) => (
+                {availableSlotsList.map((slot) => (
                   <div
                     key={slot.id}
                     className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
@@ -617,13 +775,13 @@ const TimeSlotsListPage = () => {
             </div>
           )}
 
-          {availableSlots.error && (
+          {availableSlotsError && (
             <div className="text-center py-4">
-              <p className="text-red-600">Error: {availableSlots.error}</p>
+              <p className="text-red-600">Error: {availableSlotsError}</p>
             </div>
           )}
 
-          {!availableSlots.loading && availableSlots.list.length === 0 && availabilityDate && (
+          {!availableSlotsLoading && (!availableSlotsList || availableSlotsList.length === 0) && availabilityDate && (
             <div className="text-center py-8">
               <EmptyState
                 title="No Available Time Slots"
@@ -632,6 +790,111 @@ const TimeSlotsListPage = () => {
             </div>
           )}
         </div>
+      </Modal>
+      
+      {/* View TimeSlot Modal */}
+      <Modal
+        isOpen={showViewModal}
+        onClose={() => {
+          setShowViewModal(false);
+          setViewingTimeSlot(null);
+        }}
+        title="Time Slot Details"
+        size="lg"
+      >
+        {viewingTimeSlot && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <p className="mt-1 text-sm text-gray-900">{viewingTimeSlot.name}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <div className="mt-1">
+                  <Badge variant={viewingTimeSlot.isActive ? 'success' : 'secondary'} size="sm">
+                    {viewingTimeSlot.isActive ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Time Range</label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {timeSlotsService.formatTimeForDisplay(viewingTimeSlot.startTime)} - {timeSlotsService.formatTimeForDisplay(viewingTimeSlot.endTime)}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Duration: {timeSlotsService.calculateDuration(viewingTimeSlot.startTime, viewingTimeSlot.endTime)} minutes
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Capacity</label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {viewingTimeSlot.maxVisitors} visitors maximum
+                </p>
+                {viewingTimeSlot.bufferTime && (
+                  <p className="text-sm text-gray-500">
+                    Buffer time: {viewingTimeSlot.bufferTime} minutes
+                  </p>
+                )}
+              </div>
+            </div>
+            
+            {viewingTimeSlot.locationName && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Location</label>
+                <p className="mt-1 text-sm text-gray-900">{viewingTimeSlot.locationName}</p>
+              </div>
+            )}
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Active Days</label>
+              <p className="mt-1 text-sm text-gray-900">
+                {getActiveDayNames(viewingTimeSlot.activeDays)}
+              </p>
+            </div>
+            
+            {viewingTimeSlot.displayOrder !== undefined && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Display Order</label>
+                <p className="mt-1 text-sm text-gray-900">{viewingTimeSlot.displayOrder}</p>
+              </div>
+            )}
+            
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowViewModal(false);
+                  setViewingTimeSlot(null);
+                }}
+              >
+                Close
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowViewModal(false);
+                  handleTimeSlotAction('availability', viewingTimeSlot);
+                }}
+              >
+                Check Availability
+              </Button>
+              {canEdit && (
+                <Button
+                  onClick={() => {
+                    setShowViewModal(false);
+                    handleTimeSlotAction('edit', viewingTimeSlot);
+                  }}
+                >
+                  Edit
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </Modal>
       
       {/* Bulk Confirm Modal */}

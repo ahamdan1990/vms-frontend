@@ -441,7 +441,7 @@ const InvitationForm = ({
                   options={visitors}
                   value={selectedVisitor}
                   onChange={handleVisitorSelect}
-                  getOptionLabel={(visitor) => `${visitor.firstName} ${visitor.lastName}`}
+                  getOptionLabel={(visitor) => `${visitor.fullName}`}
                   getOptionDescription={(visitor) => visitor.email}
                   placeholder="Search for a visitor..."
                   error={touched.visitorId ? formErrors.visitorId : undefined}

@@ -288,67 +288,94 @@ const CheckInDashboard = () => {
   // Table columns for active visitors
   const columns = [
     {
-      id: 'visitor',
+      key: 'selection',
+      header: '',
+      width: '50px',
+      sortable: false,
+      render: (value, invitation) => (
+        <input
+          type="checkbox"
+          checked={false} // Add selection state if needed
+          onChange={() => {}} // Add selection handler if needed
+          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+      )
+    },
+    {
+      key: 'visitor',
       header: 'Visitor',
-      cell: ({ row }) => formatVisitorInfo(row.original)
+      sortable: true,
+      render: (value, invitation) => formatVisitorInfo(invitation)
     },
     {
-      id: 'visit',
+      key: 'visit',
       header: 'Visit Details',
-      cell: ({ row }) => formatVisitInfo(row.original)
+      sortable: true,
+      render: (value, invitation) => formatVisitInfo(invitation)
     },
     {
-      id: 'status',
+      key: 'status',
       header: 'Status',
-      cell: ({ row }) => getStatusBadge(row.original)
+      sortable: true,
+      render: (value, invitation) => getStatusBadge(invitation)
     },
     {
-      id: 'checkin_status',
+      key: 'checkin_status',
       header: 'Check-in Status',
-      cell: ({ row }) => formatCheckInStatus(row.original)
+      sortable: false,
+      render: (value, invitation) => formatCheckInStatus(invitation)
     },
     {
-      id: 'actions',
+      key: 'actions',
       header: 'Actions',
-      cell: ({ row }) => {
-        const invitation = row.original;
+      width: '180px',
+      sortable: false,
+      render: (value, invitation) => {
         const isCheckedIn = invitation.checkedInAt && !invitation.checkedOutAt;
         const canCheckIn = invitation.status === 'Approved' && !invitation.checkedInAt;
         
         return (
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => {
+                setSelectedInvitation(invitation);
+                // View details functionality
+                console.log('View invitation details:', invitation);
+              }}
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+              title="View details"
+            >
+              <EyeIcon className="w-4 h-4" />
+            </button>
+            
             {canCheckIn && (
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={() => {
                   setSelectedInvitation(invitation);
                   setShowCheckInForm(true);
                 }}
-                icon={<ArrowRightOnRectangleIcon className="w-4 h-4" />}
+                className="text-green-600 hover:text-green-900 transition-colors"
+                title="Check In"
               >
-                Check In
-              </Button>
+                <ArrowRightOnRectangleIcon className="w-4 h-4" />
+              </button>
             )}
             
             {isCheckedIn && (
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={() => {
                   setSelectedInvitation(invitation);
-                  // Could open a check-out modal here
                   handleCheckOut(invitation, 'Manual check-out');
                 }}
-                icon={<ArrowLeftOnRectangleIcon className="w-4 h-4" />}
+                className="text-blue-600 hover:text-blue-900 transition-colors"
+                title="Check Out"
               >
-                Check Out
-              </Button>
+                <ArrowLeftOnRectangleIcon className="w-4 h-4" />
+              </button>
             )}
           </div>
         );
-      },
-      enableSorting: false
+      }
     }
   ];
 

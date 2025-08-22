@@ -31,6 +31,7 @@ const timeSlotsService = {
 
     const queryString = buildQueryString(queryParams);
     const response = await apiClient.get(`${TIME_SLOTS_ENDPOINTS.BASE}${queryString}`);
+    console.log(response)
     return extractApiData(response);
   },
 

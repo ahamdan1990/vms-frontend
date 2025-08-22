@@ -305,7 +305,7 @@ const timeSlotsSlice = createSlice({
       .addCase(getTimeSlots.fulfilled, (state, action) => {
         state.listLoading = false;
         const { response, queryParams } = action.payload;
-
+        console.log(action)
         state.list = response.items || [];
         state.total = response.totalCount || 0;
         state.pagination = {

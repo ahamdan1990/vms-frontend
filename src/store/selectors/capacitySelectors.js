@@ -236,7 +236,7 @@ export const selectOverviewSummary = createSelector(
         averageUtilization: 0
       };
     }
-
+    console.log(overviewData)
     const totalLocations = overviewData.length;
     const totalCapacity = overviewData.reduce((sum, loc) => sum + (loc.maxCapacity || 0), 0);
     const totalOccupancy = overviewData.reduce((sum, loc) => sum + (loc.currentOccupancy || 0), 0);

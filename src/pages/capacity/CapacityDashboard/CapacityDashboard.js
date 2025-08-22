@@ -20,6 +20,29 @@ import {
 
 import { getLocations } from '../../../store/slices/locationsSlice';
 
+// Import selectors
+import {
+  selectOccupancyData,
+  selectOccupancyLoading,
+  selectOccupancyError,
+  selectStatisticsData,
+  selectStatisticsLoading,
+  selectStatisticsError,
+  selectOverviewData,
+  selectOverviewLoading,
+  selectOverviewError,
+  selectTrendsData,
+  selectTrendsLoading,
+  selectTrendsError,
+  selectSelectedLocationId,
+  selectSelectedDateRange,
+  selectAutoRefresh,
+  selectShowStatisticsModal,
+  selectShowTrendsModal
+} from '../../../store/selectors/capacitySelectors';
+
+import { selectLocationsList } from '../../../store/selectors/locationSelectors';
+
 // Components
 import Button from '../../../components/common/Button/Button';
 import Select from '../../../components/common/Select/Select';
@@ -46,18 +69,31 @@ const CapacityDashboard = () => {
   const [refreshInterval, setRefreshInterval] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // Redux state
-  const {
-    occupancy,
-    statistics,
-    overview,
-    trends,
-    selectedLocationId,
-    selectedDateRange,
-    autoRefresh
-  } = useSelector(state => state.capacity);
+  // Redux state using selectors
+  const occupancyData = useSelector(selectOccupancyData);
+  const occupancyLoading = useSelector(selectOccupancyLoading);
+  const occupancyError = useSelector(selectOccupancyError);
+  
+  const statisticsData = useSelector(selectStatisticsData);
+  const statisticsLoading = useSelector(selectStatisticsLoading);
+  const statisticsError = useSelector(selectStatisticsError);
+  
+  const overviewData = useSelector(selectOverviewData);
+  const overviewLoading = useSelector(selectOverviewLoading);
+  const overviewError = useSelector(selectOverviewError);
+  
+  const trendsData = useSelector(selectTrendsData);
+  const trendsLoading = useSelector(selectTrendsLoading);
+  const trendsError = useSelector(selectTrendsError);
+  
+  const selectedLocationId = useSelector(selectSelectedLocationId);
+  const selectedDateRange = useSelector(selectSelectedDateRange);
+  const autoRefresh = useSelector(selectAutoRefresh);
+  const showStatisticsModalState = useSelector(selectShowStatisticsModal);
+  const showTrendsModalState = useSelector(selectShowTrendsModal);
 
-  const { list: locations, loading: locationsLoading } = useSelector(state => state.locations);
+  const locations = useSelector(selectLocationsList);
+  const locationsLoading = useSelector(state => state.locations.loading);
 
   // Check permissions
   const canViewBasic = userPermissions.canActivate;
@@ -194,8 +230,8 @@ const CapacityDashboard = () => {
   ], [locations]);
 
   // Current occupancy status
-  const occupancyStatus = occupancy.data 
-    ? capacityService.getOccupancyStatus(occupancy.data)
+  const occupancyStatus = occupancyData 
+    ? capacityService.getOccupancyStatus(occupancyData)
     : 'unknown';
 
   if (!canViewBasic) {
@@ -222,7 +258,7 @@ const CapacityDashboard = () => {
           <Button
             variant="outline"
             onClick={handleRefresh}
-            loading={occupancy.loading || overview.loading}
+            loading={occupancyLoading || overviewLoading}
           >
             Refresh
           </Button>
@@ -293,20 +329,20 @@ const CapacityDashboard = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Current Occupancy</h2>
-            {occupancy.lastUpdated && (
+            {occupancyData?.lastUpdated && (
               <span className="text-sm text-gray-500">
-                Updated {formatDistanceToNow(new Date(occupancy.lastUpdated), { addSuffix: true })}
+                Updated {formatDistanceToNow(new Date(occupancyData.lastUpdated), { addSuffix: true })}
               </span>
             )}
           </div>
 
-          {occupancy.loading ? (
+          {occupancyLoading ? (
             <div className="flex justify-center py-8">
               <LoadingSpinner size="lg" />
             </div>
-          ) : occupancy.error ? (
+          ) : occupancyError ? (
             <div className="text-center py-8">
-              <p className="text-red-600">Error: {occupancy.error}</p>
+              <p className="text-red-600">Error: {occupancyError}</p>
               <Button
                 variant="outline"
                 onClick={handleRefresh}
@@ -315,25 +351,25 @@ const CapacityDashboard = () => {
                 Retry
               </Button>
             </div>
-          ) : occupancy.data ? (
+          ) : occupancyData ? (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-gray-900">
-                  {occupancy.data.currentOccupancy}
+                  {occupancyData.currentOccupancy}
                 </div>
                 <div className="text-sm text-gray-600">Current Visitors</div>
               </div>
               
               <div className="text-center">
                 <div className="text-3xl font-bold text-gray-900">
-                  {occupancy.data.maxCapacity}
+                  {occupancyData.maxCapacity}
                 </div>
                 <div className="text-sm text-gray-600">Max Capacity</div>
               </div>
               
               <div className="text-center">
                 <div className="text-3xl font-bold text-green-600">
-                  {occupancy.data.availableSlots}
+                  {occupancyData.availableSlots}
                 </div>
                 <div className="text-sm text-gray-600">Available Slots</div>
               </div>
@@ -347,7 +383,7 @@ const CapacityDashboard = () => {
                     }
                     size="lg"
                   >
-                    {occupancy.data.occupancyPercentage}%
+                    {occupancyData.occupancyPercentage}%
                   </Badge>
                 </div>
                 <div className="text-sm text-gray-600">Utilization</div>
@@ -362,7 +398,7 @@ const CapacityDashboard = () => {
       </motion.div>
 
       {/* Overview Cards */}
-      {overview.data.length > 0 && (
+      {overviewData && overviewData.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -372,7 +408,7 @@ const CapacityDashboard = () => {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Location Overview</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {overview.data.map((location) => (
+              {overviewData.map((location) => (
                 <div
                   key={location.locationId}
                   className="border border-gray-200 rounded-lg p-4"
@@ -443,7 +479,161 @@ const CapacityDashboard = () => {
         </div>
       </Card>
 
-      {/* Modals will be added in the next step */}
+      {/* Statistics Modal */}
+      <Modal
+        isOpen={showStatisticsModalState}
+        onClose={() => dispatch({ type: 'capacity/hideStatisticsModal' })}
+        title="Capacity Statistics"
+        size="lg"
+      >
+        <div className="space-y-6">
+          {statisticsLoading ? (
+            <div className="flex justify-center py-8">
+              <LoadingSpinner size="lg" />
+            </div>
+          ) : statisticsError ? (
+            <div className="text-center py-8">
+              <p className="text-red-600">Error loading statistics: {statisticsError}</p>
+              <Button
+                variant="outline"
+                onClick={handleViewStatistics}
+                className="mt-4"
+              >
+                Retry
+              </Button>
+            </div>
+          ) : statisticsData ? (
+            <div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {statisticsData.averageOccupancy}%
+                  </div>
+                  <div className="text-sm text-gray-600">Average Occupancy</div>
+                </div>
+                
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {statisticsData.peakOccupancy}%
+                  </div>
+                  <div className="text-sm text-gray-600">Peak Occupancy</div>
+                </div>
+                
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-orange-600">
+                    {statisticsData.totalVisitors}
+                  </div>
+                  <div className="text-sm text-gray-600">Total Visitors</div>
+                </div>
+              </div>
+              
+              {statisticsData.dailyStats && (
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Daily Breakdown</h3>
+                  <div className="space-y-2">
+                    {statisticsData.dailyStats.map((day, index) => (
+                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <span className="font-medium">{new Date(day.date).toLocaleDateString()}</span>
+                        <div className="flex gap-4 text-sm">
+                          <span>Visitors: {day.visitors}</span>
+                          <span>Peak: {day.peakOccupancy}%</span>
+                          <span>Avg: {day.averageOccupancy}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-600">No statistics available</p>
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      {/* Trends Modal */}
+      <Modal
+        isOpen={showTrendsModalState}
+        onClose={() => dispatch({ type: 'capacity/hideTrendsModal' })}
+        title="Capacity Trends"
+        size="lg"
+      >
+        <div className="space-y-6">
+          {trendsLoading ? (
+            <div className="flex justify-center py-8">
+              <LoadingSpinner size="lg" />
+            </div>
+          ) : trendsError ? (
+            <div className="text-center py-8">
+              <p className="text-red-600">Error loading trends: {trendsError}</p>
+              <Button
+                variant="outline"
+                onClick={handleViewTrends}
+                className="mt-4"
+              >
+                Retry
+              </Button>
+            </div>
+          ) : trendsData ? (
+            <div>
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-4">7-Day Capacity Trends</h3>
+                
+                {trendsData.summary && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="text-xl font-bold text-blue-600">
+                        {trendsData.summary.averageTrend > 0 ? '+' : ''}{trendsData.summary.averageTrend}%
+                      </div>
+                      <div className="text-sm text-gray-600">Average Change</div>
+                    </div>
+                    
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <div className="text-xl font-bold text-purple-600">
+                        {trendsData.summary.peakDay}
+                      </div>
+                      <div className="text-sm text-gray-600">Busiest Day</div>
+                    </div>
+                    
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="text-xl font-bold text-green-600">
+                        {trendsData.summary.optimalTime}
+                      </div>
+                      <div className="text-sm text-gray-600">Best Time</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {trendsData.data && (
+                <div>
+                  <h4 className="font-semibold mb-3">Daily Trends</h4>
+                  <div className="space-y-2">
+                    {trendsData.data.map((trend, index) => (
+                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <span className="font-medium">{new Date(trend.date).toLocaleDateString()}</span>
+                        <div className="flex gap-4 text-sm">
+                          <span>Avg: {trend.averageOccupancy}%</span>
+                          <span>Peak: {trend.peakOccupancy}%</span>
+                          <span className={`font-medium ${trend.trend > 0 ? 'text-green-600' : trend.trend < 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                            {trend.trend > 0 ? '+' : ''}{trend.trend}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-600">No trends data available</p>
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

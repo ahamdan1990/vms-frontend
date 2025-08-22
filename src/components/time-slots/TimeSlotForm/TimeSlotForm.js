@@ -62,11 +62,24 @@ const TimeSlotForm = ({
         isActive: timeSlot.isActive !== undefined ? timeSlot.isActive : true
       });
 
-      // Initialize selected days
+      // Initialize selected days - Backend format: "1,2,3,4,5" (1=Monday, 7=Sunday)
       if (timeSlot.activeDays) {
-        const daysArray = timeSlotsService.getActiveDaysArray(timeSlot.activeDays);
-        setSelectedDays(daysArray);
+        try {
+          const daysArray = timeSlot.activeDays
+            .split(',')
+            .map(day => parseInt(day.trim()))
+            .filter(day => day >= 1 && day <= 7);
+          setSelectedDays(daysArray);
+        } catch (error) {
+          console.error('Error parsing active days:', error);
+          setSelectedDays([]);
+        }
+      } else {
+        setSelectedDays([]);
       }
+    } else {
+      // Reset form for create mode
+      setSelectedDays([]);
     }
   }, [timeSlot]);
 
@@ -90,39 +103,84 @@ const TimeSlotForm = ({
   const handleDayToggle = (dayNumber) => {
     const newSelectedDays = selectedDays.includes(dayNumber)
       ? selectedDays.filter(day => day !== dayNumber)
-      : [...selectedDays, dayNumber].sort();
+      : [...selectedDays, dayNumber].sort((a, b) => a - b); // Sort numerically
 
     setSelectedDays(newSelectedDays);
     
-    const activeDaysString = timeSlotsService.createActiveDaysString(newSelectedDays);
+    // Create backend-compatible active days string: "1,2,3,4,5"
+    const activeDaysString = newSelectedDays.join(',');
     handleInputChange('activeDays', activeDaysString);
+    
+    // Clear active days validation error when user selects days
+    if (newSelectedDays.length > 0 && validationErrors.activeDays) {
+      setValidationErrors(prev => ({
+        ...prev,
+        activeDays: null
+      }));
+    }
   };
 
   // Validate form
   const validateForm = () => {
-    const validation = timeSlotsService.validateTimeSlotData(formData, isEdit);
+    const errors = {};
     
-    if (!validation.isValid) {
-      const errors = {};
-      validation.errors.forEach(error => {
-        // Map error messages to field names
-        if (error.includes('name')) errors.name = error;
-        else if (error.includes('start time')) errors.startTime = error;
-        else if (error.includes('end time')) errors.endTime = error;
-        else if (error.includes('visitors')) errors.maxVisitors = error;
-        else if (error.includes('days')) errors.activeDays = error;
-        else if (error.includes('buffer')) errors.bufferMinutes = error;
-        else if (error.includes('order')) errors.displayOrder = error;
-        else if (error.includes('location')) errors.locationId = error;
-        else errors.general = error;
-      });
-      
-      setValidationErrors(errors);
-      return false;
+    // Basic field validation
+    if (!formData.name.trim()) {
+      errors.name = 'Time slot name is required';
     }
-
-    setValidationErrors({});
-    return true;
+    
+    if (!formData.startTime) {
+      errors.startTime = 'Start time is required';
+    }
+    
+    if (!formData.endTime) {
+      errors.endTime = 'End time is required';
+    }
+    
+    if (formData.startTime && formData.endTime && formData.startTime >= formData.endTime) {
+      errors.endTime = 'End time must be after start time';
+    }
+    
+    if (!formData.maxVisitors || formData.maxVisitors < 1) {
+      errors.maxVisitors = 'Maximum visitors must be at least 1';
+    }
+    
+    // Active days validation - ensure we have selected days and correct format
+    if (selectedDays.length === 0) {
+      errors.activeDays = 'Please select at least one active day';
+    } else {
+      // Validate that all selected days are in valid range (1-7)
+      const invalidDays = selectedDays.filter(day => day < 1 || day > 7);
+      if (invalidDays.length > 0) {
+        errors.activeDays = 'Invalid day selection detected. Please reselect days.';
+      }
+    }
+    
+    // Call service validation if available
+    try {
+      const validation = timeSlotsService.validateTimeSlotData(formData, isEdit);
+      if (!validation.isValid && validation.errors) {
+        validation.errors.forEach(error => {
+          // Map error messages to field names
+          if (error.includes('name') && !errors.name) errors.name = error;
+          else if (error.includes('start time') && !errors.startTime) errors.startTime = error;
+          else if (error.includes('end time') && !errors.endTime) errors.endTime = error;
+          else if (error.includes('visitors') && !errors.maxVisitors) errors.maxVisitors = error;
+          else if (error.includes('days') && !errors.activeDays) errors.activeDays = error;
+          else if (error.includes('buffer') && !errors.bufferMinutes) errors.bufferMinutes = error;
+          else if (error.includes('order') && !errors.displayOrder) errors.displayOrder = error;
+          else if (error.includes('location') && !errors.locationId) errors.locationId = error;
+          else if (!errors.general) errors.general = error;
+        });
+      }
+    } catch (serviceError) {
+      console.warn('Service validation failed:', serviceError);
+      // Continue with client-side validation only
+    }
+    
+    const hasErrors = Object.keys(errors).length > 0;
+    setValidationErrors(errors);
+    return !hasErrors;
   };
 
   // Handle form submission
@@ -134,13 +192,24 @@ const TimeSlotForm = ({
     }
 
     try {
+      // Ensure activeDays is in correct format before submission
+      const activeDaysString = selectedDays.sort((a, b) => a - b).join(',');
+      
       const submitData = {
         ...formData,
+        activeDays: activeDaysString, // Ensure correct format: "1,2,3,4,5"
         maxVisitors: parseInt(formData.maxVisitors),
         bufferMinutes: parseInt(formData.bufferMinutes),
         displayOrder: parseInt(formData.displayOrder),
         locationId: formData.locationId ? parseInt(formData.locationId) : null
       };
+
+      // Debug log to verify format
+      console.log('Submitting time slot data:', {
+        ...submitData,
+        selectedDaysArray: selectedDays,
+        activeDaysString: activeDaysString
+      });
 
       await onSubmit(submitData);
     } catch (error) {
@@ -148,15 +217,15 @@ const TimeSlotForm = ({
     }
   };
 
-  // Day options
+  // Day options - Backend expects: 1=Monday, 2=Tuesday, ..., 7=Sunday
   const dayOptions = [
-    { value: 0, label: 'Sunday', short: 'Sun' },
-    { value: 1, label: 'Monday', short: 'Mon' },
-    { value: 2, label: 'Tuesday', short: 'Tue' },
-    { value: 3, label: 'Wednesday', short: 'Wed' },
-    { value: 4, label: 'Thursday', short: 'Thu' },
-    { value: 5, label: 'Friday', short: 'Fri' },
-    { value: 6, label: 'Saturday', short: 'Sat' }
+    { value: 1, label: 'Monday', short: 'Mon', color: 'blue' },
+    { value: 2, label: 'Tuesday', short: 'Tue', color: 'blue' },
+    { value: 3, label: 'Wednesday', short: 'Wed', color: 'blue' },
+    { value: 4, label: 'Thursday', short: 'Thu', color: 'blue' },
+    { value: 5, label: 'Friday', short: 'Fri', color: 'blue' },
+    { value: 6, label: 'Saturday', short: 'Sat', color: 'purple' },
+    { value: 7, label: 'Sunday', short: 'Sun', color: 'red' }
   ];
 
   // Location options
@@ -302,53 +371,124 @@ const TimeSlotForm = ({
 
         {/* Active Days */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Active Days</h3>
+          <h3 className="text-lg font-medium text-gray-900">Schedule</h3>
           
-          {validationErrors.activeDays && (
-            <p className="text-sm text-red-600">{validationErrors.activeDays}</p>
-          )}
-          
-          <div className="grid grid-cols-7 gap-2">
-            {dayOptions.map((day) => (
-              <button
-                key={day.value}
-                type="button"
-                onClick={() => handleDayToggle(day.value)}
-                className={`
-                  p-3 text-center text-sm font-medium rounded-lg border transition-colors
-                  ${selectedDays.includes(day.value)
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                  }
-                `}
-              >
-                <div className="block md:hidden">{day.short}</div>
-                <div className="hidden md:block">{day.label}</div>
-              </button>
-            ))}
+          <div className="bg-gray-50 rounded-lg p-6">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Active Days
+                <span className="text-red-500 ml-1">*</span>
+              </label>
+              <p className="text-sm text-gray-600">
+                Select the days when this time slot is available for scheduling
+              </p>
+            </div>
+            
+            {validationErrors.activeDays && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-600">{validationErrors.activeDays}</p>
+              </div>
+            )}
+            
+            <div className="grid grid-cols-7 gap-3">
+              {dayOptions.map((day) => {
+                const isSelected = selectedDays.includes(day.value);
+                const isWeekend = day.value === 6 || day.value === 7; // Saturday or Sunday
+                
+                return (
+                  <button
+                    key={day.value}
+                    type="button"
+                    onClick={() => handleDayToggle(day.value)}
+                    className={`
+                      relative px-3 py-4 text-center font-medium rounded-xl border-2 transition-all duration-200
+                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                      ${isSelected
+                        ? isWeekend
+                          ? 'bg-purple-600 text-white border-purple-600 shadow-lg transform scale-105'
+                          : 'bg-blue-600 text-white border-blue-600 shadow-lg transform scale-105'
+                        : isWeekend
+                          ? 'bg-white text-purple-700 border-purple-200 hover:bg-purple-50 hover:border-purple-300'
+                          : 'bg-white text-blue-700 border-blue-200 hover:bg-blue-50 hover:border-blue-300'
+                      }
+                    `}
+                  >
+                    <div className="text-xs font-semibold tracking-wide uppercase">
+                      {day.short}
+                    </div>
+                    <div className="text-xs mt-1 hidden sm:block">
+                      {day.label}
+                    </div>
+                    
+                    {isSelected && (
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white">
+                        <svg className="w-2 h-2 text-white absolute top-0.5 left-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            
+            {selectedDays.length > 0 && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <div className="flex items-start space-x-2">
+                  <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-medium text-blue-800">Selected Days:</p>
+                    <p className="text-sm text-blue-700 mt-1">
+                      {selectedDays
+                        .sort((a, b) => a - b)
+                        .map(day => dayOptions.find(d => d.value === day)?.label)
+                        .join(', ')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {selectedDays.length === 0 && (
+              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                <div className="flex items-center space-x-2">
+                  <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm text-amber-800">
+                    Please select at least one day when this time slot will be available
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
-          
-          <p className="text-sm text-gray-500">
-            Select the days when this time slot is available
-          </p>
         </div>
+
+
 
         {/* Status (for edit mode) */}
         {isEdit && (
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Status</h3>
             
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="isActive"
-                checked={formData.isActive}
-                onChange={(e) => handleInputChange('isActive', e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
-                Time slot is active
-              </label>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  checked={formData.isActive}
+                  onChange={(e) => handleInputChange('isActive', e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="isActive" className="ml-3 block">
+                  <span className="text-sm font-medium text-gray-900">Time slot is active</span>
+                  <p className="text-sm text-gray-500">
+                    Active time slots are available for invitation scheduling
+                  </p>
+                </label>
+              </div>
             </div>
           </div>
         )}

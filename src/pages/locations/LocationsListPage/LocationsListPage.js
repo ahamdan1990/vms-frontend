@@ -92,6 +92,8 @@ const LocationsListPage = () => {
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'tree'
   const [bulkAction, setBulkAction] = useState('');
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingLocation, setViewingLocation] = useState(null);
 
   // Permissions
   const canRead = hasPermission('SystemConfig.Read');
@@ -198,6 +200,24 @@ const LocationsListPage = () => {
     }
   };
 
+  // Handle location actions (view, edit, delete)
+  const handleLocationAction = (action, location) => {
+    switch (action) {
+      case 'view':
+        setViewingLocation(location);
+        setShowViewModal(true);
+        break;
+      case 'edit':
+        dispatch(showEditModal(location));
+        break;
+      case 'delete':
+        dispatch(showDeleteModal(location));
+        break;
+      default:
+        break;
+    }
+  };
+
   const handleFilterChange = (filterName, value) => {
     dispatch(updateFilters({ [filterName]: value }));
   };
@@ -233,31 +253,85 @@ const LocationsListPage = () => {
   // Table columns configuration
   const columns = [
     {
+      key: 'selection',
+      header: '',
+      width: '50px',
+      sortable: false,
+      render: (value, location) => (
+        <input
+          type="checkbox"
+          checked={selectedLocations.includes(location.id)}
+          onChange={(e) => {
+            if (e.target.checked) {
+              dispatch(setSelectedLocations([...selectedLocations, location.id]));
+            } else {
+              dispatch(setSelectedLocations(selectedLocations.filter(id => id !== location.id)));
+            }
+          }}
+          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+      )
+    },
+    {
       key: 'name',
       header: 'Location',
       sortable: true,
       render: (value, location) => (
-        <div className="flex items-center space-x-2">
-          <div className={`w-2 h-2 rounded-full ${location.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
-          <span className="font-medium text-gray-900">{location.name}</span>
+        <div>
+          <div className="flex items-center space-x-2">
+            <div className={`w-2 h-2 rounded-full ${location.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+            <span className="font-medium text-gray-900">{location.name}</span>
+          </div>
+          {location.description && (
+            <div className="text-sm text-gray-500 mt-1">{location.description}</div>
+          )}
+          {location.address && (
+            <div className="text-sm text-gray-500 flex items-center mt-1">
+              <MapPinIcon className="w-4 h-4 mr-1" />
+              {location.address}
+            </div>
+          )}
         </div>
       )
     },
     {
       key: 'type',
-      header: 'Type',
+      header: 'Type & Hierarchy',
       sortable: true,
       render: (value, location) => (
-        <Badge variant="secondary" size="sm">
-          {location.locationType || 'General'}
-        </Badge>
+        <div className="space-y-1">
+          <div>
+            <Badge variant="secondary" size="sm">
+              {location.locationType || 'General'}
+            </Badge>
+          </div>
+          {location.parentLocationName && (
+            <div className="text-sm text-gray-500">
+              Parent: {location.parentLocationName}
+            </div>
+          )}
+        </div>
       )
     },
     {
       key: 'capacity',
       header: 'Capacity',
       sortable: true,
-      render: (value, location) => location.maxCapacity || 'Unlimited'
+      render: (value, location) => (
+        <div className="space-y-1">
+          <div className="flex items-center space-x-1">
+            <UserGroupIcon className="w-4 h-4 text-gray-400" />
+            <span className="font-medium">
+              {location.maxCapacity ? `${location.maxCapacity} visitors` : 'Unlimited'}
+            </span>
+          </div>
+          {location.currentOccupancy !== undefined && (
+            <div className="text-sm text-gray-500">
+              Current: {location.currentOccupancy}
+            </div>
+          )}
+        </div>
+      )
     },
     {
       key: 'status',
@@ -270,6 +344,44 @@ const LocationsListPage = () => {
         >
           {location.isActive ? 'Active' : 'Inactive'}
         </Badge>
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      width: '120px',
+      sortable: false,
+      render: (value, location) => (
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => handleLocationAction('view', location)}
+            className="text-gray-600 hover:text-gray-900 transition-colors"
+            title="View details"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+          {canUpdate && (
+            <button
+              onClick={() => handleLocationAction('edit', location)}
+              className="text-blue-600 hover:text-blue-900 transition-colors"
+              title="Edit location"
+            >
+              <PencilIcon className="w-4 h-4" />
+            </button>
+          )}
+          {canDelete && (
+            <button
+              onClick={() => handleLocationAction('delete', location)}
+              className="text-red-600 hover:text-red-900 transition-colors"
+              title="Delete location"
+            >
+              <TrashIcon className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       )
     }
   ];
@@ -577,6 +689,101 @@ const LocationsListPage = () => {
           </div>
         )}
       </Card>
+
+      {/* View Location Modal */}
+      <Modal
+        isOpen={showViewModal}
+        onClose={() => {
+          setShowViewModal(false);
+          setViewingLocation(null);
+        }}
+        title="Location Details"
+        size="lg"
+      >
+        {viewingLocation && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <p className="mt-1 text-sm text-gray-900">{viewingLocation.name}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Type</label>
+                <p className="mt-1 text-sm text-gray-900">{viewingLocation.locationType || 'General'}</p>
+              </div>
+            </div>
+            
+            {viewingLocation.description && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <p className="mt-1 text-sm text-gray-900">{viewingLocation.description}</p>
+              </div>
+            )}
+            
+            {viewingLocation.address && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Address</label>
+                <p className="mt-1 text-sm text-gray-900">{viewingLocation.address}</p>
+              </div>
+            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Capacity</label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {viewingLocation.maxCapacity ? `${viewingLocation.maxCapacity} visitors` : 'Unlimited'}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <div className="mt-1">
+                  <Badge variant={viewingLocation.isActive ? 'success' : 'secondary'} size="sm">
+                    {viewingLocation.isActive ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            
+            {viewingLocation.parentLocationName && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Parent Location</label>
+                <p className="mt-1 text-sm text-gray-900">{viewingLocation.parentLocationName}</p>
+              </div>
+            )}
+            
+            {viewingLocation.currentOccupancy !== undefined && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Current Occupancy</label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {viewingLocation.currentOccupancy} / {viewingLocation.maxCapacity || '∞'} visitors
+                </p>
+              </div>
+            )}
+            
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowViewModal(false);
+                  setViewingLocation(null);
+                }}
+              >
+                Close
+              </Button>
+              {canUpdate && (
+                <Button
+                  onClick={() => {
+                    setShowViewModal(false);
+                    handleLocationAction('edit', viewingLocation);
+                  }}
+                >
+                  Edit
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Create Modal */}
       <Modal

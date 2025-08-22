@@ -85,6 +85,8 @@ const VisitPurposesListPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [bulkAction, setBulkAction] = useState('');
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewingPurpose, setViewingPurpose] = useState(null);
 
   // Permissions
   const canRead = hasPermission('SystemConfig.Read');
@@ -102,8 +104,8 @@ const VisitPurposesListPage = () => {
   const selectedPurposes = useSelector(selectSelectedVisitPurposes);
   const stats = useSelector(selectVisitPurposeStats);
   const showCreateModalState = useSelector(selectShowCreateModal);
-  const showEditModal = useSelector(selectShowEditModal);
-  const showDeleteModal = useSelector(selectShowDeleteModal);
+  const showEditModalState = useSelector(selectShowEditModal);
+  const showDeleteModalState = useSelector(selectShowDeleteModal);
   const currentPurpose = useSelector(selectCurrentVisitPurpose);
   const createError = useSelector(selectVisitPurposesCreateError);
   const updateError = useSelector(selectVisitPurposesUpdateError);
@@ -195,29 +197,98 @@ const VisitPurposesListPage = () => {
     setSearchInput('');
     dispatch(resetFilters());
   };
+
+  // Handle purpose actions (view, edit, delete)
+  const handlePurposeAction = (action, purpose) => {
+    switch (action) {
+      case 'view':
+        setViewingPurpose(purpose);
+        setShowViewModal(true);
+        break;
+      case 'edit':
+        dispatch(showEditModal(purpose));
+        break;
+      case 'delete':
+        dispatch(showDeleteModal(purpose));
+        break;
+      default:
+        break;
+    }
+  };
   // Table columns configuration
   const columns = [
+    {
+      key: 'selection',
+      header: '',
+      width: '50px',
+      sortable: false,
+      render: (value, purpose) => (
+        <input
+          type="checkbox"
+          checked={selectedPurposes.includes(purpose.id)}
+          onChange={(e) => {
+            if (e.target.checked) {
+              dispatch(setSelectedVisitPurposes([...selectedPurposes, purpose.id]));
+            } else {
+              dispatch(setSelectedVisitPurposes(selectedPurposes.filter(id => id !== purpose.id)));
+            }
+          }}
+          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+      )
+    },
     {
       key: 'name',
       header: 'Purpose Name',
       sortable: true,
       render: (value, purpose) => (
-        <div className="flex items-center space-x-2">
-          <span className="font-medium text-gray-900">{purpose.name}</span>
+        <div>
+          <div className="font-medium text-gray-900">{purpose.name}</div>
+          {purpose.description && (
+            <div className="text-sm text-gray-500 mt-1">{purpose.description}</div>
+          )}
         </div>
       )
     },
     {
-      key: 'approvalRequired',
-      header: 'Approval Required',
+      key: 'requirements',
+      header: 'Requirements',
+      sortable: false,
+      render: (value, purpose) => (
+        <div className="space-y-1">
+          <div>
+            <Badge 
+              variant={purpose.requiresApproval ? 'warning' : 'success'}
+              size="sm"
+            >
+              {purpose.requiresApproval ? 'Approval Required' : 'No Approval'}
+            </Badge>
+          </div>
+          {purpose.requiresEscort && (
+            <div>
+              <Badge variant="info" size="sm">
+                Escort Required
+              </Badge>
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'usage',
+      header: 'Usage',
       sortable: true,
       render: (value, purpose) => (
-        <Badge 
-          variant={purpose.requiresApproval ? 'warning' : 'success'}
-          size="sm"
-        >
-          {purpose.requiresApproval ? 'Yes' : 'No'}
-        </Badge>
+        <div className="space-y-1">
+          <div className="text-sm font-medium text-gray-900">
+            {purpose.usageCount || 0} invitations
+          </div>
+          {purpose.lastUsed && (
+            <div className="text-sm text-gray-500">
+              Last used: {formatters.relativeTime(purpose.lastUsed)}
+            </div>
+          )}
+        </div>
       )
     },
     {
@@ -231,6 +302,44 @@ const VisitPurposesListPage = () => {
         >
           {purpose.isActive ? 'Active' : 'Inactive'}
         </Badge>
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      width: '120px',
+      sortable: false,
+      render: (value, purpose) => (
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => handlePurposeAction('view', purpose)}
+            className="text-gray-600 hover:text-gray-900 transition-colors"
+            title="View details"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+          {canUpdate && (
+            <button
+              onClick={() => handlePurposeAction('edit', purpose)}
+              className="text-blue-600 hover:text-blue-900 transition-colors"
+              title="Edit purpose"
+            >
+              <PencilIcon className="w-4 h-4" />
+            </button>
+          )}
+          {canDelete && (
+            <button
+              onClick={() => handlePurposeAction('delete', purpose)}
+              className="text-red-600 hover:text-red-900 transition-colors"
+              title="Delete purpose"
+            >
+              <TrashIcon className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       )
     }
   ];
@@ -477,6 +586,94 @@ const VisitPurposesListPage = () => {
         )}
       </Card>
 
+      {/* View Purpose Modal */}
+      <Modal
+        isOpen={showViewModal}
+        onClose={() => {
+          setShowViewModal(false);
+          setViewingPurpose(null);
+        }}
+        title="Visit Purpose Details"
+        size="lg"
+      >
+        {viewingPurpose && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <p className="mt-1 text-sm text-gray-900">{viewingPurpose.name}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <div className="mt-1">
+                  <Badge variant={viewingPurpose.isActive ? 'success' : 'secondary'} size="sm">
+                    {viewingPurpose.isActive ? 'Active' : 'Inactive'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            
+            {viewingPurpose.description && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <p className="mt-1 text-sm text-gray-900">{viewingPurpose.description}</p>
+              </div>
+            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Requires Approval</label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {viewingPurpose.requiresApproval ? 'Yes' : 'No'}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Requires Escort</label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {viewingPurpose.requiresEscort ? 'Yes' : 'No'}
+                </p>
+              </div>
+            </div>
+            
+            {viewingPurpose.usageCount !== undefined && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Usage Statistics</label>
+                <p className="mt-1 text-sm text-gray-900">
+                  Used in {viewingPurpose.usageCount || 0} invitation{(viewingPurpose.usageCount || 0) !== 1 ? 's' : ''}
+                </p>
+                {viewingPurpose.lastUsed && (
+                  <p className="text-sm text-gray-500">
+                    Last used: {formatters.relativeTime(viewingPurpose.lastUsed)}
+                  </p>
+                )}
+              </div>
+            )}
+            
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowViewModal(false);
+                  setViewingPurpose(null);
+                }}
+              >
+                Close
+              </Button>
+              {canUpdate && (
+                <Button
+                  onClick={() => {
+                    setShowViewModal(false);
+                    handlePurposeAction('edit', viewingPurpose);
+                  }}
+                >
+                  Edit
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
+
       {/* Create Modal */}
       <Modal
         isOpen={showCreateModalState}
@@ -494,7 +691,7 @@ const VisitPurposesListPage = () => {
 
       {/* Edit Modal */}
       <Modal
-        isOpen={showEditModal}
+        isOpen={showEditModalState}
         onClose={() => dispatch(hideEditModal())}
         title="Edit Visit Purpose"
         size="lg"
@@ -513,7 +710,7 @@ const VisitPurposesListPage = () => {
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal
-        isOpen={showDeleteModal}
+        isOpen={showDeleteModalState}
         onClose={() => dispatch(hideDeleteModal())}
         onConfirm={() => handleDeletePurpose(false)}
         title="Delete Visit Purpose"
