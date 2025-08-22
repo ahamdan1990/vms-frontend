@@ -4,10 +4,20 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setPageTitle } from '../../../store/slices/uiSlice';
 import Button from '../../../components/common/Button/Button';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
+
+// Import capacity selectors and actions
+import {
+  selectOccupancyData,
+  selectOccupancyLoading
+} from '../../../store/selectors/capacitySelectors';
+import { getOccupancy } from '../../../store/slices/capacitySlice';
+
+// Import capacity components
+import { OccupancyCard } from '../../../components/capacity';
 
 /**
  * Beautiful Operator Dashboard with real-time monitoring and quick actions
@@ -16,6 +26,11 @@ const OperatorDashboard = () => {
   const dispatch = useDispatch();
   const { user, userName } = useAuth();
   const { checkin, visitor, alert, emergency } = usePermissions();
+  
+  // Get capacity data
+  const occupancyData = useSelector(selectOccupancyData);
+  const occupancyLoading = useSelector(selectOccupancyLoading);
+  
   const [currentTime, setCurrentTime] = useState(new Date());
   const [realtimeData, setRealtimeData] = useState({
     todaysVisitors: 0,
@@ -26,6 +41,11 @@ const OperatorDashboard = () => {
 
   useEffect(() => {
     dispatch(setPageTitle('Operator Dashboard'));
+    
+    // Load capacity data
+    dispatch(getOccupancy({ 
+      dateTime: new Date().toISOString() 
+    }));
     
     // Update time every minute
     const timer = setInterval(() => {
@@ -284,6 +304,27 @@ const OperatorDashboard = () => {
             isLive={true}
           />
         </div>
+
+        {/* Capacity Monitoring */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="mb-8"
+        >
+          <OccupancyCard
+            occupancy={occupancyData}
+            loading={occupancyLoading}
+            title="Current Capacity Status"
+            showActions={true}
+            onRefresh={() => dispatch(getOccupancy({ 
+              dateTime: new Date().toISOString() 
+            }))}
+            onViewDetails={() => {
+              window.location.href = '/capacity';
+            }}
+          />
+        </motion.div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

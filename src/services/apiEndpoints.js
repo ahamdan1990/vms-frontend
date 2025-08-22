@@ -164,6 +164,23 @@ export const EXCEL_ENDPOINTS = {
   VALIDATE: '/api/xlsx/validate'
 };
 
+// Capacity endpoints
+export const CAPACITY_ENDPOINTS = {
+  VALIDATE: '/api/capacity/validate',
+  OCCUPANCY: '/api/capacity/occupancy',
+  STATISTICS: '/api/capacity/statistics',
+  ALTERNATIVES: '/api/capacity/alternatives',
+  OVERVIEW: '/api/capacity/overview',
+  TRENDS: '/api/capacity/trends'
+};
+
+// Time Slots endpoints
+export const TIME_SLOTS_ENDPOINTS = {
+  BASE: '/api/time-slots',
+  BY_ID: (id) => `/api/time-slots/${id}`,
+  AVAILABLE: '/api/time-slots/available'
+};
+
 
 // Helper functions for dynamic endpoint generation
 export const buildEndpoint = (template, params = {}) => {
@@ -227,6 +244,8 @@ export const API_ENDPOINTS = {
   VISITOR_NOTES: VISITOR_NOTE_ENDPOINTS,
   INVITATIONS: INVITATION_ENDPOINTS,
   EXCEL: EXCEL_ENDPOINTS,
+  CAPACITY: CAPACITY_ENDPOINTS,
+  TIME_SLOTS: TIME_SLOTS_ENDPOINTS,
   ADMIN: ADMIN_ENDPOINTS,
   CONFIGURATION: CONFIGURATION_ENDPOINTS,
   FILES: FILE_ENDPOINTS,

@@ -147,6 +147,7 @@ export const SYSTEM_ROUTES = {
   TEMPLATES: '/system/templates',
   VISIT_PURPOSES: '/system/visit-purposes',
   LOCATIONS: '/system/locations',
+  TIME_SLOTS: '/system/time-slots',
   MANAGEMENT: '/system/management', // New consolidated management page
   
   // Facial Recognition System routes
@@ -161,6 +162,15 @@ export const SYSTEM_ROUTES = {
   // Bulk operations
   BULK_IMPORT: '/system/bulk-import',
   BULK_EXPORT: '/system/bulk-export'
+};
+
+// Capacity management routes
+export const CAPACITY_ROUTES = {
+  BASE: '/capacity',
+  DASHBOARD: '/capacity',
+  MONITOR: '/capacity/monitor',
+  STATISTICS: '/capacity/statistics',
+  TRENDS: '/capacity/trends'
 };
 
 // Profile and settings routes
@@ -348,6 +358,22 @@ export const ROUTE_METADATA = {
     requiresAuth: true,
     roles: ['Administrator'],
     permissions: ['SystemConfig.Read']
+  },
+  
+  [SYSTEM_ROUTES.TIME_SLOTS]: {
+    title: 'Time Slots',
+    breadcrumb: 'Time Slots',
+    requiresAuth: true,
+    roles: ['Administrator'],
+    permissions: ['SystemConfig.ManageCapacity']
+  },
+  
+  [CAPACITY_ROUTES.DASHBOARD]: {
+    title: 'Capacity Dashboard',
+    breadcrumb: 'Capacity',
+    requiresAuth: true,
+    roles: ['Staff', 'Operator', 'Administrator'],
+    permissions: ['Dashboard.ViewBasic']
   }
 };
 
@@ -431,6 +457,13 @@ export const NAVIGATION_MENU = {
       roles: ['Operator', 'Administrator']
     },
     {
+      id: 'capacity',
+      label: 'Capacity Monitor',
+      path: CAPACITY_ROUTES.DASHBOARD,
+      icon: 'chart-pie',
+      roles: ['Staff', 'Operator', 'Administrator']
+    },
+    {
       id: 'analytics',
       label: 'Analytics',
       path: DASHBOARD_ROUTES.ANALYTICS,
@@ -487,6 +520,12 @@ export const NAVIGATION_MENU = {
           id: 'system-locations',
           label: 'Locations',
           path: SYSTEM_ROUTES.LOCATIONS,
+          roles: ['Administrator']
+        },
+        {
+          id: 'system-time-slots',
+          label: 'Time Slots',
+          path: SYSTEM_ROUTES.TIME_SLOTS,
           roles: ['Administrator']
         },
         {
@@ -640,6 +679,7 @@ export default {
   CHECKIN_ROUTES,
   REPORT_ROUTES,
   SYSTEM_ROUTES,
+  CAPACITY_ROUTES,
   PROFILE_ROUTES,
   ALERT_ROUTES,
   HELP_ROUTES,

@@ -10,6 +10,7 @@ import Input from '../../common/Input/Input';
 import Card from '../../common/Card/Card';
 import Badge from '../../common/Badge/Badge';
 import AutocompleteInput from '../../common/AutocompleteInput/AutocompleteInput';
+import { CapacityValidator } from '../../capacity';
 
 // Selectors
 import { selectVisitorsList } from '../../../store/selectors/visitorSelectors';
@@ -89,6 +90,10 @@ const InvitationForm = ({
   const [selectedVisitors, setSelectedVisitors] = useState([]); // For group invitations
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedVisitPurpose, setSelectedVisitPurpose] = useState(null);
+  
+  // Capacity validation state
+  const [capacityValid, setCapacityValid] = useState(true);
+  const [capacityResult, setCapacityResult] = useState(null);
 
   // Initialize form with initial data
   useEffect(() => {
@@ -233,6 +238,30 @@ const InvitationForm = ({
     }
   };
 
+  // Handle capacity validation changes
+  const handleCapacityValidation = (result) => {
+    setCapacityResult(result);
+    setCapacityValid(result?.isAvailable || false);
+    
+    // If an alternative was selected, update the form data
+    if (result?.alternativeSelected && result?.selectedAlternative) {
+      const alternative = result.selectedAlternative;
+      if (alternative.dateTime) {
+        handleChange('scheduledStartTime', alternative.dateTime);
+        
+        // Calculate end time based on duration or default to 1 hour
+        const startTime = new Date(alternative.dateTime);
+        const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // Default 1 hour
+        handleChange('scheduledEndTime', endTime.toISOString().slice(0, 16));
+      }
+      
+      // Update time slot if provided
+      if (alternative.timeSlotId) {
+        handleChange('timeSlotId', alternative.timeSlotId);
+      }
+    }
+  };
+
   // Handle visitor selection with auto-population of preferences
   const handleVisitorSelect = (visitor) => {
     setSelectedVisitor(visitor);
@@ -299,6 +328,15 @@ const InvitationForm = ({
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
+      return;
+    }
+
+    // Check capacity validation
+    if (!capacityValid && capacityResult && !capacityResult.isAvailable) {
+      setFormErrors(prev => ({
+        ...prev,
+        capacity: 'The selected time slot is at capacity. Please choose an alternative time or location.'
+      }));
       return;
     }
 
@@ -678,6 +716,29 @@ const InvitationForm = ({
           )}
         </Card>
 
+        {/* Capacity Validation */}
+        {formData.scheduledStartTime && (
+          <Card className="p-6">
+            <div className="flex items-center space-x-2 mb-4">
+              <ShieldCheckIcon className="w-6 h-6 text-blue-600" />
+              <h3 className="text-lg font-medium text-gray-900">Capacity Check</h3>
+            </div>
+
+            <CapacityValidator
+              locationId={formData.locationId}
+              timeSlotId={formData.timeSlotId}
+              dateTime={formData.scheduledStartTime}
+              expectedVisitors={formData.expectedVisitorCount || 1}
+              isVipRequest={false}
+              excludeInvitationId={isEdit ? initialData?.id : null}
+              onValidationChange={handleCapacityValidation}
+              autoValidate={true}
+              showAlternatives={true}
+              className="w-full"
+            />
+          </Card>
+        )}
+
         {/* Requirements */}
         <Card className="p-6">
           <div className="flex items-center space-x-2 mb-6">
@@ -799,6 +860,19 @@ const InvitationForm = ({
             </div>
           </div>
         </Card>
+
+        {/* Form Errors */}
+        {formErrors.capacity && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-start space-x-3">
+              <ExclamationCircleIcon className="w-5 h-5 text-red-600 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-medium text-red-800">Capacity Issue</h4>
+                <p className="text-sm text-red-700 mt-1">{formErrors.capacity}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex justify-end space-x-3">

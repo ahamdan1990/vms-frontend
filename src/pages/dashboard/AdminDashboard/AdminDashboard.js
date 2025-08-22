@@ -17,9 +17,21 @@ import {
   selectVisitorStatisticsError 
 } from '../../../store/selectors/visitorSelectors';
 
+// Import capacity selectors
+import {
+  selectOccupancyData,
+  selectOccupancyLoading,
+  selectOverviewData,
+  selectOverviewSummary
+} from '../../../store/selectors/capacitySelectors';
+
 // Import actions to load stats
 import { getUserStats } from '../../../store/slices/usersSlice';
 import { getVisitorStatistics } from '../../../store/slices/visitorsSlice';
+import { getOccupancy, getCapacityOverview } from '../../../store/slices/capacitySlice';
+
+// Import capacity components
+import { OccupancyCard } from '../../../components/capacity';
 
 /**
  * Beautiful Admin Dashboard with comprehensive system overview and management tools
@@ -42,6 +54,12 @@ const AdminDashboard = () => {
   const visitorStatsLoading = useSelector(selectVisitorStatisticsLoading);
   const visitorStatsError = useSelector(selectVisitorStatisticsError);
   
+  // Get capacity data
+  const occupancyData = useSelector(selectOccupancyData);
+  const occupancyLoading = useSelector(selectOccupancyLoading);
+  const overviewData = useSelector(selectOverviewData);
+  const overviewSummary = useSelector(selectOverviewSummary);
+  
   const [currentTime, setCurrentTime] = useState(new Date());
   const [systemData, setSystemData] = useState({
     systemHealth: 98.5,
@@ -57,6 +75,14 @@ const AdminDashboard = () => {
     dispatch(setPageTitle('Admin Dashboard'));
     dispatch(getUserStats());
     dispatch(getVisitorStatistics());
+    
+    // Load capacity data
+    dispatch(getOccupancy({ 
+      dateTime: new Date().toISOString() 
+    }));
+    dispatch(getCapacityOverview({ 
+      dateTime: new Date().toISOString() 
+    }));
     
     // Update time every minute
     const timer = setInterval(() => {
@@ -117,30 +143,31 @@ const AdminDashboard = () => {
     }
   ]);
 
-  // useEffect(() => {
-  //   dispatch(setPageTitle('Admin Dashboard'));
+  useEffect(() => {
+    dispatch(setPageTitle('Admin Dashboard'));
     
-  //   // Update time every minute
-  //   const timer = setInterval(() => {
-  //     setCurrentTime(new Date());
-  //   }, 60000);
+    // Load dashboard data
+    dispatch(getUserStats());
+    dispatch(getVisitorStatistics());
+    dispatch(getOccupancy({ dateTime: new Date().toISOString() }));
+    dispatch(getCapacityOverview({ dateTime: new Date().toISOString() }));
     
-  //   // Simulate real-time data updates
-  //   const dataTimer = setInterval(() => {
-  //     setSystemData(prev => ({
-  //       ...prev,
-  //       activeUsers: prev.activeUsers + (Math.random() > 0.7 ? 1 : 0),
-  //       todaysVisitors: prev.todaysVisitors + (Math.random() > 0.8 ? 1 : 0),
-  //       systemHealth: Math.min(100, prev.systemHealth + (Math.random() - 0.5) * 0.1),
-  //       securityAlerts: Math.max(0, prev.securityAlerts + (Math.random() > 0.95 ? 1 : 0))
-  //     }));
-  //   }, 30000);
+    // Update time every minute
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
     
-  //   return () => {
-  //     clearInterval(timer);
-  //     clearInterval(dataTimer);
-  //   };
-  // }, [dispatch]);
+    // Auto-refresh capacity data every 30 seconds
+    const capacityTimer = setInterval(() => {
+      dispatch(getOccupancy({ dateTime: new Date().toISOString() }));
+      dispatch(getCapacityOverview({ dateTime: new Date().toISOString() }));
+    }, 30000);
+    
+    return () => {
+      clearInterval(timer);
+      clearInterval(capacityTimer);
+    };
+  }, [dispatch]);
 
   const adminActions = [
     {
@@ -442,6 +469,80 @@ const AdminDashboard = () => {
             trendColor="text-green-600"
           />
         </div>
+
+        {/* Capacity Monitoring Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="mb-8"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <OccupancyCard
+              occupancy={occupancyData}
+              loading={occupancyLoading}
+              title="Current Occupancy"
+              showActions={true}
+              onRefresh={() => dispatch(getOccupancy({ 
+                dateTime: new Date().toISOString() 
+              }))}
+              onViewDetails={() => {
+                // Navigate to capacity dashboard
+                window.location.href = '/capacity';
+              }}
+            />
+            
+            {overviewSummary && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.2 }}
+                className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+              >
+                <div className="flex items-center space-x-2 mb-4">
+                  <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <h3 className="text-lg font-semibold text-gray-900">Capacity Overview</h3>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-3 bg-gray-50 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-900">{overviewSummary.totalLocations}</div>
+                    <div className="text-sm text-gray-600">Total Locations</div>
+                  </div>
+                  <div className="text-center p-3 bg-green-50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">{overviewSummary.averageUtilization}%</div>
+                    <div className="text-sm text-gray-600">Avg Utilization</div>
+                  </div>
+                  <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                    <div className="text-2xl font-bold text-yellow-600">{overviewSummary.warningLevelCount}</div>
+                    <div className="text-sm text-gray-600">Warning Level</div>
+                  </div>
+                  <div className="text-center p-3 bg-red-50 rounded-lg">
+                    <div className="text-2xl font-bold text-red-600">{overviewSummary.atCapacityCount}</div>
+                    <div className="text-sm text-gray-600">At Capacity</div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <Link to="/capacity">
+                    <Button
+                      variant="outline"
+                      fullWidth
+                      className="transition-all duration-200 hover:shadow-md"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      View Full Capacity Dashboard
+                    </Button>
+                  </Link>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </motion.div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

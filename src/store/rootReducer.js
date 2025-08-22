@@ -10,6 +10,8 @@ import locationsReducer from './slices/locationsSlice';
 import visitorsReducer from './slices/visitorsSlice';
 import emergencyContactsReducer from './slices/emergencyContactsSlice';
 import invitationsReducer from './slices/invitationsSlice';
+import capacityReducer from './slices/capacitySlice';
+import timeSlotsReducer from './slices/timeSlotsSlice';
 
 /**
  * Root reducer that combines all feature slices
@@ -27,6 +29,8 @@ const rootReducer = combineReducers({
   visitors: visitorsReducer,
   emergencyContacts: emergencyContactsReducer,
   invitations: invitationsReducer,
+  capacity: capacityReducer,
+  timeSlots: timeSlotsReducer,
 });
 
 /**
@@ -502,6 +506,96 @@ export const getInitialState = () => ({
     pushSupported: false,
     pushPermission: 'default',
     pushSubscription: null
+  },
+  capacity: {
+    validation: {
+      result: null,
+      loading: false,
+      error: null
+    },
+    occupancy: {
+      data: null,
+      loading: false,
+      error: null,
+      lastUpdated: null
+    },
+    statistics: {
+      data: null,
+      loading: false,
+      error: null,
+      dateRange: {
+        startDate: null,
+        endDate: null
+      }
+    },
+    alternatives: {
+      list: [],
+      loading: false,
+      error: null,
+      originalRequest: null
+    },
+    overview: {
+      data: [],
+      loading: false,
+      error: null,
+      lastUpdated: null
+    },
+    trends: {
+      data: null,
+      loading: false,
+      error: null,
+      parameters: null
+    },
+    selectedLocationId: null,
+    selectedDateRange: {
+      startDate: null,
+      endDate: null
+    },
+    refreshInterval: null,
+    autoRefresh: false,
+    showAlternativesModal: false,
+    showStatisticsModal: false,
+    showTrendsModal: false
+  },
+  timeSlots: {
+    list: [],
+    total: 0,
+    pagination: {
+      pageIndex: 0,
+      pageSize: 50,
+      totalPages: 0,
+      hasNext: false,
+      hasPrevious: false
+    },
+    currentTimeSlot: null,
+    loading: false,
+    listLoading: false,
+    createLoading: false,
+    updateLoading: false,
+    deleteLoading: false,
+    error: null,
+    listError: null,
+    createError: null,
+    updateError: null,
+    deleteError: null,
+    filters: {
+      locationId: null,
+      activeOnly: true,
+      sortBy: 'DisplayOrder',
+      sortDirection: 'asc'
+    },
+    availableSlots: {
+      list: [],
+      loading: false,
+      error: null,
+      date: null,
+      locationId: null
+    },
+    selectedTimeSlots: [],
+    showCreateModal: false,
+    showEditModal: false,
+    showDeleteModal: false,
+    showAvailabilityModal: false
   }
 });
 
@@ -649,6 +743,35 @@ export const hydrateState = (persistedState) => {
       loading: false,
       error: null
     },
+    capacity: {
+      ...initialState.capacity,
+      // Don't persist capacity data (always fresh from server)
+      validation: { result: null, loading: false, error: null },
+      occupancy: { data: null, loading: false, error: null, lastUpdated: null },
+      statistics: { data: null, loading: false, error: null, dateRange: { startDate: null, endDate: null } },
+      alternatives: { list: [], loading: false, error: null, originalRequest: null },
+      overview: { data: [], loading: false, error: null, lastUpdated: null },
+      trends: { data: null, loading: false, error: null, parameters: null },
+      showAlternativesModal: false,
+      showStatisticsModal: false,
+      showTrendsModal: false,
+      loading: false,
+      error: null
+    },
+    timeSlots: {
+      ...initialState.timeSlots,
+      // Don't persist time slots data (always fresh from server)
+      list: [],
+      currentTimeSlot: null,
+      selectedTimeSlots: [],
+      availableSlots: { list: [], loading: false, error: null, date: null, locationId: null },
+      showCreateModal: false,
+      showEditModal: false,
+      showDeleteModal: false,
+      showAvailabilityModal: false,
+      loading: false,
+      error: null
+    },
     notifications: {
       ...initialState.notifications,
       ...persistedState.notifications,
@@ -664,7 +787,7 @@ export const hydrateState = (persistedState) => {
  * Validates restored state structure
  */
 export const validateState = (state) => {
-  const requiredSlices = ['auth', 'users', 'ui', 'notifications', 'configuration', 'audit', 'visitPurposes', 'locations', 'visitors', 'emergencyContacts', 'invitations'];
+  const requiredSlices = ['auth', 'users', 'ui', 'notifications', 'configuration', 'audit', 'visitPurposes', 'locations', 'visitors', 'emergencyContacts', 'invitations', 'capacity', 'timeSlots'];
   
   if (!state || typeof state !== 'object') {
     return false;

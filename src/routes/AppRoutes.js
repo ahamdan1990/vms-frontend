@@ -33,6 +33,7 @@ import {
   VISITOR_ROUTES,
   CHECKIN_ROUTES,
   SYSTEM_ROUTES,
+  CAPACITY_ROUTES,
   PROFILE_ROUTES
 } from '../constants/routeConstants';
 
@@ -98,6 +99,10 @@ const AuditPage = lazy(() => import('../pages/system/AuditPage/AuditPage'));
 const SystemManagement = lazy(() => import('../components/system/SystemManagement/SystemManagement'));
 const VisitPurposesListPage = lazy(() => import('../pages/visit-purposes/VisitPurposesListPage/VisitPurposesListPage'));
 const LocationsListPage = lazy(() => import('../pages/locations/LocationsListPage/LocationsListPage'));
+
+// Time Slots and Capacity Management Pages
+const TimeSlotsListPage = lazy(() => import('../pages/time-slots/TimeSlotsListPage/TimeSlotsListPage'));
+const CapacityDashboard = lazy(() => import('../pages/capacity/CapacityDashboard/CapacityDashboard'));
 
 // Visitor Management Pages
 const VisitorsListPage = lazy(() => import('../pages/visitors/VisitorsListPage/VisitorsListPage'));
@@ -464,6 +469,82 @@ const AppRoutes = () => {
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <AuditPage />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        } 
+      />
+
+      <Route 
+        path={SYSTEM_ROUTES.TIME_SLOTS} 
+        element={
+          <AuthGuard>
+            <PermissionGuard permission={SYSTEM_CONFIG_PERMISSIONS.MANAGE_CAPACITY}>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <TimeSlotsListPage />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        } 
+      />
+
+      {/* === CAPACITY MANAGEMENT ROUTES === */}
+      <Route 
+        path={CAPACITY_ROUTES.DASHBOARD} 
+        element={
+          <AuthGuard>
+            <PermissionGuard permission="Dashboard.ViewBasic">
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <CapacityDashboard />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        } 
+      />
+
+      <Route 
+        path={CAPACITY_ROUTES.MONITOR} 
+        element={
+          <AuthGuard>
+            <PermissionGuard permission="Dashboard.ViewBasic">
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <CapacityDashboard />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        } 
+      />
+
+      <Route 
+        path={CAPACITY_ROUTES.STATISTICS} 
+        element={
+          <AuthGuard>
+            <PermissionGuard permission="Report.GenerateOwn">
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <CapacityDashboard />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        } 
+      />
+
+      <Route 
+        path={CAPACITY_ROUTES.TRENDS} 
+        element={
+          <AuthGuard>
+            <PermissionGuard permission="Report.GenerateOwn">
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <CapacityDashboard />
                 </Suspense>
               </Layout>
             </PermissionGuard>
