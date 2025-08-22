@@ -76,6 +76,7 @@ const ChangePasswordPage = lazy(() => import('../pages/auth/ChangePasswordPage/C
 
 // Dashboard Pages
 const DashboardPage = lazy(() => import('../pages/dashboard/DashboardPage/DashboardPage'));
+const UnifiedDashboard = lazy(() => import('../pages/dashboard/UnifiedDashboard/UnifiedDashboard'));
 const StaffDashboard = lazy(() => import('../pages/dashboard/StaffDashboard/StaffDashboard'));
 const OperatorDashboard = lazy(() => import('../pages/dashboard/OperatorDashboard/OperatorDashboard'));
 const AdminDashboard = lazy(() => import('../pages/dashboard/AdminDashboard/AdminDashboard'));
@@ -120,7 +121,7 @@ const ServerErrorPage = lazy(() => import('../pages/errors/ServerErrorPage'));
 
 /**
  * Role-based dashboard routing component
- * Dynamically renders the appropriate dashboard based on user role
+ * Now uses UnifiedDashboard for all roles - handles role logic internally
  * @component
  */
 const DashboardRouter = () => {
@@ -130,16 +131,9 @@ const DashboardRouter = () => {
     return <LoadingFallback />;
   }
 
-  switch (userRole) {
-    case ROLES.STAFF:
-      return <StaffDashboard />;
-    case ROLES.OPERATOR:
-      return <OperatorDashboard />;
-    case ROLES.ADMINISTRATOR:
-      return <AdminDashboard />;
-    default:
-      return <DashboardPage />;
-  }
+  // All roles now use the UnifiedDashboard
+  // Role-specific logic is handled within UnifiedDashboard component
+  return <UnifiedDashboard />;
 };
 
 /**
@@ -212,7 +206,7 @@ const AppRoutes = () => {
           <AuthGuard>
             <Layout>
               <Suspense fallback={<LoadingFallback />}>
-                <DashboardRouter />
+                <UnifiedDashboard />
               </Suspense>
             </Layout>
           </AuthGuard>
@@ -226,7 +220,7 @@ const AppRoutes = () => {
             <RoleGuard role={ROLES.STAFF} allowHigher={false}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
-                  <StaffDashboard />
+                  <UnifiedDashboard />
                 </Suspense>
               </Layout>
             </RoleGuard>
@@ -241,7 +235,7 @@ const AppRoutes = () => {
             <RoleGuard role={ROLES.OPERATOR} allowHigher={false}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
-                  <OperatorDashboard />
+                  <UnifiedDashboard />
                 </Suspense>
               </Layout>
             </RoleGuard>
@@ -256,7 +250,7 @@ const AppRoutes = () => {
             <RoleGuard role={ROLES.ADMINISTRATOR} allowHigher={false}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
-                  <AdminDashboard />
+                  <UnifiedDashboard />
                 </Suspense>
               </Layout>
             </RoleGuard>
@@ -317,7 +311,7 @@ const AppRoutes = () => {
             <PermissionGuard permission={VISITOR_PERMISSIONS.READ}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
-                  <IntegratedVisitorManagement />
+                  <UnifiedDashboard />
                 </Suspense>
               </Layout>
             </PermissionGuard>
