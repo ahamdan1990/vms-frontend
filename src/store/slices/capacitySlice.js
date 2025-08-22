@@ -340,6 +340,7 @@ const capacitySlice = createSlice({
         state.occupancy.error = null;
       })
       .addCase(getOccupancy.fulfilled, (state, action) => {
+        console.log(action)
         state.occupancy.loading = false;
         state.occupancy.data = action.payload.response;
         state.occupancy.lastUpdated = action.payload.timestamp;

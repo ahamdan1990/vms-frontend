@@ -50,7 +50,7 @@ const OccupancyCard = ({
     if (percentage >= 80) return 'bg-yellow-500';
     return 'bg-green-500';
   };
-
+  console.log(occupancy)
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
