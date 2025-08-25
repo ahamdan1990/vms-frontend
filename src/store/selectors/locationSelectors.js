@@ -255,19 +255,20 @@ export const selectLocationsByType = createSelector(
 export const selectActiveLocationsForDropdown = createSelector(
   [selectActiveLocations, selectLocationsList],
   (cachedActive, allLocations) => {
-    // Use cached active locations if available, otherwise filter from all
     if (cachedActive && cachedActive.length > 0) {
-      return cachedActive.sort((a, b) => {
-        if (a.displayOrder !== b.displayOrder) {
-          return (a.displayOrder || 999) - (b.displayOrder || 999);
-        }
-        return a.name.localeCompare(b.name);
-      });
+      return [...cachedActive] // clone so sort doesn’t mutate frozen state
+        .sort((a, b) => {
+          if (a.displayOrder !== b.displayOrder) {
+            return (a.displayOrder || 999) - (b.displayOrder || 999);
+          }
+          return a.name.localeCompare(b.name);
+        });
     }
 
     // Fallback to filtering from all locations
     return allLocations
       .filter(location => location.isActive)
+      .slice() // clone result of filter to avoid mutating original
       .sort((a, b) => {
         if (a.displayOrder !== b.displayOrder) {
           return (a.displayOrder || 999) - (b.displayOrder || 999);
@@ -276,6 +277,7 @@ export const selectActiveLocationsForDropdown = createSelector(
       });
   }
 );
+
 
 // Get location by ID
 export const selectLocationById = createSelector(

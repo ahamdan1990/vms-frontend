@@ -101,6 +101,9 @@ const SystemManagement = lazy(() => import('../components/system/SystemManagemen
 const VisitPurposesListPage = lazy(() => import('../pages/visit-purposes/VisitPurposesListPage/VisitPurposesListPage'));
 const LocationsListPage = lazy(() => import('../pages/locations/LocationsListPage/LocationsListPage'));
 
+const SystemManagementPage = lazy(() => import('../pages/system/SystemManagementPage'))
+const BackupPage = lazy(() => import('../pages/system/BackupPage'))
+
 // Time Slots and Capacity Management Pages
 const TimeSlotsListPage = lazy(() => import('../pages/time-slots/TimeSlotsListPage/TimeSlotsListPage'));
 const CapacityDashboard = lazy(() => import('../pages/capacity/CapacityDashboard/CapacityDashboard'));
@@ -402,7 +405,22 @@ const AppRoutes = () => {
             <PermissionGuard permission={CONFIGURATION_PERMISSIONS.READ}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
-                  <SystemManagement />
+                  <SystemManagementPage />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        } 
+      />
+
+      <Route 
+        path={SYSTEM_ROUTES.BACKUP} 
+        element={
+          <AuthGuard>
+            <PermissionGuard permission={CONFIGURATION_PERMISSIONS.READ}>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <BackupPage />
                 </Suspense>
               </Layout>
             </PermissionGuard>
