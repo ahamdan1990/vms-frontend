@@ -83,7 +83,7 @@ const AdminDashboard = lazy(() => import('../pages/dashboard/AdminDashboard/Admi
 
 // Advanced Dashboard Pages
 const ReceptionistDashboard = lazy(() => import('../pages/receptionist/ReceptionistDashboard'));
-const VisitorAnalyticsDashboard = lazy(() => import('../components/analytics/VisitorAnalyticsDashboard'));
+const UnifiedAnalyticsDashboard = lazy(() => import('../pages/analytics/UnifiedAnalyticsDashboard'));
 const ExcelManagementPage = lazy(() => import('../pages/admin/ExcelManagementPage'));
 const IntegratedVisitorManagement = lazy(() => import('../pages/IntegratedVisitorManagement'));
 
@@ -284,7 +284,7 @@ const AppRoutes = () => {
             <PermissionGuard permission={VISITOR_PERMISSIONS.READ}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
-                  <VisitorAnalyticsDashboard />
+                  <UnifiedAnalyticsDashboard />
                 </Suspense>
               </Layout>
             </PermissionGuard>
