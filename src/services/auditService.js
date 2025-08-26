@@ -1,21 +1,10 @@
 import apiClient, { extractApiData } from './apiClient';
-import { buildQueryString } from './apiEndpoints';
+import { buildQueryString , AUDIT_ENDPOINTS} from './apiEndpoints';
 
 /**
  * Audit management service for viewing system audit trails
  * Matches backend audit functionality
  */
-
-// Audit endpoints
-const AUDIT_ENDPOINTS = {
-  BASE: '/api/Audit',
-  BY_ID: (id) => `/api/Audit/${id}`,
-  EXPORT: '/api/Audit/export',
-  SEARCH: '/api/Audit/search',
-  USER_ACTIVITY: '/api/Audit/user-activity',
-  SYSTEM_EVENTS: '/api/Audit/system-events',
-  SECURITY_EVENTS: '/api/Audit/security-events'
-};
 
 const auditService = {
   /**

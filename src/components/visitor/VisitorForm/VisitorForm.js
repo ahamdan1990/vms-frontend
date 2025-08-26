@@ -46,6 +46,8 @@ import {
   CloudArrowUpIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import { getVisitorById } from '../../../store/slices/visitorsSlice';
+import { selectCurrentVisitor } from '../../../store/selectors/visitorSelectors';
 
 /**
  * Enhanced Visitor Form Component with Photo, Documents, Location, and Visit Purpose
@@ -155,6 +157,7 @@ const VisitorForm = ({
   // Initialize form with initial data (enhanced)
   useEffect(() => {
     if (initialData) {
+      console.log(initialData)
       setFormData({
         firstName: initialData.firstName || '',
         lastName: initialData.lastName || '',

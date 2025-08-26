@@ -12,6 +12,8 @@ import ReceptionistDashboard from '../../receptionist/ReceptionistDashboard';
 import VisitorAnalyticsDashboard from '../../../components/analytics/VisitorAnalyticsDashboard';
 import ExcelManagementPage from '../../admin/ExcelManagementPage';
 
+import UnifiedAnalyticsDashboard from '../../analytics/UnifiedAnalyticsDashboard';
+
 // Import existing common components
 import NotificationCenter from '../../../components/notifications/NotificationCenter';
 import Card from '../../../components/common/Card/Card';
@@ -438,7 +440,7 @@ const UnifiedDashboard = () => {
         
       case 'analytics':
         // Use existing VisitorAnalyticsDashboard component - NO CHANGES
-        return <VisitorAnalyticsDashboard />;
+        return <UnifiedAnalyticsDashboard />;
         
       case 'excel':
         // Use existing ExcelManagementPage component - NO CHANGES

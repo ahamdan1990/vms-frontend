@@ -8,14 +8,6 @@ import Button from '../Button/Button';
 
 /**
  * Professional Modal Component with animations, accessibility, and scrolling support
- * 
- * Features:
- * - Responsive design with proper mobile support
- * - Automatic scrolling for content that exceeds viewport height
- * - Fixed header and footer with scrollable content area
- * - Custom scrollbar styling for better UX
- * - Full keyboard navigation and focus management
- * - Support for different sizes and variants
  */
 const Modal = ({
   isOpen,
@@ -32,6 +24,8 @@ const Modal = ({
   overlayClassName = '',
   preventBodyScroll = true,
   initialFocus = null,
+  hasUnsavedChanges = false,
+  confirmCloseMessage = '',
   ...props
 }) => {
   const modalRef = useRef(null);
@@ -74,14 +68,12 @@ const Modal = ({
     if (!isOpen || !closeOnEscape) return;
 
     const handleEscape = (event) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
+      if (event.key === 'Escape') handleClose();
     };
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, closeOnEscape, onClose]);
+  }, [isOpen, closeOnEscape]);
 
   // Handle body scroll
   useEffect(() => {
@@ -100,7 +92,7 @@ const Modal = ({
   useEffect(() => {
     if (isOpen) {
       previousFocusRef.current = document.activeElement;
-      
+
       setTimeout(() => {
         if (initialFocus?.current) {
           initialFocus.current.focus();
@@ -119,8 +111,17 @@ const Modal = ({
   // Handle backdrop click
   const handleBackdropClick = (event) => {
     if (closeOnBackdrop && event.target === event.currentTarget) {
-      onClose();
+      handleClose();
     }
+  };
+
+  // Handle unsaved changes confirmation
+  const handleClose = () => {
+    if (hasUnsavedChanges && confirmCloseMessage) {
+      const confirmed = window.confirm(confirmCloseMessage);
+      if (!confirmed) return;
+    }
+    onClose();
   };
 
   // Handle focus trap
@@ -129,7 +130,7 @@ const Modal = ({
       const focusableElements = modalRef.current?.querySelectorAll(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      
+
       if (focusableElements?.length) {
         const firstElement = focusableElements[0];
         const lastElement = focusableElements[focusableElements.length - 1];
@@ -167,7 +168,6 @@ const Modal = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.2 }}
-            {...props}
           >
             {/* Header */}
             {(title || showCloseButton) && (
@@ -177,12 +177,12 @@ const Modal = ({
                     {title}
                   </h3>
                 )}
-                
+
                 {showCloseButton && (
                   <button
                     type="button"
                     className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
-                    onClick={onClose}
+                    onClick={handleClose}
                     aria-label="Close modal"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -210,7 +210,6 @@ const Modal = ({
     </AnimatePresence>
   );
 
-  // Render modal in portal
   return ReactDOM.createPortal(modalContent, document.body);
 };
 
@@ -228,10 +227,12 @@ Modal.propTypes = {
   className: PropTypes.string,
   overlayClassName: PropTypes.string,
   preventBodyScroll: PropTypes.bool,
-  initialFocus: PropTypes.object
+  initialFocus: PropTypes.object,
+  hasUnsavedChanges: PropTypes.bool,
+  confirmCloseMessage: PropTypes.string
 };
 
-// Confirmation Modal Helper Component
+// ConfirmModal Helper
 export const ConfirmModal = ({
   isOpen,
   onClose,
@@ -248,64 +249,30 @@ export const ConfirmModal = ({
       await onConfirm();
       onClose();
     } catch (error) {
-      // Error handling is done by the parent component
+      // Parent handles errors
     }
   };
 
   const footer = (
     <div className="flex space-x-3 justify-end">
-      <Button
-        variant="secondary"
-        onClick={onClose}
-        disabled={loading}
-      >
+      <Button variant="secondary" onClick={onClose} disabled={loading}>
         {cancelText}
       </Button>
-      <Button
-        variant={variant}
-        onClick={handleConfirm}
-        loading={loading}
-      >
+      <Button variant={variant} onClick={handleConfirm} loading={loading}>
         {confirmText}
       </Button>
     </div>
   );
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={title}
-      footer={footer}
-      size="sm"
-      variant={variant}
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title={title} footer={footer} size="sm" variant={variant}>
       <p className="text-gray-600">{message}</p>
     </Modal>
   );
 };
 
-ConfirmModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired,
-  title: PropTypes.string,
-  message: PropTypes.string,
-  confirmText: PropTypes.string,
-  cancelText: PropTypes.string,
-  variant: PropTypes.oneOf(['danger', 'warning', 'success', 'info']),
-  loading: PropTypes.bool
-};
-
-// Alert Modal Helper Component
-export const AlertModal = ({
-  isOpen,
-  onClose,
-  title = 'Alert',
-  message = '',
-  variant = 'info',
-  buttonText = 'OK'
-}) => {
+// AlertModal Helper
+export const AlertModal = ({ isOpen, onClose, title = 'Alert', message = '', variant = 'info', buttonText = 'OK' }) => {
   const footer = (
     <div className="flex justify-end">
       <Button variant="primary" onClick={onClose}>
@@ -315,26 +282,10 @@ export const AlertModal = ({
   );
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={title}
-      footer={footer}
-      size="sm"
-      variant={variant}
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title={title} footer={footer} size="sm" variant={variant}>
       <p className="text-gray-600">{message}</p>
     </Modal>
   );
-};
-
-AlertModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  title: PropTypes.string,
-  message: PropTypes.string,
-  variant: PropTypes.oneOf(['default', 'danger', 'warning', 'success', 'info']),
-  buttonText: PropTypes.string
 };
 
 export default Modal;

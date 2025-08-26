@@ -41,7 +41,8 @@ import {
   clearAdvancedSearch,
   setQuickSearchTerm,
   clearQuickSearch,
-  clearError
+  clearError,
+  getVisitorById
 } from '../../../store/slices/visitorsSlice';
 
 // Invitation actions
@@ -422,7 +423,9 @@ const VisitorsListPage = () => {
         dispatch(showDetailsModal(visitor));
         break;
       case 'edit':
-        dispatch(showEditModal(visitor));
+        dispatch(getVisitorById(visitor.id));
+        
+        dispatch(showEditModal(currentVisitor));
         break;
       case 'delete':
         dispatch(showDeleteModal(visitor));

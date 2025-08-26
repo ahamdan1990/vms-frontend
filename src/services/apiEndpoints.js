@@ -10,6 +10,7 @@ export const API_CONFIG = {
   VERSION: 'v1'
 };
 
+
 // Authentication endpoints
 export const AUTH_ENDPOINTS = {
   LOGIN: '/api/Auth/login',
@@ -64,6 +65,17 @@ export const ADMIN_ENDPOINTS = {
   VULNERABILITIES: '/api/Security/vulnerabilities',
   COMPLIANCE: '/api/Compliance',
   COMPLIANCE_REPORT: '/api/Compliance/report'
+};
+
+// Audit endpoints
+export const AUDIT_ENDPOINTS = {
+  BASE: '/api/Audit',
+  BY_ID: (id) => `/api/Audit/${id}`,
+  EXPORT: '/api/Audit/export',
+  SEARCH: '/api/Audit/search',
+  USER_ACTIVITY: '/api/Audit/user-activity',
+  SYSTEM_EVENTS: '/api/Audit/system-events',
+  SECURITY_EVENTS: '/api/Audit/security-events'
 };
 
 // Configuration management endpoints
@@ -249,6 +261,7 @@ export const API_ENDPOINTS = {
   ADMIN: ADMIN_ENDPOINTS,
   CONFIGURATION: CONFIGURATION_ENDPOINTS,
   FILES: FILE_ENDPOINTS,
+  AUDIT: AUDIT_ENDPOINTS
 };
 
 export default API_ENDPOINTS;

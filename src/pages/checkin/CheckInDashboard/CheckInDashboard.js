@@ -88,9 +88,9 @@ const CheckInDashboard = () => {
     };
 
     loadActiveInvitations();
-    const interval = setInterval(loadActiveInvitations, 30000); // Refresh every 30 seconds
+    //const interval = setInterval(loadActiveInvitations, 30000); // Refresh every 30 seconds
 
-    return () => clearInterval(interval);
+    //return () => clearInterval(interval);
   }, [dispatch]);
 
   // Calculate stats when active invitations change

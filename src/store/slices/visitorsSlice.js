@@ -109,9 +109,9 @@ export const getVisitors = createAsyncThunk(
 // Get visitor by ID
 export const getVisitorById = createAsyncThunk(
   'visitors/getVisitorById',
-  async ({ id, includeDeleted = false }, { rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {  // <- just `id`
     try {
-      const data = await visitorService.getVisitorById(id, includeDeleted);
+      const data = await visitorService.getVisitorById(id, false);
       return data;
     } catch (error) {
       const errorMessage = handleApiError(error);

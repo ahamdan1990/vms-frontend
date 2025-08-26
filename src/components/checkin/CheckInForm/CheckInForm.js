@@ -67,7 +67,7 @@ const CheckInForm = ({
       const filtered = invitations.filter(invitation => {
         const visitor = invitation.visitor;
         const searchLower = visitorSearchTerm.toLowerCase();
-        
+        console.log(invitation)
         return (
           visitor?.firstName?.toLowerCase().includes(searchLower) ||
           visitor?.lastName?.toLowerCase().includes(searchLower) ||
@@ -147,7 +147,7 @@ const CheckInForm = ({
   // Check if invitation can be checked in
   const canCheckIn = (invitation) => {
     return invitation && 
-           invitation.status === 'Approved' && 
+           invitation.status === 'approved' && 
            !invitation.checkedInAt &&
            new Date(invitation.scheduledStartTime) <= new Date() &&
            new Date(invitation.scheduledEndTime) >= new Date();
@@ -308,7 +308,7 @@ const CheckInForm = ({
                 <div className="text-sm text-yellow-700">
                   {selectedInvitation.checkedInAt ? 
                     'This visitor is already checked in.' :
-                    selectedInvitation.status !== 'Approved' ?
+                    selectedInvitation.status !== 'approved' ?
                     'This invitation is not approved for check-in.' :
                     'This invitation is not within the scheduled time window.'
                   }

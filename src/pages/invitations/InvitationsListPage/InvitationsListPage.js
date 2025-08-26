@@ -152,7 +152,7 @@ const InvitationsListPage = () => {
   // Modal states
   const showCreateModalState = useSelector(selectShowCreateModal);
   const showEditModalState = useSelector(selectShowEditModal);
-  const showDeleteModal = useSelector(selectShowDeleteModal);
+  const showDeleteModalState = useSelector(selectShowDeleteModal);
   const showDetailsModalState = useSelector(selectShowDetailsModal);
   const showApprovalModal = useSelector(selectShowApprovalModal);
   const showQrModalState = useSelector(selectShowQrModal);
@@ -256,6 +256,7 @@ const InvitationsListPage = () => {
         permanentDelete: false
       })).unwrap();
       // Modal will be closed by the reducer
+      dispatch(getInvitations());
     } catch (error) {
       console.error('Delete invitation failed:', error);
     }
@@ -1294,7 +1295,7 @@ const InvitationsListPage = () => {
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal
-        isOpen={showDeleteModal}
+        isOpen={showDeleteModalState}
         onClose={handleCloseDeleteModal}
         onConfirm={handleDeleteInvitation}
         title="Delete Invitation"
