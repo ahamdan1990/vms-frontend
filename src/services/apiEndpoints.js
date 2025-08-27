@@ -193,6 +193,29 @@ export const TIME_SLOTS_ENDPOINTS = {
   AVAILABLE: '/api/time-slots/available'
 };
 
+// Notification endpoints
+export const NOTIFICATION_ENDPOINTS = {
+  BASE: '/api/notifications',
+  ALL: '/api/notifications/all',
+  BY_ID: (id) => `/api/notifications/${id}`,
+  ACKNOWLEDGE: (id) => `/api/notifications/${id}/acknowledge`,
+  STATS: '/api/notifications/stats',
+  SYSTEM_STATS: '/api/notifications/stats/system',
+  ESCALATIONS: '/api/notifications/escalations',
+  ESCALATION_BY_ID: (id) => `/api/notifications/escalations/${id}`,
+  ALERT_TYPES: '/api/notifications/alert-types',
+  PRIORITIES: '/api/notifications/priorities',
+  ESCALATION_ACTIONS: '/api/notifications/escalation-actions'
+};
+
+// SignalR Hub endpoints
+export const SIGNALR_ENDPOINTS = {
+  OPERATOR_HUB: '/hubs/operator',
+  HOST_HUB: '/hubs/host',
+  SECURITY_HUB: '/hubs/security',
+  ADMIN_HUB: '/hubs/admin'
+};
+
 
 // Helper functions for dynamic endpoint generation
 export const buildEndpoint = (template, params = {}) => {
@@ -258,6 +281,8 @@ export const API_ENDPOINTS = {
   EXCEL: EXCEL_ENDPOINTS,
   CAPACITY: CAPACITY_ENDPOINTS,
   TIME_SLOTS: TIME_SLOTS_ENDPOINTS,
+  NOTIFICATIONS: NOTIFICATION_ENDPOINTS,
+  SIGNALR: SIGNALR_ENDPOINTS,
   ADMIN: ADMIN_ENDPOINTS,
   CONFIGURATION: CONFIGURATION_ENDPOINTS,
   FILES: FILE_ENDPOINTS,

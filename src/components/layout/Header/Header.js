@@ -5,19 +5,27 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { useNotifications } from '../../../hooks/useNotifications';
 import { toggleSidebar, toggleTheme } from '../../../store/slices/uiSlice';
 import { formatName } from '../../../utils/formatters';
 import Button from '../../common/Button/Button';
 
 /**
  * Professional Header Component with user menu, notifications, and search
- * Responsive design with mobile support
+ * Responsive design with mobile support and real-time notifications
  */
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth();
   const { canAccessAdminFeatures } = usePermissions();
+  
+  // Real-time notifications
+  const { 
+    unreadCount, 
+    connectionStatus, 
+    refreshNotifications 
+  } = useNotifications();
   
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -27,7 +35,6 @@ const Header = () => {
   const notificationsRef = useRef(null);
   
   const { theme, sidebarOpen } = useSelector(state => state.ui);
-  const { unreadCount } = useSelector(state => state.notifications);
 
   // Close menus when clicking outside
   useEffect(() => {

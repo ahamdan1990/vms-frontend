@@ -1,5 +1,6 @@
-// src/store/slices/notificationSlice.js - PRODUCTION FIXED VERSION
+// src/store/slices/notificationSlice.js - PRODUCTION VERSION WITH SIGNALR INTEGRATION
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { notificationService } from '../../services/notificationService';
 
 // Initial state
 const initialState = {
@@ -28,7 +29,19 @@ const initialState = {
   // Push notification state
   pushSupported: false,
   pushPermission: 'default', // 'default' | 'granted' | 'denied'
-  pushSubscription: null
+  pushSubscription: null,
+  
+  // Real-time state
+  isSignalRConnected: false,
+  lastSyncTime: null,
+  
+  // Statistics
+  stats: {
+    total: 0,
+    unread: 0,
+    byType: {},
+    byPriority: {}
+  }
 };
 
 // Notification types
@@ -99,6 +112,55 @@ const showDesktopNotification = (notification, settings) => {
     console.error('Failed to show desktop notification:', error);
   }
 };
+
+// API-based async thunks for real-time notifications
+export const fetchNotifications = createAsyncThunk(
+  'notifications/fetchNotifications',
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const response = await notificationService.getNotifications(params);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const fetchAllNotifications = createAsyncThunk(
+  'notifications/fetchAllNotifications',
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const response = await notificationService.getAllNotifications(params);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const acknowledgeNotificationAsync = createAsyncThunk(
+  'notifications/acknowledgeNotificationAsync',
+  async ({ notificationId, notes }, { rejectWithValue }) => {
+    try {
+      await notificationService.acknowledgeNotification(notificationId, notes);
+      return notificationId;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const fetchNotificationStats = createAsyncThunk(
+  'notifications/fetchNotificationStats',
+  async ({ fromDate, toDate } = {}, { rejectWithValue }) => {
+    try {
+      const response = await notificationService.getNotificationStats(fromDate, toDate);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 
 // ✅ PRODUCTION FIX: Only request permission when explicitly called by user action
 export const requestNotificationPermission = createAsyncThunk(
@@ -308,9 +370,122 @@ const notificationSlice = createSlice({
     // Set loading state
     setLoading: (state, action) => {
       state.loading = action.payload;
+    },
+
+    // SignalR connection status
+    setSignalRConnectionStatus: (state, action) => {
+      state.isSignalRConnected = action.payload;
+    },
+
+    // Update last sync time
+    updateLastSyncTime: (state) => {
+      state.lastSyncTime = new Date().toISOString();
+    },
+
+    // Add real-time notification from SignalR
+    addRealTimeNotification: (state, action) => {
+      const notification = {
+        id: action.payload.id || Date.now().toString(),
+        type: action.payload.type || NOTIFICATION_TYPES.INFO,
+        title: action.payload.title,
+        message: action.payload.message,
+        timestamp: action.payload.timestamp || new Date().toISOString(),
+        read: false,
+        persistent: action.payload.persistent || false,
+        actions: action.payload.actions || [],
+        data: action.payload.data || null,
+        priority: action.payload.priority || 'medium'
+      };
+
+      // Add to beginning of notifications array
+      state.notifications.unshift(notification);
+      state.unreadCount += 1;
+
+      // Keep only last 100 notifications
+      if (state.notifications.length > 100) {
+        const removed = state.notifications.slice(100);
+        state.notifications = state.notifications.slice(0, 100);
+        
+        // Adjust unread count for removed unread notifications
+        const removedUnread = removed.filter(n => !n.read).length;
+        state.unreadCount = Math.max(0, state.unreadCount - removedUnread);
+      }
+
+      // Update stats
+      state.stats.total += 1;
+      state.stats.unread += 1;
+      
+      if (state.stats.byType[notification.type]) {
+        state.stats.byType[notification.type] += 1;
+      } else {
+        state.stats.byType[notification.type] = 1;
+      }
+      
+      if (state.stats.byPriority[notification.priority]) {
+        state.stats.byPriority[notification.priority] += 1;
+      } else {
+        state.stats.byPriority[notification.priority] = 1;
+      }
     }
   },
   extraReducers: (builder) => {
+    // Fetch notifications
+    builder
+      .addCase(fetchNotifications.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchNotifications.fulfilled, (state, action) => {
+        state.loading = false;
+        state.notifications = action.payload.items;
+        state.unreadCount = action.payload.items.filter(n => !n.read).length;
+        state.lastSyncTime = new Date().toISOString();
+      })
+      .addCase(fetchNotifications.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
+    // Fetch all notifications (admin)
+    builder
+      .addCase(fetchAllNotifications.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllNotifications.fulfilled, (state, action) => {
+        state.loading = false;
+        state.notifications = action.payload.items;
+        state.lastSyncTime = new Date().toISOString();
+      })
+      .addCase(fetchAllNotifications.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
+    // Acknowledge notification
+    builder
+      .addCase(acknowledgeNotificationAsync.fulfilled, (state, action) => {
+        const notificationId = action.payload;
+        const notification = state.notifications.find(n => n.id === notificationId);
+        if (notification && !notification.read) {
+          notification.read = true;
+          notification.acknowledgedOn = new Date().toISOString();
+          state.unreadCount = Math.max(0, state.unreadCount - 1);
+        }
+      })
+      .addCase(acknowledgeNotificationAsync.rejected, (state, action) => {
+        state.error = action.payload;
+      });
+
+    // Fetch notification stats
+    builder
+      .addCase(fetchNotificationStats.fulfilled, (state, action) => {
+        state.stats = action.payload;
+      })
+      .addCase(fetchNotificationStats.rejected, (state, action) => {
+        state.error = action.payload;
+      });
+
     // Request permission
     builder
       .addCase(requestNotificationPermission.fulfilled, (state, action) => {
@@ -333,26 +508,6 @@ const notificationSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       });
-
-    // Mark as read
-    builder
-      .addCase(markAsRead.fulfilled, (state, action) => {
-        const notificationId = action.payload;
-        const notification = state.notifications.find(n => n.id === notificationId);
-        if (notification && !notification.read) {
-          notification.read = true;
-          state.unreadCount = Math.max(0, state.unreadCount - 1);
-        }
-      });
-
-    // Mark all as read
-    builder
-      .addCase(markAllAsRead.fulfilled, (state) => {
-        state.notifications.forEach(notification => {
-          notification.read = true;
-        });
-        state.unreadCount = 0;
-      });
   }
 });
 
@@ -373,7 +528,10 @@ export const {
   clearError,
   batchMarkAsRead,
   updateNotification,
-  setLoading
+  setLoading,
+  setSignalRConnectionStatus,
+  updateLastSyncTime,
+  addRealTimeNotification
 } = notificationSlice.actions;
 
 // Helper action creators
@@ -410,12 +568,14 @@ export const showInfoToast = (title, message, options = {}) =>
     ...options
   });
 
-// Action creator that includes desktop notification
+// Action creator that includes desktop notification (used by SignalR)
 export const addNotificationWithDesktop = (notificationData) => (dispatch, getState) => {
   const { notifications } = getState();
   
-  dispatch(addNotification(notificationData));
+  // Add to Redux store as real-time notification
+  dispatch(addRealTimeNotification(notificationData));
   
+  // Show desktop notification if enabled and permitted
   if (notifications.settings.desktop && notifications.pushPermission === 'granted') {
     const notification = {
       id: notificationData.id || Date.now().toString(),
@@ -428,25 +588,72 @@ export const addNotificationWithDesktop = (notificationData) => (dispatch, getSt
     
     showDesktopNotification(notification, notifications.settings);
   }
+
+  // Auto-add as toast for high-priority items
+  if (notificationData.priority === 'high' || notificationData.priority === 'critical' || notificationData.priority === 'emergency') {
+    dispatch(addToast({
+      type: getToastTypeFromPriority(notificationData.priority),
+      title: notificationData.title,
+      message: notificationData.message,
+      persistent: notificationData.priority === 'emergency',
+      actions: notificationData.actions
+    }));
+  }
 };
 
-// ✅ PRODUCTION FIX: Safe initialization without automatic permission request
+// Helper function to map priority to toast type
+const getToastTypeFromPriority = (priority) => {
+  switch (priority) {
+    case 'emergency':
+    case 'critical':
+      return NOTIFICATION_TYPES.ERROR;
+    case 'high':
+      return NOTIFICATION_TYPES.WARNING;
+    default:
+      return NOTIFICATION_TYPES.INFO;
+  }
+};
+
+// ✅ PRODUCTION FIX: Real-time initialization with SignalR (no automatic permission request)
 export const initializeNotifications = () => async (dispatch) => {
   try {
     // Check browser support
     const pushSupported = 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
     dispatch(setPushSupported(pushSupported));
     
-    // ✅ PRODUCTION FIX: Only check permission, DON'T request automatically
+    // Only check permission, DON'T request automatically
     if ('Notification' in window) {
       dispatch(setPushPermission(Notification.permission));
       console.log('✅ Notifications initialized. Permission:', Notification.permission);
     }
+
+    // Load initial notifications from API
+    await dispatch(fetchNotifications());
     
+    // Load notification statistics
+    await dispatch(fetchNotificationStats());
+    
+    console.log('✅ Notification system initialized with real-time support');
   } catch (error) {
     console.error('Failed to initialize notifications:', error);
     dispatch(setError('Failed to initialize notifications'));
   }
+};
+
+// SignalR connection management
+export const setSignalRConnected = (connected) => (dispatch) => {
+  dispatch(setSignalRConnectionStatus(connected));
+  
+  if (connected) {
+    // When SignalR connects, sync notifications
+    dispatch(fetchNotifications());
+  }
+};
+
+// Manual refresh from API (fallback when SignalR disconnected)
+export const refreshNotifications = () => async (dispatch) => {
+  await dispatch(fetchNotifications());
+  dispatch(updateLastSyncTime());
 };
 
 // ✅ PRODUCTION ADDITION: Manual permission request for user-triggered action

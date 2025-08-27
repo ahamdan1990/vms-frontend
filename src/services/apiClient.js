@@ -290,7 +290,7 @@ const createRefreshQueue = () => {
 /**
  * ✅ ENHANCED: Function to refresh token with improved race condition prevention
  */
-const refreshToken = async () => {
+export const refreshToken = async () => {
   // If already refreshing, return the existing promise
   if (isRefreshing && refreshPromise) {
     return createRefreshQueue();

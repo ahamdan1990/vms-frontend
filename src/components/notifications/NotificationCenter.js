@@ -1,6 +1,15 @@
 // src/components/notifications/NotificationCenter.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useDispatch, useSelector } from 'react-redux';
+import { 
+  fetchNotifications, 
+  acknowledgeNotificationAsync, 
+  markNotificationAsRead,
+  removeNotification,
+  fetchNotificationStats
+} from '../../store/slices/notificationSlice';
+import { useSignalR } from '../../hooks/useSignalR';
 
 // Components
 import Button from '../common/Button/Button';
@@ -22,7 +31,8 @@ import {
   EnvelopeIcon,
   Cog6ToothIcon,
   EllipsisVerticalIcon,
-  ArchiveBoxIcon
+  ArchiveBoxIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import { BellIcon as BellIconSolid } from '@heroicons/react/24/solid';
 
@@ -30,7 +40,7 @@ import { BellIcon as BellIconSolid } from '@heroicons/react/24/solid';
 import formatters from '../../utils/formatters';
 
 /**
- * Advanced Notification Center
+ * Advanced Notification Center with Real-time SignalR Integration
  * Manages real-time notifications for visitor management events
  * Includes notification filtering, actions, and real-time updates
  */
@@ -39,156 +49,86 @@ const NotificationCenter = ({
   onClose,
   className = ''
 }) => {
-  // Notification state
-  const [notifications, setNotifications] = useState([]);
+  const dispatch = useDispatch();
+  
+  // Redux state
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    error,
+    isSignalRConnected,
+    stats
+  } = useSelector(state => state.notifications);
+
+  // SignalR integration
+  const { isConnected: signalRConnected, host } = useSignalR();
+
+  // Local state
   const [filter, setFilter] = useState('all'); // 'all', 'unread', 'security', 'visitors', 'system'
-  const [loading, setLoading] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
 
-  // Sample notification data - in real app, this would come from WebSocket/API
-  const sampleNotifications = [
-    {
-      id: 1,
-      type: 'visitor_checkin',
-      title: 'Visitor Check-in',
-      message: 'John Doe from ABC Corp has checked in',
-      timestamp: new Date(Date.now() - 5 * 60 * 1000),
-      read: false,
-      priority: 'normal',
-      category: 'visitors',
-      actions: [
-        { label: 'View Profile', action: 'view_visitor', visitorId: 123 },
-        { label: 'Send Welcome', action: 'send_welcome', visitorId: 123 }
-      ],
-      metadata: {
-        visitorName: 'John Doe',
-        company: 'ABC Corp',
-        host: 'Jane Smith',
-        location: 'Main Lobby'
-      }
-    },
-    {
-      id: 2,
-      type: 'security_alert',
-      title: 'Security Alert',
-      message: 'Visitor exceeded authorized area - Floor 3 Restricted Zone',
-      timestamp: new Date(Date.now() - 15 * 60 * 1000),
-      read: false,
-      priority: 'high',
-      category: 'security',
-      actions: [
-        { label: 'View Location', action: 'view_location' },
-        { label: 'Contact Security', action: 'contact_security' },
-        { label: 'Acknowledge', action: 'acknowledge' }
-      ],
-      metadata: {
-        visitorName: 'Unknown Visitor',
-        location: 'Floor 3 - Restricted Zone',
-        alertType: 'unauthorized_access'
-      }
-    },
-    {
-      id: 3,
-      type: 'visitor_overdue',
-      title: 'Overdue Visitor',
-      message: 'Sarah Wilson has not checked in - 30 minutes overdue',
-      timestamp: new Date(Date.now() - 30 * 60 * 1000),
-      read: true,
-      priority: 'medium',
-      category: 'visitors',
-      actions: [
-        { label: 'Call Visitor', action: 'call_visitor', phone: '+1234567890' },
-        { label: 'Cancel Invitation', action: 'cancel_invitation', invitationId: 456 }
-      ],
-      metadata: {
-        visitorName: 'Sarah Wilson',
-        company: 'XYZ Industries',
-        expectedTime: new Date(Date.now() - 60 * 60 * 1000),
-        host: 'Mike Johnson'
-      }
-    },
-    {
-      id: 4,
-      type: 'system_update',
-      title: 'System Update',
-      message: 'New features available: Document scanner and enhanced analytics',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      read: false,
-      priority: 'low',
-      category: 'system',
-      actions: [
-        { label: 'View Updates', action: 'view_updates' },
-        { label: 'Dismiss', action: 'dismiss' }
-      ]
-    },
-    {
-      id: 5,
-      type: 'invitation_approved',
-      title: 'Invitation Approved',
-      message: 'Meeting request for tomorrow has been approved',
-      timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000),
-      read: true,
-      priority: 'normal',
-      category: 'visitors',
-      actions: [
-        { label: 'Send Notification', action: 'notify_visitor' },
-        { label: 'View Details', action: 'view_invitation' }
-      ],
-      metadata: {
-        invitationId: 789,
-        host: 'Emily Davis',
-        meetingTime: new Date(Date.now() + 24 * 60 * 60 * 1000)
-      }
-    }
-  ];
-
-  // Initialize notifications
+  // Load notifications on mount and when filter changes
   useEffect(() => {
-    setNotifications(sampleNotifications);
-    setUnreadCount(sampleNotifications.filter(n => !n.read).length);
-  }, []);
+    if (isOpen) {
+      const filterParams = {};
+      
+      if (filter === 'unread') {
+        filterParams.isAcknowledged = false;
+      } else if (filter !== 'all') {
+        filterParams.alertType = filter;
+      }
+
+      dispatch(fetchNotifications(filterParams));
+      dispatch(fetchNotificationStats());
+    }
+  }, [dispatch, isOpen, filter]);
+
+  // Real-time connection status indicator
+  useEffect(() => {
+    if (isOpen && host) {
+      // Request notification history when connected
+      host.getNotificationHistory(7).catch(console.error);
+    }
+  }, [isOpen, host]);
 
   // Filter notifications
   const filteredNotifications = notifications.filter(notification => {
     if (filter === 'all') return true;
     if (filter === 'unread') return !notification.read;
-    return notification.category === filter;
+    
+    // Map filter to notification types
+    const typeMap = {
+      'visitors': ['VisitorArrival', 'VisitorCheckedIn', 'VisitorCheckedOut', 'VisitorOverstay'],
+      'security': ['BlacklistAlert', 'UnknownFace', 'EmergencyAlert', 'SecurityAlert'],
+      'system': ['SystemAlert', 'FRSystemOffline', 'MaintenanceNotice']
+    };
+    
+    return typeMap[filter]?.includes(notification.type) || false;
   });
 
   // Mark notification as read
   const markAsRead = useCallback((notificationId) => {
-    setNotifications(prev => 
-      prev.map(n => 
-        n.id === notificationId ? { ...n, read: true } : n
-      )
-    );
-    setUnreadCount(prev => Math.max(0, prev - 1));
-  }, []);
+    dispatch(markNotificationAsRead(notificationId));
+  }, [dispatch]);
 
   // Mark all as read
   const markAllAsRead = useCallback(() => {
-    setNotifications(prev => 
-      prev.map(n => ({ ...n, read: true }))
-    );
-    setUnreadCount(0);
-  }, []);
+    const unreadNotificationIds = notifications
+      .filter(n => !n.read)
+      .map(n => n.id);
+    
+    unreadNotificationIds.forEach(id => {
+      dispatch(markNotificationAsRead(id));
+    });
+  }, [dispatch, notifications]);
 
   // Remove notification
-  const removeNotification = useCallback((notificationId) => {
-    setNotifications(prev => {
-      const notification = prev.find(n => n.id === notificationId);
-      const newNotifications = prev.filter(n => n.id !== notificationId);
-      
-      if (notification && !notification.read) {
-        setUnreadCount(count => Math.max(0, count - 1));
-      }
-      
-      return newNotifications;
-    });
-  }, []);
+  const removeNotificationHandler = useCallback((notificationId) => {
+    dispatch(removeNotification(notificationId));
+  }, [dispatch]);
 
   // Handle notification action
-  const handleNotificationAction = (notification, action) => {
+  const handleNotificationAction = useCallback(async (notification, action) => {
     console.log('Notification action:', action, notification);
     
     // Mark as read when action is taken
@@ -197,49 +137,82 @@ const NotificationCenter = ({
     }
 
     // Handle specific actions
-    switch (action.action) {
-      case 'acknowledge':
-      case 'dismiss':
-        removeNotification(notification.id);
-        break;
-      case 'view_visitor':
-        // Navigate to visitor profile
-        break;
-      case 'call_visitor':
-        // Initiate phone call
-        if (action.phone) {
-          window.open(`tel:${action.phone}`);
-        }
-        break;
-      case 'contact_security':
-        // Contact security team
-        break;
-      default:
-        // Handle other actions
-        break;
+    try {
+      switch (action.action) {
+        case 'acknowledge':
+          await dispatch(acknowledgeNotificationAsync({ 
+            notificationId: notification.id, 
+            notes: 'Acknowledged via notification center' 
+          })).unwrap();
+          // Also acknowledge via SignalR if available
+          if (host?.acknowledgeNotification) {
+            await host.acknowledgeNotification(notification.id);
+          }
+          break;
+          
+        case 'dismiss':
+          removeNotificationHandler(notification.id);
+          break;
+          
+        case 'view_visitor':
+          // Navigate to visitor profile
+          if (action.visitorId) {
+            window.location.href = `/visitors/${action.visitorId}`;
+          }
+          break;
+          
+        case 'call_visitor':
+          // Initiate phone call
+          if (action.phone) {
+            window.open(`tel:${action.phone}`);
+          }
+          break;
+          
+        case 'contact_security':
+          // Contact security team
+          window.location.href = '/security/contact';
+          break;
+          
+        case 'view_invitation':
+          if (action.invitationId || notification.data?.invitationId) {
+            const invitationId = action.invitationId || notification.data.invitationId;
+            window.location.href = `/invitations/${invitationId}`;
+          }
+          break;
+          
+        default:
+          console.log('Unhandled notification action:', action.action);
+          break;
+      }
+    } catch (error) {
+      console.error('Error handling notification action:', error);
     }
-  };
+  }, [dispatch, markAsRead, removeNotificationHandler, host]);
 
   // Get notification icon
   const getNotificationIcon = (type, priority) => {
-    const iconClass = `w-5 h-5 ${priority === 'high' ? 'text-red-500' : priority === 'medium' ? 'text-yellow-500' : 'text-blue-500'}`;
+    const iconClass = `w-5 h-5 ${priority === 'Critical' || priority === 'Emergency' ? 'text-red-500' : priority === 'High' ? 'text-orange-500' : priority === 'Medium' ? 'text-yellow-500' : 'text-blue-500'}`;
     
     switch (type) {
-      case 'visitor_checkin':
+      case 'VisitorArrival':
+      case 'VisitorCheckedIn':
         return <UserPlusIcon className={iconClass} />;
-      case 'visitor_checkout':
+      case 'VisitorCheckedOut':
         return <UserMinusIcon className={iconClass} />;
-      case 'visitor_overdue':
+      case 'VisitorOverstay':
         return <ClockIcon className="w-5 h-5 text-yellow-500" />;
-      case 'security_alert':
+      case 'BlacklistAlert':
+      case 'UnknownFace':
+      case 'EmergencyAlert':
         return <ShieldExclamationIcon className="w-5 h-5 text-red-500" />;
-      case 'system_update':
+      case 'SystemAlert':
+      case 'FRSystemOffline':
         return <Cog6ToothIcon className={iconClass} />;
-      case 'invitation_approved':
+      case 'InvitationApproved':
         return <CheckIcon className="w-5 h-5 text-green-500" />;
-      case 'invitation_rejected':
+      case 'InvitationRejected':
         return <XMarkIcon className="w-5 h-5 text-red-500" />;
-      case 'email_sent':
+      case 'InvitationPendingApproval':
         return <EnvelopeIcon className={iconClass} />;
       default:
         return <InformationCircleIcon className={iconClass} />;
@@ -248,9 +221,12 @@ const NotificationCenter = ({
 
   // Get priority badge color
   const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'high':
+    switch (priority?.toLowerCase()) {
+      case 'emergency':
+      case 'critical':
         return 'red';
+      case 'high':
+        return 'orange';
       case 'medium':
         return 'yellow';
       case 'low':
@@ -264,7 +240,7 @@ const NotificationCenter = ({
   const renderFilterTabs = () => (
     <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-4">
       {[
-        { label: 'All', value: 'all' },
+        { label: 'All', value: 'all', count: notifications.length },
         { label: 'Unread', value: 'unread', count: unreadCount },
         { label: 'Visitors', value: 'visitors' },
         { label: 'Security', value: 'security' },
@@ -281,7 +257,9 @@ const NotificationCenter = ({
         >
           <span>{tab.label}</span>
           {tab.count !== undefined && tab.count > 0 && (
-            <Badge color="red" size="xs">{tab.count}</Badge>
+            <Badge color={tab.value === 'unread' ? 'red' : 'gray'} size="xs">
+              {tab.count}
+            </Badge>
           )}
         </button>
       ))}
@@ -329,23 +307,23 @@ const NotificationCenter = ({
               </p>
               
               <p className="text-xs text-gray-500">
-                {formatters.formatRelativeTime(notification.timestamp)}
+                {formatters.formatRelativeTime(new Date(notification.timestamp))}
               </p>
 
-              {/* Metadata */}
-              {notification.metadata && (
+              {/* Related Entity Information */}
+              {notification.data && (
                 <div className="mt-2 text-xs text-gray-500 space-y-1">
-                  {notification.metadata.visitorName && (
-                    <p><strong>Visitor:</strong> {notification.metadata.visitorName}</p>
+                  {notification.data.visitorName && (
+                    <p><strong>Visitor:</strong> {notification.data.visitorName}</p>
                   )}
-                  {notification.metadata.company && (
-                    <p><strong>Company:</strong> {notification.metadata.company}</p>
+                  {notification.data.company && (
+                    <p><strong>Company:</strong> {notification.data.company}</p>
                   )}
-                  {notification.metadata.host && (
-                    <p><strong>Host:</strong> {notification.metadata.host}</p>
+                  {notification.data.hostName && (
+                    <p><strong>Host:</strong> {notification.data.hostName}</p>
                   )}
-                  {notification.metadata.location && (
-                    <p><strong>Location:</strong> {notification.metadata.location}</p>
+                  {notification.data.location && (
+                    <p><strong>Location:</strong> {notification.data.location}</p>
                   )}
                 </div>
               )}
@@ -366,7 +344,7 @@ const NotificationCenter = ({
               <Button
                 size="xs"
                 variant="ghost"
-                onClick={() => removeNotification(notification.id)}
+                onClick={() => removeNotificationHandler(notification.id)}
                 icon={<XMarkIcon className="w-3 h-3" />}
                 title="Remove notification"
               />
@@ -403,6 +381,7 @@ const NotificationCenter = ({
       className={`fixed inset-y-0 right-0 w-96 bg-white shadow-2xl z-50 overflow-hidden ${className}`}
     >
       {/* Header */}
+
       <div className="p-6 border-b border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -411,6 +390,13 @@ const NotificationCenter = ({
             {unreadCount > 0 && (
               <Badge color="red" size="sm">{unreadCount}</Badge>
             )}
+            {/* Real-time connection indicator */}
+            <div className="flex items-center space-x-1">
+              <div className={`w-2 h-2 rounded-full ${signalRConnected || isSignalRConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <span className="text-xs text-gray-500">
+                {signalRConnected || isSignalRConnected ? 'Live' : 'Offline'}
+              </span>
+            </div>
           </div>
           
           <div className="flex items-center space-x-1">
@@ -441,9 +427,26 @@ const NotificationCenter = ({
 
       {/* Notifications List */}
       <div className="flex-1 overflow-y-auto">
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 m-4 rounded-lg">
+            <p className="text-red-600 text-sm">
+              Error loading notifications: {error}
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => dispatch(fetchNotifications())}
+              className="mt-2"
+            >
+              Retry
+            </Button>
+          </div>
+        )}
+        
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <LoadingSpinner size="lg" />
+            <span className="ml-2 text-gray-500">Loading notifications...</span>
           </div>
         ) : filteredNotifications.length === 0 ? (
           <div className="text-center py-12">
@@ -455,6 +458,13 @@ const NotificationCenter = ({
                 : `No ${filter === 'all' ? '' : filter} notifications to show`
               }
             </p>
+            {!signalRConnected && !isSignalRConnected && (
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-yellow-600 text-xs">
+                  Real-time updates are currently unavailable. Notifications may be delayed.
+                </p>
+              </div>
+            )}
           </div>
         ) : (
           <div className="p-4 space-y-3">
@@ -468,14 +478,30 @@ const NotificationCenter = ({
       {/* Footer */}
       <div className="p-4 border-t border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between text-xs text-gray-500">
-          <span>{filteredNotifications.length} notifications</span>
-          <Button
-            size="xs"
-            variant="ghost"
-            icon={<ArchiveBoxIcon className="w-3 h-3" />}
-          >
-            View Archive
-          </Button>
+          <div className="flex items-center space-x-4">
+            <span>{filteredNotifications.length} notifications</span>
+            {stats.lastSyncTime && (
+              <span>Updated: {formatters.formatRelativeTime(new Date(stats.lastSyncTime))}</span>
+            )}
+          </div>
+          
+          <div className="flex items-center space-x-1">
+            <Button
+              size="xs"
+              variant="ghost"
+              onClick={() => dispatch(fetchNotifications())}
+              icon={<ArrowPathIcon className="w-3 h-3" />}
+              title="Refresh notifications"
+            />
+            <Button
+              size="xs"
+              variant="ghost"
+              icon={<ArchiveBoxIcon className="w-3 h-3" />}
+              title="View archive"
+            >
+              Archive
+            </Button>
+          </div>
         </div>
       </div>
     </motion.div>
