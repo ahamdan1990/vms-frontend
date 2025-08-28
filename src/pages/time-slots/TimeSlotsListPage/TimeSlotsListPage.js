@@ -68,12 +68,8 @@ import {
 
 import { selectLocationsList } from '../../../store/selectors/locationSelectors';
 
-// Notification actions
-import {
-  showSuccessToast,
-  showErrorToast,
-  showWarningToast,
-} from '../../../store/slices/notificationSlice';
+// Notification hook
+import { useToast } from '../../../hooks/useNotifications';
 
 // Components
 import Button from '../../../components/common/Button/Button';
@@ -99,6 +95,7 @@ import { extractErrorMessage } from '../../../utils/errorUtils';
 const TimeSlotsListPage = () => {
   const dispatch = useDispatch();
   const { user: userPermissions } = usePermissions();
+  const toast = useToast();
 
   // Local state
   const [searchInput, setSearchInput] = useState('');
@@ -186,11 +183,11 @@ const TimeSlotsListPage = () => {
   const handleCreateTimeSlot = async (timeSlotData) => {
     try {
       await dispatch(createTimeSlot(timeSlotData)).unwrap();
-      dispatch(showSuccessToast('Time slot created successfully'));
+      toast.success('Success', 'Time slot created successfully');
       dispatch(getTimeSlots(filters)); // Refresh list
     } catch (error) {
       const errorMessage = extractErrorMessage(error);
-      dispatch(showErrorToast(`Failed to create time slot: ${errorMessage}`));
+      toast.error('Error', `Failed to create time slot: ${errorMessage}`);
     }
   };
 
@@ -201,11 +198,11 @@ const TimeSlotsListPage = () => {
         id: currentTimeSlot.id, 
         timeSlotData 
       })).unwrap();
-      dispatch(showSuccessToast('Time slot updated successfully'));
+      toast.success('Success', 'Time slot updated successfully');
       dispatch(getTimeSlots(filters)); // Refresh list
     } catch (error) {
       const errorMessage = extractErrorMessage(error);
-      dispatch(showErrorToast(`Failed to update time slot: ${errorMessage}`));
+      toast.error('Error', `Failed to update time slot: ${errorMessage}`);
     }
   };
 
@@ -216,12 +213,12 @@ const TimeSlotsListPage = () => {
         id: currentTimeSlot.id, 
         hardDelete 
       })).unwrap();
-      dispatch(showSuccessToast(`Time slot ${hardDelete ? 'permanently deleted' : 'deactivated'} successfully`));
+      toast.success('Success', `Time slot ${hardDelete ? 'permanently deleted' : 'deactivated'} successfully`);
       dispatch(hideDeleteModal());
       dispatch(getTimeSlots(filters)); // Refresh list
     } catch (error) {
       const errorMessage = extractErrorMessage(error);
-      dispatch(showErrorToast(`Failed to delete time slot: ${errorMessage}`));
+      toast.error('Error', `Failed to delete time slot: ${errorMessage}`);
     }
   };
 
@@ -235,14 +232,14 @@ const TimeSlotsListPage = () => {
           dispatch(deleteTimeSlot({ id, hardDelete: false })).unwrap()
         );
         await Promise.all(promises);
-        dispatch(showSuccessToast(`${selectedTimeSlots.length} time slots deactivated`));
+        toast.success('Success', `${selectedTimeSlots.length} time slots deactivated`);
       }
       
       dispatch(clearSelections());
       dispatch(getTimeSlots(filters)); // Refresh list
     } catch (error) {
       const errorMessage = extractErrorMessage(error);
-      dispatch(showErrorToast(`Bulk action failed: ${errorMessage}`));
+      toast.error('Error', `Bulk action failed: ${errorMessage}`);
     } finally {
       setShowBulkConfirm(false);
       setBulkAction('');

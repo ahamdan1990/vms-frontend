@@ -16,7 +16,7 @@ import {
   getCurrentUser,
   clearError as clearAuthError
 } from '../../../store/slices/authSlice';
-import { showSuccessToast, showErrorToast } from '../../../store/slices/notificationSlice';
+import { useToast } from '../../../hooks/useNotifications';
 import { setPageTitle } from '../../../store/slices/uiSlice';
 import { formatName, formatDate, formatDateTime } from '../../../utils/formatters';
 import { validatePasswordChange, validateUserData } from '../../../utils/validators';
@@ -38,6 +38,7 @@ import ProfilePhotoUpload from '../../../components/common/ProfilePhotoUpload/Pr
  */
 const ProfilePage = () => {
   const dispatch = useDispatch();
+  const toast = useToast();
   const { 
     user, 
     userId, 
@@ -200,7 +201,7 @@ const ProfilePage = () => {
       });
     } catch (error) {
       console.error('Failed to load profile:', error);
-      dispatch(showErrorToast('Error', 'Failed to load profile data'));
+      toast.error('Error', 'Failed to load profile data');
     } finally {
       setProfileLoading(false);
     }
@@ -266,14 +267,14 @@ const ProfilePage = () => {
       const validation = validateUserData(submissionData, true);
       if (!validation.isValid) {
         setProfileErrors(validation.errors);
-        dispatch(showErrorToast('Validation Error', 'Please fix the errors in the form'));
+        toast.error('Validation Error', 'Please fix the errors in the form');
         return;
       }
 
       console.log('Submitting profile data:', submissionData); // Debug log
 
       await userService.updateCurrentUserProfile(submissionData);
-      dispatch(showSuccessToast('Success', 'Profile updated successfully'));
+      toast.success('Success', 'Profile updated successfully');
       setIsEditingProfile(false);
       setProfileErrors({});
       
@@ -285,7 +286,7 @@ const ProfilePage = () => {
     } catch (error) {
       console.error('Profile update failed:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to update profile';
-      dispatch(showErrorToast('Error', errorMessage));
+      toast.error('Error', errorMessage);
       
       // If there are specific field errors, show them
       if (error.response?.data?.errors) {
@@ -301,10 +302,10 @@ const ProfilePage = () => {
     try {
       setPreferencesLoading(true);
       await userService.updateCurrentUserPreferences(preferences);
-      dispatch(showSuccessToast('Success', 'Preferences updated successfully'));
+      toast.success('Success', 'Preferences updated successfully');
     } catch (error) {
       console.error('Preferences update failed:', error);
-      dispatch(showErrorToast('Error', 'Failed to update preferences'));
+      toast.error('Error', 'Failed to update preferences');
     } finally {
       setPreferencesLoading(false);
     }
@@ -322,7 +323,7 @@ const ProfilePage = () => {
       // Upload photo
       const photoUrl = await fileUploadService.uploadProfilePhoto(file);
       console.log('Photo uploaded, returned URL:', photoUrl); // Debug log
-      dispatch(showSuccessToast('Success', 'Profile photo uploaded successfully'));
+      toast.success('Success', 'Profile photo uploaded successfully');
       
       // Reload profile data to get updated photo URL
       await loadProfileData();
@@ -333,7 +334,7 @@ const ProfilePage = () => {
       return photoUrl;
     } catch (error) {
       console.error('Photo upload failed:', error);
-      dispatch(showErrorToast('Error', error.message || 'Failed to upload profile photo'));
+      toast.error('Error', error.message || 'Failed to upload profile photo');
       throw error;
     }
   };
@@ -342,7 +343,7 @@ const ProfilePage = () => {
   const handlePhotoRemove = async () => {
     try {
       await fileUploadService.removeProfilePhoto();
-      dispatch(showSuccessToast('Success', 'Profile photo removed successfully'));
+      toast.success('Success', 'Profile photo removed successfully');
       
       // Reload profile data to update UI
       await loadProfileData();
@@ -351,7 +352,7 @@ const ProfilePage = () => {
       await dispatch(getCurrentUser());
     } catch (error) {
       console.error('Photo removal failed:', error);
-      dispatch(showErrorToast('Error', 'Failed to remove profile photo'));
+      toast.error('Error', 'Failed to remove profile photo');
       throw error;
     }
   };
@@ -386,7 +387,7 @@ const ProfilePage = () => {
       }
 
       await dispatch(changePassword(passwordData)).unwrap();
-      dispatch(showSuccessToast('Success', 'Password changed successfully'));
+      toast.success('Success', 'Password changed successfully');
       setIsChangingPassword(false);
       setPasswordData({
         currentPassword: '',
@@ -395,7 +396,7 @@ const ProfilePage = () => {
       });
       setPasswordErrors({});
     } catch (error) {
-      dispatch(showErrorToast('Error', 'Failed to change password'));
+      toast.error('Error', 'Failed to change password');
     }
   };
 
@@ -403,11 +404,11 @@ const ProfilePage = () => {
   const handleTerminateSession = async () => {
     try {
       await dispatch(terminateSession(sessionToTerminate.sessionId)).unwrap();
-      dispatch(showSuccessToast('Success', 'Session terminated successfully'));
+      toast.success('Success', 'Session terminated successfully');
       setShowTerminateModal(false);
       setSessionToTerminate(null);
     } catch (error) {
-      dispatch(showErrorToast('Error', 'Failed to terminate session'));
+      toast.error('Error', 'Failed to terminate session');
     }
   };
 

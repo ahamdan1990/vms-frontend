@@ -443,10 +443,6 @@ export const getInitialState = () => ({
       recentSearches: []
     },
     alerts: [],
-    notifications: {
-      unreadCount: 0,
-      items: []
-    },
     tablePreferences: {
       pageSize: 20,
       density: 'standard',

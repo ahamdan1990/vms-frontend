@@ -74,12 +74,8 @@ const initialState = {
     recentSearches: []
   },
   
-  // Notifications/alerts
+  // Alerts (notifications moved to notificationSlice)
   alerts: [],
-  notifications: {
-    unreadCount: 0,
-    items: []
-  },
   
   // Table/list preferences using constants
   tablePreferences: {
@@ -368,30 +364,6 @@ const uiSlice = createSlice({
       state.alerts = [];
     },
     
-    // Notification actions
-    setNotificationCount: (state, action) => {
-      state.notifications.unreadCount = action.payload;
-    },
-    
-    setNotifications: (state, action) => {
-      state.notifications.items = action.payload;
-    },
-    
-    addNotification: (state, action) => {
-      state.notifications.items.unshift(action.payload);
-      if (!action.payload.read) {
-        state.notifications.unreadCount += 1;
-      }
-    },
-    
-    markNotificationAsRead: (state, action) => {
-      const notification = state.notifications.items.find(n => n.id === action.payload);
-      if (notification && !notification.read) {
-        notification.read = true;
-        state.notifications.unreadCount = Math.max(0, state.notifications.unreadCount - 1);
-      }
-    },
-    
     // Table preferences using constants
     setTablePreferences: (state, action) => {
       const newPrefs = { ...state.tablePreferences, ...action.payload };
@@ -630,10 +602,6 @@ export const {
   removeAlert,
   markAlertAsRead,
   clearAlerts,
-  setNotificationCount,
-  setNotifications,
-  addNotification,
-  markNotificationAsRead,
   setTablePreferences,
   setUnsavedChanges,
   setFormDirty,

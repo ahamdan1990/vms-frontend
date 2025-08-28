@@ -19,7 +19,7 @@ import {
   setCurrentUser,
   clearCurrentUser
 } from '../../../store/slices/usersSlice';
-import { showSuccessToast, showErrorToast } from '../../../store/slices/notificationSlice';
+import { useToast } from '../../../hooks/useNotifications';
 import { setPageTitle } from '../../../store/slices/uiSlice';
 import { USER_ROUTES } from '../../../constants/routeConstants';
 import { formatName, formatDate, formatDateTime } from '../../../utils/formatters';
@@ -43,6 +43,7 @@ const UserDetailPage = () => {
   const dispatch = useDispatch();
   
   const { user: currentAuthUser, userId: currentUserId } = useAuth();
+  const toast = useToast();
   const { user: userPermissions } = usePermissions();
 
   // Extract specific permissions for easier use
@@ -139,21 +140,21 @@ const UserDetailPage = () => {
         navigate(USER_ROUTES.LIST);
       } else {
         await dispatch(updateUser({ id: currentUser.id, userData })).unwrap();
-        dispatch(showSuccessToast('Success', 'User updated successfully'));
+        toast.success('Success', 'User updated successfully');
         setIsEditing(false);
       }
     } catch (error) {
-      dispatch(showErrorToast('Error', 'Failed to save user'));
+      toast.error('Error', 'Failed to save user');
     }
   };
 
   const handleDelete = async () => {
     try {
       await dispatch(deleteUser(currentUser.id)).unwrap();
-      dispatch(showSuccessToast('Success', 'User deleted successfully'));
+      toast.success('Success', 'User deleted successfully');
       navigate(USER_ROUTES.LIST);
     } catch (error) {
-      dispatch(showErrorToast('Error', 'Failed to delete user'));
+      toast.error('Error', 'Failed to delete user');
     }
   };
 
@@ -164,11 +165,11 @@ const UserDetailPage = () => {
         reason: actionReason,
         resetFailedAttempts: true
       })).unwrap();
-      dispatch(showSuccessToast('Success', 'User activated successfully'));
+      toast.success('Success', 'User activated successfully');
       setShowActivateModal(false);
       setActionReason('');
     } catch (error) {
-      dispatch(showErrorToast('Error', 'Failed to activate user'));
+      toast.error('Error', 'Failed to activate user');
     }
   };
 
@@ -179,11 +180,11 @@ const UserDetailPage = () => {
         reason: actionReason,
         revokeAllSessions: true
       })).unwrap();
-      dispatch(showSuccessToast('Success', 'User deactivated successfully'));
+      toast.success('Success', 'User deactivated successfully');
       setShowDeactivateModal(false);
       setActionReason('');
     } catch (error) {
-      dispatch(showErrorToast('Error', 'Failed to deactivate user'));
+      toast.error('Error', 'Failed to deactivate user');
     }
   };
 
@@ -193,11 +194,11 @@ const UserDetailPage = () => {
         id: currentUser.id, 
         reason: actionReason
       })).unwrap();
-      dispatch(showSuccessToast('Success', 'User unlocked successfully'));
+      toast.success('Success', 'User unlocked successfully');
       setShowUnlockModal(false);
       setActionReason('');
     } catch (error) {
-      dispatch(showErrorToast('Error', 'Failed to unlock user'));
+      toast.error('Error', 'Failed to unlock user');
     }
   };
 
@@ -207,7 +208,7 @@ const UserDetailPage = () => {
         id: currentUser.id,
         ...passwordResetData
       })).unwrap();
-      dispatch(showSuccessToast('Success', 'Password reset successfully'));
+      toast.success('Success', 'Password reset successfully');
       setShowPasswordResetModal(false);
       setPasswordResetData({
         newPassword: '',
@@ -216,7 +217,7 @@ const UserDetailPage = () => {
         reason:''
       });
     } catch (error) {
-      dispatch(showErrorToast('Error', 'Failed to reset password'));
+      toast.error('Error', 'Failed to reset password');
     }
   };
 

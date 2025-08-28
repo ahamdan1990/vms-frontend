@@ -1,7 +1,7 @@
 // src/components/notifications/NotificationProvider.js - UNIFIED NOTIFICATION PROVIDER
 import React, { createContext, useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { initializeNotifications } from '../../store/slices/unifiedNotificationSlice';
+import { initializeNotifications } from '../../store/slices/notificationSlice';
 import ToastContainer from './ToastContainer';
 import useNotifications from '../../hooks/useNotifications';
 

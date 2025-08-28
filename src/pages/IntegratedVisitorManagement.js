@@ -7,7 +7,7 @@ import ReceptionistDashboard from './receptionist/ReceptionistDashboard';
 import VisitorAnalyticsDashboard from '../components/analytics/VisitorAnalyticsDashboard';
 import ExcelManagementPage from './admin/ExcelManagementPage';
 import NotificationCenter from '../components/notifications/NotificationCenter';
-import { useToast } from '../components/notifications/ToastManager';
+import { useNotifications } from '../hooks/useNotifications';
 import Card from '../components/common/Card/Card';
 import Button from '../components/common/Button/Button';
 import Badge from '../components/common/Badge/Badge';
@@ -92,7 +92,7 @@ const IntegratedVisitorManagement = () => {
     ]
   });
 
-  const toast = useToast();
+  const { toast, visitor } = useNotifications();
 
   // Navigation items
   const navigationItems = [
@@ -138,19 +138,19 @@ const IntegratedVisitorManagement = () => {
   /*useEffect(() => {
     const notificationTimer = setTimeout(() => {
       // Simulate visitor check-in notification
-      toast.visitorCheckedIn('Alice Cooper', 'Tech Division');
+      visitor.checkedIn('Alice Cooper', 'Tech Division');
     }, 5000);
 
     const overdueTimer = setTimeout(() => {
       // Simulate overdue visitor notification
-      toast.visitorOverdue('Bob Johnson', 15);
+      visitor.overdue('Bob Johnson', 15);
     }, 10000);
 
     return () => {
       clearTimeout(notificationTimer);
       clearTimeout(overdueTimer);
     };
-  }, [toast]);*/
+  }, [visitor]);*/
 
   // Handle quick actions
   const handleQuickAction = (actionId) => {

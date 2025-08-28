@@ -3,7 +3,7 @@ import { useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { signalRManager } from '../services/signalr/signalRConnection';
 import { HubConnectionState } from '@microsoft/signalr';
-import { showErrorToast } from '../store/slices/notificationSlice';
+import { useToast } from './useNotifications';
 
 /**
  * SignalR Hook for managing real-time connections
@@ -12,6 +12,7 @@ import { showErrorToast } from '../store/slices/notificationSlice';
 export const useSignalR = () => {
   const dispatch = useDispatch();
   const { user, isAuthenticated } = useSelector(state => state.auth);
+  const { error: errorToast } = useToast();
   const initializationAttempted = useRef(false);
   const initializationPromise = useRef(null);
 
@@ -27,14 +28,14 @@ export const useSignalR = () => {
         .initializeConnections(user)
         .catch(error => {
           console.error('SignalR initialization failed:', error);
-          dispatch(showErrorToast(
+          errorToast(
             'Connection Error',
             'Failed to establish real-time connection. Some features may be limited.',
             { persistent: true }
-          ));
+          );
         });
     }
-  }, [isAuthenticated, user, dispatch]);
+  }, [isAuthenticated, user, errorToast]);
 
   /**
    * Cleanup connections when user logs out
@@ -74,14 +75,14 @@ export const useSignalR = () => {
       return await signalRManager.invokeHubMethod(hubName, methodName, ...args);
     } catch (error) {
       console.error(`Failed to invoke ${methodName} on ${hubName}:`, error);
-      dispatch(showErrorToast(
+      errorToast(
         'Connection Error',
         `Failed to perform action: ${error.message}`,
         { duration: 5000 }
-      ));
+      );
       throw error;
     }
-  }, [dispatch]);
+  }, [errorToast]);
 
   /**
    * Operator-specific methods

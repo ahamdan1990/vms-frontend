@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useDispatch } from 'react-redux';
 import { validateUserData } from '../../../utils/validators';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { showSuccessToast, showErrorToast, showWarningToast } from '../../../store/slices/notificationSlice';
+import { useToast } from '../../../hooks/useNotifications';
 import Input from '../../common/Input/Input';
 import Button from '../../common/Button/Button';
 import PropTypes from 'prop-types';
@@ -24,6 +24,7 @@ const UserForm = ({
 }) => {
   const dispatch = useDispatch();
   const { user: userPermissions } = usePermissions();
+  const toast = useToast();
   const isEditing = Boolean(user);
 
   const [formData, setFormData] = useState({
@@ -192,10 +193,10 @@ const UserForm = ({
       setTouchedFields(new Set(Object.keys(formData)));
       
       // Show validation error notification
-      dispatch(showErrorToast(
+      toast.error(
         'Validation Error',
         'Please fix the errors in the form before submitting.'
-      ));
+      );
       return;
     }
 
@@ -206,7 +207,7 @@ const UserForm = ({
       await onSubmit(submissionData);
       
       // Show success notification
-      dispatch(showSuccessToast(
+      toast.success(
         isEditing ? 'User Updated' : 'User Created',
         isEditing 
           ? `${formData.firstName} ${formData.lastName} has been updated successfully.`
@@ -252,13 +253,13 @@ const UserForm = ({
             }
           ]
         }
-      ));
+      );
 
     } catch (error) {
       // Error handling with notification
       const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred';
       
-      dispatch(showErrorToast(
+      toast.error(
         isEditing ? 'Update Failed' : 'Creation Failed',
         errorMessage,
         {
@@ -271,7 +272,7 @@ const UserForm = ({
             }
           ]
         }
-      ));
+      );
       
       setErrors(prev => ({ ...prev, global: errorMessage }));
     } finally {

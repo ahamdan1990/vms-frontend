@@ -37,6 +37,7 @@ class NotificationService {
       if (includeExpired) params.append('includeExpired', includeExpired);
 
       const response = await apiClient.get(`${this.baseUrl}?${params}`);
+      console.log(response)
       return response.data;
     } catch (error) {
       console.error('Error fetching notifications:', error);

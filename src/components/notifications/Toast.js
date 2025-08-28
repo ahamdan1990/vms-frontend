@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useDispatch } from 'react-redux';
-import { removeToast } from '../../store/slices/unifiedNotificationSlice';
+import { removeToast } from '../../store/slices/notificationSlice';
 import { 
   CheckCircleIcon, 
   XCircleIcon, 

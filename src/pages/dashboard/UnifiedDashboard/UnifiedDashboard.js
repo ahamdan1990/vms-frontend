@@ -245,6 +245,7 @@ const UnifiedDashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200"
+          onClick={() => setShowNotifications(true)}
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">

@@ -29,7 +29,7 @@ import {
   // Constants
   NOTIFICATION_TYPES,
   PRIORITIES
-} from '../store/slices/notificationSlice';
+} from '../store/slices/unifiedNotificationSlice';
 
 /**
  * Primary hook for all notification operations

@@ -47,12 +47,8 @@ import {
   selectCanBulkDelete
 } from '../../../store/selectors/userSelectors';
 
-// Notification actions
-import {
-  showSuccessToast,
-  showErrorToast,
-  showWarningToast,
-} from '../../../store/slices/notificationSlice';
+// Notification hook
+import { useToast } from '../../../hooks/useNotifications';
 
 // Components
 import Button from '../../../components/common/Button/Button';
@@ -98,6 +94,7 @@ import { extractErrorMessage } from '../../../utils/errorUtils';
 const UsersListPage = () => {
   const dispatch = useDispatch();
   const { user: userPermissions } = usePermissions();
+  const toast = useToast();
 
   // Local state
   const [searchInput, setSearchInput] = useState('');
@@ -201,7 +198,7 @@ const UsersListPage = () => {
         dispatch(hideCreateModal());
         
         // Show success notification
-        dispatch(showSuccessToast(
+        toast.success(
           'User Created Successfully',
           `${formData.firstName} ${formData.lastName} has been created.${formData.sendWelcomeEmail ? ' Welcome email sent.' : ''}`,
           {
@@ -216,7 +213,7 @@ const UsersListPage = () => {
               }
             ]
           }
-        ));
+        );
 
         // Refresh data
         dispatch(getUsers());
@@ -224,13 +221,13 @@ const UsersListPage = () => {
       }
     } catch (error) {
       console.error('Failed to create user:', error);
-      dispatch(showErrorToast(
+      toast.error(
         'User Creation Failed',
         extractErrorMessage(error) || 'An unexpected error occurred',
         {
           persistent: true
         }
-      ));
+      );
       throw error; // Re-throw to let UserForm handle it
     }
   };
@@ -251,13 +248,13 @@ const UsersListPage = () => {
           setCurrentEditUser(null);
           
           // Show success notification
-          dispatch(showSuccessToast(
+          toast.success(
             'User Updated Successfully',
             `${formData.firstName} ${formData.lastName} has been updated.`,
             {
               duration: 5000
             }
-          ));
+          );
 
           // Refresh data
           dispatch(getUsers());
@@ -266,13 +263,13 @@ const UsersListPage = () => {
       }
     } catch (error) {
       console.error('Failed to update user:', error);
-      dispatch(showErrorToast(
+      toast.error(
         'User Update Failed',
         extractErrorMessage(error) || 'An unexpected error occurred',
         {
           persistent: true
         }
-      ));
+      );
       throw error; // Re-throw to let UserForm handle it
     }
   };
@@ -287,13 +284,13 @@ const UsersListPage = () => {
         const userName = `${currentDeleteUser.firstName || currentDeleteUser.FirstName || ''} ${currentDeleteUser.lastName || currentDeleteUser.LastName || ''}`.trim();
         
         // Show success notification
-        dispatch(showSuccessToast(
+        toast.success(
           'User Deleted',
           `${userName || 'User'} has been deleted successfully.`,
           {
             duration: 5000
           }
-        ));
+        );
 
         setCurrentDeleteUser(null);
         dispatch(getUsers());
@@ -301,13 +298,13 @@ const UsersListPage = () => {
       }
     } catch (error) {
       console.error('Failed to delete user:', error);
-      dispatch(showErrorToast(
+      toast.error(
         'Delete Failed',
         extractErrorMessage(error) || 'Failed to delete user',
         {
           persistent: true
         }
-      ));
+      );
     }
   };
 
@@ -319,10 +316,10 @@ const UsersListPage = () => {
       switch (action) {
         case 'activate':
           await dispatch(activateUser({ id: user.id, reason: 'Manual activation' }));
-          dispatch(showSuccessToast(
+          toast.success(
             'User Activated',
             `${userName} has been activated successfully.`
-          ));
+          );
           // Refresh data
           dispatch(getUsers());
           dispatch(getUserStats());
@@ -330,10 +327,10 @@ const UsersListPage = () => {
           
         case 'deactivate':
           await dispatch(deactivateUser({ id: user.id, reason: 'Manual deactivation', revokeAllSessions: true }));
-          dispatch(showWarningToast(
+          toast.warning(
             'User Deactivated',
             `${userName} has been deactivated. All sessions revoked.`
-          ));
+          );
           // Refresh data
           dispatch(getUsers());
           dispatch(getUserStats());
@@ -341,10 +338,10 @@ const UsersListPage = () => {
           
         case 'unlock':
           await dispatch(unlockUser({ id: user.id, reason: 'Manual unlock' }));
-          dispatch(showSuccessToast(
+          toast.success(
             'User Unlocked',
             `${userName} account has been unlocked.`
-          ));
+          );
           // Refresh data
           dispatch(getUsers());
           dispatch(getUserStats());
@@ -365,13 +362,13 @@ const UsersListPage = () => {
       }
     } catch (error) {
       console.error('User action failed:', error);
-      dispatch(showErrorToast(
+      toast.error(
         'Action Failed',
         extractErrorMessage(error) || `Failed to ${action} user`,
         {
           persistent: true
         }
-      ));
+      );
     }
   };
 
@@ -403,26 +400,26 @@ const UsersListPage = () => {
       setBulkAction('');
 
       // Show success notification
-      dispatch(showSuccessToast(
+      toast.success(
         'Bulk Action Completed',
         `Successfully ${bulkAction}d ${selectedUsers.length} user${selectedUsers.length > 1 ? 's' : ''}.`,
         {
           duration: 5000
         }
-      ));
+      );
 
       // Refresh data
       dispatch(getUsers());
       dispatch(getUserStats());
     } catch (error) {
       console.error('Bulk action failed:', error);
-      dispatch(showErrorToast(
+      toast.error(
         'Bulk Action Failed',
         `Failed to ${bulkAction} some users. Please try again.`,
         {
           persistent: true
         }
-      ));
+      );
     }
   };
 
