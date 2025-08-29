@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useSignalR } from './useSignalR';
 import dashboardService from '../services/dashboardService';
 import { debounce } from '../utils/asyncHelpers';
+import { HubConnectionState } from '@microsoft/signalr';
+
 
 /**
  * Real-time dashboard hook that uses SignalR instead of setInterval polling
@@ -21,8 +23,11 @@ const useRealTimeDashboard = (options = {}) => {
   const { 
     getConnectionStatus, 
     areConnectionsHealthy,
-    adminMethods 
+    getConnectionHealth,
+    admin: adminMethods 
   } = useSignalR();
+
+  const isAdminConnected = getConnectionStatus('admin') === HubConnectionState.Connected;
 
   // Dashboard state
   const [dashboardData, setDashboardData] = useState(null);
@@ -35,7 +40,6 @@ const useRealTimeDashboard = (options = {}) => {
   const fallbackInterval = useRef(null);
   // Refs for cleanup and preventing multiple calls
   const mounted = useRef(true);
-  const signalRListeners = useRef(new Set());
 
   /**
    * Fetch dashboard data manually (without recent activity)
@@ -98,26 +102,26 @@ const useRealTimeDashboard = (options = {}) => {
     }
   }, [onActivityUpdate]);
 
-  // Debounced version to prevent rapid successive calls
-  const debouncedFetchDashboardData = useCallback(
+  // Debounced version to prevent rapid successive calls (STABLE)
+  const debouncedFetchDashboardData = useMemo(() => 
     debounce(fetchDashboardData, 1000), // 1 second debounce
     [fetchDashboardData]
   );
 
-  // Separate debounced function for recent activity (longer delay since it updates less frequently)
-  const debouncedFetchRecentActivity = useCallback(
+  // Separate debounced function for recent activity (longer delay since it updates less frequently) (STABLE)
+  const debouncedFetchRecentActivity = useMemo(() =>
     debounce(fetchRecentActivity, 5000), // 5 second debounce for activity
     [fetchRecentActivity]
   );
 
   /**
-   * Fetch system health data
+   * Fetch system health data via SignalR (memoized to prevent re-creation)
    */
   const fetchSystemHealth = useCallback(async () => {
     try {
-      if (adminMethods?.getSystemHealth) {
+      if (adminMethods?.getSystemMetrics) {
         // Use SignalR method if available
-        const health = await adminMethods.getSystemHealth();
+        const health = await adminMethods.getSystemMetrics();
         if (mounted.current) {
           setSystemHealth(health);
           onSystemHealthUpdate?.(health);
@@ -126,24 +130,27 @@ const useRealTimeDashboard = (options = {}) => {
     } catch (err) {
       console.error('Failed to fetch system health via SignalR:', err);
     }
-  }, [adminMethods, onSystemHealthUpdate]);
+  }, [adminMethods?.getSystemMetrics, onSystemHealthUpdate]); // More specific dependency
 
   /**
-   * Setup SignalR event listeners
+   * Setup SignalR event listeners through hook patterns (STABLE)
    */
   useEffect(() => {
     // Don't set up listeners if not enabled
-    if (!enableAutoRefresh) return;
+    if (!isAdminConnected || !enableAutoRefresh) return;
+    
 
+    // Access the SignalR connection through the global reference
+    // This is a temporary solution until we implement a better event system
     const signalRConnection = window.signalRManager?.connections?.get('admin');
     if (!signalRConnection || signalRConnection.state !== 'Connected') {
-      console.log('Admin SignalR connection not available, using fallback polling');
+      console.log('Admin hub connection not ready');
       return;
     }
 
     console.log('🔗 Setting up real-time dashboard listeners');
 
-    // Dashboard metrics updates
+    // Create stable event handlers to prevent re-registration
     const onDashboardMetricsUpdate = (metrics) => {
       console.log('📊 Real-time dashboard metrics received:', metrics);
       if (mounted.current) {
@@ -153,7 +160,7 @@ const useRealTimeDashboard = (options = {}) => {
       }
     };
 
-    // System health updates
+    // Primary handler for SystemHealthUpdate events (prevents duplication with signalRConnection)
     const onSystemHealthUpdateReceived = (health) => {
       console.log('🏥 Real-time system health received:', health);
       if (mounted.current) {
@@ -162,7 +169,7 @@ const useRealTimeDashboard = (options = {}) => {
       }
     };
 
-    // Queue updates (for operator dashboards)
+    // Primary handler for QueueUpdate events (prevents duplication with signalRConnection)
     const onQueueUpdate = (queueData) => {
       console.log('📋 Real-time queue update received:', queueData);
       if (mounted.current) {
@@ -176,39 +183,36 @@ const useRealTimeDashboard = (options = {}) => {
       }
     };
 
-    // Activity updates (ONLY when new audit logs are created via SignalR)
     const onNewAuditLogCreated = async (auditLogData) => {
       console.log('📝 New audit log detected via SignalR:', auditLogData);
       // Use debounced fetch to prevent rapid consecutive updates
       debouncedFetchRecentActivity();
     };
 
-    // Register event listeners
+    // Register event listeners with consistent event names
     signalRConnection.on('DashboardMetricsUpdated', onDashboardMetricsUpdate);
     signalRConnection.on('SystemHealthUpdate', onSystemHealthUpdateReceived);
     signalRConnection.on('QueueUpdate', onQueueUpdate);
-    signalRConnection.on('AuditLogCreated', onNewAuditLogCreated); // Only updates when new audit logs
+    signalRConnection.on('AuditLogCreated', onNewAuditLogCreated);
     signalRConnection.on('SystemMetrics', onSystemHealthUpdateReceived);
 
-    // Keep track of listeners for cleanup
-    signalRListeners.current.add('DashboardMetricsUpdated');
-    signalRListeners.current.add('SystemHealthUpdate');
-    signalRListeners.current.add('QueueUpdate');
-    signalRListeners.current.add('AuditLogCreated');
-    signalRListeners.current.add('SystemMetrics');
-
-    // Request initial system metrics
-    fetchSystemHealth();
+    // Request initial system metrics only once
+    if (adminMethods?.getSystemMetrics) {
+      adminMethods.getSystemMetrics().catch(console.error);
+    }
 
     // Cleanup function
     return () => {
       console.log('🧹 Cleaning up SignalR dashboard listeners');
-      signalRListeners.current.forEach(eventName => {
-        signalRConnection.off(eventName);
-      });
-      signalRListeners.current.clear();
+      if (signalRConnection && signalRConnection.state === 'Connected') {
+        signalRConnection.off('DashboardMetricsUpdated', onDashboardMetricsUpdate);
+        signalRConnection.off('SystemHealthUpdate', onSystemHealthUpdateReceived);
+        signalRConnection.off('QueueUpdate', onQueueUpdate);
+        signalRConnection.off('AuditLogCreated', onNewAuditLogCreated);
+        signalRConnection.off('SystemMetrics', onSystemHealthUpdateReceived);
+      }
     };
-  }, [enableAutoRefresh, onDashboardUpdate, onSystemHealthUpdate, onActivityUpdate, fetchSystemHealth]);
+  }, [enableAutoRefresh, getConnectionStatus]); // STABLE DEPENDENCIES ONLY
 
   /**
    * Setup fallback polling when SignalR is not available
@@ -241,6 +245,15 @@ const useRealTimeDashboard = (options = {}) => {
       }
     };
   }, [enableAutoRefresh, fallbackIntervalMs, areConnectionsHealthy, debouncedFetchDashboardData]);
+
+  /**
+   * Initial system health fetch (separate from event listeners to avoid dependency thrashing)
+   */
+  useEffect(() => {
+    if (enableAutoRefresh && adminMethods?.getSystemMetrics) {
+      adminMethods.getSystemMetrics().catch(console.error);
+    }
+  }, [enableAutoRefresh, adminMethods?.getSystemMetrics]);
 
   /**
    * Initial data fetch (fetch both dashboard data and recent activity on mount)
@@ -294,6 +307,7 @@ const useRealTimeDashboard = (options = {}) => {
     isLoading,
     error,
     isSignalRConnected: areConnectionsHealthy(),
+    connectionHealth: getConnectionHealth(),
     
     // Actions
     refresh,

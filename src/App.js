@@ -1,4 +1,4 @@
-// src/App.js - UPDATED WITH UNIFIED NOTIFICATION SYSTEM
+// src/App.js - UNIFIED NOTIFICATION SYSTEM
 import React, { useEffect, useRef } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
@@ -8,19 +8,19 @@ import AppRoutes from './routes/AppRoutes';
 import { useAuth } from './hooks/useAuth';
 import { useDispatch } from 'react-redux';
 import { initializeUI, setPageLoading } from './store/slices/uiSlice';
-import { initializeNotifications, setSignalRConnected } from './store/slices/notificationSlice';
+import { initializeNotifications } from './store/slices/notificationSlice';
 import NotificationProvider from './components/notifications/NotificationProvider';
 import NotificationCenter from './components/notifications/NotificationCenter.js';
-import { signalRManager } from './services/signalr/signalRConnection';
-//import './App.css';
+
+
 /**
- * App initialization component with theme support
+ * App initialization component
+ * Note: SignalR initialization is now handled by useSignalR hook to avoid conflicts
  */
 const AppInitializer = ({ children }) => {
   const dispatch = useDispatch();
-  const { isAuthenticated, loading, user } = useAuth();
+  const { loading } = useAuth();
   const initialized = useRef(false);
-  const signalRInitialized = useRef(false);
 
   useEffect(() => {
     if (!initialized.current) {
@@ -39,44 +39,6 @@ const AppInitializer = ({ children }) => {
       }, 100);
     }
   }, [dispatch]);
-
-  // Initialize SignalR when user is authenticated
-  useEffect(() => {
-    if (isAuthenticated && user && !signalRInitialized.current) {
-      console.log('🔗 Initializing SignalR connections...');
-      signalRInitialized.current = true;
-      
-      signalRManager
-        .initializeConnections(user)
-        .then(() => {
-          dispatch(setSignalRConnected(true));
-          console.log('✅ SignalR connections established');
-        })
-        .catch(error => {
-          console.error('❌ SignalR initialization failed:', error);
-          dispatch(setSignalRConnected(false));
-          signalRInitialized.current = false;
-        });
-    }
-  }, [isAuthenticated, user, dispatch]);
-
-  // Cleanup SignalR when user logs out
-  useEffect(() => {
-    if (!isAuthenticated && signalRInitialized.current) {
-      console.log('🔌 Cleaning up SignalR connections...');
-      signalRInitialized.current = false;
-      
-      signalRManager
-        .disconnectAll()
-        .then(() => {
-          dispatch(setSignalRConnected(false));
-          console.log('✅ SignalR connections closed');
-        })
-        .catch(error => {
-          console.error('❌ SignalR cleanup error:', error);
-        });
-    }
-  }, [isAuthenticated, dispatch]);
 
   // Centralized loading management
   useEffect(() => {

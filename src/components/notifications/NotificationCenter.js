@@ -16,6 +16,7 @@ import Button from '../common/Button/Button';
 import Badge from '../common/Badge/Badge';
 import Card from '../common/Card/Card';
 import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
+import ConnectionStatus from '../common/ConnectionStatus';
 
 // Icons
 import {
@@ -391,12 +392,7 @@ const NotificationCenter = ({
               <Badge color="red" size="sm">{unreadCount}</Badge>
             )}
             {/* Real-time connection indicator */}
-            <div className="flex items-center space-x-1">
-              <div className={`w-2 h-2 rounded-full ${signalRConnected || isSignalRConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              <span className="text-xs text-gray-500">
-                {signalRConnected || isSignalRConnected ? 'Live' : 'Offline'}
-              </span>
-            </div>
+            <ConnectionStatus className="ml-2" />
           </div>
           
           <div className="flex items-center space-x-1">

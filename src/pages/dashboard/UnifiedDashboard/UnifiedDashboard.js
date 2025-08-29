@@ -26,6 +26,7 @@ import useRealTimeDashboard from '../../../hooks/useRealTimeDashboard';
 
 // Import role constants
 import { ROLES } from '../../../constants/role';
+import SignalRDebugPanel from '../../../components/admin/SignalRDebugPanel';
 
 // Icons
 import {
@@ -469,6 +470,9 @@ const UnifiedDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* TEMPORARY: SignalR Debug Panel */}
+      {process.env.NODE_ENV === 'development' && <SignalRDebugPanel />}
+      
       {/* Navigation Tabs (only show if user has multiple pages) */}
       {getNavigationItems().length > 1 && (
         <div className="border-b border-gray-200 bg-white rounded-lg shadow-sm">

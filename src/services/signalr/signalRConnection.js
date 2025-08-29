@@ -278,7 +278,7 @@ class SignalRConnectionManager {
    * Set up event handlers for a SignalR hub
    */
   setupHubEventHandlers(connection, hubName, user) {
-    // Connection state handlers
+    // Connection state handlers with improved user feedback
     connection.onreconnecting(() => {
       console.log(`🔄 Reconnecting to ${hubName} hub...`);
     });
@@ -295,8 +295,24 @@ class SignalRConnectionManager {
       
       const attempts = this.reconnectAttempts.get(hubName) || 0;
       if (attempts < this.maxReconnectAttempts && error) {
+        // Show user feedback for unexpected disconnections
+        if (error) {
+          store.dispatch(showWarningToast(
+            'Connection Lost',
+            `Lost connection to ${hubName} services. Attempting to reconnect...`,
+            { duration: 5000 }
+          ));
+        }
+        
         // Attempt manual reconnection for unexpected disconnections
         setTimeout(() => this.reconnectToHub(hubName, user), 5000);
+      } else if (attempts >= this.maxReconnectAttempts) {
+        // Max attempts reached - inform user
+        store.dispatch(showErrorToast(
+          'Connection Failed',
+          `Unable to reconnect to ${hubName} services. Please refresh the page.`,
+          { persistent: true }
+        ));
       }
     });
 
@@ -316,14 +332,44 @@ class SignalRConnectionManager {
         break;
     }
 
-    // Common error handler
+    // Common error handler with improved messaging
     connection.on('Error', (error) => {
       console.error(`${hubName} hub error:`, error);
       
       // Don't show toast for permission errors during initial connection
-      if (!error.includes('Insufficient permissions') && !error.includes('security permissions')) {
-        store.dispatch(showErrorToast('Connection Error', error));
+      if (!error.includes('Insufficient permissions') && 
+          !error.includes('security permissions') &&
+          !error.includes('Authentication failed')) {
+        store.dispatch(showErrorToast(
+          `${hubName.charAt(0).toUpperCase() + hubName.slice(1)} Connection Error`, 
+          error,
+          { duration: 8000 }
+        ));
       }
+    });
+
+    // Add connection quality monitoring
+    connection.onreconnecting(() => {
+      console.log(`🔄 Reconnecting to ${hubName} hub...`);
+      store.dispatch(showWarningToast(
+        'Connection Issue',
+        `Reconnecting to ${hubName} services...`,
+        { duration: 3000 }
+      ));
+    });
+
+    connection.onreconnected(() => {
+      console.log(`✅ Reconnected to ${hubName} hub`);
+      this.reconnectAttempts.set(hubName, 0);
+      
+      store.dispatch(showSuccessToast(
+        'Connection Restored',
+        `${hubName.charAt(0).toUpperCase() + hubName.slice(1)} services reconnected`,
+        { duration: 3000 }
+      ));
+      
+      // Re-join groups after reconnection
+      this.joinHubGroups(connection, hubName, user);
     });
   }
 
@@ -337,7 +383,7 @@ class SignalRConnectionManager {
       store.dispatch(showSuccessToast('Connected', 'You are now online as an operator'));
     });
 
-    // Visitor arrival notifications
+    // Visitor arrival notifications (FIXED: from backend)
     connection.on('VisitorArrival', (data) => {
       console.log('Visitor arrival:', data);
       store.dispatch(addNotificationWithDesktop({
@@ -354,11 +400,70 @@ class SignalRConnectionManager {
       }));
     });
 
-    // Queue updates
-    connection.on('VisitorQueueUpdate', (data) => {
-      console.log('Queue update:', data);
-      // Update queue metrics in real-time
-      // This would update dashboard components
+    // Note: QueueUpdate is handled by useRealTimeDashboard hook to prevent duplication
+
+    // NEW: User notifications from backend
+    connection.on('UserNotification', (data) => {
+      console.log('User notification:', data);
+      store.dispatch(addNotificationWithDesktop({
+        type: data.Type || 'notification',
+        title: data.Title || 'Notification',
+        message: data.Message,
+        priority: data.Priority?.toLowerCase() || 'medium',
+        data: data,
+        persistent: data.Priority === 'High' || data.Priority === 'Critical'
+      }));
+    });
+
+    // NEW: VIP Alert notifications
+    connection.on('VipAlert', (data) => {
+      console.log('VIP Alert:', data);
+      store.dispatch(addNotificationWithDesktop({
+        type: 'vip_arrival',
+        title: 'VIP Arrival',
+        message: `VIP ${data.VisitorName} has arrived at ${data.Location}`,
+        priority: 'high',
+        persistent: true,
+        data: data,
+        actions: [
+          { label: 'Acknowledge', action: 'acknowledge_vip' },
+          { label: 'View Details', action: 'view_visitor' }
+        ]
+      }));
+    });
+
+    // NEW: Unknown face alerts
+    connection.on('UnknownFaceAlert', (data) => {
+      console.log('Unknown Face Alert:', data);
+      store.dispatch(addNotificationWithDesktop({
+        type: 'unknown_face',
+        title: 'Unknown Person Detected',
+        message: `Unknown person detected at ${data.CameraLocation}`,
+        priority: 'medium',
+        persistent: true,
+        data: data,
+        actions: [
+          { label: 'Review', action: 'review_detection' },
+          { label: 'Dismiss', action: 'dismiss_alert' }
+        ]
+      }));
+    });
+
+    // NEW: FR System Offline notifications
+    connection.on('FRSystemOffline', (data) => {
+      console.log('FR System Offline:', data);
+      store.dispatch(addNotificationWithDesktop({
+        type: 'system_alert',
+        title: 'Facial Recognition System Offline',
+        message: 'The facial recognition system is currently offline. Manual processing required.',
+        priority: 'high',
+        persistent: true,
+        data: data,
+        actions: [
+          { label: 'Acknowledge', action: 'acknowledge_system_alert' },
+          { label: 'Check Status', action: 'check_fr_status' }
+        ]
+      }));
     });
 
     // Operator status changes
@@ -390,16 +495,58 @@ class SignalRConnectionManager {
       console.log('Host registered:', data);
     });
 
-    // Visitor notifications for hosts
-    connection.on('VisitorNotification', (data) => {
-      console.log('Visitor notification:', data);
+    // NEW: User notifications (FIXED: correct backend event name)
+    connection.on('UserNotification', (data) => {
+      console.log('Host user notification:', data);
       store.dispatch(addNotificationWithDesktop({
-        type: data.notificationType || 'visitor_update',
-        title: data.title || 'Visitor Update',
-        message: data.message,
-        priority: data.priority || 'medium',
+        type: data.Type || 'visitor_update',
+        title: data.Title || 'Visitor Update',
+        message: data.Message,
+        priority: data.Priority?.toLowerCase() || 'medium',
         data: data,
         actions: data.actions || []
+      }));
+    });
+
+    // NEW: Invitation status updates
+    connection.on('InvitationStatusUpdate', (data) => {
+      console.log('Invitation status update:', data);
+      store.dispatch(addNotificationWithDesktop({
+        type: data.Approved ? 'invitation_approved' : 'invitation_rejected',
+        title: data.Approved ? 'Invitation Approved' : 'Invitation Rejected',
+        message: data.Note || `Your invitation has been ${data.Approved ? 'approved' : 'rejected'}`,
+        priority: 'medium',
+        data: data,
+        actions: [
+          { label: 'View Details', action: 'view_invitation' }
+        ]
+      }));
+    });
+
+    // NEW: Visitor check-in notifications
+    connection.on('VisitorCheckIn', (data) => {
+      console.log('Visitor check-in:', data);
+      store.dispatch(addNotificationWithDesktop({
+        type: 'visitor_checkin',
+        title: 'Visitor Checked In',
+        message: `${data.VisitorName} has checked in at ${data.Location}`,
+        priority: 'low',
+        data: data,
+        actions: [
+          { label: 'View Details', action: 'view_visitor' }
+        ]
+      }));
+    });
+
+    // NEW: Visitor check-out notifications
+    connection.on('VisitorCheckOut', (data) => {
+      console.log('Visitor check-out:', data);
+      store.dispatch(addNotificationWithDesktop({
+        type: 'visitor_checkout',
+        title: 'Visitor Checked Out',
+        message: `${data.VisitorName} has checked out at ${data.CheckOutTime}`,
+        priority: 'low',
+        data: data
       }));
     });
 
@@ -419,6 +566,18 @@ class SignalRConnectionManager {
     connection.on('HostAvailabilityChanged', (data) => {
       console.log('Host availability changed:', data);
       // Update host status display
+    });
+
+    // NEW: FR System Offline notifications
+    connection.on('FRSystemOffline', (data) => {
+      console.log('FR System Offline (Host):', data);
+      store.dispatch(addNotificationWithDesktop({
+        type: 'system_alert',
+        title: 'System Notice',
+        message: 'Facial recognition system is offline. Visitor processing may be delayed.',
+        priority: 'medium',
+        data: data
+      }));
     });
   }
 
@@ -449,6 +608,23 @@ class SignalRConnectionManager {
       }));
     });
 
+    // NEW: VIP Alert notifications (also sent to security)
+    connection.on('VipAlert', (data) => {
+      console.log('VIP Alert (Security):', data);
+      store.dispatch(addNotificationWithDesktop({
+        type: 'vip_arrival',
+        title: 'VIP Arrival - Security Alert',
+        message: `VIP ${data.VisitorName} has arrived at ${data.Location}`,
+        priority: 'high',
+        persistent: true,
+        data: data,
+        actions: [
+          { label: 'Acknowledge', action: 'acknowledge_vip' },
+          { label: 'Security Protocol', action: 'vip_protocol' }
+        ]
+      }));
+    });
+
     // Emergency alerts
     connection.on('EmergencyAlert', (data) => {
       console.log('Emergency alert:', data);
@@ -472,6 +648,35 @@ class SignalRConnectionManager {
     connection.on('SecurityAlertAcknowledged', (data) => {
       console.log('Security alert acknowledged:', data);
     });
+
+    // NEW: FR System Offline notifications
+    connection.on('FRSystemOffline', (data) => {
+      console.log('FR System Offline (Security):', data);
+      store.dispatch(addNotificationWithDesktop({
+        type: 'system_alert',
+        title: 'SECURITY: FR System Offline',
+        message: 'Facial recognition system is offline. Manual security monitoring required.',
+        priority: 'high',
+        persistent: true,
+        data: data,
+        actions: [
+          { label: 'Acknowledge', action: 'acknowledge_system_alert' },
+          { label: 'Manual Override', action: 'manual_security_mode' }
+        ]
+      }));
+    });
+
+    // NEW: Bulk notification handling
+    connection.on('BulkNotification', (data) => {
+      console.log('Bulk notification (Security):', data);
+      store.dispatch(addNotificationWithDesktop({
+        type: data.Type || 'bulk_notification',
+        title: data.Title || 'System Notification',
+        message: data.Message,
+        priority: data.Priority?.toLowerCase() || 'medium',
+        data: data
+      }));
+    });
   }
 
   /**
@@ -483,17 +688,13 @@ class SignalRConnectionManager {
       console.log('Admin registered:', data);
     });
 
-    // System health updates
+    // System health updates (initial response)
     connection.on('SystemHealth', (data) => {
       console.log('System health update:', data);
       // Update admin dashboard with system metrics
     });
 
-    // Handle both 'SystemHealth' and 'SystemHealthUpdate' event names
-    connection.on('SystemHealthUpdate', (data) => {
-      console.log('System health update (alt):', data);
-      // Update admin dashboard with system metrics
-    });
+    // Note: SystemHealthUpdate is handled by useRealTimeDashboard hook to prevent duplication
 
     // Bulk approval results
     connection.on('BulkApprovalCompleted', (data) => {
@@ -514,16 +715,52 @@ class SignalRConnectionManager {
       ));
     });
 
-      // Admin capacityalert 
-      connection.on('CapacityAlert', (data) => {
-      console.log('Capacity Alert:', data);
-      // Update operator status display
+    // Admin capacity alert 
+    connection.on('CapacityAlert', (data) => {
+      console.log('Capacity Alert (Admin):', data);
+      store.dispatch(addNotificationWithDesktop({
+        type: 'capacity_alert',
+        title: 'Capacity Alert',
+        message: `${data.LocationName} is at ${data.PercentageFull}% capacity (${data.CurrentOccupancy}/${data.MaxCapacity})`,
+        priority: data.PercentageFull >= 95 ? 'high' : 'medium',
+        data: data,
+        actions: [
+          { label: 'View Location', action: 'view_location' },
+          { label: 'Manage Capacity', action: 'manage_capacity' }
+        ]
+      }));
     });
 
-    // System metrics updates
-    connection.on('SystemMetrics', (data) => {
-      console.log('System metrics update:', data);
-      // Update real-time system metrics display
+    // Note: SystemMetrics is handled by useRealTimeDashboard hook to prevent duplication
+
+    // NEW: Critical alerts for administrators
+    connection.on('CriticalAlert', (data) => {
+      console.log('Critical Alert (Admin):', data);
+      store.dispatch(addNotificationWithDesktop({
+        type: 'critical_alert',
+        title: 'CRITICAL SYSTEM ALERT',
+        message: data.Message,
+        priority: 'emergency',
+        persistent: true,
+        data: data,
+        actions: [
+          { label: 'Investigate', action: 'investigate_critical' },
+          { label: 'System Status', action: 'view_system_status' }
+        ]
+      }));
+    });
+
+    // NEW: Bulk notification handling for admins
+    connection.on('BulkNotification', (data) => {
+      console.log('Bulk notification (Admin):', data);
+      store.dispatch(addNotificationWithDesktop({
+        type: data.Type || 'bulk_notification',
+        title: data.Title || 'System Notification',
+        message: data.Message,
+        priority: data.Priority?.toLowerCase() || 'medium',
+        data: data,
+        persistent: data.Priority === 'High' || data.Priority === 'Critical'
+      }));
     });
   }
 
@@ -624,6 +861,35 @@ class SignalRConnectionManager {
   }
 
   /**
+   * Get detailed connection health status
+   */
+  getConnectionHealth() {
+    const health = {
+      isHealthy: true,
+      connectedHubs: [],
+      disconnectedHubs: [],
+      totalConnections: this.connections.size,
+      healthyConnections: 0
+    };
+
+    for (const [hubName, connection] of this.connections) {
+      if (connection.state === HubConnectionState.Connected) {
+        health.connectedHubs.push(hubName);
+        health.healthyConnections++;
+      } else {
+        health.disconnectedHubs.push({
+          hubName,
+          state: connection.state,
+          reconnectAttempts: this.reconnectAttempts.get(hubName) || 0
+        });
+        health.isHealthy = false;
+      }
+    }
+
+    return health;
+  }
+
+  /**
    * Invoke a method on a specific hub
    */
   async invokeHubMethod(hubName, methodName, ...args) {
@@ -644,4 +910,10 @@ class SignalRConnectionManager {
 
 // Create singleton instance
 export const signalRManager = new SignalRConnectionManager();
+
+// For backward compatibility and global access (needed by useRealTimeDashboard)
+if (typeof window !== 'undefined') {
+  window.signalRManager = signalRManager;
+}
+
 export default signalRManager;

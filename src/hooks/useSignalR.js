@@ -63,6 +63,13 @@ export const useSignalR = () => {
   }, []);
 
   /**
+   * Get detailed connection health information
+   */
+  const getConnectionHealth = useCallback(() => {
+    return signalRManager.getConnectionHealth();
+  }, []);
+
+  /**
    * Invoke a method on a specific hub
    */
   const invokeHubMethod = useCallback(async (hubName, methodName, ...args) => {
@@ -139,23 +146,24 @@ export const useSignalR = () => {
    * Admin-specific methods
    */
   const adminMethods = {
-    getSystemHealth: useCallback(() => 
+    getSystemMetrics: useCallback(() => 
       invokeHubMethod('admin', 'GetSystemMetrics'), [invokeHubMethod]),
+    
+    getSystemHealth: useCallback(() => 
+      invokeHubMethod('admin', 'GetSystemMetrics'), [invokeHubMethod]), // Alias for backward compatibility
     
     bulkApproveInvitations: useCallback((invitationIds, note = null) => 
       invokeHubMethod('admin', 'BulkApproveInvitations', invitationIds, note), [invokeHubMethod]),
     
     broadcastMaintenanceNotification: useCallback((message, scheduledTime = null) => 
-      invokeHubMethod('admin', 'BroadcastMaintenanceNotification', message, scheduledTime), [invokeHubMethod]),
-    
-    getSystemMetrics: useCallback(() => 
-      invokeHubMethod('admin', 'GetSystemMetrics'), [invokeHubMethod])
+      invokeHubMethod('admin', 'BroadcastMaintenanceNotification', message, scheduledTime), [invokeHubMethod])
   };
 
   return {
     // Connection status
     getConnectionStatus,
     areConnectionsHealthy,
+    getConnectionHealth,
     isConnected: areConnectionsHealthy(),
     
     // Generic method invoker
