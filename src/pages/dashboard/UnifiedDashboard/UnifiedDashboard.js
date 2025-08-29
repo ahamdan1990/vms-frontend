@@ -20,6 +20,10 @@ import Card from '../../../components/common/Card/Card';
 import Button from '../../../components/common/Button/Button';
 import Badge from '../../../components/common/Badge/Badge';
 
+// Services
+import dashboardService from '../../../services/dashboardService';
+import useRealTimeDashboard from '../../../hooks/useRealTimeDashboard';
+
 // Import role constants
 import { ROLES } from '../../../constants/role';
 
@@ -65,33 +69,41 @@ const UnifiedDashboard = () => {
   const [activeView, setActiveView] = useState('overview');
   const [showNotifications, setShowNotifications] = useState(false);
   
-  // System state (for overview)
-  const [systemStats, setSystemStats] = useState({
-    todayVisitors: 24,
-    activeVisitors: 7,
-    pendingInvitations: 12,
-    overdueVisitors: 2,
-    systemAlerts: 1,
-    lastUpdate: new Date()
+  // Real-time dashboard data using SignalR
+  const {
+    dashboardData: systemStats,
+    recentActivity,
+    lastUpdated,
+    isLoading,
+    error: dashboardError,
+    isSignalRConnected,
+    refresh
+  } = useRealTimeDashboard({
+    enableAutoRefresh: true,
+    onDashboardUpdate: (data) => {
+      console.log('📊 Dashboard updated via SignalR:', data);
+    },
+    onError: (error) => {
+      console.error('Dashboard error:', error);
+    }
   });
+
+  // Transform dashboard data for compatibility with existing UI
+  const transformedSystemStats = {
+    todayVisitors: systemStats?.todayVisitors || 0,
+    activeVisitors: systemStats?.activeVisitors || 0,
+    pendingInvitations: systemStats?.pendingInvitations || 0,
+    overdueVisitors: systemStats?.overdueVisitors || 0,
+    systemAlerts: systemStats?.systemAlerts || 0,
+    lastUpdate: lastUpdated,
+    loading: isLoading
+  };
 
   // Set initial view based on user role
   useEffect(() => {
     dispatch(setPageTitle('Dashboard'));
     setActiveView(getDefaultView());
   }, [dispatch, userRole]);
-
-  // Real-time data simulation (reused from IntegratedVisitorManagement)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSystemStats(prev => ({
-        ...prev,
-        lastUpdate: new Date()
-      }));
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   /**
    * Navigation Configuration
@@ -192,7 +204,7 @@ const UnifiedDashboard = () => {
                 <h3 className="text-sm font-medium text-gray-600">Today's Visitors</h3>
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               </div>
-              <p className="text-2xl font-bold text-gray-900">{systemStats.todayVisitors}</p>
+              <p className="text-2xl font-bold text-gray-900">{transformedSystemStats.todayVisitors}</p>
               <p className="text-xs text-green-600 font-medium mt-1">↗ +12% from yesterday</p>
             </div>
             <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
@@ -213,7 +225,7 @@ const UnifiedDashboard = () => {
                 <h3 className="text-sm font-medium text-gray-600">Active Now</h3>
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               </div>
-              <p className="text-2xl font-bold text-gray-900">{systemStats.activeVisitors}</p>
+              <p className="text-2xl font-bold text-gray-900">{transformedSystemStats.activeVisitors}</p>
               <p className="text-xs text-gray-500 mt-1">Currently on-site</p>
             </div>
             <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
@@ -231,7 +243,7 @@ const UnifiedDashboard = () => {
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <h3 className="text-sm font-medium text-gray-600 mb-1">Pending</h3>
-              <p className="text-2xl font-bold text-gray-900">{systemStats.pendingInvitations}</p>
+              <p className="text-2xl font-bold text-gray-900">{transformedSystemStats.pendingInvitations}</p>
               <p className="text-xs text-amber-600 font-medium mt-1">Awaiting approval</p>
             </div>
             <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center">
@@ -250,7 +262,7 @@ const UnifiedDashboard = () => {
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <h3 className="text-sm font-medium text-gray-600 mb-1">Alerts</h3>
-              <p className="text-2xl font-bold text-gray-900">{systemStats.overdueVisitors + systemStats.systemAlerts}</p>
+              <p className="text-2xl font-bold text-gray-900">{transformedSystemStats.overdueVisitors + transformedSystemStats.systemAlerts}</p>
               <p className="text-xs text-red-600 font-medium mt-1">Require attention</p>
             </div>
             <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
@@ -358,22 +370,25 @@ const UnifiedDashboard = () => {
         >
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
           <div className="space-y-3">
-            {[
-              { type: 'success', message: 'System backup completed successfully', time: '2h ago' },
-              { type: 'info', message: 'New user account created', time: '4h ago' },
-              { type: 'warning', message: 'Storage usage at 65%', time: '6h ago' }
-            ].map((activity, index) => (
-              <div key={index} className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50">
-                <div className={`w-2 h-2 rounded-full mt-2 ${
-                  activity.type === 'success' ? 'bg-green-500' :
-                  activity.type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
-                }`}></div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900 font-medium">{activity.message}</p>
-                  <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+            {recentActivity.length > 0 ? (
+              recentActivity.map((activity) => (
+                <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50">
+                  <div className={`w-2 h-2 rounded-full mt-2 ${
+                    activity.type === 'success' ? 'bg-green-500' :
+                    activity.type === 'warning' ? 'bg-yellow-500' :
+                    activity.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+                  }`}></div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-900 font-medium">{activity.message}</p>
+                    <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-500">No recent activity</p>
               </div>
-            ))}
+            )}
           </div>
         </motion.div>
       </div>

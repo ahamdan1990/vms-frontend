@@ -6,7 +6,7 @@
  * comprehensive dashboard using the enhanced design system.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Design System
@@ -22,6 +22,10 @@ import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinne
 // Existing Components
 import VisitorAnalyticsDashboard from '../../components/analytics/VisitorAnalyticsDashboard';
 import CapacityDashboard from '../capacity/CapacityDashboard/CapacityDashboard';
+
+// Services
+import dashboardService from '../../services/dashboardService';
+import useRealTimeDashboard from '../../hooks/useRealTimeDashboard';
 
 // Icons
 import {
@@ -41,6 +45,7 @@ import {
 
 // Utils
 import formatters from '../../utils/formatters';
+import { debounce } from '../../utils/asyncHelpers';
 
 const UnifiedAnalyticsDashboard = () => {
   // Navigation state
@@ -49,30 +54,52 @@ const UnifiedAnalyticsDashboard = () => {
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(new Date());
   
-  // Mock analytics data
+  // Real-time analytics connection
+  const {
+    refresh: refreshRealTimeData,
+    lastUpdated: realTimeLastUpdated
+  } = useRealTimeDashboard({
+    enableAutoRefresh: activeTab === 'overview',
+    onDashboardUpdate: (data) => {
+      // Only trigger analytics reload if not already loading and if there are actual metric changes
+      if (activeTab === 'overview' && !loading) {
+        console.log('📊 Dashboard metrics updated, refreshing analytics:', data);
+        // Use a debounced approach to prevent excessive reloading
+        const debouncedReload = debounce(() => {
+          loadAnalyticsData().catch(err => {
+            console.error('Failed to reload analytics on dashboard update:', err);
+          });
+        }, 2000); // 2 second debounce
+        
+        debouncedReload();
+      }
+    },
+    onError: (error) => {
+      console.error('Real-time dashboard error:', error);
+      // Don't set analytics error here to avoid conflicts
+    }
+  });
+  
+  // Analytics data - now using real API data
   const [analytics, setAnalytics] = useState({
     overview: {
-      totalVisitors: 156,
-      activeVisitors: 12,
-      todayVisitors: 28,
-      avgVisitDuration: 45,
-      checkInRate: 87,
-      currentOccupancy: 42,
+      totalVisitors: 0,
+      activeVisitors: 0,
+      todayVisitors: 0,
+      avgVisitDuration: 0,
+      checkInRate: 0,
+      currentOccupancy: 0,
       maxCapacity: 150,
-      utilizationRate: 28,
-      availableSlots: 108,
+      utilizationRate: 0,
+      availableSlots: 150,
       capacityStatus: 'normal',
-      visitorTrend: 12.5,
-      capacityTrend: -3.2
+      visitorTrend: 0,
+      capacityTrend: 0
     },
     insights: {
-      peakHours: ['10:00 AM', '2:00 PM', '4:00 PM'],
-      popularLocations: ['Main Lobby', 'Conference Room A', 'Meeting Room 3'],
-      recommendations: [
-        'Peak visitor times are 10 AM and 2 PM',
-        'Conference Room A has highest utilization',
-        'Consider capacity adjustments for Wednesday'
-      ]
+      peakHours: [],
+      popularLocations: [],
+      recommendations: []
     }
   });
 
@@ -104,27 +131,45 @@ const UnifiedAnalyticsDashboard = () => {
     }
   ], [analytics]);
 
-  // Simulate data loading
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-        setLastUpdated(new Date());
-        setLoading(false);
-      }, 1000);
-    };
+  // Real data loading with callback
+  const loadAnalyticsData = useCallback(async () => {
+    // Prevent concurrent calls
+    if (loading) {
+      console.log('Analytics already loading, skipping...');
+      return;
+    }
 
-    loadData();
+    setLoading(true);
+    setError(null);
     
-    const interval = setInterval(() => {
-      if (activeTab === 'overview') {
-        setLastUpdated(new Date());
-      }
-    }, 30000);
+    try {
+      const analyticsData = await dashboardService.getAnalyticsData();
+      setAnalytics(analyticsData);
+      setLastUpdated(realTimeLastUpdated || new Date());
+    } catch (error) {
+      console.error('Failed to load analytics data:', error);
+      setError('Failed to load analytics data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [realTimeLastUpdated, loading]); // Added loading to dependencies
 
-    return () => clearInterval(interval);
-  }, [activeTab]);
+  // Initial data load and tab changes - but prevent excessive calls
+  useEffect(() => {
+    // Only load analytics for overview tab
+    if (activeTab === 'overview' && !loading) {
+      loadAnalyticsData().catch(err => {
+        console.error('Failed to load analytics on tab change:', err);
+      });
+    }
+  }, [activeTab]); // Removed loadAnalyticsData from dependencies to prevent loops
+
+  // Separate effect for initial load
+  useEffect(() => {
+    loadAnalyticsData().catch(err => {
+      console.error('Failed to load initial analytics:', err);
+    });
+  }, []); // Empty dependency array for initial load only
 
   // Export analytics data
   const exportAnalytics = () => {
@@ -146,13 +191,15 @@ const UnifiedAnalyticsDashboard = () => {
     URL.revokeObjectURL(url);
   };
 
-  // Refresh data
-  const handleRefresh = () => {
+  // Refresh data using real-time connection and manual reload
+  const handleRefresh = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setLastUpdated(new Date());
-      setLoading(false);
-    }, 800);
+    try {
+      await refreshRealTimeData(); // Refresh SignalR data
+      await loadAnalyticsData(); // Reload analytics
+    } catch (error) {
+      console.error('Refresh failed:', error);
+    }
   };
 
   // Render overview cards

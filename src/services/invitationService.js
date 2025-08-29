@@ -264,6 +264,31 @@ const invitationService = {
     return response.data; // Return blob directly
   },
 
+  /**
+   * Gets invitation statistics
+   * GET /api/invitations/statistics
+   * Requires: Invitation.ReadOwn permission
+   */
+  async getInvitationStatistics(params = {}) {
+    const queryParams = {
+      startDate: params.startDate,
+      endDate: params.endDate,
+      hostId: params.hostId,
+      includeDeleted: params.includeDeleted || false
+    };
+
+    // Remove undefined values
+    Object.keys(queryParams).forEach(key => {
+      if (queryParams[key] === undefined) {
+        delete queryParams[key];
+      }
+    });
+
+    const queryString = buildQueryString(queryParams);
+    const response = await apiClient.get(`${INVITATION_ENDPOINTS.STATISTICS}${queryString}`);
+    return extractApiData(response);
+  },
+
   // Convenience methods for common operations
 
   /**

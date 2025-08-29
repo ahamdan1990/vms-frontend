@@ -140,7 +140,7 @@ export const useSignalR = () => {
    */
   const adminMethods = {
     getSystemHealth: useCallback(() => 
-      invokeHubMethod('admin', 'GetSystemHealth'), [invokeHubMethod]),
+      invokeHubMethod('admin', 'GetSystemMetrics'), [invokeHubMethod]),
     
     bulkApproveInvitations: useCallback((invitationIds, note = null) => 
       invokeHubMethod('admin', 'BulkApproveInvitations', invitationIds, note), [invokeHubMethod]),

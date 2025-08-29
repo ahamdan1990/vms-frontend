@@ -352,6 +352,93 @@ const auditService = {
     };
     
     return icons[action] || 'document-text';
+  },
+
+  /**
+   * Gets recent system activity for dashboards
+   * GET /api/Audit - optimized for dashboard display
+   */
+  async getRecentActivity(limit = 5) {
+    const queryParams = {
+      pageIndex: 0,
+      pageSize: limit,
+      sortBy: 'Timestamp',
+      sortDescending: true
+    };
+
+    const queryString = buildQueryString(queryParams);
+    const response = await apiClient.get(`${AUDIT_ENDPOINTS.BASE}${queryString}`);
+    const data = extractApiData(response);
+
+    // Transform audit data for dashboard display
+    return data.items?.map(log => ({
+      id: log.id,
+      type: this.getActivityType(log.category, log.action),
+      message: this.formatActivityMessage(log),
+      time: this.formatRelativeTime(log.timestamp),
+      timestamp: log.timestamp,
+      userId: log.userId,
+      username: log.username,
+      icon: this.getActivityIcon(log.category)
+    })) || [];
+  },
+
+  /**
+   * Helper methods for activity display
+   */
+  getActivityType(category, action) {
+    if (category?.toLowerCase().includes('error') || action?.toLowerCase().includes('fail')) {
+      return 'error';
+    }
+    if (category?.toLowerCase().includes('security')) {
+      return 'warning';
+    }
+    if (action?.toLowerCase().includes('create') || action?.toLowerCase().includes('success')) {
+      return 'success';
+    }
+    return 'info';
+  },
+
+  formatActivityMessage(log) {
+    // Create user-friendly activity messages
+    if (log.action?.toLowerCase().includes('login')) {
+      return `User ${log.username || 'Unknown'} logged in`;
+    }
+    if (log.action?.toLowerCase().includes('create') && log.category?.toLowerCase().includes('invitation')) {
+      return `New invitation created by ${log.username || 'Unknown'}`;
+    }
+    if (log.action?.toLowerCase().includes('backup')) {
+      return 'System backup completed successfully';
+    }
+    if (log.action?.toLowerCase().includes('update') && log.category?.toLowerCase().includes('configuration')) {
+      return `System configuration updated: ${log.details || 'settings changed'}`;
+    }
+    
+    // Fallback to generic message
+    return log.details || `${log.action || 'Action'} performed by ${log.username || 'System'}`;
+  },
+
+  formatRelativeTime(timestamp) {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diff = now - time;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor(diff / (1000 * 60));
+
+    if (minutes < 1) return 'just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  },
+
+  getActivityIcon(category) {
+    const cat = category?.toLowerCase() || '';
+    if (cat.includes('security')) return 'ShieldCheckIcon';
+    if (cat.includes('user')) return 'UserGroupIcon';
+    if (cat.includes('invitation')) return 'DocumentTextIcon';
+    if (cat.includes('system')) return 'CogIcon';
+    return 'CheckCircleIcon';
   }
 };
 

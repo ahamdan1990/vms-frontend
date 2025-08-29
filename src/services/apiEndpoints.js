@@ -165,7 +165,8 @@ export const INVITATION_ENDPOINTS = {
   RESEND: (id) => `/api/invitations/${id}/resend`,
   TEMPLATES: '/api/invitations/templates',
   BULK_CREATE: '/api/invitations/bulk',
-  EXPORT: '/api/invitations/export'
+  EXPORT: '/api/invitations/export',
+  STATISTICS: '/api/invitations/statistics'
 };
 
 // Excel/XLSX endpoints
@@ -214,6 +215,12 @@ export const SIGNALR_ENDPOINTS = {
   HOST_HUB: '/hubs/host',
   SECURITY_HUB: '/hubs/security',
   ADMIN_HUB: '/hubs/admin'
+};
+
+// Dashboard endpoints  
+export const DASHBOARD_ENDPOINTS = {
+  METRICS: '/api/dashboard/metrics',
+  SYSTEM_HEALTH: '/health'
 };
 
 
@@ -283,6 +290,7 @@ export const API_ENDPOINTS = {
   TIME_SLOTS: TIME_SLOTS_ENDPOINTS,
   NOTIFICATIONS: NOTIFICATION_ENDPOINTS,
   SIGNALR: SIGNALR_ENDPOINTS,
+  DASHBOARD: DASHBOARD_ENDPOINTS,
   ADMIN: ADMIN_ENDPOINTS,
   CONFIGURATION: CONFIGURATION_ENDPOINTS,
   FILES: FILE_ENDPOINTS,

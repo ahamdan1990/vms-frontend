@@ -10,6 +10,10 @@ import Card from '../../../components/common/Card/Card';
 import Button from '../../../components/common/Button/Button';
 import Badge from '../../../components/common/Badge/Badge';
 
+// Services
+import systemService from '../../../services/systemService';
+import useRealTimeDashboard from '../../../hooks/useRealTimeDashboard';
+
 // Icons
 import {
   Cog6ToothIcon,
@@ -32,39 +36,111 @@ import {
 const SystemManagementPage = () => {
   const dispatch = useDispatch();
   
-  // System health state
-  const [systemHealth, setSystemHealth] = useState({
-    overall: 98.5,
-    database: 'Healthy',
-    emailService: 'Operational', 
-    qrGenerator: 'Active',
-    documentScanner: 'Limited',
-    lastHealthCheck: new Date()
+  // Real-time system data using SignalR
+  const {
+    systemHealth: realTimeSystemHealth,
+    recentActivity,
+    lastUpdated,
+    isLoading,
+    error: systemError,
+    refresh
+  } = useRealTimeDashboard({
+    enableAutoRefresh: true,
+    onSystemHealthUpdate: (health) => {
+      console.log('🏥 System health updated:', health);
+    },
+    onError: (error) => {
+      console.error('System management error:', error);
+    }
   });
 
-  // System statistics
+  // Local state for system health (parsed from real-time data)
+  const [systemHealth, setSystemHealth] = useState({
+    overall: 'Loading...',
+    database: 'Loading...',
+    emailService: 'Loading...', 
+    qrGenerator: 'Loading...',
+    documentScanner: 'Loading...',
+    lastHealthCheck: new Date(),
+    loading: true
+  });
+
+  // Local state for system statistics 
   const [systemStats, setSystemStats] = useState({
-    totalUsers: 156,
-    activeLocations: 12,
-    visitPurposes: 8,
-    timeSlots: 24,
-    lastBackup: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    systemUptime: '15 days, 4 hours'
+    totalUsers: 0,
+    activeLocations: 0,
+    visitPurposes: 0,
+    timeSlots: 0,
+    lastBackup: new Date(),
+    systemUptime: 'Loading...',
+    loading: true
   });
 
   useEffect(() => {
     dispatch(setPageTitle('System Management'));
-    
-    // Simulate periodic health checks
-    const healthCheckInterval = setInterval(() => {
-      setSystemHealth(prev => ({
-        ...prev,
-        lastHealthCheck: new Date()
-      }));
-    }, 30000);
-
-    return () => clearInterval(healthCheckInterval);
   }, [dispatch]);
+
+  // Fetch system health data (initial and when real-time data changes)
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchSystemData = async () => {
+      try {
+        // Fetch real system health data
+        const healthData = await systemService.getSystemHealth();
+        const parsedHealth = systemService.parseHealthData(healthData);
+        
+        if (isMounted) {
+          setSystemHealth({
+            ...parsedHealth,
+            loading: false
+          });
+        }
+
+        // Fetch system statistics
+        const stats = await systemService.getSystemStatistics();
+        
+        if (isMounted) {
+          setSystemStats({
+            ...stats,
+            loading: false
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch system data:', error);
+        if (isMounted) {
+          setSystemHealth(prev => ({
+            ...prev,
+            overall: 'Error',
+            database: 'Error',
+            loading: false
+          }));
+          setSystemStats(prev => ({
+            ...prev,
+            loading: false
+          }));
+        }
+      }
+    };
+
+    // Initial fetch
+    fetchSystemData();
+    
+    // Update when real-time system health changes
+    if (realTimeSystemHealth) {
+      if (isMounted) {
+        setSystemHealth(prev => ({
+          ...prev,
+          ...realTimeSystemHealth,
+          loading: false
+        }));
+      }
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [realTimeSystemHealth]);
 
   
   // Helper function for relative time formatting
@@ -403,42 +479,30 @@ const SystemManagementPage = () => {
           </div>
           
           <div className="space-y-3">
-            {[
-              {
-                type: 'success',
-                message: 'Automatic backup completed successfully',
-                time: '2 hours ago',
-                icon: CheckCircleIcon
-              },
-              {
-                type: 'info', 
-                message: 'New user account created: sarah.johnson@company.com',
-                time: '4 hours ago',
-                icon: UserGroupIcon
-              },
-              {
-                type: 'warning',
-                message: 'System configuration updated: email settings',
-                time: '6 hours ago',
-                icon: ExclamationTriangleIcon
-              }
-            ].map((activity, index) => (
-              <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                  activity.type === 'success' ? 'bg-green-100' :
-                  activity.type === 'warning' ? 'bg-yellow-100' : 'bg-blue-100'
-                }`}>
-                  <activity.icon className={`w-4 h-4 ${
-                    activity.type === 'success' ? 'text-green-600' :
-                    activity.type === 'warning' ? 'text-yellow-600' : 'text-blue-600'
-                  }`} />
+            {recentActivity.length > 0 ? (
+              recentActivity.map((activity, index) => (
+                <div key={activity.id || index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    activity.type === 'success' ? 'bg-green-100' :
+                    activity.type === 'warning' ? 'bg-yellow-100' :
+                    activity.type === 'error' ? 'bg-red-100' : 'bg-blue-100'
+                  }`}>
+                    {activity.type === 'success' && <CheckCircleIcon className="w-4 h-4 text-green-600" />}
+                    {activity.type === 'warning' && <ExclamationTriangleIcon className="w-4 h-4 text-yellow-600" />}
+                    {activity.type === 'error' && <ExclamationTriangleIcon className="w-4 h-4 text-red-600" />}
+                    {activity.type === 'info' && <UserGroupIcon className="w-4 h-4 text-blue-600" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-900 font-medium">{activity.message}</p>
+                    <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900 font-medium">{activity.message}</p>
-                  <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-500">No recent activity available</p>
               </div>
-            ))}
+            )}
           </div>
         </Card>
       </motion.div>
