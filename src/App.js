@@ -12,7 +12,7 @@ import { initializeNotifications, setSignalRConnected } from './store/slices/not
 import NotificationProvider from './components/notifications/NotificationProvider';
 import NotificationCenter from './components/notifications/NotificationCenter.js';
 import { signalRManager } from './services/signalr/signalRConnection';
-
+//import './App.css';
 /**
  * App initialization component with theme support
  */

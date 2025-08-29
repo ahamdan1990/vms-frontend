@@ -45,7 +45,7 @@ import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpi
 import EmptyState from '../../../components/common/EmptyState/EmptyState';
 import ConfirmDialog from '../../../components/common/ConfirmDialog/ConfirmDialog';
 import Modal from '../../../components/common/Modal/Modal';
-import { toast } from 'react-hot-toast';
+
 
 // Icons
 import {
@@ -60,11 +60,13 @@ import {
   ExclamationTriangleIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
+import { useToast } from '../../../hooks/useNotifications';
 
 const ConfigurationPage = () => {
   const dispatch = useDispatch();
   const { user } = useAuth();
   const { hasPermission } = usePermissions();
+  const toast = useToast();
 
   // Selectors
   const configurations = useSelector(selectConfigurations);
@@ -160,7 +162,7 @@ const ConfigurationPage = () => {
       setEditingConfig(null);
       dispatch(fetchAllConfigurations());
     } catch (error) {
-      toast.error('Failed to update configuration');
+      toast.error('Failed to update configuration:');
     }
   };
 
@@ -540,9 +542,9 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
     if (!formData.value && formData.value !== '') {
       errors.value = 'Value is required';
     }
-    if (!formData.reason.trim()) {
-      errors.reason = 'Reason for change is required';
-    }
+    // if (!formData.reason.trim()) {
+    //   errors.reason = 'Reason for change is required';
+    // }
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -660,7 +662,7 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
               <span className="font-medium text-gray-700">Category:</span>
               <span className="ml-2 text-gray-900">{config.category}</span>
             </div>
-            <div>
+            {/* <div>
               <span className="font-medium text-gray-700">Data Type:</span>
               <span className="ml-2 text-gray-900">{config.dataType}</span>
             </div>
@@ -669,7 +671,7 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
               <span className="ml-2 text-gray-900 font-mono">
                 {config.isSensitive ? '••••••••' : config.value}
               </span>
-            </div>
+            </div> */}
           </div>
           
           {config.description && (
@@ -704,7 +706,6 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
             onChange={(e) => handleReasonChange(e.target.value)}
             error={formErrors.reason}
             placeholder="Enter reason for this configuration change..."
-            required
           />
           <p className="mt-1 text-sm text-gray-500">
             This will be logged for audit purposes.

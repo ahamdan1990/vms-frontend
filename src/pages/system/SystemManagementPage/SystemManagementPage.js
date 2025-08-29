@@ -135,6 +135,15 @@ const SystemManagementPage = () => {
       stats: `${systemStats.timeSlots} time slots configured`
     },
     {
+      id: 'escalation-rules',
+      title: 'Escalation Rules',
+      description: 'Configure alert escalation and notification rules',
+      icon: ExclamationTriangleIcon,
+      href: '/system/escalation-rules',
+      color: 'bg-red-100 text-red-600',
+      stats: 'Alert management'
+    },
+    {
       id: 'users',
       title: 'User Management',
       description: 'Manage user accounts, roles, and permissions',

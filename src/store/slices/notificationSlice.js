@@ -211,7 +211,7 @@ const notificationSlice = createSlice({
         id: action.payload.id || Date.now().toString() + Math.random(),
         type: action.payload.type || NOTIFICATION_TYPES.INFO,
         title: action.payload.title,
-        message: action.payload.message,
+        message: action.payload.details?.errors?.join(", ") || action.payload.message,
         duration: action.payload.duration ?? state.settings.defaultDuration,
         persistent: action.payload.persistent || false,
         actions: action.payload.actions || [],

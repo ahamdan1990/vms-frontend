@@ -396,7 +396,7 @@ const ProfilePage = () => {
       });
       setPasswordErrors({});
     } catch (error) {
-      toast.error('Error', 'Failed to change password');
+      toast.error('Error', error);
     }
   };
 

@@ -34,7 +34,8 @@ import {
   CHECKIN_ROUTES,
   SYSTEM_ROUTES,
   CAPACITY_ROUTES,
-  PROFILE_ROUTES
+  PROFILE_ROUTES,
+  NOTIFICATION_ROUTES
 } from '../constants/routeConstants';
 
 // Permission and Role Constants
@@ -75,17 +76,17 @@ const ResetPasswordPage = lazy(() => import('../pages/auth/ResetPasswordPage/Res
 const ChangePasswordPage = lazy(() => import('../pages/auth/ChangePasswordPage/ChangePasswordPage'));
 
 // Dashboard Pages
-const DashboardPage = lazy(() => import('../pages/dashboard/DashboardPage/DashboardPage'));
+//const DashboardPage = lazy(() => import('../pages/dashboard/DashboardPage/DashboardPage'));
 const UnifiedDashboard = lazy(() => import('../pages/dashboard/UnifiedDashboard/UnifiedDashboard'));
-const StaffDashboard = lazy(() => import('../pages/dashboard/StaffDashboard/StaffDashboard'));
-const OperatorDashboard = lazy(() => import('../pages/dashboard/OperatorDashboard/OperatorDashboard'));
-const AdminDashboard = lazy(() => import('../pages/dashboard/AdminDashboard/AdminDashboard'));
+//const StaffDashboard = lazy(() => import('../pages/dashboard/StaffDashboard/StaffDashboard'));
+//const OperatorDashboard = lazy(() => import('../pages/dashboard/OperatorDashboard/OperatorDashboard'));
+//const AdminDashboard = lazy(() => import('../pages/dashboard/AdminDashboard/AdminDashboard'));
 
 // Advanced Dashboard Pages
 const ReceptionistDashboard = lazy(() => import('../pages/receptionist/ReceptionistDashboard'));
 const UnifiedAnalyticsDashboard = lazy(() => import('../pages/analytics/UnifiedAnalyticsDashboard'));
 const ExcelManagementPage = lazy(() => import('../pages/admin/ExcelManagementPage'));
-const IntegratedVisitorManagement = lazy(() => import('../pages/IntegratedVisitorManagement'));
+//const IntegratedVisitorManagement = lazy(() => import('../pages/IntegratedVisitorManagement'));
 
 // User Management Pages
 const UsersListPage = lazy(() => import('../pages/users/UsersListPage/UsersListPage'));
@@ -97,9 +98,10 @@ const ProfilePage = lazy(() => import('../pages/users/ProfilePage/ProfilePage'))
 // System Administration Pages
 const ConfigurationPage = lazy(() => import('../pages/system/ConfigurationPage/ConfigurationPage'));
 const AuditPage = lazy(() => import('../pages/system/AuditPage/AuditPage'));
-const SystemManagement = lazy(() => import('../components/system/SystemManagement/SystemManagement'));
+//const SystemManagement = lazy(() => import('../components/system/SystemManagement/SystemManagement'));
 const VisitPurposesListPage = lazy(() => import('../pages/visit-purposes/VisitPurposesListPage/VisitPurposesListPage'));
 const LocationsListPage = lazy(() => import('../pages/locations/LocationsListPage/LocationsListPage'));
+const EscalationRulesPage = lazy(() => import('../pages/system/EscalationRulesPage/EscalationRulesPage'));
 
 const SystemManagementPage = lazy(() => import('../pages/system/SystemManagementPage'))
 const BackupPage = lazy(() => import('../pages/system/BackupPage'))
@@ -116,6 +118,9 @@ const InvitationsListPage = lazy(() => import('../pages/invitations/InvitationsL
 
 // Check-in Management Pages
 const CheckInDashboard = lazy(() => import('../pages/checkin/CheckInDashboard/CheckInDashboard'));
+
+// Notification Pages
+const NotificationsDashboard = lazy(() => import('../pages/notifications/NotificationsDashboard/NotificationsDashboard'));
 
 // Error Pages
 const AccessDeniedPage = lazy(() => import('../pages/errors/AccessDeniedPage'));
@@ -397,6 +402,20 @@ const AppRoutes = () => {
         } 
       />
 
+      {/* === NOTIFICATION ROUTES === */}
+      <Route 
+        path={NOTIFICATION_ROUTES.DASHBOARD} 
+        element={
+          <AuthGuard>
+            <Layout>
+              <Suspense fallback={<LoadingFallback />}>
+                <NotificationsDashboard />
+              </Suspense>
+            </Layout>
+          </AuthGuard>
+        } 
+      />
+
       {/* === SYSTEM ADMINISTRATION ROUTES === */}
       <Route 
         path={SYSTEM_ROUTES.MANAGEMENT} 
@@ -496,6 +515,21 @@ const AppRoutes = () => {
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <TimeSlotsListPage />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        } 
+      />
+
+      <Route 
+        path={SYSTEM_ROUTES.ESCALATION_RULES} 
+        element={
+          <AuthGuard>
+            <PermissionGuard permission={CONFIGURATION_PERMISSIONS.READ}>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <EscalationRulesPage />
                 </Suspense>
               </Layout>
             </PermissionGuard>

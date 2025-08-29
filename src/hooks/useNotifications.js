@@ -200,7 +200,22 @@ export const useNotifications = () => {
 export const useToast = () => {
   const dispatch = useDispatch();
   const toasts = useSelector(state => state.notifications.toasts);
-  
+
+  // Helper to extract a string from error objects
+  const getErrorMessage = (error) => {
+    if (!error) return "An unexpected error occurred";
+
+    if (typeof error === "string") return error;
+
+    if (Array.isArray(error?.details?.errors)) {
+      return error.details.errors.join(", ");
+    }
+
+    if (error?.message) return error.message;
+
+    return "An unexpected error occurred";
+  };
+
   return {
     toasts,
     hasToasts: toasts.length > 0,
@@ -209,8 +224,10 @@ export const useToast = () => {
     success: useCallback((title, message, options) => 
       dispatch(showSuccessToast(title, message, options)), [dispatch]),
     
-    error: useCallback((title, message, options) => 
-      dispatch(showErrorToast(title, message, options)), [dispatch]),
+    error: useCallback((title, error, options) => {
+        const message = getErrorMessage(error);
+        dispatch(showErrorToast(title, message, options));
+      }, [dispatch]),
     
     warning: useCallback((title, message, options) => 
       dispatch(showWarningToast(title, message, options)), [dispatch]),

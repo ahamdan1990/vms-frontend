@@ -164,6 +164,7 @@ const Button = ({
   // Enhanced icon component with better spacing
   const IconComponent = icon && React.cloneElement(icon, {
     className: classNames(
+      icon.props.className, // keep passed classes
       iconSizeClasses[size],
       {
         'mr-2': iconPosition === 'left' && children,

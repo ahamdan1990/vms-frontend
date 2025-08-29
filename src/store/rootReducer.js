@@ -12,6 +12,7 @@ import emergencyContactsReducer from './slices/emergencyContactsSlice';
 import invitationsReducer from './slices/invitationsSlice';
 import capacityReducer from './slices/capacitySlice';
 import timeSlotsReducer from './slices/timeSlotsSlice';
+import escalationRulesReducer from './slices/escalationRulesSlice';
 
 /**
  * Root reducer that combines all feature slices
@@ -31,6 +32,7 @@ const rootReducer = combineReducers({
   invitations: invitationsReducer,
   capacity: capacityReducer,
   timeSlots: timeSlotsReducer,
+  escalationRules: escalationRulesReducer,
 });
 
 /**

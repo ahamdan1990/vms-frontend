@@ -149,6 +149,7 @@ export const SYSTEM_ROUTES = {
   LOCATIONS: '/system/locations',
   TIME_SLOTS: '/system/time-slots',
   MANAGEMENT: '/system/management', // New consolidated management page
+  ESCALATION_RULES: '/system/escalation-rules', // New escalation rules page
   
   // Facial Recognition System routes
   FR_SYSTEM: '/system/facial-recognition',
@@ -196,6 +197,20 @@ export const ALERT_ROUTES = {
   // Dynamic route builders
   getDetailRoute: (id) => `/alerts/${id}`,
   getAcknowledgeRoute: (id) => `/alerts/${id}/acknowledge`
+};
+
+// Notification routes
+export const NOTIFICATION_ROUTES = {
+  BASE: '/notifications',
+  DASHBOARD: '/notifications',
+  LIST: '/notifications',
+  DETAIL: '/notifications/:id',
+  ACKNOWLEDGE: '/notifications/:id/acknowledge',
+  STATS: '/notifications/stats',
+  
+  // Dynamic route builders
+  getDetailRoute: (id) => `/notifications/${id}`,
+  getAcknowledgeRoute: (id) => `/notifications/${id}/acknowledge`
 };
 
 // Help and documentation routes
@@ -367,6 +382,21 @@ export const ROUTE_METADATA = {
     roles: ['Administrator'],
     permissions: ['SystemConfig.ManageCapacity']
   },
+
+  [SYSTEM_ROUTES.ESCALATION_RULES]: {
+    title: 'Escalation Rules',
+    breadcrumb: 'Escalation Rules',
+    requiresAuth: true,
+    roles: ['Administrator'],
+    permissions: ['Configuration.Read']
+  },
+
+  [NOTIFICATION_ROUTES.DASHBOARD]: {
+    title: 'Notifications',
+    breadcrumb: 'Notifications',
+    requiresAuth: true,
+    roles: ['Staff', 'Operator', 'Administrator']
+  },
   
   [CAPACITY_ROUTES.DASHBOARD]: {
     title: 'Capacity Dashboard',
@@ -529,6 +559,12 @@ export const NAVIGATION_MENU = {
           roles: ['Administrator']
         },
         {
+          id: 'system-escalation-rules',
+          label: 'Escalation Rules',
+          path: SYSTEM_ROUTES.ESCALATION_RULES,
+          roles: ['Administrator']
+        },
+        {
           id: 'system-audit',
           label: 'Audit Logs',
           path: SYSTEM_ROUTES.AUDIT,
@@ -682,6 +718,7 @@ export default {
   CAPACITY_ROUTES,
   PROFILE_ROUTES,
   ALERT_ROUTES,
+  NOTIFICATION_ROUTES,
   HELP_ROUTES,
   ROUTE_PARAMS,
   QUERY_PARAMS,

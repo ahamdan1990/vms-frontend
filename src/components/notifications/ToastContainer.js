@@ -51,8 +51,11 @@ const ToastContainer = ({
       aria-live="assertive"
       role="region"
       aria-label="Notifications"
+      style={
+        {width:'20rem'}
+      }
     >
-      <div className="space-y-2 pointer-events-auto">
+      <div className="flex flex-col gap-3 pointer-events-auto">
         <AnimatePresence mode="sync">
           {visibleToasts.map((toast, index) => (
             <Toast

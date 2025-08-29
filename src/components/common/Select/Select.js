@@ -28,19 +28,23 @@ const Select = ({
           {label}
         </label>
       )}
-      <select
-        className={selectClasses}
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        {...props}
-      >
-        {options.map((option) => (
+    <select
+      className={selectClasses}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      {...props}
+    >
+      {options.length > 0 ? (
+        options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
-        ))}
-      </select>
+        ))
+      ) : (
+        props.children
+      )}
+    </select>
       {error && (
         <p className="text-sm text-red-600">{error}</p>
       )}
