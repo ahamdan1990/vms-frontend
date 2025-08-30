@@ -178,7 +178,7 @@ const timeSlotsService = {
 
     // Location ID validation (optional)
     if (data.locationId !== undefined && data.locationId !== null) {
-      if (!Number.isInteger(data.locationId) || data.locationId <= 0) {
+      if (!Number.isInteger(parseInt(data.locationId)) || data.locationId <= 0) {
         errors.push('Location ID must be a positive integer');
       }
     }

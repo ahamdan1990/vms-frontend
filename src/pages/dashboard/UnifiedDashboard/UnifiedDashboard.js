@@ -471,7 +471,7 @@ const UnifiedDashboard = () => {
   return (
     <div className="space-y-6">
       {/* TEMPORARY: SignalR Debug Panel */}
-      {process.env.NODE_ENV === 'development' && <SignalRDebugPanel />}
+      {/* {process.env.NODE_ENV === 'development' && <SignalRDebugPanel />} */}
       
       {/* Navigation Tabs (only show if user has multiple pages) */}
       {getNavigationItems().length > 1 && (

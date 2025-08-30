@@ -3,16 +3,16 @@ import { useSignalR } from './useSignalR';
 import dashboardService from '../services/dashboardService';
 import { debounce } from '../utils/asyncHelpers';
 import { HubConnectionState } from '@microsoft/signalr';
-
+import { signalRManager } from '../services/signalr/signalRConnection';
 
 /**
- * Real-time dashboard hook that uses SignalR instead of setInterval polling
+ * Real-time dashboard hook that uses SignalR with event handlers
  * Provides real-time updates for dashboard metrics, system health, and activity
  */
 const useRealTimeDashboard = (options = {}) => {
   const {
     enableAutoRefresh = true,
-    fallbackIntervalMs = 30000, // Fallback polling interval if SignalR fails
+    fallbackIntervalMs = 30000,
     onDashboardUpdate,
     onSystemHealthUpdate,
     onActivityUpdate,
@@ -38,14 +38,14 @@ const useRealTimeDashboard = (options = {}) => {
   const [error, setError] = useState(null);
 
   const fallbackInterval = useRef(null);
-  // Refs for cleanup and preventing multiple calls
   const mounted = useRef(true);
+  const dashboardEventSubscription = useRef(null);
 
   /**
-   * Fetch dashboard data manually (without recent activity)
+   * Fetch dashboard data manually
    */
   const fetchDashboardData = useCallback(async () => {
-    if (!mounted.current || isLoading) return; // Prevent multiple concurrent calls
+    if (!mounted.current || isLoading) return;
 
     setIsLoading(true);
     setError(null);
@@ -56,8 +56,6 @@ const useRealTimeDashboard = (options = {}) => {
       if (mounted.current) {
         setDashboardData(dashboard);
         setLastUpdated(new Date());
-
-        // Notify parent components
         onDashboardUpdate?.(dashboard);
       }
     } catch (err) {
@@ -74,7 +72,7 @@ const useRealTimeDashboard = (options = {}) => {
   }, [onDashboardUpdate, onError, isLoading]);
 
   /**
-   * Fetch recent activity separately (only when needed)
+   * Fetch recent activity separately
    */
   const fetchRecentActivity = useCallback(async () => {
     if (!mounted.current) return;
@@ -83,136 +81,100 @@ const useRealTimeDashboard = (options = {}) => {
       const activity = await dashboardService.getRecentActivity(5);
       
       if (mounted.current) {
-        // Only update if activity data has actually changed (prevent unnecessary re-renders)
         setRecentActivity(prevActivity => {
-          // Compare the activities to see if they're different
           if (JSON.stringify(prevActivity) !== JSON.stringify(activity)) {
-            console.log('📝 Recent activity updated with new data');
+            console.log('Recent activity updated with new data');
             onActivityUpdate?.(activity);
             return activity;
           } else {
-            console.log('📝 Recent activity unchanged, skipping update');
-            return prevActivity; // Return previous state to prevent re-render
+            console.log('Recent activity unchanged, skipping update');
+            return prevActivity;
           }
         });
       }
     } catch (err) {
       console.error('Failed to fetch recent activity:', err);
-      // Don't set main error state for activity failures
     }
   }, [onActivityUpdate]);
 
-  // Debounced version to prevent rapid successive calls (STABLE)
+  // Debounced versions
   const debouncedFetchDashboardData = useMemo(() => 
-    debounce(fetchDashboardData, 1000), // 1 second debounce
+    debounce(fetchDashboardData, 1000),
     [fetchDashboardData]
   );
 
-  // Separate debounced function for recent activity (longer delay since it updates less frequently) (STABLE)
   const debouncedFetchRecentActivity = useMemo(() =>
-    debounce(fetchRecentActivity, 5000), // 5 second debounce for activity
+    debounce(fetchRecentActivity, 5000),
     [fetchRecentActivity]
   );
 
   /**
-   * Fetch system health data via SignalR (memoized to prevent re-creation)
-   */
-  const fetchSystemHealth = useCallback(async () => {
-    try {
-      if (adminMethods?.getSystemMetrics) {
-        // Use SignalR method if available
-        const health = await adminMethods.getSystemMetrics();
-        if (mounted.current) {
-          setSystemHealth(health);
-          onSystemHealthUpdate?.(health);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch system health via SignalR:', err);
-    }
-  }, [adminMethods?.getSystemMetrics, onSystemHealthUpdate]); // More specific dependency
-
-  /**
-   * Setup SignalR event listeners through hook patterns (STABLE)
+   * Set up SignalR dashboard event listeners using the new event handler system
    */
   useEffect(() => {
-    // Don't set up listeners if not enabled
     if (!isAdminConnected || !enableAutoRefresh) return;
+    if (dashboardEventSubscription.current) return; // already subscribed
+
+    console.log('Setting up real-time dashboard event listeners');
     
+    // Get the dashboard event handler from the SignalR manager
+    const eventHandlers = signalRManager.getEventHandlers();
+    const dashboardHandler = eventHandlers.getDashboardHandler();
 
-    // Access the SignalR connection through the global reference
-    // This is a temporary solution until we implement a better event system
-    const signalRConnection = window.signalRManager?.connections?.get('admin');
-    if (!signalRConnection || signalRConnection.state !== 'Connected') {
-      console.log('Admin hub connection not ready');
-      return;
-    }
+    // Subscribe to dashboard events
+     dashboardEventSubscription.current = dashboardHandler.subscribe((eventType, data, hubName) => {
+      if (!mounted.current) return;
 
-    console.log('🔗 Setting up real-time dashboard listeners');
+      switch (eventType) {
+        case 'dashboard-update':
+          console.log('Real-time dashboard metrics received:', data);
+          setDashboardData(prev => ({ ...prev, ...data }));
+          setLastUpdated(new Date());
+          onDashboardUpdate?.(data);
+          break;
 
-    // Create stable event handlers to prevent re-registration
-    const onDashboardMetricsUpdate = (metrics) => {
-      console.log('📊 Real-time dashboard metrics received:', metrics);
-      if (mounted.current) {
-        setDashboardData(prev => ({ ...prev, ...metrics }));
-        setLastUpdated(new Date());
-        onDashboardUpdate?.(metrics);
+        case 'system-health-update':
+          console.log('Real-time system health received:', data);
+          setSystemHealth(data);
+          onSystemHealthUpdate?.(data);
+          break;
+
+        case 'queue-update':
+          console.log('Real-time queue update received:', data);
+          setDashboardData(prev => ({
+            ...prev,
+            waitingVisitors: data.waitingVisitors || 0,
+            processingVisitors: data.processingVisitors || 0,
+            lastUpdated: new Date()
+          }));
+          onDashboardUpdate?.(data);
+          break;
+
+        case 'audit-log-created':
+          console.log('New audit log detected via SignalR:', data);
+          debouncedFetchRecentActivity();
+          break;
+
+        default:
+          console.log('Unhandled dashboard event:', eventType);
+          break;
       }
-    };
+    });
 
-    // Primary handler for SystemHealthUpdate events (prevents duplication with signalRConnection)
-    const onSystemHealthUpdateReceived = (health) => {
-      console.log('🏥 Real-time system health received:', health);
-      if (mounted.current) {
-        setSystemHealth(health);
-        onSystemHealthUpdate?.(health);
-      }
-    };
-
-    // Primary handler for QueueUpdate events (prevents duplication with signalRConnection)
-    const onQueueUpdate = (queueData) => {
-      console.log('📋 Real-time queue update received:', queueData);
-      if (mounted.current) {
-        setDashboardData(prev => ({
-          ...prev,
-          waitingVisitors: queueData.WaitingCount || 0,
-          processingVisitors: queueData.ProcessingCount || 0,
-          lastUpdated: new Date()
-        }));
-        onDashboardUpdate?.(queueData);
-      }
-    };
-
-    const onNewAuditLogCreated = async (auditLogData) => {
-      console.log('📝 New audit log detected via SignalR:', auditLogData);
-      // Use debounced fetch to prevent rapid consecutive updates
-      debouncedFetchRecentActivity();
-    };
-
-    // Register event listeners with consistent event names
-    signalRConnection.on('DashboardMetricsUpdated', onDashboardMetricsUpdate);
-    signalRConnection.on('SystemHealthUpdate', onSystemHealthUpdateReceived);
-    signalRConnection.on('QueueUpdate', onQueueUpdate);
-    signalRConnection.on('AuditLogCreated', onNewAuditLogCreated);
-    signalRConnection.on('SystemMetrics', onSystemHealthUpdateReceived);
-
-    // Request initial system metrics only once
+    // Request initial system metrics
     if (adminMethods?.getSystemMetrics) {
       adminMethods.getSystemMetrics().catch(console.error);
     }
 
     // Cleanup function
     return () => {
-      console.log('🧹 Cleaning up SignalR dashboard listeners');
-      if (signalRConnection && signalRConnection.state === 'Connected') {
-        signalRConnection.off('DashboardMetricsUpdated', onDashboardMetricsUpdate);
-        signalRConnection.off('SystemHealthUpdate', onSystemHealthUpdateReceived);
-        signalRConnection.off('QueueUpdate', onQueueUpdate);
-        signalRConnection.off('AuditLogCreated', onNewAuditLogCreated);
-        signalRConnection.off('SystemMetrics', onSystemHealthUpdateReceived);
+      console.log('Cleaning up SignalR dashboard listeners');
+      if (dashboardEventSubscription.current) {
+        dashboardEventSubscription.current();
+        dashboardEventSubscription.current = null;
       }
     };
-  }, [enableAutoRefresh, getConnectionStatus]); // STABLE DEPENDENCIES ONLY
+  }, [enableAutoRefresh, isAdminConnected, adminMethods, onDashboardUpdate, onSystemHealthUpdate, debouncedFetchRecentActivity]);
 
   /**
    * Setup fallback polling when SignalR is not available
@@ -220,20 +182,18 @@ const useRealTimeDashboard = (options = {}) => {
   useEffect(() => {
     if (!enableAutoRefresh) return;
 
-    // Check if SignalR is working
     const isSignalRHealthy = areConnectionsHealthy();
     
     if (!isSignalRHealthy && fallbackIntervalMs && !fallbackInterval.current) {
-      console.log('🔄 SignalR not healthy, setting up fallback polling');
+      console.log('SignalR not healthy, setting up fallback polling');
       
       fallbackInterval.current = setInterval(() => {
-        debouncedFetchDashboardData(); // Use debounced version
+        debouncedFetchDashboardData();
       }, fallbackIntervalMs);
     }
 
-    // Cleanup fallback interval when SignalR becomes healthy
     if (isSignalRHealthy && fallbackInterval.current) {
-      console.log('✅ SignalR is healthy, stopping fallback polling');
+      console.log('SignalR is healthy, stopping fallback polling');
       clearInterval(fallbackInterval.current);
       fallbackInterval.current = null;
     }
@@ -247,25 +207,16 @@ const useRealTimeDashboard = (options = {}) => {
   }, [enableAutoRefresh, fallbackIntervalMs, areConnectionsHealthy, debouncedFetchDashboardData]);
 
   /**
-   * Initial system health fetch (separate from event listeners to avoid dependency thrashing)
-   */
-  useEffect(() => {
-    if (enableAutoRefresh && adminMethods?.getSystemMetrics) {
-      adminMethods.getSystemMetrics().catch(console.error);
-    }
-  }, [enableAutoRefresh, adminMethods?.getSystemMetrics]);
-
-  /**
-   * Initial data fetch (fetch both dashboard data and recent activity on mount)
+   * Initial data fetch on mount
    */
   useEffect(() => {
     const initialFetch = async () => {
       await fetchDashboardData();
-      await fetchRecentActivity(); // Initial fetch of recent activity
+      await fetchRecentActivity();
     };
     
     initialFetch();
-  }, []); // Empty dependency array - only run on mount
+  }, []);
 
   /**
    * Cleanup on unmount
@@ -273,6 +224,9 @@ const useRealTimeDashboard = (options = {}) => {
   useEffect(() => {
     return () => {
       mounted.current = false;
+      if (dashboardEventSubscription.current) {
+        dashboardEventSubscription.current();
+      }
     };
   }, []);
 
@@ -281,8 +235,10 @@ const useRealTimeDashboard = (options = {}) => {
    */
   const refresh = useCallback(async () => {
     await fetchDashboardData();
-    await fetchSystemHealth();
-  }, [fetchDashboardData, fetchSystemHealth]);
+    if (adminMethods?.getSystemMetrics) {
+      adminMethods.getSystemMetrics().catch(console.error);
+    }
+  }, [fetchDashboardData, adminMethods]);
 
   /**
    * Manual refresh recent activity only
