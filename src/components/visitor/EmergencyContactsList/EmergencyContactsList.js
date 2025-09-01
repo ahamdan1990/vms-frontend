@@ -42,8 +42,7 @@ import {
   selectSelectedContactsCount,
   selectPrimaryEmergencyContact,
   selectEmergencyContactStats,
-  selectEmergencyContactSummary,
-  selectCurrentVisitorId
+  selectEmergencyContactSummary
 } from '../../../store/selectors/emergencyContactSelectors';
 
 // Components
@@ -117,16 +116,10 @@ const EmergencyContactsList = ({
   const primaryContact = useSelector(selectPrimaryEmergencyContact);
   const stats = useSelector(selectEmergencyContactStats);
   const summary = useSelector(selectEmergencyContactSummary);
-  const currentVisitorId = useSelector(selectCurrentVisitorId);
 
   // Load contacts when visitor changes
   useEffect(() => {
     if (visitorId && canRead) {
-      // Clear previous data if visitor changed
-      if (currentVisitorId && currentVisitorId !== visitorId) {
-        dispatch(clearContactData());
-      }
-      
       dispatch(getEmergencyContacts({ visitorId }));
     }
     
@@ -136,7 +129,7 @@ const EmergencyContactsList = ({
         dispatch(clearContactData());
       }
     };
-  }, [dispatch, visitorId, canRead, currentVisitorId, isEmbedded]);
+  }, [dispatch, visitorId, canRead, isEmbedded]);
 
   // Clear errors on unmount
   useEffect(() => {

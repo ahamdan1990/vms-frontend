@@ -37,7 +37,10 @@ const VisitorCard = ({
   onDelete,
   onToggleVip,
   onToggleBlacklist,
+  selected = false,
+  onSelect,
   showActions = true,
+  showSelection = false,
   variant = 'default', // 'default', 'compact', 'minimal'
   className = ''
 }) => {
@@ -87,7 +90,20 @@ const VisitorCard = ({
   };
 
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 ${variantClasses[variant]} ${className}`}>
+    <div className={`relative bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 ${variantClasses[variant]} ${className} ${selected ? 'ring-2 ring-blue-500 border-blue-500' : ''}`}>
+      {/* Selection Checkbox */}
+      {showSelection && (
+        <div className="absolute top-3 right-3 z-10">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={(e) => onSelect && onSelect(e.target.checked)}
+            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+
       <div className="flex items-start space-x-4">
         {/* Profile Photo */}
         <div className={`flex-shrink-0 ${photoSize[variant]}`}>
@@ -251,29 +267,32 @@ const VisitorCard = ({
   );
 };
 
-VisitorCard.propTypes = {
-  visitor: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    firstName: PropTypes.string.isRequired,
-    lastName: PropTypes.string.isRequired,
-    fullName: PropTypes.string,
-    email: PropTypes.string.isRequired,
-    phoneNumber: PropTypes.string,
-    company: PropTypes.string,
-    profilePhotoUrl: PropTypes.string,
-    isVip: PropTypes.bool,
-    isBlacklisted: PropTypes.bool,
-    visitCount: PropTypes.number,
-    lastVisitDate: PropTypes.string,
-    createdOn: PropTypes.string
-  }).isRequired,
-  onEdit: PropTypes.func,
-  onDelete: PropTypes.func,
-  onToggleVip: PropTypes.func,
-  onToggleBlacklist: PropTypes.func,
-  showActions: PropTypes.bool,
-  variant: PropTypes.oneOf(['default', 'compact', 'minimal']),
-  className: PropTypes.string
-};
+// VisitorCard.propTypes = {
+//   visitor: PropTypes.shape({
+//     id: PropTypes.number.isRequired,
+//     firstName: PropTypes.string.isRequired,
+//     lastName: PropTypes.string.isRequired,
+//     fullName: PropTypes.string,
+//     email: PropTypes.string.isRequired,
+//     phoneNumber: PropTypes.string,
+//     company: PropTypes.string,
+//     profilePhotoUrl: PropTypes.string,
+//     isVip: PropTypes.bool,
+//     isBlacklisted: PropTypes.bool,
+//     visitCount: PropTypes.number,
+//     lastVisitDate: PropTypes.string,
+//     createdOn: PropTypes.string
+//   }).isRequired,
+//   onEdit: PropTypes.func,
+//   onDelete: PropTypes.func,
+//   onToggleVip: PropTypes.func,
+//   onToggleBlacklist: PropTypes.func,
+//   selected: PropTypes.bool,
+//   onSelect: PropTypes.func,
+//   showActions: PropTypes.bool,
+//   showSelection: PropTypes.bool,
+//   variant: PropTypes.oneOf(['default', 'compact', 'minimal']),
+//   className: PropTypes.string
+// };
 
 export default VisitorCard;

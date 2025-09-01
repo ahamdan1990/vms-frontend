@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 // Components
 import VisitorCard from '../VisitorCard/VisitorCard';
+import BulkActions from '../BulkActions/BulkActions';
 import Button from '../../common/Button/Button';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
 import EmptyState from '../../common/EmptyState/EmptyState';
@@ -18,7 +19,7 @@ import {
 
 /**
  * Visitor Grid Component
- * Provides multiple view options for displaying visitors
+ * Provides multiple view options for displaying visitors with bulk operations support
  */
 const VisitorGrid = ({
   visitors = [],
@@ -29,13 +30,27 @@ const VisitorGrid = ({
   onDelete,
   onToggleVip,
   onToggleBlacklist,
+  // Bulk operations
+  selectedVisitors = [],
+  onSelectionChange,
+  onBulkMarkVip,
+  onBulkRemoveVip,
+  onBulkBlacklist,
+  onBulkRemoveBlacklist,
+  onBulkDelete,
+  onBulkSendInvitation,
+  bulkLoading = false,
+  // Display options
   showActions = true,
   showViewToggle = true,
+  showBulkActions = true,
+  allowBulkSelection = true,
   emptyMessage = "No visitors found",
   emptyDescription = "Try adjusting your search criteria or add a new visitor.",
   className = ''
 }) => {
   const [localViewMode, setLocalViewMode] = useState(viewMode);
+  const [selectAll, setSelectAll] = useState(false);
 
   // Handle view mode change
   const handleViewModeChange = (mode) => {
@@ -43,6 +58,45 @@ const VisitorGrid = ({
     if (onViewModeChange) {
       onViewModeChange(mode);
     }
+  };
+
+  // Handle bulk selection
+  const handleSelectAll = () => {
+    const newSelectAll = !selectAll;
+    setSelectAll(newSelectAll);
+    
+    if (onSelectionChange) {
+      if (newSelectAll) {
+        onSelectionChange(visitors.map(v => v.id));
+      } else {
+        onSelectionChange([]);
+      }
+    }
+  };
+
+  // Handle individual visitor selection
+  const handleVisitorSelection = (visitorId, selected) => {
+    if (!onSelectionChange) return;
+    
+    let newSelection;
+    if (selected) {
+      newSelection = [...selectedVisitors, visitorId];
+    } else {
+      newSelection = selectedVisitors.filter(id => id !== visitorId);
+    }
+    
+    onSelectionChange(newSelection);
+    
+    // Update select all state
+    setSelectAll(newSelection.length === visitors.length && visitors.length > 0);
+  };
+
+  // Handle clear selection
+  const handleClearSelection = () => {
+    if (onSelectionChange) {
+      onSelectionChange([]);
+    }
+    setSelectAll(false);
   };
 
   // Get current view mode
@@ -133,13 +187,56 @@ const VisitorGrid = ({
 
   return (
     <div className={className}>
-      {/* View Mode Toggle */}
-      {showViewToggle && (
+      {/* Header with View Mode Toggle and Bulk Selection */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          {/* Bulk Selection Controls */}
+          {allowBulkSelection && visitors.length > 0 && (
+            <div className="flex items-center space-x-4">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={handleSelectAll}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="ml-2 text-sm text-gray-700">
+                  Select all ({visitors.length})
+                </span>
+              </label>
+              
+              {selectedVisitors.length > 0 && (
+                <span className="text-sm text-gray-600">
+                  {selectedVisitors.length} selected
+                </span>
+              )}
+            </div>
+          )}
+          
+          {/* View Mode Toggle */}
+          {showViewToggle && (
+            <ViewModeToggle
+              modes={viewModes}
+              activeMode={currentViewMode}
+              onModeChange={handleViewModeChange}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Bulk Actions */}
+      {showBulkActions && allowBulkSelection && selectedVisitors.length > 0 && (
         <div className="mb-6">
-          <ViewModeToggle
-            modes={viewModes}
-            activeMode={currentViewMode}
-            onModeChange={handleViewModeChange}
+          <BulkActions
+            selectedCount={selectedVisitors.length}
+            onClearSelection={handleClearSelection}
+            onMarkVip={onBulkMarkVip}
+            onRemoveVip={onBulkRemoveVip}
+            onBlacklist={onBulkBlacklist}
+            onRemoveBlacklist={onBulkRemoveBlacklist}
+            onDelete={onBulkDelete}
+            onSendInvitation={onBulkSendInvitation}
+            loading={bulkLoading}
           />
         </div>
       )}
@@ -151,11 +248,14 @@ const VisitorGrid = ({
             key={visitor.id}
             visitor={visitor}
             variant={getCardVariant()}
+            selected={allowBulkSelection ? selectedVisitors.includes(visitor.id) : false}
+            onSelect={allowBulkSelection ? (selected) => handleVisitorSelection(visitor.id, selected) : undefined}
             onEdit={onEdit}
             onDelete={onDelete}
             onToggleVip={onToggleVip}
             onToggleBlacklist={onToggleBlacklist}
             showActions={showActions}
+            showSelection={allowBulkSelection}
           />
         ))}
       </div>
@@ -204,8 +304,21 @@ VisitorGrid.propTypes = {
   onDelete: PropTypes.func,
   onToggleVip: PropTypes.func,
   onToggleBlacklist: PropTypes.func,
+  // Bulk operations
+  selectedVisitors: PropTypes.arrayOf(PropTypes.number),
+  onSelectionChange: PropTypes.func,
+  onBulkMarkVip: PropTypes.func,
+  onBulkRemoveVip: PropTypes.func,
+  onBulkBlacklist: PropTypes.func,
+  onBulkRemoveBlacklist: PropTypes.func,
+  onBulkDelete: PropTypes.func,
+  onBulkSendInvitation: PropTypes.func,
+  bulkLoading: PropTypes.bool,
+  // Display options
   showActions: PropTypes.bool,
   showViewToggle: PropTypes.bool,
+  showBulkActions: PropTypes.bool,
+  allowBulkSelection: PropTypes.bool,
   emptyMessage: PropTypes.string,
   emptyDescription: PropTypes.string,
   className: PropTypes.string

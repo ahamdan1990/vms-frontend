@@ -20,6 +20,7 @@ import Card from '../../../components/common/Card/Card';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import Modal, { ConfirmModal } from '../../../components/common/Modal/Modal';
 import DocumentViewer from '../../../components/common/DocumentViewer/DocumentViewer';
+import DocumentManager from '../../../components/visitor/DocumentManager/DocumentManager';
 import VisitorForm from '../../../components/visitor/VisitorForm/VisitorForm';
 import EmergencyContactsList from '../../../components/visitor/EmergencyContactsList/EmergencyContactsList';
 
@@ -203,6 +204,45 @@ const VisitorProfilePage = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Failed to download document:', error);
+    }
+  };
+
+  // Handle document upload
+  const handleUploadDocument = async (file, metadata) => {
+    try {
+      const uploadedDocument = await visitorDocumentService.uploadVisitorDocument(
+        visitor.id, 
+        file, 
+        metadata.title, 
+        metadata.documentType, 
+        {
+          description: metadata.description,
+          isSensitive: metadata.isSensitive,
+          isRequired: metadata.isRequired,
+          tags: metadata.tags
+        }
+      );
+      
+      // Reload documents
+      loadDocuments();
+      
+      return uploadedDocument;
+    } catch (error) {
+      console.error('Failed to upload document:', error);
+      throw error;
+    }
+  };
+
+  // Handle document deletion
+  const handleDeleteDocument = async (documentId) => {
+    try {
+      await visitorDocumentService.deleteVisitorDocument(visitor.id, documentId, false);
+      
+      // Reload documents
+      loadDocuments();
+    } catch (error) {
+      console.error('Failed to delete document:', error);
+      throw error;
     }
   };
 
@@ -633,93 +673,18 @@ const VisitorProfilePage = () => {
   // Documents Tab
   function renderDocumentsTab() {
     return (
-      <div>
-        <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-lg font-medium text-gray-900">Documents & Files</h3>
-          <Badge variant="info" size="sm">
-            {documents.length} documents
-          </Badge>
-        </div>
-
-        {documentsLoading ? (
-          <div className="flex justify-center py-8">
-            <LoadingSpinner />
-          </div>
-        ) : documents.length === 0 ? (
-          <Card>
-            <div className="p-12 text-center">
-              <DocumentTextIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Documents</h3>
-              <p className="text-gray-600">This visitor hasn't uploaded any documents yet.</p>
-            </div>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {documents.map((document) => (
-              <Card key={document.id} className="hover:shadow-md transition-shadow">
-                <div className="p-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0">
-                      {document.documentType === 'Photo' ? (
-                        <PhotoIcon className="w-8 h-8 text-blue-500" />
-                      ) : (
-                        <DocumentTextIcon className="w-8 h-8 text-gray-400" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium text-gray-900 truncate">
-                        {document.documentName}
-                      </h4>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {document.documentType} • {document.formattedFileSize}
-                      </p>
-                      {document.description && (
-                        <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                          {document.description}
-                        </p>
-                      )}
-                      <div className="flex items-center space-x-2 mt-2">
-                        {document.isSensitive && (
-                          <Badge variant="warning" size="xs">Sensitive</Badge>
-                        )}
-                        {document.isExpired && (
-                          <Badge variant="danger" size="xs">Expired</Badge>
-                        )}
-                        {document.isRequired && (
-                          <Badge variant="info" size="xs">Required</Badge>
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Uploaded {formatDate(document.createdOn)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2 mt-4 pt-2 border-t border-gray-100">
-                    <Button
-                      onClick={() => handleViewDocument(document)}
-                      variant="outline"
-                      size="xs"
-                      className="flex-1"
-                    >
-                      <EyeIcon className="w-3 h-3 mr-1" />
-                      View
-                    </Button>
-                    <Button
-                      onClick={() => handleDownloadDocument(document)}
-                      variant="outline"
-                      size="xs"
-                      className="flex-1"
-                    >
-                      <CloudArrowDownIcon className="w-3 h-3 mr-1" />
-                      Download
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
+      <DocumentManager
+        visitorId={visitor.id}
+        documents={documents}
+        loading={documentsLoading}
+        onUpload={handleUploadDocument}
+        onDelete={handleDeleteDocument}
+        onDownload={handleDownloadDocument}
+        onRefresh={loadDocuments}
+        allowedTypes={['Passport', 'National ID', 'Driver License', 'Visa', 'Work Permit', 'Health Certificate', 'Background Check', 'Photo', 'Other']}
+        maxFileSize={10 * 1024 * 1024} // 10MB
+        allowedExtensions={['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.doc', '.docx', '.bmp', '.tiff']}
+      />
     );
   }
 

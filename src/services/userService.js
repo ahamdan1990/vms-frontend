@@ -223,6 +223,7 @@ const userService = {
    */
   async getCurrentUserProfile() {
     const response = await apiClient.get(USER_ENDPOINTS.PROFILE);
+    console.log(response)
     return extractApiData(response);
   },
 

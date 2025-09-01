@@ -369,6 +369,31 @@ const VisitorsListPage = () => {
     }
   };
 
+  // Handle bulk VIP operations
+  const handleBulkMarkVip = async () => {
+    try {
+      const vipPromises = selectedVisitors.map(id =>
+        dispatch(markAsVip(id)).unwrap()
+      );
+      await Promise.all(vipPromises);
+      setSelectedVisitors([]);
+    } catch (error) {
+      console.error('Bulk mark VIP failed:', error);
+    }
+  };
+
+  const handleBulkRemoveVip = async () => {
+    try {
+      const removeVipPromises = selectedVisitors.map(id =>
+        dispatch(removeVipStatus(id)).unwrap()
+      );
+      await Promise.all(removeVipPromises);
+      setSelectedVisitors([]);
+    } catch (error) {
+      console.error('Bulk remove VIP failed:', error);
+    }
+  };
+
   const handleFilterChange = (filterName, value) => {
     dispatch(updateFilters({ [filterName]: value }));
   };
@@ -883,8 +908,19 @@ const VisitorsListPage = () => {
         onViewModeChange={setViewMode}
         onEdit={canUpdate ? (visitor) => handleVisitorAction('edit', visitor) : undefined}
         onDelete={canDelete ? (visitor) => handleVisitorAction('delete', visitor) : undefined}
+        // Bulk operations
+        selectedVisitors={selectedVisitors}
+        onSelectionChange={setSelectedVisitors}
+        onBulkMarkVip={canMarkVip ? handleBulkMarkVip : undefined}
+        onBulkRemoveVip={canRemoveVip ? handleBulkRemoveVip : undefined}
+        onBulkBlacklist={canBlacklist ? handleBulkBlacklist : undefined}
+        onBulkDelete={canDelete ? handleBulkDelete : undefined}
+        bulkLoading={statusChangeLoading || deleteLoading}
+        // Display options
         showActions={true}
         showViewToggle={true}
+        showBulkActions={true}
+        allowBulkSelection={true}
         emptyMessage="No visitors found"
         emptyDescription="Try adjusting your search criteria or add a new visitor."
         className="mb-6"

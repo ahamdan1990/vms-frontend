@@ -17,6 +17,7 @@ import Badge from '../../common/Badge/Badge';
 import Card from '../../common/Card/Card';
 import FileUpload from '../../common/FileUpload/FileUpload';
 import AutocompleteInput from '../../common/AutocompleteInput/AutocompleteInput';
+import ProfilePhotoUpload from '../ProfilePhotoUpload/ProfilePhotoUpload';
 
 // Redux
 import { getLocations } from '../../../store/slices/locationsSlice';
@@ -48,7 +49,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { getVisitorById } from '../../../store/slices/visitorsSlice';
-import { selectCurrentVisitor } from '../../../store/selectors/visitorSelectors';
+
 
 /**
  * Enhanced Visitor Form Component with Photo, Documents, Location, and Visit Purpose
@@ -163,12 +164,36 @@ const VisitorForm = ({
   // Form change tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [initialFormData, setInitialFormData] = useState(null);
+  
+  // Existing documents state for edit mode
+  const [existingDocuments, setExistingDocuments] = useState([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
 
   // Load supporting data on mount
   useEffect(() => {
     dispatch(getLocations({ pageSize: 1000, isActive: true }));
     dispatch(getVisitPurposes({ pageSize: 1000, isActive: true }));
   }, [dispatch]);
+
+  // Load existing documents when editing
+  useEffect(() => {
+    const loadExistingDocuments = async () => {
+      if (isEdit && initialData?.id) {
+        setLoadingDocuments(true);
+        try {
+          const documents = await visitorDocumentService.getVisitorDocuments(initialData.id);
+          setExistingDocuments(documents);
+        } catch (error) {
+          console.error('Failed to load existing documents:', error);
+          setExistingDocuments([]);
+        } finally {
+          setLoadingDocuments(false);
+        }
+      }
+    };
+
+    loadExistingDocuments();
+  }, [isEdit, initialData?.id]);
 
   // Initialize form with initial data (enhanced)
   useEffect(() => {
@@ -185,7 +210,7 @@ const VisitorForm = ({
         jobTitle: initialData.jobTitle || '',
         
         // Photo and documents
-        photo: initialData.photo || null,
+        photo: initialData.profilePhotoUrl || initialData.photo || null,
         photoFile: null, // Will be set if editing with existing photo
         documents: initialData.documents || [],
         documentFiles: [],
@@ -235,7 +260,7 @@ const VisitorForm = ({
         phoneNumber: initialData.phoneNumber || '',
         company: initialData.company || '',
         jobTitle: initialData.jobTitle || '',
-        photo: initialData.photo || null,
+        photo: initialData.profilePhotoUrl || initialData.photo || null,
         photoFile: null,
         documents: initialData.documents || [],
         documentFiles: [],
@@ -1055,17 +1080,17 @@ const VisitorForm = ({
           <PhotoIcon className="w-5 h-5" />
           <span>Visitor Photo</span>
         </h3>
-        <FileUpload
-          onFileSelect={handlePhotoUpload}
-          onFileRemove={handlePhotoRemove}
-          accept="image/*"
-          maxSize={5 * 1024 * 1024} // 5MB
-          maxFiles={1}
-          files={formData.photoFile ? [formData.photoFile] : []}
-          label="Upload Photo"
-          description="Upload a clear photo of the visitor for identification"
-          error={touched.photo ? formErrors.photo : undefined}
-          className="max-w-md"
+        <ProfilePhotoUpload
+          currentPhotoUrl={formData.photo.toString()}
+          onUpload={async (file) => {
+            await handlePhotoUpload([file]);
+          }}
+          onRemove={handlePhotoRemove}
+          loading={false}
+          size="lg"
+          allowRemove={true}
+          acceptedTypes={['image/jpeg', 'image/jpg', 'image/png', 'image/gif']}
+          maxFileSize={5 * 1024 * 1024} // 5MB
         />
         <p className="text-sm text-gray-500 mt-2">
           Recommended: High-quality headshot, JPG or PNG format, max 5MB
@@ -1078,20 +1103,75 @@ const VisitorForm = ({
           <DocumentTextIcon className="w-5 h-5" />
           <span>Identification Documents</span>
         </h3>
-        <FileUpload
-          onFileSelect={handleDocumentUpload}
-          onFileRemove={handleDocumentRemove}
-          accept="image/*,application/pdf,.doc,.docx"
-          maxSize={10 * 1024 * 1024} // 10MB
-          maxFiles={5}
-          files={formData.documentFiles}
-          label="Upload Documents"
-          description="Upload ID, passport, or other identification documents"
-          error={touched.documents ? formErrors.documents : undefined}
-        />
-        <p className="text-sm text-gray-500 mt-2">
-          Accepted formats: PDF, DOC, DOCX, JPG, PNG. Max 5 files, 10MB each.
-        </p>
+        
+        {/* Existing Documents (Edit Mode) */}
+        {isEdit && (
+          <div className="mb-6">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Current Documents</h4>
+            {loadingDocuments ? (
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <span>Loading existing documents...</span>
+              </div>
+            ) : existingDocuments.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {existingDocuments.map((doc) => (
+                  <div key={doc.id} className="bg-gray-50 rounded-lg p-3 border">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2">
+                          <DocumentTextIcon className="w-4 h-4 text-gray-400" />
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {doc.documentName}
+                          </p>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {doc.documentType} • {doc.formattedFileSize}
+                        </p>
+                        {doc.description && (
+                          <p className="text-xs text-gray-600 mt-1 truncate">
+                            {doc.description}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        {doc.isSensitive && (
+                          <Badge variant="warning" size="xs">Sensitive</Badge>
+                        )}
+                        {doc.isRequired && (
+                          <Badge variant="info" size="xs">Required</Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No documents uploaded yet.</p>
+            )}
+          </div>
+        )}
+        
+        {/* Upload New Documents */}
+        <div>
+          <h4 className="text-sm font-medium text-gray-700 mb-3">
+            {isEdit ? 'Upload Additional Documents' : 'Upload Documents'}
+          </h4>
+          <FileUpload
+            onFileSelect={handleDocumentUpload}
+            onFileRemove={handleDocumentRemove}
+            accept="image/*,application/pdf,.doc,.docx"
+            maxSize={10 * 1024 * 1024} // 10MB
+            maxFiles={5}
+            files={formData.documentFiles}
+            label="Upload Documents"
+            description="Upload ID, passport, or other identification documents"
+            error={touched.documents ? formErrors.documents : undefined}
+          />
+          <p className="text-sm text-gray-500 mt-2">
+            Accepted formats: PDF, DOC, DOCX, JPG, PNG. Max 5 files, 10MB each.
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -228,22 +228,22 @@ const Button = ({
   );
 };
 
-Button.propTypes = {
-  children: PropTypes.node,
-  variant: PropTypes.oneOf([
-    'primary', 'secondary', 'success', 'danger', 
-    'warning', 'info', 'outline', 'ghost', 'link'
-  ]),
-  size: PropTypes.oneOf(['xs', 'sm', 'md', 'lg', 'xl']),
-  disabled: PropTypes.bool,
-  loading: PropTypes.bool,
-  type: PropTypes.oneOf(['button', 'submit', 'reset']),
-  className: PropTypes.string,
-  onClick: PropTypes.func,
-  icon: PropTypes.element,
-  iconPosition: PropTypes.oneOf(['left', 'right']),
-  fullWidth: PropTypes.bool
-};
+// Button.propTypes = {
+//   children: PropTypes.node,
+//   variant: PropTypes.oneOf([
+//     'primary', 'secondary', 'success', 'danger', 
+//     'warning', 'info', 'outline', 'ghost', 'link'
+//   ]),
+//   size: PropTypes.oneOf(['xs', 'sm', 'md', 'lg', 'xl']),
+//   disabled: PropTypes.bool,
+//   loading: PropTypes.bool,
+//   type: PropTypes.oneOf(['button', 'submit', 'reset']),
+//   className: PropTypes.string,
+//   onClick: PropTypes.func,
+//   icon: PropTypes.element,
+//   iconPosition: PropTypes.oneOf(['left', 'right']),
+//   fullWidth: PropTypes.bool
+// };
 
 
 export default Button;

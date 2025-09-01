@@ -24,6 +24,7 @@ const visitorDocumentService = {
 
     const queryString = buildQueryString(queryParams);
     const response = await apiClient.get(`${VISITOR_DOCUMENT_ENDPOINTS.BASE(visitorId)}${queryString}`);
+    console.log(response)
     return extractApiData(response);
   },
 
