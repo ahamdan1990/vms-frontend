@@ -22,7 +22,7 @@ const UserForm = ({
   error = null,
   className = ''
 }) => {
-  const dispatch = useDispatch();
+
   const { user: userPermissions } = usePermissions();
   const toast = useToast();
   const isEditing = Boolean(user);
@@ -88,32 +88,32 @@ const UserForm = ({
   useEffect(() => {
     if (user) {
       setFormData({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        email: user.email || '',
-        phoneNumber: user.phoneNumber || '',
-        phoneCountryCode: user.phoneCountryCode || '961',
-        phoneType: user.phoneType || 'Mobile',
-        role: user.role || 'Staff',
-        status: user.status || 'Active', 
-        department: user.department || '',
-        jobTitle: user.jobTitle || '',
-        employeeId: user.employeeId || '',
-        isActive: user.isActive !== undefined ? user.isActive : true,
+        firstName: user.firstName ?? '',
+        lastName: user.lastName ?? '',
+        email: user.email ?? '',
+        phoneNumber: user?.phoneNumber ?? '',
+        phoneCountryCode: user.phoneCountryCode ?? '961',
+        phoneType: user.phoneType ?? 'Mobile',
+        role: user.role ?? 'Staff',
+        status: user.status ?? 'Active',
+        department: user.department ?? '',
+        jobTitle: user.jobTitle ?? '',
+        employeeId: user?.employeeId ?? '',
+        isActive: user.isActive ?? true,
         mustChangePassword: false,
-        timeZone: user.timeZone || 'Asia/Beirut',
-        language: user.language || 'en-US',
-        theme: user.theme || 'light',
-        addressType: user.addressType || 'Home',
-        street1: user.street1 || '',
-        street2: user.street2 || '',
-        city: user.city || '',
-        governorate: user.state || user.governorate || '', // Support both for backward compatibility
-        postalCode: user.postalCode || '',
-        country: user.country || 'Lebanon',
+        timeZone: user.timeZone ?? 'Asia/Beirut',
+        language: user.language ?? 'en-US',
+        theme: user.theme ?? 'light',
+        addressType: user.addressType ?? 'Home',
+        street1: user.street1 ?? '',
+        street2: user.street2 ?? '',
+        city: user.city ?? '',
+        governorate: user.state ?? user.governorate ?? '', 
+        postalCode: user?.postalCode ?? '',
+        country: user.country ?? 'Lebanon',
         enableCoordinates: user.latitude && user.longitude,
-        latitude: user.latitude || '',
-        longitude: user.longitude || '',
+        latitude: user?.latitude?.toString() ?? '',
+        longitude: user?.longitude?.toString() ?? '',
         sendWelcomeEmail: false
       });
     }
@@ -429,7 +429,7 @@ const UserForm = ({
                 {/* Country Code Selector - Lebanon First */}
                 <select
                   name="phoneCountryCode"
-                  value={formData.phoneCountryCode}
+                  value={formData.phoneCountryCode ?? ""}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   disabled={isLoading}
@@ -458,7 +458,7 @@ const UserForm = ({
                     type="tel"
                     name="phoneNumber"
                     placeholder="71 123 456"
-                    value={formData.phoneNumber}
+                    value={formData.phoneNumber ?? ""}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     error={touchedFields.has('phoneNumber') ? errors.phoneNumber : null}
@@ -475,7 +475,7 @@ const UserForm = ({
                 {/* Phone Type Selector */}
                 <select
                   name="phoneType"
-                  value={formData.phoneType}
+                  value={formData.phoneType ?? ""}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   disabled={isLoading}
@@ -520,7 +520,7 @@ const UserForm = ({
               </label>
               <select
                 name="role"
-                value={formData.role}
+                value={formData.role ?? ""}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isLoading}
@@ -553,7 +553,7 @@ const UserForm = ({
                 name="employeeId"
                 label="Employee ID"
                 placeholder="Enter employee ID"
-                value={formData.employeeId}
+                value={formData.employeeId ?? ""}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={touchedFields.has('employeeId') ? errors.employeeId : null}
@@ -573,7 +573,7 @@ const UserForm = ({
                 name="department"
                 label="Department"
                 placeholder="Enter department"
-                value={formData.department}
+                value={formData.department ?? ""}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={touchedFields.has('department') ? errors.department : null}
@@ -592,7 +592,7 @@ const UserForm = ({
                 name="jobTitle"
                 label="Job Title"
                 placeholder="Enter job title"
-                value={formData.jobTitle}
+                value={formData.jobTitle ?? ""}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={touchedFields.has('jobTitle') ? errors.jobTitle : null}
@@ -609,7 +609,7 @@ const UserForm = ({
           </label>
           <select
             name="status"
-            value={formData.status}
+            value={formData.status ?? ""}
             onChange={handleChange}
             onBlur={handleBlur}
             disabled={isLoading}
@@ -639,7 +639,7 @@ const UserForm = ({
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Address Type</label>
             <select
               name="addressType"
-              value={formData.addressType}
+              value={formData.addressType ?? ""}
               onChange={handleChange}
               onBlur={handleBlur}
               disabled={isLoading}
@@ -659,7 +659,7 @@ const UserForm = ({
               name="street1"
               label="Street Address"
               placeholder="Building name, Street name"
-              value={formData.street1}
+              value={formData.street1 ?? ""}
               onChange={handleChange}
               onBlur={handleBlur}
               error={touchedFields.has('street1') ? errors.street1 : null}
@@ -671,7 +671,7 @@ const UserForm = ({
               name="street2"
               label="Additional Address (Optional)"
               placeholder="Floor, Apartment, Unit"
-              value={formData.street2}
+              value={formData.street2 ?? ""}
               onChange={handleChange}
               onBlur={handleBlur}
               error={touchedFields.has('street2') ? errors.street2 : null}
@@ -683,7 +683,7 @@ const UserForm = ({
               name="city"
               label="City"
               placeholder="e.g., Beirut, Tripoli, Sidon"
-              value={formData.city}
+              value={formData.city ?? ""}
               onChange={handleChange}
               onBlur={handleBlur}
               error={touchedFields.has('city') ? errors.city : null}
@@ -697,7 +697,7 @@ const UserForm = ({
               </label>
               <select
                 name="governorate"
-                value={formData.governorate}
+                value={formData.governorate ?? ""}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isLoading}
@@ -720,7 +720,7 @@ const UserForm = ({
               name="postalCode"
               label="Postal Code (Optional)"
               placeholder="e.g., 1107-2180"
-              value={formData.postalCode}
+              value={formData.postalCode ?? ""}
               onChange={handleChange}
               onBlur={handleBlur}
               error={touchedFields.has('postalCode') ? errors.postalCode : null}
@@ -735,7 +735,7 @@ const UserForm = ({
               </label>
               <select
                 name="country"
-                value={formData.country}
+                value={formData.country ?? ""}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isLoading}
@@ -795,7 +795,7 @@ const UserForm = ({
                   label="Latitude"
                   placeholder="33.8938"
                   step="any"
-                  value={formData.latitude}
+                  value={formData.latitude ?? ""}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   error={touchedFields.has('latitude') ? errors.latitude : null}
@@ -808,7 +808,7 @@ const UserForm = ({
                   label="Longitude"
                   placeholder="35.5018"
                   step="any"
-                  value={formData.longitude}
+                  value={formData.longitude ?? ""}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   error={touchedFields.has('longitude') ? errors.longitude : null}
@@ -835,7 +835,7 @@ const UserForm = ({
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Time Zone</label>
               <select
                 name="timeZone"
-                value={formData.timeZone}
+                value={formData.timeZone ?? ""}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isLoading}
@@ -865,7 +865,7 @@ const UserForm = ({
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Language</label>
               <select
                 name="language"
-                value={formData.language}
+                value={formData.language ?? ""}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isLoading}
@@ -887,7 +887,7 @@ const UserForm = ({
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Theme</label>
               <select
                 name="theme"
-                value={formData.theme}
+                value={formData.theme ?? ""}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isLoading}

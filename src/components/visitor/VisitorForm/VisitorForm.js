@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Services
 import visitorDocumentService from '../../../services/visitorDocumentService';
 import visitorNoteService from '../../../services/visitorNoteService';
+import visitorService from '../../../services/visitorService';
 
 // Components
 import Button from '../../common/Button/Button';
@@ -77,6 +78,8 @@ const VisitorForm = ({
     lastName: '',
     email: '',
     phoneNumber: '',
+    phoneCountryCode: '961', // Lebanon default
+    phoneType: 'Mobile',
     company: '',
     jobTitle: '',
     
@@ -90,14 +93,14 @@ const VisitorForm = ({
     preferredLocationId: null,
     defaultVisitPurposeId: null,
     
-    // Address Information
+    // Address Information - Enhanced Lebanon Structure
     address: {
       street1: '',
       street2: '',
       city: '',
-      state: '',
+      governorate: '', // Lebanon uses governorates
       postalCode: '',
-      country: '',
+      country: 'Lebanon', // Default to Lebanon
       addressType: 'Home'
     },
     
@@ -107,6 +110,7 @@ const VisitorForm = ({
     governmentIdType: 'Passport',
     nationality: '',
     language: 'en-US',
+    timeZone: 'Asia/Beirut', // Lebanon timezone
     
     // Special Requirements
     dietaryRequirements: '',
@@ -128,6 +132,18 @@ const VisitorForm = ({
   const [completedSteps, setCompletedSteps] = useState(new Set());
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedVisitPurpose, setSelectedVisitPurpose] = useState(null);
+
+  // Lebanon-specific data
+  const lebaneseGovernorates = [
+    'Beirut',
+    'Mount Lebanon',
+    'North Lebanon',
+    'South Lebanon',
+    'Beqaa',
+    'Akkar',
+    'Baalbek-Hermel',
+    'Nabatieh'
+  ];
 
   // Invitation creation state
   const [createInvitation, setCreateInvitation] = useState(false);
@@ -163,6 +179,8 @@ const VisitorForm = ({
         lastName: initialData.lastName || '',
         email: initialData.email || '',
         phoneNumber: initialData.phoneNumber || '',
+        phoneCountryCode: initialData.phoneCountryCode || '961',
+        phoneType: initialData.phoneType || 'Mobile',
         company: initialData.company || '',
         jobTitle: initialData.jobTitle || '',
         
@@ -180,9 +198,9 @@ const VisitorForm = ({
           street1: initialData.address?.street1 || '',
           street2: initialData.address?.street2 || '',
           city: initialData.address?.city || '',
-          state: initialData.address?.state || '',
+          governorate: initialData.address?.state || initialData.address?.governorate || '',
           postalCode: initialData.address?.postalCode || '',
-          country: initialData.address?.country || '',
+          country: initialData.address?.country || 'Lebanon',
           addressType: initialData.address?.addressType || 'Home'
         },
         dateOfBirth: initialData.dateOfBirth ? 
@@ -191,6 +209,7 @@ const VisitorForm = ({
         governmentIdType: initialData.governmentIdType || 'Passport',
         nationality: initialData.nationality || '',
         language: initialData.language || 'en-US',
+        timeZone: initialData.timeZone || 'Asia/Beirut',
         dietaryRequirements: initialData.dietaryRequirements || '',
         accessibilityRequirements: initialData.accessibilityRequirements || '',
         securityClearance: initialData.securityClearance || '',
@@ -237,6 +256,7 @@ const VisitorForm = ({
         governmentIdType: initialData.governmentIdType || 'Passport',
         nationality: initialData.nationality || '',
         language: initialData.language || 'en-US',
+        timeZone: initialData.timeZone || 'Asia/Beirut',
         dietaryRequirements: initialData.dietaryRequirements || '',
         accessibilityRequirements: initialData.accessibilityRequirements || '',
         securityClearance: initialData.securityClearance || '',
@@ -816,15 +836,14 @@ const VisitorForm = ({
       return;
     }
 
-    // Prepare submission data
+    // Prepare submission data - clean up form data for backend
     const submissionData = {
-      ...formData,
-      // Convert files to base64 or FormData as needed
-      photoFile: formData.photoFile,
-      documentFiles: formData.documentFiles,
-      preferredLocationId: formData.preferredLocationId,
-      defaultVisitPurposeId: formData.defaultVisitPurposeId
+      ...formData
     };
+    
+    // Remove file objects from submission data as they'll be handled separately
+    delete submissionData.photoFile;
+    delete submissionData.documentFiles;
 
     // Prepare invitation data if creating invitation
     const invitationSubmissionData = createInvitation ? {
@@ -836,9 +855,26 @@ const VisitorForm = ({
     } : null;
 
     try {
-      await onSubmit(submissionData, invitationSubmissionData);
+      if (isEdit) {
+        // For editing, use the parent's onSubmit method
+        await onSubmit(submissionData, invitationSubmissionData);
+      } else {
+        // For creating new visitor, use enhanced service method
+        const result = await visitorService.createVisitorWithAssets(
+          submissionData,
+          formData.photoFile,
+          formData.documentFiles,
+          invitationSubmissionData
+        );
+        
+        // Call parent's onSubmit with the result for any additional handling
+        if (onSubmit) {
+          await onSubmit(result, invitationSubmissionData);
+        }
+      }
     } catch (error) {
       console.error('Form submission error:', error);
+      throw error; // Re-throw to let parent handle error display
     }
   };
 
@@ -907,16 +943,72 @@ const VisitorForm = ({
           placeholder="Enter email address"
         />
 
-        <Input
-          label="Phone Number"
-          type="tel"
-          value={formData.phoneNumber}
-          onChange={(e) => handleChange('phoneNumber', e.target.value)}
-          onBlur={() => handleBlur('phoneNumber')}
-          error={touched.phoneNumber ? formErrors.phoneNumber : undefined}
-          required
-          placeholder="Enter phone number"
-        />
+        {/* Enhanced Phone Number - Lebanon Focused */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Phone Number
+          </label>
+          
+          <div className="flex space-x-2">
+            {/* Country Code Selector - Lebanon First */}
+            <select
+              value={formData.phoneCountryCode}
+              onChange={(e) => handleChange('phoneCountryCode', e.target.value)}
+              onBlur={() => handleBlur('phoneCountryCode')}
+              className="w-32 px-3 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="961">🇱🇧 +961</option>
+              <option value="963">🇸🇾 +963</option>
+              <option value="962">🇯🇴 +962</option>
+              <option value="972">🇮🇱 +972</option>
+              <option value="90">🇹🇷 +90</option>
+              <option value="20">🇪🇬 +20</option>
+              <option value="966">🇸🇦 +966</option>
+              <option value="971">🇦🇪 +971</option>
+              <option value="965">🇰🇼 +965</option>
+              <option value="974">🇶🇦 +974</option>
+              <option value="1">🇺🇸 +1</option>
+              <option value="44">🇬🇧 +44</option>
+              <option value="33">🇫🇷 +33</option>
+              <option value="49">🇩🇪 +49</option>
+              <option value="39">🇮🇹 +39</option>
+            </select>
+
+            {/* Phone Number Input */}
+            <div className="flex-1">
+              <Input
+                type="tel"
+                value={formData.phoneNumber}
+                onChange={(e) => handleChange('phoneNumber', e.target.value)}
+                onBlur={() => handleBlur('phoneNumber')}
+                error={touched.phoneNumber ? formErrors.phoneNumber : undefined}
+                required
+                placeholder="71 123 456"
+              />
+            </div>
+
+            {/* Phone Type Selector */}
+            <select
+              value={formData.phoneType}
+              onChange={(e) => handleChange('phoneType', e.target.value)}
+              onBlur={() => handleBlur('phoneType')}
+              className="w-32 px-3 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="Mobile">📱 Mobile</option>
+              <option value="Landline">☎️ Landline</option>
+              <option value="Unknown">❓ Unknown</option>
+            </select>
+          </div>
+          
+          {touched.phoneNumber && formErrors.phoneNumber && (
+            <p className="text-red-600 text-sm mt-1 flex items-center">
+              <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              {formErrors.phoneNumber}
+            </p>
+          )}
+        </div>
 
         <Input
           label="Company"
@@ -1099,52 +1191,101 @@ const VisitorForm = ({
           onChange={(e) => handleChange('address.city', e.target.value)}
           onBlur={() => handleBlur('address.city')}
           error={touched['address.city'] ? formErrors['address.city'] : undefined}
-          placeholder="Enter city"
+          placeholder="e.g., Beirut, Tripoli, Sidon"
         />
 
-        <Input
-          label="State/Province"
-          type="text"
-          value={formData.address.state}
-          onChange={(e) => handleChange('address.state', e.target.value)}
-          onBlur={() => handleBlur('address.state')}
-          error={touched['address.state'] ? formErrors['address.state'] : undefined}
-          placeholder="Enter state or province"
-        />
+        {/* Lebanese Governorates */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Governorate
+          </label>
+          <select
+            value={formData.address.governorate}
+            onChange={(e) => handleChange('address.governorate', e.target.value)}
+            onBlur={() => handleBlur('address.governorate')}
+            className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">Select Governorate</option>
+            {lebaneseGovernorates.map(governorate => (
+              <option key={governorate} value={governorate}>
+                {governorate}
+              </option>
+            ))}
+          </select>
+          {touched['address.governorate'] && formErrors['address.governorate'] && (
+            <p className="text-red-600 text-sm mt-1">{formErrors['address.governorate']}</p>
+          )}
+        </div>
 
         <Input
-          label="Postal Code"
+          label="Postal Code (Optional)"
           type="text"
           value={formData.address.postalCode}
           onChange={(e) => handleChange('address.postalCode', e.target.value)}
           onBlur={() => handleBlur('address.postalCode')}
           error={touched['address.postalCode'] ? formErrors['address.postalCode'] : undefined}
-          placeholder="Enter postal code"
+          placeholder="e.g., 1107-2180"
+          helperText="Lebanon postal codes are optional"
         />
 
-        <Input
-          label="Country"
-          type="text"
-          value={formData.address.country}
-          onChange={(e) => handleChange('address.country', e.target.value)}
-          onBlur={() => handleBlur('address.country')}
-          error={touched['address.country'] ? formErrors['address.country'] : undefined}
-          placeholder="Enter country"
-        />
+        {/* Enhanced Country Selector - Lebanon and Region First */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Country
+          </label>
+          <select
+            value={formData.address.country}
+            onChange={(e) => handleChange('address.country', e.target.value)}
+            onBlur={() => handleBlur('address.country')}
+            className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="Lebanon">🇱🇧 Lebanon</option>
+            <option value="">--- Middle East ---</option>
+            <option value="Syria">🇸🇾 Syria</option>
+            <option value="Jordan">🇯🇴 Jordan</option>
+            <option value="Israel">🇮🇱 Israel</option>
+            <option value="Turkey">🇹🇷 Turkey</option>
+            <option value="Cyprus">🇨🇾 Cyprus</option>
+            <option value="Egypt">🇪🇬 Egypt</option>
+            <option value="Saudi Arabia">🇸🇦 Saudi Arabia</option>
+            <option value="United Arab Emirates">🇦🇪 United Arab Emirates</option>
+            <option value="Kuwait">🇰🇼 Kuwait</option>
+            <option value="Qatar">🇶🇦 Qatar</option>
+            <option value="Bahrain">🇧🇭 Bahrain</option>
+            <option value="Oman">🇴🇲 Oman</option>
+            <option value="Iraq">🇮🇶 Iraq</option>
+            <option value="Iran">🇮🇷 Iran</option>
+            <option value="">--- International ---</option>
+            <option value="United States">🇺🇸 United States</option>
+            <option value="Canada">🇨🇦 Canada</option>
+            <option value="United Kingdom">🇬🇧 United Kingdom</option>
+            <option value="France">🇫🇷 France</option>
+            <option value="Germany">🇩🇪 Germany</option>
+            <option value="Italy">🇮🇹 Italy</option>
+            <option value="Australia">🇦🇺 Australia</option>
+            <option value="Brazil">🇧🇷 Brazil</option>
+            <option value="Other">🌍 Other</option>
+          </select>
+          {touched['address.country'] && formErrors['address.country'] && (
+            <p className="text-red-600 text-sm mt-1">{formErrors['address.country']}</p>
+          )}
+        </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Address Type
-        </label>
+      {/* Address Type Selector */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">Address Type</label>
         <select
           value={formData.address.addressType}
           onChange={(e) => handleChange('address.addressType', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          onBlur={() => handleBlur('address.addressType')}
+          className="w-full md:w-48 px-3 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
-          <option value="Home">Home</option>
-          <option value="Work">Work</option>
-          <option value="Other">Other</option>
+          <option value="Home">🏠 Home</option>
+          <option value="Work">🏢 Work</option>
+          <option value="Billing">💳 Billing</option>
+          <option value="Shipping">📦 Shipping</option>
+          <option value="Other">📍 Other</option>
         </select>
       </div>
     </div>

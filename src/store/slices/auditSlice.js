@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createSelector  } from '@reduxjs/toolkit';
 import auditService from '../../services/auditService';
 import { handleApiError } from '../../services/errorService';
 
@@ -464,27 +464,32 @@ export const selectAvailableCategories = (state) => state.audit.availableCategor
 export const selectAuditStatistics = (state) => state.audit.statistics;
 
 // Export loading selectors
-export const selectAuditLoading = (state) => ({
-  loading: state.audit.loading,
-  listLoading: state.audit.listLoading,
-  detailLoading: state.audit.detailLoading,
-  userActivityLoading: state.audit.userActivityLoading,
-  systemEventsLoading: state.audit.systemEventsLoading,
-  securityEventsLoading: state.audit.securityEventsLoading,
-  searchLoading: state.audit.searchLoading,
-  exportLoading: state.audit.exportLoading
-});
+export const selectAuditLoading = createSelector(
+  [selectAuditLogs],
+  (audit) => ({
+    loading: audit.loading,
+    listLoading: audit.listLoading,
+    detailLoading: audit.detailLoading,
+    userActivityLoading: audit.userActivityLoading,
+    systemEventsLoading: audit.systemEventsLoading,
+    securityEventsLoading: audit.securityEventsLoading,
+    searchLoading: audit.searchLoading,
+    exportLoading: audit.exportLoading
+  })
+);
 
 // Export error selectors
-export const selectAuditErrors = (state) => ({
-  error: state.audit.error,
-  listError: state.audit.listError,
-  detailError: state.audit.detailError,
-  userActivityError: state.audit.userActivityError,
-  systemEventsError: state.audit.systemEventsError,
-  securityEventsError: state.audit.securityEventsError,
-  searchError: state.audit.searchError,
-  exportError: state.audit.exportError
-});
-
+export const selectAuditErrors = createSelector(
+  [selectAuditLogs],
+  (audit) => ({
+    error: audit.error,
+    listError: audit.listError,
+    detailError: audit.detailError,
+    userActivityError: audit.userActivityError,
+    systemEventsError: audit.systemEventsError,
+    securityEventsError: audit.securityEventsError,
+    searchError: audit.searchError,
+    exportError: audit.exportError
+  })
+);
 export default auditSlice.reducer;

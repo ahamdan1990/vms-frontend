@@ -112,6 +112,7 @@ const CapacityDashboard = lazy(() => import('../pages/capacity/CapacityDashboard
 
 // Visitor Management Pages
 const VisitorsListPage = lazy(() => import('../pages/visitors/VisitorsListPage/VisitorsListPage'));
+const VisitorProfilePage = lazy(() => import('../pages/visitors/VisitorProfilePage/VisitorProfilePage'));
 
 // Invitation Management Pages
 const InvitationsListPage = lazy(() => import('../pages/invitations/InvitationsListPage/InvitationsListPage'));
@@ -607,6 +608,21 @@ const AppRoutes = () => {
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <VisitorsListPage />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        } 
+      />
+
+      <Route 
+        path={VISITOR_ROUTES.DETAIL} 
+        element={
+          <AuthGuard>
+            <PermissionGuard permission={VISITOR_PERMISSIONS.READ}>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <VisitorProfilePage />
                 </Suspense>
               </Layout>
             </PermissionGuard>

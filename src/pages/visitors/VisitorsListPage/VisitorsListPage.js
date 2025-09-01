@@ -1,9 +1,13 @@
 // src/pages/visitors/VisitorsListPage/VisitorsListPage.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
+
+// Route constants
+import { VISITOR_ROUTES } from '../../../constants/routeConstants';
 
 // Redux actions and selectors
 import {
@@ -89,7 +93,6 @@ import {
 // Components
 import Button from '../../../components/common/Button/Button';
 import Input from '../../../components/common/Input/Input';
-import Table from '../../../components/common/Table/Table';
 import Modal, { ConfirmModal } from '../../../components/common/Modal/Modal';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import Badge from '../../../components/common/Badge/Badge';
@@ -97,6 +100,7 @@ import Card from '../../../components/common/Card/Card';
 import Pagination from '../../../components/common/Pagination/Pagination';
 import EmergencyContactsList from '../../../components/visitor/EmergencyContactsList/EmergencyContactsList';
 import VisitorForm from '../../../components/visitor/VisitorForm/VisitorForm';
+import VisitorGrid from '../../../components/visitor/VisitorGrid/VisitorGrid';
 import AdvancedSearchModal from '../../../components/visitor/AdvancedSearch/AdvancedSearchModal';
 
 // Icons
@@ -131,6 +135,7 @@ import { extractErrorMessage } from '../../../utils/errorUtils';
  */
 const VisitorsListPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const { hasPermission } = usePermissions();
 
@@ -140,6 +145,7 @@ const VisitorsListPage = () => {
   const [bulkAction, setBulkAction] = useState('');
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const [blacklistReason, setBlacklistReason] = useState('');
+  const [viewMode, setViewMode] = useState('list'); // 'grid', 'list', 'compact'
 
   // Permissions
   const canRead = hasPermission('Visitor.Read');
@@ -420,7 +426,7 @@ const VisitorsListPage = () => {
   const handleVisitorAction = (action, visitor) => {
     switch (action) {
       case 'view':
-        dispatch(showDetailsModal(visitor));
+        navigate(VISITOR_ROUTES.getDetailRoute(visitor.id));
         break;
       case 'edit':
         dispatch(getVisitorById(visitor.id));
@@ -869,102 +875,94 @@ const VisitorsListPage = () => {
         </Card>
       )}
 
-      {/* Main Table */}
-      <Card>
-        {listLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <LoadingSpinner size="lg" />
-          </div>
-        ) : (
-          <>
-            <Table
-              data={visitors}
-              columns={columns}
-              loading={listLoading}
-              onRowSelectionChange={(selectedRowIds) => {
-                const selectedIds = Object.keys(selectedRowIds).filter(id => selectedRowIds[id]);
-                dispatch(setSelectedVisitors(selectedIds.map(Number)));
-              }}
-              emptyMessage="No visitors found"
-              className="visitors-table"
-            />
-            
-            {/* Pagination */}
-            {total > 0 && (
-              <div className="px-6 py-4 border-t border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2 text-sm text-gray-500">
-                    <span>
-                      Showing {pageRange.start} to {pageRange.end} of {pageRange.total} visitors
-                    </span>
-                    <select
-                      value={pageSize}
-                      onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-                      className="border border-gray-300 rounded px-2 py-1 text-sm"
-                    >
-                      <option value={10}>10 per page</option>
-                      <option value={20}>20 per page</option>
-                      <option value={50}>50 per page</option>
-                      <option value={100}>100 per page</option>
-                    </select>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(pageIndex - 1)}
-                      disabled={!hasPreviousPage}
-                      icon={<ChevronLeftIcon className="w-4 h-4" />}
-                    >
-                      Previous
-                    </Button>
-                    
-                    <div className="flex items-center space-x-1">
-                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                        let pageNum;
-                        if (totalPages <= 5) {
-                          pageNum = i;
-                        } else if (pageIndex < 3) {
-                          pageNum = i;
-                        } else if (pageIndex > totalPages - 4) {
-                          pageNum = totalPages - 5 + i;
-                        } else {
-                          pageNum = pageIndex - 2 + i;
-                        }
-                        
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => handlePageChange(pageNum)}
-                            className={`px-3 py-1 text-sm rounded ${
-                              pageNum === pageIndex
-                                ? 'bg-blue-100 text-blue-700 font-medium'
-                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                            }`}
-                          >
-                            {pageNum + 1}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(pageIndex + 1)}
-                      disabled={!hasNextPage}
-                      icon={<ChevronRightIcon className="w-4 h-4" />}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
+      {/* Visitors Display */}
+      <VisitorGrid
+        visitors={visitors}
+        loading={listLoading}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onEdit={canUpdate ? (visitor) => handleVisitorAction('edit', visitor) : undefined}
+        onDelete={canDelete ? (visitor) => handleVisitorAction('delete', visitor) : undefined}
+        showActions={true}
+        showViewToggle={true}
+        emptyMessage="No visitors found"
+        emptyDescription="Try adjusting your search criteria or add a new visitor."
+        className="mb-6"
+      />
+
+      {/* Pagination */}
+      {total > 0 && (
+        <Card>
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <span>
+                  Showing {pageRange.start} to {pageRange.end} of {pageRange.total} visitors
+                </span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                  className="border border-gray-300 rounded px-2 py-1 text-sm"
+                >
+                  <option value={10}>10 per page</option>
+                  <option value={20}>20 per page</option>
+                  <option value={50}>50 per page</option>
+                  <option value={100}>100 per page</option>
+                </select>
               </div>
-            )}
-          </>
-        )}
-      </Card>
+              
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pageIndex - 1)}
+                  disabled={!hasPreviousPage}
+                >
+                  Previous
+                </Button>
+                
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i;
+                    } else if (pageIndex < 3) {
+                      pageNum = i;
+                    } else if (pageIndex > totalPages - 4) {
+                      pageNum = totalPages - 5 + i;
+                    } else {
+                      pageNum = pageIndex - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`px-3 py-1 text-sm rounded ${
+                          pageNum === pageIndex
+                            ? 'bg-blue-100 text-blue-700 font-medium'
+                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        {pageNum + 1}
+                      </button>
+                    );
+                  })}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(pageIndex + 1)}
+                  disabled={!hasNextPage}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Create Modal */}
       <Modal
@@ -1008,78 +1006,7 @@ const VisitorsListPage = () => {
 
         </Modal>
       )}
-
-      {/* Details Modal */}
-      {currentVisitor && (
-      <Modal
-        isOpen={showDetailsModalState}
-        onClose={() => dispatch(hideDetailsModal())}
-        title="Visitor Details"
-        size="xl"
-      >
-          <div>
-            {/* Visitor Information */}
-            <div className="p-6 border-b border-gray-200">
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  {formatVisitorName(currentVisitor)}
-                  {getVisitorStatusBadge(currentVisitor)}
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium text-gray-500">Email:</span>
-                    <div>{currentVisitor.email || 'Not provided'}</div>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-500">Phone:</span>
-                    <div>{currentVisitor.phoneNumber || 'Not provided'}</div>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-500">Company:</span>
-                    <div>{currentVisitor.company || 'Not provided'}</div>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-500">Nationality:</span>
-                    <div>{currentVisitor.nationality || 'Not provided'}</div>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-500">Security Clearance:</span>
-                    <div>{currentVisitor.securityClearance || 'Standard'}</div>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-500">Last Visit:</span>
-                    <div>
-                      {currentVisitor.lastVisitAt 
-                        ? formatDateTime(currentVisitor.lastVisitAt)
-                        : 'Never'
-                      }
-                    </div>
-                  </div>
-                </div>
-                
-                {currentVisitor.notes && (
-                  <div>
-                    <span className="font-medium text-gray-500">Notes:</span>
-                    <div className="mt-1 text-gray-900">{currentVisitor.notes}</div>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Emergency Contacts Section */}
-            <div className="p-6">
-              <EmergencyContactsList
-                visitorId={currentVisitor.id}
-                visitorName={`${currentVisitor.firstName} ${currentVisitor.lastName}`}
-                showHeader={true}
-                isEmbedded={true}
-                maxHeight="400px"
-              />
-            </div>
-          </div>
-      </Modal>
-      )}
+      
       {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={showDeleteModalState}

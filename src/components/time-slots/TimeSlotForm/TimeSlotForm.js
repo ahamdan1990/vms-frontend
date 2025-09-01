@@ -159,7 +159,7 @@ const TimeSlotForm = ({
     // Call service validation if available
     try {
       const validation = timeSlotsService.validateTimeSlotData(formData, isEdit);
-      console.log(formData)
+
       if (!validation.isValid && validation.errors) {
         validation.errors.forEach(error => {
           // Map error messages to field names

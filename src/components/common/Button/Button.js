@@ -245,14 +245,5 @@ Button.propTypes = {
   fullWidth: PropTypes.bool
 };
 
-Button.defaultProps = {
-  variant: 'primary',
-  size: 'md',
-  disabled: false,
-  loading: false,
-  type: 'button',
-  iconPosition: 'left',
-  fullWidth: false
-};
 
 export default Button;

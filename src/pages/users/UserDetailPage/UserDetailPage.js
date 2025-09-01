@@ -547,8 +547,7 @@ const UserDetailPage = () => {
                         </div>
                       </div>
                     </div>
-
-                    {console.log(currentUser)}
+                    
                     {/* Work Information */}
                     <div className="bg-gray-50 rounded-lg p-6">
                       <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">

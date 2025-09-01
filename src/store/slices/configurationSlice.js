@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import configurationService from '../../services/configurationService';
 import { handleApiError } from '../../services/errorService';
 
@@ -482,29 +482,33 @@ export const selectShowSensitive = (state) => state.configuration.showSensitive;
 export const selectValidationResult = (state) => state.configuration.validationResult;
 export const selectPendingRestarts = (state) => state.configuration.pendingRestarts;
 
-// Export loading selectors
-export const selectConfigurationLoading = (state) => ({
-  loading: state.configuration.loading,
-  listLoading: state.configuration.listLoading,
-  createLoading: state.configuration.createLoading,
-  updateLoading: state.configuration.updateLoading,
-  deleteLoading: state.configuration.deleteLoading,
-  historyLoading: state.configuration.historyLoading,
-  searchLoading: state.configuration.searchLoading,
-  validateLoading: state.configuration.validateLoading,
-  cacheLoading: state.configuration.cacheLoading
-});
+export const selectConfigurationLoading = createSelector(
+  [selectConfigurations],
+  (config) => ({
+    loading: config.loading,
+    listLoading: config.listLoading,
+    createLoading: config.createLoading,
+    updateLoading: config.updateLoading,
+    deleteLoading: config.deleteLoading,
+    historyLoading: config.historyLoading,
+    searchLoading: config.searchLoading,
+    validateLoading: config.validateLoading,
+    cacheLoading: config.cacheLoading
+  })
+);
 
-// Export error selectors
-export const selectConfigurationErrors = (state) => ({
-  error: state.configuration.error,
-  listError: state.configuration.listError,
-  createError: state.configuration.createError,
-  updateError: state.configuration.updateError,
-  deleteError: state.configuration.deleteError,
-  historyError: state.configuration.historyError,
-  searchError: state.configuration.searchError,
-  validateError: state.configuration.validateError
-});
+export const selectConfigurationErrors = createSelector(
+  [selectConfigurations],
+  (config) => ({
+    error: config.error,
+    listError: config.listError,
+    createError: config.createError,
+    updateError: config.updateError,
+    deleteError: config.deleteError,
+    historyError: config.historyError,
+    searchError: config.searchError,
+    validateError: config.validateError
+  })
+);
 
 export default configurationSlice.reducer;

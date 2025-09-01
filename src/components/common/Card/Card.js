@@ -156,14 +156,5 @@ Card.propTypes = {
   onClick: PropTypes.func
 };
 
-Card.defaultProps = {
-  variant: 'default',
-  size: 'default',
-  padding: true,
-  shadow: true,
-  hover: false,
-  accent: null,
-  clickable: false
-};
 
 export default Card;

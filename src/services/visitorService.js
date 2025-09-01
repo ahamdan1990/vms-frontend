@@ -56,8 +56,66 @@ const visitorService = {
    * Requires: Visitor.Create permission
    */
   async createVisitor(visitorData) {
-    const response = await apiClient.post(VISITOR_ENDPOINTS.BASE, visitorData);
+    // Transform form data to match backend DTO structure
+    const backendData = this.transformVisitorDataForBackend(visitorData);
+    const response = await apiClient.post(VISITOR_ENDPOINTS.BASE, backendData);
     return extractApiData(response);
+  },
+
+  /**
+   * Transforms frontend visitor data to backend DTO structure
+   * Handles address nesting and field mapping
+   */
+  transformVisitorDataForBackend(visitorData) {
+    return {
+      firstName: visitorData.firstName,
+      lastName: visitorData.lastName,
+      email: visitorData.email,
+      
+      // Enhanced phone fields
+      phoneNumber: visitorData.phoneNumber,
+      phoneCountryCode: visitorData.phoneCountryCode,
+      phoneType: visitorData.phoneType,
+      
+      company: visitorData.company,
+      jobTitle: visitorData.jobTitle,
+      
+      // Address structure - map governorate to state for backend compatibility
+      address: visitorData.address ? {
+        street1: visitorData.address.street1,
+        street2: visitorData.address.street2,
+        city: visitorData.address.city,
+        state: visitorData.address.governorate, // Map governorate to state
+        postalCode: visitorData.address.postalCode,
+        country: visitorData.address.country,
+        addressType: visitorData.address.addressType
+      } : null,
+      
+      // Personal details
+      dateOfBirth: visitorData.dateOfBirth ? new Date(visitorData.dateOfBirth).toISOString() : null,
+      governmentId: visitorData.governmentId,
+      governmentIdType: visitorData.governmentIdType,
+      nationality: visitorData.nationality,
+      language: visitorData.language,
+      
+      // New fields for preferences
+      preferredLocationId: visitorData.preferredLocationId,
+      defaultVisitPurposeId: visitorData.defaultVisitPurposeId,
+      timeZone: visitorData.timeZone,
+      
+      // Special requirements
+      dietaryRequirements: visitorData.dietaryRequirements,
+      accessibilityRequirements: visitorData.accessibilityRequirements,
+      securityClearance: visitorData.securityClearance,
+      
+      // Status and notes
+      isVip: visitorData.isVip || false,
+      notes: visitorData.notes,
+      externalId: visitorData.externalId,
+      
+      // Emergency contacts
+      emergencyContacts: visitorData.emergencyContacts || []
+    };
   },
 
   /**
@@ -229,6 +287,72 @@ const visitorService = {
    */
   async getVisitorsByCompany(company, params = {}) {
     return this.getVisitors({ ...params, company });
+  },
+
+  /**
+   * Creates visitor with complete asset upload (photos and documents)
+   * Handles the full visitor creation flow with error recovery
+   */
+  async createVisitorWithAssets(visitorData, photoFile = null, documentFiles = [], invitationData = null) {
+    let createdVisitor = null;
+    
+    try {
+      // Step 1: Create the visitor
+      createdVisitor = await this.createVisitor(visitorData);
+      
+      // Step 2: Upload photo if provided
+      if (photoFile && createdVisitor.id) {
+        const visitorDocumentService = await import('./visitorDocumentService');
+        await visitorDocumentService.default.uploadVisitorPhoto(createdVisitor.id, photoFile, {
+          description: 'Visitor profile photo',
+          isSensitive: false,
+          isRequired: false
+        });
+      }
+      
+      // Step 3: Upload documents if provided
+      if (documentFiles.length > 0 && createdVisitor.id) {
+        const visitorDocumentService = await import('./visitorDocumentService');
+        const documentsData = documentFiles.map(file => ({
+          file,
+          title: file.name,
+          documentType: 'Other',
+          options: {
+            description: `Document: ${file.name}`,
+            isSensitive: false,
+            isRequired: false
+          }
+        }));
+        
+        await visitorDocumentService.default.uploadMultipleDocuments(
+          createdVisitor.id, 
+          documentsData
+        );
+      }
+      
+      // Step 4: Create invitation if requested
+      if (invitationData && createdVisitor.id) {
+        const invitationService = await import('./invitationService');
+        await invitationService.default.createInvitation({
+          ...invitationData,
+          visitorId: createdVisitor.id
+        });
+      }
+      
+      return createdVisitor;
+      
+    } catch (error) {
+      // Error recovery: cleanup created visitor if asset upload fails
+      if (createdVisitor?.id) {
+        try {
+          await this.deleteVisitor(createdVisitor.id, true); // permanent delete for cleanup
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup visitor after asset upload error:', cleanupError);
+        }
+      }
+      
+      throw new Error(`Visitor creation failed: ${error.message}`);
+    }
   }
 };
 
