@@ -33,7 +33,8 @@ import {
   Cog6ToothIcon,
   EllipsisVerticalIcon,
   ArchiveBoxIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { BellIcon as BellIconSolid } from '@heroicons/react/24/solid';
 
@@ -145,6 +146,10 @@ const NotificationCenter = ({
             notificationId: notification.id, 
             notes: 'Acknowledged via notification center' 
           })).unwrap();
+          
+          // Force refresh notifications after acknowledgment
+          dispatch(fetchNotifications());
+          
           // Also acknowledge via SignalR if available
           if (host?.acknowledgeNotification) {
             await host.acknowledgeNotification(notification.id);
@@ -189,6 +194,28 @@ const NotificationCenter = ({
       console.error('Error handling notification action:', error);
     }
   }, [dispatch, markAsRead, removeNotificationHandler, host]);
+
+  // Enhanced acknowledge handler for direct acknowledge button
+  const handleDirectAcknowledge = useCallback(async (notificationId) => {
+    try {
+      await dispatch(acknowledgeNotificationAsync({ 
+        notificationId, 
+        notes: 'Direct acknowledgment from notification center' 
+      })).unwrap();
+      
+      // Force refresh notifications after acknowledgment
+      dispatch(fetchNotifications());
+      
+      // Also acknowledge via SignalR if available
+      if (host?.acknowledgeNotification) {
+        await host.acknowledgeNotification(notificationId);
+      }
+      
+      console.log('✅ Notification acknowledged successfully');
+    } catch (error) {
+      console.error('❌ Failed to acknowledge notification:', error);
+    }
+  }, [dispatch, host]);
 
   // Get notification icon
   const getNotificationIcon = (type, priority) => {
@@ -330,7 +357,7 @@ const NotificationCenter = ({
               )}
             </div>
 
-            {/* Actions Menu */}
+            {/* Enhanced Actions Menu */}
             <div className="flex items-center space-x-1">
               {!notification.read && (
                 <Button
@@ -342,6 +369,16 @@ const NotificationCenter = ({
                 />
               )}
               
+              {/* Acknowledge Button */}
+              <Button
+                size="xs"
+                variant="ghost"
+                onClick={() => handleDirectAcknowledge(notification.id)}
+                icon={<CheckCircleIcon className="w-3 h-3" />}
+                title="Acknowledge notification"
+                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+              />
+              
               <Button
                 size="xs"
                 variant="ghost"
@@ -349,6 +386,14 @@ const NotificationCenter = ({
                 icon={<XMarkIcon className="w-3 h-3" />}
                 title="Remove notification"
               />
+              
+              {/* Acknowledged Status Indicator */}
+              {notification.read && notification.acknowledgedOn && (
+                <div className="flex items-center space-x-1 text-green-600">
+                  <CheckCircleIcon className="w-3 h-3" />
+                  <span className="text-xs">Acknowledged</span>
+                </div>
+              )}
             </div>
           </div>
 

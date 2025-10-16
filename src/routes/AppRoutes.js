@@ -31,6 +31,7 @@ import {
   USER_ROUTES,
   INVITATION_ROUTES,
   VISITOR_ROUTES,
+  CAMERA_ROUTES,
   CHECKIN_ROUTES,
   SYSTEM_ROUTES,
   CAPACITY_ROUTES,
@@ -43,6 +44,7 @@ import {
   USER_PERMISSIONS,
   INVITATION_PERMISSIONS,
   VISITOR_PERMISSIONS,
+  CAMERA_PERMISSIONS,
   CHECKIN_PERMISSIONS,
   SYSTEM_CONFIG_PERMISSIONS,
   CONFIGURATION_PERMISSIONS,
@@ -113,6 +115,10 @@ const CapacityDashboard = lazy(() => import('../pages/capacity/CapacityDashboard
 // Visitor Management Pages
 const VisitorsListPage = lazy(() => import('../pages/visitors/VisitorsListPage/VisitorsListPage'));
 const VisitorProfilePage = lazy(() => import('../pages/visitors/VisitorProfilePage/VisitorProfilePage'));
+
+// Camera Management Pages
+const CamerasListPage = lazy(() => import('../pages/cameras/CamerasListPage/CamerasListPage'));
+const CameraDetailsPage = lazy(() => import('../pages/cameras/CameraDetailsPage/CameraDetailsPage'));
 
 // Invitation Management Pages
 const InvitationsListPage = lazy(() => import('../pages/invitations/InvitationsListPage/InvitationsListPage'));
@@ -382,6 +388,37 @@ const AppRoutes = () => {
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <UserDetailPage />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        } 
+      />
+
+      {/* === CAMERA MANAGEMENT ROUTES === */}
+      <Route 
+        path={CAMERA_ROUTES.LIST} 
+        element={
+          <AuthGuard>
+            <PermissionGuard permission={CAMERA_PERMISSIONS.READ}>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <CamerasListPage />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        } 
+      />
+
+      <Route 
+        path={CAMERA_ROUTES.DETAIL} 
+        element={
+          <AuthGuard>
+            <PermissionGuard permission={CAMERA_PERMISSIONS.READ}>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <CameraDetailsPage />
                 </Suspense>
               </Layout>
             </PermissionGuard>

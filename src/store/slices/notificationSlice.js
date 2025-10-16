@@ -317,9 +317,42 @@ const notificationSlice = createSlice({
       })
       .addCase(fetchNotifications.fulfilled, (state, action) => {
         state.loading = false;
-        state.notifications = action.payload.items;
-        state.unreadCount = action.payload.items.filter(n => !n.read).length;
+        
+        // Transform backend notification data to frontend format
+        state.notifications = action.payload.items.map(notification => ({
+          ...notification,
+          // Map backend isAcknowledged to frontend read property
+          read: notification.isAcknowledged || notification.read || false,
+          acknowledged: notification.isAcknowledged || notification.acknowledged || false,
+          // Preserve backend timestamps and data
+          acknowledgedOn: notification.acknowledgedOn,
+          acknowledgedBy: notification.acknowledgedBy,
+          acknowledgedByName: notification.acknowledgedByName,
+          // Map other potential field differences
+          timestamp: notification.createdOn || notification.timestamp,
+          type: notification.type || 'info',
+          priority: notification.priority || 'medium'
+        }));
+        
+        // Calculate unread count based on properly mapped read status
+        state.unreadCount = state.notifications.filter(n => !n.read).length;
+        
+        // Update sync time
         state.lastSyncTime = new Date().toISOString();
+        
+        // Debug logging to verify mapping
+        console.log('📊 Notifications mapped:', {
+          total: state.notifications.length,
+          unread: state.unreadCount,
+          acknowledged: state.notifications.filter(n => n.acknowledged).length,
+          mapping: state.notifications.map(n => ({
+            id: n.id,
+            title: n.title,
+            isAcknowledged: n.isAcknowledged, // backend field
+            read: n.read, // frontend field
+            acknowledged: n.acknowledged // frontend field
+          }))
+        });
       })
       .addCase(fetchNotifications.rejected, (state, action) => {
         state.loading = false;
@@ -334,13 +367,20 @@ const notificationSlice = createSlice({
           state.unreadCount = Math.max(0, state.unreadCount - 1);
         }
       })
-      // Acknowledge notification (backward compatibility)
+      // Acknowledge notification (backward compatibility) - Enhanced logic
       .addCase(acknowledgeNotificationAsync.fulfilled, (state, action) => {
         const notification = state.notifications.find(n => n.id === action.payload);
-        if (notification && !notification.read) {
-          notification.read = true;
+        if (notification) {
+          // Mark as read and acknowledged regardless of current read status
+          if (!notification.read) {
+            notification.read = true;
+            state.unreadCount = Math.max(0, state.unreadCount - 1);
+          }
           notification.acknowledgedOn = new Date().toISOString();
-          state.unreadCount = Math.max(0, state.unreadCount - 1);
+          notification.acknowledged = true;
+          
+          // Update last sync time
+          state.lastSyncTime = new Date().toISOString();
         }
       })
       .addCase(acknowledgeNotificationAsync.rejected, (state, action) => {

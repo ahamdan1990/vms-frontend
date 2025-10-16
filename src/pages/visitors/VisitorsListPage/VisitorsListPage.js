@@ -52,6 +52,9 @@ import {
 // Invitation actions
 import { createInvitation } from '../../../store/slices/invitationsSlice';
 
+// Services
+import visitorService from '../../../services/visitorService';
+
 import {
   selectSortedVisitors,
   selectVisitorsTotal,
@@ -231,43 +234,115 @@ const VisitorsListPage = () => {
   const [hasUnsavedEditChanges, setHasUnsavedEditChanges] = useState(false);
 
   // Event handlers
-  const handleCreateVisitor = async (visitorData, invitationData = null) => {
+  const handleCreateVisitor = async (visitorData, invitationData = null, assetData = {}) => {
     try {
-      // Create the visitor first
-      const createdVisitor = await dispatch(createVisitor(visitorData)).unwrap();
-      
-      // If invitation data provided, create invitation for the new visitor
-      if (invitationData) {
-        const invitationPayload = {
-          ...invitationData,
-          visitorId: createdVisitor.id
-        };
-        await dispatch(createInvitation(invitationPayload)).unwrap();
-        console.log('✅ Visitor and invitation created successfully!');
+      const { photoFile, documentFiles, isEdit } = assetData;
+
+      if (isEdit) {
+        // For editing, use the standard Redux update pattern
+        await dispatch(updateVisitor({ 
+          id: currentVisitor.id, 
+          visitorData 
+        })).unwrap();
+        
+        // Handle invitation separately if provided (edit mode invitation creation)
+        if (invitationData) {
+          const invitationPayload = {
+            ...invitationData,
+            visitorId: currentVisitor.id
+          };
+          await dispatch(createInvitation(invitationPayload)).unwrap();
+          console.log('✅ Visitor updated and invitation created successfully!');
+        } else {
+          console.log('✅ Visitor updated successfully!');
+        }
+        
+        // Reset form change tracking and close modal
+        setHasUnsavedEditChanges(false);
+        dispatch(hideEditModal());
       } else {
-        console.log('✅ Visitor created successfully!');
+        // For new visitor creation, use the comprehensive service method that handles:
+        // 1. Visitor creation with invitation data integrated
+        // 2. Photo upload
+        // 3. Document uploads
+        // 4. Error recovery and cleanup
+        const result = await visitorService.createVisitorWithAssets(
+          visitorData,
+          photoFile,
+          documentFiles || [],
+          invitationData
+        );
+
+        // Handle partial success scenarios (visitor created but some uploads failed)
+        if (result.errors && result.errors.length > 0) {
+          console.warn('Visitor created with some warnings:', result.errors);
+          
+          // Show user-friendly toast notification for non-critical errors
+          // This allows the operation to succeed while informing user of minor issues
+          const errorMessages = result.errors.join(', ');
+          console.info(`Visitor created successfully! Note: ${errorMessages}`);
+        }
+
+        console.log('✅ Visitor and associated assets created successfully!');
+        
+        // Reset form change tracking and close modal
+        setHasUnsavedCreateChanges(false);
+        dispatch(hideCreateModal());
       }
       
-      // Reset form change tracking and close modal
-      setHasUnsavedCreateChanges(false);
-      dispatch(hideCreateModal());
-      
-      // Refresh the list to show the new item with proper filtering/sorting
+      // Refresh the visitor list to show the new/updated item with proper filtering/sorting
       const params = { ...filters, pageIndex, pageSize };
       dispatch(getVisitors(params));
-      // Success handled by Redux state
+      
+      // Refresh statistics if available
+      if (canViewStats) {
+        dispatch(getVisitorStatistics());
+      }
+      
     } catch (error) {
-      // Error handled by Redux state
-      console.error('Create visitor failed:', error);
+      // Enhanced error handling with specific error categorization
+      console.error('Create/Update visitor failed:', error);
+      
+      const errorMessage = error.response?.data?.message || error.message;
+      
+      // Provide user-friendly error messages based on error type
+      if (errorMessage.includes('email')) {
+        console.error('Email validation error:', errorMessage);
+        // Error will be handled by VisitorForm to show field-specific error
+      } else if (errorMessage.includes('invitation')) {
+        console.error('Invitation creation failed:', errorMessage);
+        // Partial success - visitor may have been created but invitation failed
+      } else if (errorMessage.includes('upload')) {
+        console.error('File upload error:', errorMessage);
+        // Partial success - visitor created but file uploads failed
+      } else {
+        console.error('General creation error:', errorMessage);
+      }
+      
+      // Re-throw to let VisitorForm handle error display and validation
+      throw error;
     }
   };
 
-  const handleUpdateVisitor = async (visitorData) => {
+  const handleUpdateVisitor = async (visitorData, invitationData = null, assetData = {}) => {
     try {
+      // Update visitor using Redux pattern for consistency with list management
       await dispatch(updateVisitor({ 
         id: currentVisitor.id, 
         visitorData 
       })).unwrap();
+      
+      // Handle invitation creation if provided (useful for adding invitations during edit)
+      if (invitationData) {
+        const invitationPayload = {
+          ...invitationData,
+          visitorId: currentVisitor.id
+        };
+        await dispatch(createInvitation(invitationPayload)).unwrap();
+        console.log('✅ Visitor updated and invitation created successfully!');
+      } else {
+        console.log('✅ Visitor updated successfully!');
+      }
       
       // Reset form change tracking and close modal
       setHasUnsavedEditChanges(false);
@@ -276,10 +351,26 @@ const VisitorsListPage = () => {
       // Refresh the list to show the updated item
       const params = { ...filters, pageIndex, pageSize };
       dispatch(getVisitors(params));
-      // Success handled by Redux state
+      
+      // Refresh statistics if available
+      if (canViewStats) {
+        dispatch(getVisitorStatistics());
+      }
+      
     } catch (error) {
-      // Error handled by Redux state
+      // Enhanced error handling with categorization
       console.error('Update visitor failed:', error);
+      
+      const errorMessage = error.response?.data?.message || error.message;
+      
+      if (errorMessage.includes('email')) {
+        console.error('Email validation error during update:', errorMessage);
+      } else if (errorMessage.includes('invitation')) {
+        console.error('Invitation creation failed during update:', errorMessage);
+      }
+      
+      // Re-throw to let VisitorForm handle error display
+      throw error;
     }
   };
 

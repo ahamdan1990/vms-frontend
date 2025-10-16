@@ -537,6 +537,90 @@ export const getDateRangePresets = () => {
   };
 };
 
+// Formatting functions for time ago and date time
+export const formatTimeAgo = (date) => {
+  if (!date) return '';
+  
+  const now = new Date();
+  const diffMs = now - new Date(date);
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  if (diffMinutes < 1) return 'Just now';
+  if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+  if (diffDays < 30) {
+    const diffWeeks = Math.floor(diffDays / 7);
+    return `${diffWeeks} week${diffWeeks !== 1 ? 's' : ''} ago`;
+  }
+  if (diffDays < 365) {
+    const diffMonths = Math.floor(diffDays / 30);
+    return `${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
+  }
+  
+  const diffYears = Math.floor(diffDays / 365);
+  return `${diffYears} year${diffYears !== 1 ? 's' : ''} ago`;
+};
+
+export const formatDateTime = (date, options = {}) => {
+  if (!date) return '';
+  
+  const {
+    includeTime = true,
+    includeSeconds = false,
+    format24Hour = false,
+    includeDate = true,
+    dateFormat = 'MM/DD/YYYY',
+    separator = ' '
+  } = options;
+  
+  const d = new Date(date);
+  let result = '';
+  
+  if (includeDate) {
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const day = d.getDate().toString().padStart(2, '0');
+    const year = d.getFullYear();
+    
+    switch (dateFormat.toLowerCase()) {
+      case 'dd/mm/yyyy':
+        result = `${day}/${month}/${year}`;
+        break;
+      case 'yyyy-mm-dd':
+        result = `${year}-${month}-${day}`;
+        break;
+      default: // 'mm/dd/yyyy'
+        result = `${month}/${day}/${year}`;
+    }
+  }
+  
+  if (includeTime) {
+    if (includeDate) result += separator;
+    
+    let hours = d.getHours();
+    const minutes = d.getMinutes().toString().padStart(2, '0');
+    let ampm = '';
+    
+    if (!format24Hour) {
+      ampm = hours >= 12 ? ' PM' : ' AM';
+      hours = hours % 12 || 12;
+    }
+    
+    let timeString = `${hours.toString().padStart(2, '0')}:${minutes}`;
+    
+    if (includeSeconds) {
+      const seconds = d.getSeconds().toString().padStart(2, '0');
+      timeString += `:${seconds}`;
+    }
+    
+    result += timeString + ampm;
+  }
+  
+  return result;
+};
+
 // Export all utilities
 export default {
   // Constants
@@ -635,6 +719,8 @@ export default {
   toISOString,
   toISODateString,
   toTimeString,
+  formatTimeAgo,
+  formatDateTime,
 
   // Validation
   isValidDate,

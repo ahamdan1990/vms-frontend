@@ -680,12 +680,45 @@ const VisitorForm = ({
         break;
       case 'scheduledStartTime':
         if (!value) return 'Start time is required';
-        if (new Date(value) <= new Date()) return 'Start time must be in the future';
+        const startTime = new Date(value);
+        const now = new Date();
+        if (startTime <= now) return 'Start time must be in the future';
+        // Check if it's more than 2 years in the future
+        const twoYearsFromNow = new Date();
+        twoYearsFromNow.setFullYear(twoYearsFromNow.getFullYear() + 2);
+        if (startTime > twoYearsFromNow) return 'Start time cannot be more than 2 years in the future';
         break;
       case 'scheduledEndTime':
         if (!value) return 'End time is required';
-        if (invitationData.scheduledStartTime && new Date(value) <= new Date(invitationData.scheduledStartTime)) {
-          return 'End time must be after start time';
+        if (invitationData.scheduledStartTime) {
+          const startTime = new Date(invitationData.scheduledStartTime);
+          const endTime = new Date(value);
+          if (endTime <= startTime) {
+            return 'End time must be after start time';
+          }
+          // Check duration limits
+          const durationMinutes = (endTime - startTime) / (1000 * 60);
+          if (durationMinutes < 15) {
+            return 'Visit duration must be at least 15 minutes';
+          }
+          if (durationMinutes > 24 * 60) {
+            return 'Visit duration cannot exceed 24 hours';
+          }
+        }
+        break;
+      case 'locationId':
+        if (createInvitation && !value && !formData.preferredLocationId) {
+          return 'Location is required for invitation';
+        }
+        break;
+      case 'visitPurposeId':
+        if (createInvitation && !value && !formData.defaultVisitPurposeId) {
+          return 'Visit purpose is required for invitation';
+        }
+        break;
+      case 'parkingInstructions':
+        if (invitationData.needsParking && !value?.trim()) {
+          return 'Parking instructions are required when parking is needed';
         }
         break;
       default:
@@ -698,9 +731,19 @@ const VisitorForm = ({
     if (!createInvitation) return {};
     
     const errors = {};
-    const requiredFields = ['subject', 'scheduledStartTime', 'scheduledEndTime'];
     
+    // Required fields validation
+    const requiredFields = ['subject', 'scheduledStartTime', 'scheduledEndTime'];
     requiredFields.forEach(field => {
+      const error = validateInvitationField(field, invitationData[field]);
+      if (error) {
+        errors[field] = error;
+      }
+    });
+
+    // Conditional validations
+    const conditionalFields = ['locationId', 'visitPurposeId', 'parkingInstructions'];
+    conditionalFields.forEach(field => {
       const error = validateInvitationField(field, invitationData[field]);
       if (error) {
         errors[field] = error;
@@ -880,25 +923,37 @@ const VisitorForm = ({
     } : null;
 
     try {
-      if (isEdit) {
-        // For editing, use the parent's onSubmit method
-        await onSubmit(submissionData, invitationSubmissionData);
-      } else {
-        // For creating new visitor, use enhanced service method
-        const result = await visitorService.createVisitorWithAssets(
-          submissionData,
-          formData.photoFile,
-          formData.documentFiles,
-          invitationSubmissionData
-        );
-        
-        // Call parent's onSubmit with the result for any additional handling
-        if (onSubmit) {
-          await onSubmit(result, invitationSubmissionData);
+      // For both create and edit modes, delegate to parent's onSubmit with all necessary data
+      // Parent will handle the appropriate service method (createVisitorWithAssets for new, update for edit)
+      await onSubmit(
+        submissionData, 
+        invitationSubmissionData,
+        {
+          photoFile: formData.photoFile,
+          documentFiles: formData.documentFiles,
+          isEdit: isEdit
         }
-      }
+      );
     } catch (error) {
       console.error('Form submission error:', error);
+      
+      // Enhanced error handling for different scenarios
+      const errorMessage = error.response?.data?.message || error.message;
+      
+      if (errorMessage.includes('invitation')) {
+        // Invitation-specific error
+        console.error('Invitation creation failed:', errorMessage);
+        setInvitationErrors({ general: 'Failed to create invitation. Please try creating it manually from the visitor profile.' });
+      } else if (errorMessage.includes('email')) {
+        // Email validation error
+        setFormErrors({ email: 'This email address is already registered.' });
+        setCurrentStep(0); // Go back to basic information step
+      } else if (errorMessage.includes('government')) {
+        // Government ID validation error
+        setFormErrors({ governmentId: 'This government ID is already registered.' });
+        setCurrentStep(4); // Go to personal details step
+      }
+      
       throw error; // Re-throw to let parent handle error display
     }
   };
@@ -1080,8 +1135,9 @@ const VisitorForm = ({
           <PhotoIcon className="w-5 h-5" />
           <span>Visitor Photo</span>
         </h3>
+
         <ProfilePhotoUpload
-          currentPhotoUrl={formData.photo.toString()}
+          currentPhotoUrl={formData.photo?.downloadUrl ?? ""}
           onUpload={async (file) => {
             await handlePhotoUpload([file]);
           }}

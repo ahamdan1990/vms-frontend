@@ -53,7 +53,8 @@ import {
   CheckCircleIcon,
   EyeIcon,
   TrashIcon,
-  ArchiveBoxIcon
+  ArchiveBoxIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline';
 import { BellIcon as BellIconSolid, ExclamationTriangleIcon as ExclamationTriangleIconSolid } from '@heroicons/react/24/solid';
 
@@ -83,6 +84,10 @@ const NotificationsDashboard = () => {
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'unread', 'acknowledged'
   const [viewMode, setViewMode] = useState('list'); // 'list', 'cards'
   const [refreshInterval, setRefreshInterval] = useState(30000); // 30 seconds
+  
+  // New state for individual notification action selection
+  const [notificationActions, setNotificationActions] = useState({}); // { notificationId: 'markRead'|'acknowledge' }
+  const [showActionDropdowns, setShowActionDropdowns] = useState({}); // { notificationId: boolean }
 
   // Permissions
   const canReadOwn = hasPermission(NOTIFICATION_PERMISSIONS.READ_OWN);
@@ -105,8 +110,9 @@ const NotificationsDashboard = () => {
   // Computed values
   const hasSelectedNotifications = selectedNotifications.length > 0;
   const filteredNotifications = notifications.filter(notification => {
+    // Tab-based filtering with proper acknowledged handling
     if (activeTab === 'unread' && notification.read) return false;
-    if (activeTab === 'acknowledged' && !notification.read) return false;
+    if (activeTab === 'acknowledged' && !notification.read && !notification.acknowledged) return false;
     
     // Search filter
     if (searchInput) {
@@ -148,6 +154,18 @@ const NotificationsDashboard = () => {
     return () => clearInterval(interval);
   }, [dispatch, refreshInterval, canReadOwn, canReadAll]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.notification-dropdown')) {
+        setShowActionDropdowns({});
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // Event handlers
   const handleSearch = (value) => {
     setSearchInput(value);
@@ -166,29 +184,51 @@ const NotificationsDashboard = () => {
     }));
   };
 
-  const handleMarkAsRead = (notificationId) => {
-    if (!canAcknowledge) return;
-    dispatch(markNotificationAsRead(notificationId));
-  };
-
   const handleAcknowledge = async (notificationId, notes = '') => {
     if (!canAcknowledge) return;
     
     try {
+      // First, acknowledge via Redux action
       await dispatch(acknowledgeNotificationAsync({ notificationId, notes })).unwrap();
+      
+      // Force refresh notifications to ensure UI reflects backend state
+      await dispatch(fetchNotifications());
+      
+      // Update statistics
+      if (canViewStats) {
+        dispatch(fetchNotificationStats());
+      }
+      
+      // Show success toast
       dispatch(addToast({
         type: 'success',
         title: 'Notification Acknowledged',
         message: 'Notification has been acknowledged successfully',
         duration: 3000
       }));
+      
+      // Clear any selected notifications if this was one of them
+      setSelectedNotifications(prev => prev.filter(id => id !== notificationId));
+      
     } catch (error) {
+      console.error('Acknowledgment failed:', error);
       dispatch(addToast({
         type: 'error',
         title: 'Acknowledgment Failed',
         message: extractErrorMessage(error),
         duration: 5000
       }));
+    }
+  };
+
+  const handleMarkAsRead = (notificationId) => {
+    if (!canAcknowledge) return;
+    
+    dispatch(markNotificationAsRead(notificationId));
+    
+    // Update statistics after marking as read
+    if (canViewStats) {
+      dispatch(fetchNotificationStats());
     }
   };
 
@@ -250,6 +290,41 @@ const NotificationsDashboard = () => {
     } else {
       setSelectedNotifications([]);
     }
+  };
+
+  // Helper functions for notification action management
+  const getNotificationAction = (notificationId) => {
+    return notificationActions[notificationId] || 'markRead';
+  };
+
+  const setNotificationAction = (notificationId, action) => {
+    setNotificationActions(prev => ({
+      ...prev,
+      [notificationId]: action
+    }));
+  };
+
+  const toggleActionDropdown = (notificationId) => {
+    setShowActionDropdowns(prev => ({
+      ...prev,
+      [notificationId]: !prev[notificationId]
+    }));
+  };
+
+  const executeNotificationAction = async (notificationId) => {
+    const action = getNotificationAction(notificationId);
+    
+    if (action === 'acknowledge') {
+      await handleAcknowledge(notificationId);
+    } else {
+      handleMarkAsRead(notificationId);
+    }
+    
+    // Close dropdown after action
+    setShowActionDropdowns(prev => ({
+      ...prev,
+      [notificationId]: false
+    }));
   };
 
   // Helper functions
@@ -331,9 +406,9 @@ const NotificationsDashboard = () => {
       case 'all':
         return notifications.length;
       case 'unread':
-        return unreadCount;
+        return notifications.filter(n => !n.read).length; // Use read property which now correctly maps from isAcknowledged
       case 'acknowledged':
-        return notifications.filter(n => n.read).length;
+        return notifications.filter(n => n.read || n.acknowledged).length; // Count both read and acknowledged
       default:
         return 0;
     }
@@ -413,32 +488,83 @@ const NotificationsDashboard = () => {
               )}
             </div>
 
-            {/* Actions */}
+            {/* Enhanced Actions with Dropdown */}
             <div className="flex items-center space-x-1 ml-2">
+              {!notification.read && canAcknowledge && (
+                <div className="relative notification-dropdown">
+                  {/* Action Dropdown Toggle */}
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleActionDropdown(notification.id);
+                    }}
+                    className="flex items-center space-x-1"
+                  >
+                    <span className="text-xs">
+                      {getNotificationAction(notification.id) === 'acknowledge' ? 'Acknowledge' : 'Mark as Read'}
+                    </span>
+                    <ChevronDownIcon className="w-3 h-3" />
+                  </Button>
+
+                  {/* Dropdown Menu */}
+                  {showActionDropdowns[notification.id] && (
+                    <div className="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                      <div className="py-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setNotificationAction(notification.id, 'markRead');
+                            setShowActionDropdowns(prev => ({ ...prev, [notification.id]: false }));
+                          }}
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center space-x-2 ${
+                            getNotificationAction(notification.id) === 'markRead' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                          }`}
+                        >
+                          <CheckIcon className="w-3 h-3" />
+                          <span>Mark as Read</span>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setNotificationAction(notification.id, 'acknowledge');
+                            setShowActionDropdowns(prev => ({ ...prev, [notification.id]: false }));
+                          }}
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center space-x-2 ${
+                            getNotificationAction(notification.id) === 'acknowledge' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                          }`}
+                        >
+                          <CheckCircleIcon className="w-3 h-3" />
+                          <span>Acknowledge</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Execute Action Button */}
               {!notification.read && canAcknowledge && (
                 <Button
                   size="xs"
-                  variant="ghost"
+                  variant="primary"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleMarkAsRead(notification.id);
+                    executeNotificationAction(notification.id);
                   }}
-                  icon={<CheckIcon className="w-3 h-3" />}
-                  title="Mark as read"
-                />
+                  className="ml-2"
+                >
+                  Execute
+                </Button>
               )}
               
-              {canAcknowledge && (
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAcknowledge(notification.id);
-                  }}
-                  icon={<CheckCircleIcon className="w-3 h-3" />}
-                  title="Acknowledge"
-                />
+              {/* Show acknowledged status */}
+              {notification.read && (
+                <div className="flex items-center space-x-1 text-green-600">
+                  <CheckCircleIcon className="w-4 h-4" />
+                  <span className="text-xs">Acknowledged</span>
+                </div>
               )}
             </div>
           </div>

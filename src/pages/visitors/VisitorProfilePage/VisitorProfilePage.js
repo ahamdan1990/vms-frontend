@@ -64,6 +64,8 @@ const VisitorProfilePage = () => {
   const dispatch = useDispatch();
   const { hasPermission } = usePermissions();
   
+  const [hasUnsavedEditChanges, setHasUnsavedEditChanges] = useState(false);
+
   // Redux state
   const visitor = useSelector(selectCurrentVisitor);
   const loading = useSelector(selectVisitorsLoading);
@@ -165,7 +167,12 @@ const VisitorProfilePage = () => {
   // Handle visitor update
   const handleUpdateVisitor = async (updatedData) => {
     try {
-      await dispatch(updateVisitor({ id: visitor.id, ...updatedData })).unwrap();
+            await dispatch(updateVisitor({ 
+              id: visitor.id, 
+              visitorData: updatedData  
+            })).unwrap();
+
+      setHasUnsavedEditChanges(false);
       setShowEditModal(false);
       // Reload visitor data
       dispatch(getVisitorById(visitor.id));
@@ -445,11 +452,13 @@ const VisitorProfilePage = () => {
         onClose={() => setShowEditModal(false)}
         title="Edit Visitor"
         size="2xl"
+        hasUnsavedChanges={hasUnsavedEditChanges}
       >
         <VisitorForm
           initialData={visitor}
           onSubmit={handleUpdateVisitor}
           onCancel={() => setShowEditModal(false)}
+          onFormChange={setHasUnsavedEditChanges}
           loading={updateLoading}
           isEdit={true}
         />

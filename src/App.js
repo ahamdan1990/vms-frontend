@@ -11,6 +11,7 @@ import { initializeUI, setPageLoading } from './store/slices/uiSlice';
 import { initializeNotifications } from './store/slices/notificationSlice';
 import NotificationProvider from './components/notifications/NotificationProvider';
 import NotificationCenter from './components/notifications/NotificationCenter.js';
+import { HelmetProvider } from 'react-helmet-async';
 
 
 /**
@@ -55,22 +56,24 @@ function App() {
   return (
     <Provider store={store}>
       <StorageProvider>
-        <BrowserRouter>
-          <NotificationProvider
-            position="top-right"
-            maxToasts={5}
-            defaultDuration={4000}
-            enableDesktop={true}
-            enableSound={true}
-          >
-            <AppInitializer>
-              <div className="App min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-                <AppRoutes />
-                <NotificationCenter />
-              </div>
-            </AppInitializer>
-          </NotificationProvider>
-        </BrowserRouter>
+        <HelmetProvider>
+          <BrowserRouter>
+            <NotificationProvider
+              position="top-right"
+              maxToasts={5}
+              defaultDuration={4000}
+              enableDesktop={true}
+              enableSound={true}
+            >
+              <AppInitializer>
+                <div className="App min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+                  <AppRoutes />
+                  <NotificationCenter />
+                </div>
+              </AppInitializer>
+            </NotificationProvider>
+          </BrowserRouter>
+        </HelmetProvider>
       </StorageProvider>
     </Provider>
   );

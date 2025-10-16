@@ -92,6 +92,25 @@ export const VISITOR_ROUTES = {
   getDocumentsRoute: (id) => `/visitors/${id}/documents`
 };
 
+// Camera management routes
+export const CAMERA_ROUTES = {
+  BASE: '/cameras',
+  LIST: '/cameras',
+  CREATE: '/cameras/new',
+  DETAIL: '/cameras/:id',
+  EDIT: '/cameras/:id/edit',
+  CONFIGURATION: '/cameras/:id/configuration',
+  STREAM: '/cameras/:id/stream',
+  HEALTH: '/cameras/health',
+  STATISTICS: '/cameras/statistics',
+  
+  // Dynamic route builders
+  getDetailRoute: (id) => `/cameras/${id}`,
+  getEditRoute: (id) => `/cameras/${id}/edit`,
+  getConfigurationRoute: (id) => `/cameras/${id}/configuration`,
+  getStreamRoute: (id) => `/cameras/${id}/stream`
+};
+
 // Check-in/out routes (for future implementation)
 export const CHECKIN_ROUTES = {
   BASE: '/checkin',
@@ -343,7 +362,23 @@ export const ROUTE_METADATA = {
     roles: ['Staff', 'Operator', 'Administrator'],
     permissions: ['Visitor.Create']
   },
-  
+
+  [CAMERA_ROUTES.LIST]: {
+    title: 'Camera Management',
+    breadcrumb: 'Cameras',
+    requiresAuth: true,
+    roles: ['Operator', 'Administrator'],
+    permissions: ['Camera.Read']
+  },
+
+  [CAMERA_ROUTES.DETAIL]: {
+    title: 'Camera Details',
+    breadcrumb: 'Camera Details',
+    requiresAuth: true,
+    roles: ['Operator', 'Administrator'],
+    permissions: ['Camera.Read']
+  },
+
   [PROFILE_ROUTES.VIEW]: {
     title: 'Profile',
     breadcrumb: 'Profile',
@@ -476,6 +511,33 @@ export const NAVIGATION_MENU = {
           label: 'Add Visitor',
           path: VISITOR_ROUTES.CREATE,
           roles: ['Staff', 'Operator', 'Administrator']
+        }
+      ]
+    },
+    {
+      id: 'cameras',
+      label: 'Cameras',
+      path: CAMERA_ROUTES.LIST,
+      icon: 'video-camera',
+      roles: ['Operator', 'Administrator'],
+      children: [
+        {
+          id: 'cameras-list',
+          label: 'All Cameras',
+          path: CAMERA_ROUTES.LIST,
+          roles: ['Operator', 'Administrator']
+        },
+        {
+          id: 'cameras-health',
+          label: 'Health Monitor',
+          path: CAMERA_ROUTES.HEALTH,
+          roles: ['Operator', 'Administrator']
+        },
+        {
+          id: 'cameras-statistics',
+          label: 'Statistics',
+          path: CAMERA_ROUTES.STATISTICS,
+          roles: ['Administrator']
         }
       ]
     },
@@ -712,6 +774,7 @@ export default {
   USER_ROUTES,
   INVITATION_ROUTES,
   VISITOR_ROUTES,
+  CAMERA_ROUTES,
   CHECKIN_ROUTES,
   REPORT_ROUTES,
   SYSTEM_ROUTES,

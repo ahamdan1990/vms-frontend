@@ -55,6 +55,35 @@ export const VISITOR_PERMISSIONS = {
   MANAGE_DOCUMENTS: 'Visitor.ManageDocuments'
 };
 
+// Camera Management Permissions
+export const CAMERA_PERMISSIONS = {
+  CREATE: 'Camera.Create',
+  READ: 'Camera.Read',
+  READ_ALL: 'Camera.Read.All',
+  UPDATE: 'Camera.Update',
+  DELETE: 'Camera.Delete',
+  TEST_CONNECTION: 'Camera.TestConnection',
+  MANAGE_STREAMING: 'Camera.ManageStreaming',
+  START_STREAM: 'Camera.StartStream',
+  STOP_STREAM: 'Camera.StopStream',
+  VIEW_STREAM: 'Camera.ViewStream',
+  MANAGE_FACIAL_RECOGNITION: 'Camera.ManageFacialRecognition',
+  VIEW_FRAMES: 'Camera.ViewFrames',
+  CAPTURE_FRAME: 'Camera.CaptureFrame',
+  CONFIGURE: 'Camera.Configure',
+  VIEW_CONFIGURATION: 'Camera.ViewConfiguration',
+  MANAGE_CREDENTIALS: 'Camera.ManageCredentials',
+  VIEW_STATUS: 'Camera.ViewStatus',
+  HEALTH_CHECK: 'Camera.HealthCheck',
+  VIEW_STATISTICS: 'Camera.ViewStatistics',
+  BULK_OPERATIONS: 'Camera.BulkOperations',
+  EXPORT: 'Camera.Export',
+  VIEW_HISTORY: 'Camera.ViewHistory',
+  MAINTENANCE: 'Camera.Maintenance',
+  VIEW_SENSITIVE_DATA: 'Camera.ViewSensitiveData',
+  ADMINISTER_ALL: 'Camera.AdministerAll'
+};
+
 // Emergency Contact Permissions
 export const EMERGENCY_CONTACT_PERMISSIONS = {
   CREATE: 'EmergencyContact.Create',

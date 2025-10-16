@@ -1,5 +1,7 @@
 import apiClient, { extractApiData } from './apiClient';
 import { VISITOR_ENDPOINTS, buildQueryString } from './apiEndpoints';
+import visitorDocumentService from './visitorDocumentService';
+import invitationService from './invitationService';
 
 /**
  * Visitor management service matching the backend API endpoints exactly
@@ -56,8 +58,16 @@ const visitorService = {
    * Requires: Visitor.Create permission
    */
   async createVisitor(visitorData) {
-    // Transform form data to match backend DTO structure
-    const backendData = this.transformVisitorDataForBackend(visitorData);
+    // Check if data is already transformed (has invitation fields)
+    const isAlreadyTransformed = visitorData.hasOwnProperty('createInvitation') || 
+                                  visitorData.hasOwnProperty('invitationSubject');
+    
+    // Only transform if not already transformed
+    const backendData = isAlreadyTransformed ? 
+      visitorData : 
+      this.transformVisitorDataForBackend(visitorData);
+      
+    console.log('Sending to backend:', backendData);
     const response = await apiClient.post(VISITOR_ENDPOINTS.BASE, backendData);
     return extractApiData(response);
   },
@@ -295,6 +305,127 @@ const visitorService = {
    */
   async createVisitorWithAssets(visitorData, photoFile = null, documentFiles = [], invitationData = null) {
     let createdVisitor = null;
+    let invitationCreated = false;
+    const errors = [];
+    
+    console.log('🔍 createVisitorWithAssets called with:', {
+      hasInvitationData: !!invitationData,
+      invitationData: invitationData
+    });
+    
+    try {
+      // Transform visitor data to include invitation fields if provided
+      const transformedData = this.transformVisitorDataForBackend(visitorData);
+      
+      console.log('🔍 After transformVisitorDataForBackend:', transformedData);
+      
+      // Add invitation data to the visitor creation payload
+      if (invitationData) {
+        console.log('🔍 Adding invitation data to payload...');
+        transformedData.createInvitation = true;
+        transformedData.invitationSubject = invitationData.subject;
+        transformedData.invitationMessage = invitationData.message;
+        transformedData.invitationScheduledStartTime = invitationData.scheduledStartTime;
+        transformedData.invitationScheduledEndTime = invitationData.scheduledEndTime;
+        transformedData.invitationLocationId = invitationData.locationId;
+        transformedData.invitationVisitPurposeId = invitationData.visitPurposeId;
+        transformedData.invitationExpectedVisitorCount = invitationData.expectedVisitorCount || 1;
+        transformedData.invitationSpecialInstructions = invitationData.specialInstructions;
+        transformedData.invitationRequiresApproval = invitationData.requiresApproval !== undefined ? invitationData.requiresApproval : true;
+        transformedData.invitationRequiresEscort = invitationData.requiresEscort || false;
+        transformedData.invitationRequiresBadge = invitationData.requiresBadge !== undefined ? invitationData.requiresBadge : true;
+        transformedData.invitationNeedsParking = invitationData.needsParking || false;
+        transformedData.invitationParkingInstructions = invitationData.parkingInstructions;
+        transformedData.invitationSubmitForApproval = invitationData.submitForApproval || false;
+        
+        console.log('🔍 Final transformedData with invitation:', transformedData);
+      }
+
+      // Step 1: Create the visitor (with invitation if provided)
+      createdVisitor = await this.createVisitor(transformedData);
+      console.log('Visitor created successfully:', createdVisitor.id);
+
+      // Step 2: Upload photo if provided
+      if (photoFile && createdVisitor.id) {
+        try {
+          await visitorDocumentService.uploadVisitorPhoto(createdVisitor.id, photoFile, {
+            description: 'Visitor profile photo',
+            isSensitive: false,
+            isRequired: false
+          });
+          console.log('Photo uploaded successfully');
+        } catch (photoError) {
+          console.error('Photo upload failed:', photoError);
+          errors.push(`Photo upload failed: ${photoError.message}`);
+        }
+      }
+      
+      // Step 3: Upload documents if provided
+      if (documentFiles.length > 0 && createdVisitor.id) {
+        try {
+          const documentsData = documentFiles.map(file => ({
+            file,
+            title: file.name,
+            documentType: 'Other',
+            options: {
+              description: `Document: ${file.name}`,
+              isSensitive: false,
+              isRequired: false
+            }
+          }));
+          
+          await visitorDocumentService.uploadMultipleDocuments(
+            createdVisitor.id, 
+            documentsData
+          );
+          console.log('Documents uploaded successfully');
+        } catch (documentsError) {
+          console.error('Documents upload failed:', documentsError);
+          errors.push(`Documents upload failed: ${documentsError.message}`);
+        }
+      }
+      
+      // Note: Invitation creation is now handled by the backend in step 1
+      // If invitation was requested, it should have been created with the visitor
+      if (invitationData) {
+        console.log('Invitation creation requested - handled by backend');
+        invitationCreated = true;
+      }
+      
+      // Return result with any non-critical errors
+      return {
+        visitor: createdVisitor,
+        invitationCreated,
+        errors: errors.length > 0 ? errors : null,
+        success: true
+      };
+      
+    } catch (error) {
+      console.error('Visitor creation failed:', error);
+      
+      // Error recovery: cleanup created visitor if it was created but other steps failed
+      if (createdVisitor?.id && (photoFile || documentFiles.length > 0)) {
+        try {
+          console.log('Attempting to cleanup visitor after partial failure...');
+          await this.deleteVisitor(createdVisitor.id, true); // permanent delete for cleanup
+          console.log('Visitor cleanup successful');
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup visitor after error:', cleanupError);
+        }
+      }
+      
+      // Re-throw with enhanced error information
+      const errorMessage = error.response?.data?.message || error.message;
+      throw new Error(`Visitor creation failed: ${errorMessage}`);
+    }
+  },
+
+  /**
+   * Legacy method - kept for backward compatibility
+   * @deprecated Use the backend's integrated invitation creation instead
+   */
+  async createVisitorWithAssetsLegacy(visitorData, photoFile = null, documentFiles = [], invitationData = null) {
+    let createdVisitor = null;
     
     try {
       // Step 1: Create the visitor
@@ -302,8 +433,7 @@ const visitorService = {
       
       // Step 2: Upload photo if provided
       if (photoFile && createdVisitor.id) {
-        const visitorDocumentService = await import('./visitorDocumentService');
-        await visitorDocumentService.default.uploadVisitorPhoto(createdVisitor.id, photoFile, {
+        await visitorDocumentService.uploadVisitorPhoto(createdVisitor.id, photoFile, {
           description: 'Visitor profile photo',
           isSensitive: false,
           isRequired: false
@@ -312,7 +442,6 @@ const visitorService = {
       
       // Step 3: Upload documents if provided
       if (documentFiles.length > 0 && createdVisitor.id) {
-        const visitorDocumentService = await import('./visitorDocumentService');
         const documentsData = documentFiles.map(file => ({
           file,
           title: file.name,
@@ -324,7 +453,7 @@ const visitorService = {
           }
         }));
         
-        await visitorDocumentService.default.uploadMultipleDocuments(
+        await visitorDocumentService.uploadMultipleDocuments(
           createdVisitor.id, 
           documentsData
         );
@@ -332,8 +461,7 @@ const visitorService = {
       
       // Step 4: Create invitation if requested
       if (invitationData && createdVisitor.id) {
-        const invitationService = await import('./invitationService');
-        await invitationService.default.createInvitation({
+        await invitationService.createInvitation({
           ...invitationData,
           visitorId: createdVisitor.id
         });

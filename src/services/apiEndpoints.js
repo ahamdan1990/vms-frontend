@@ -111,6 +111,34 @@ export const LOCATION_ENDPOINTS = {
   BY_ID: (id) => `/api/locations/${id}`
 };
 
+// Camera endpoints
+export const CAMERA_ENDPOINTS = {
+  BASE: '/api/Cameras',
+  LIST: '/api/Cameras',
+  BY_ID: (id) => `/api/Cameras/${id}`,
+  CREATE: '/api/Cameras',
+  UPDATE: (id) => `/api/Cameras/${id}`,
+  DELETE: (id) => `/api/Cameras/${id}`,
+  SEARCH: '/api/Cameras/search',
+  TEST_CONNECTION: (id) => `/api/Cameras/${id}/test-connection`,
+  TEST_CONNECTION_PARAMS: '/api/Cameras/test-connection',
+  START_STREAM: (id) => `/api/Cameras/${id}/start-stream`,
+  STOP_STREAM: (id) => `/api/Cameras/${id}/stop-stream`,
+  STREAM_INFO: (id) => `/api/Cameras/${id}/stream-info`,
+  HEALTH_CHECK: (id) => `/api/Cameras/${id}/health-check`,
+  HEALTH_CHECK_ALL: '/api/Cameras/health-check-all',
+  CAPTURE_FRAME: (id) => `/api/Cameras/${id}/capture-frame`,
+  STATISTICS: '/api/Cameras/statistics',
+  BY_LOCATION: (locationId) => `/api/Cameras?locationId=${locationId}`,
+  BY_TYPE: (type) => `/api/Cameras?cameraType=${type}`,
+  OPERATIONAL: '/api/Cameras?isActive=true&status=Active',
+  BULK_OPERATIONS: '/api/Cameras/bulk',
+  EXPORT: '/api/Cameras/export',
+  IMPORT: '/api/Cameras/import',
+  TYPES: '/api/Cameras/types',
+  VALIDATE_CONFIG: '/api/Cameras/validate-configuration'
+};
+
 // Visitor endpoints
 export const VISITOR_ENDPOINTS = {
   BASE: '/api/Visitors',
@@ -123,7 +151,8 @@ export const VISITOR_ENDPOINTS = {
   MARK_VIP: (id) => `/api/Visitors/${id}/vip`,
   DOCUMENTS: (id) => `/api/Visitors/${id}/documents`,
   NOTES: (id) => `/api/Visitors/${id}/notes`,
-  EMERGENCY_CONTACTS: (id) => `/api/Visitors/${id}/emergency-contacts`
+  EMERGENCY_CONTACTS: (id) => `/api/Visitors/${id}/emergency-contacts`,
+  DEBUG: '/api/Visitors/debug-binding'
 };
 
 // Emergency Contact endpoints (nested under visitors)
@@ -280,6 +309,7 @@ export const API_ENDPOINTS = {
   USERS: USER_ENDPOINTS,
   VISIT_PURPOSES: VISIT_PURPOSE_ENDPOINTS,
   LOCATIONS: LOCATION_ENDPOINTS,
+  CAMERAS: CAMERA_ENDPOINTS,
   VISITORS: VISITOR_ENDPOINTS,
   EMERGENCY_CONTACTS: EMERGENCY_CONTACT_ENDPOINTS,
   VISITOR_DOCUMENTS: VISITOR_DOCUMENT_ENDPOINTS,

@@ -13,6 +13,7 @@ import invitationsReducer from './slices/invitationsSlice';
 import capacityReducer from './slices/capacitySlice';
 import timeSlotsReducer from './slices/timeSlotsSlice';
 import escalationRulesReducer from './slices/escalationRulesSlice';
+import camerasReducer from './slices/camerasSlice';
 
 /**
  * Root reducer that combines all feature slices
@@ -33,6 +34,7 @@ const rootReducer = combineReducers({
   capacity: capacityReducer,
   timeSlots: timeSlotsReducer,
   escalationRules: escalationRulesReducer,
+  cameras: camerasReducer,
 });
 
 /**
@@ -164,6 +166,55 @@ export const getInitialState = () => ({
     rootLocationsError: null,
     rootLocationsLastFetch: null,
     lastUpdated: null
+  },
+  cameras: {
+    list: [],
+    total: 0,
+    pageIndex: 0,
+    pageSize: 20,
+    currentCamera: null,
+    loading: false,
+    listLoading: false,
+    createLoading: false,
+    updateLoading: false,
+    deleteLoading: false,
+    searchLoading: false,
+    operationLoading: false,
+    error: null,
+    listError: null,
+    createError: null,
+    updateError: null,
+    deleteError: null,
+    searchError: null,
+    operationError: null,
+    searchTerm: '',
+    filters: {
+      cameraType: null,
+      status: null,
+      locationId: null,
+      isActive: null,
+      enableFacialRecognition: null,
+      minPriority: null,
+      maxPriority: null,
+    },
+    sortBy: 'name',
+    sortDirection: 'asc',
+    streamInfo: {},
+    healthResults: {},
+    connectionTestResults: {},
+    statistics: {
+      totalCameras: 0,
+      activeCameras: 0,
+      operationalCameras: 0,
+      errorCameras: 0,
+      byType: {},
+      byStatus: {},
+      byLocation: {},
+    },
+    selectedCameraIds: [],
+    showFilters: false,
+    viewMode: 'list',
+    lastSuccessMessage: null,
   },
   visitors: {
     list: [],
