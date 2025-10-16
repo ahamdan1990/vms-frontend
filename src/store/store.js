@@ -22,23 +22,28 @@ const loadPersistedState = () => {
     }
     
     const persistedState = JSON.parse(serializedState);
-    
-    if (!validateState(persistedState)) {
+
+    // ✅ FIX: Extract timestamp before validation (it's metadata, not state)
+    const { timestamp, ...stateWithoutTimestamp } = persistedState;
+
+    if (!validateState(stateWithoutTimestamp)) {
       console.warn('❌ Invalid persisted state structure, starting fresh');
+      localStorage.removeItem(STORAGE_KEY);
       return undefined;
     }
-    
+
     // ✅ PRODUCTION FIX: More reasonable expiry (7 days instead of 30)
-    const stateAge = Date.now() - (persistedState.timestamp || 0);
+    const stateAge = Date.now() - (timestamp || 0);
     const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
-    
+
     if (stateAge > maxAge) {
       console.info('⏰ Persisted state expired, starting fresh');
       localStorage.removeItem(STORAGE_KEY);
       return undefined;
     }
-    
-    const hydratedState = hydrateState(persistedState);
+
+    // ✅ FIX: Pass state without timestamp to hydrateState
+    const hydratedState = hydrateState(stateWithoutTimestamp);
     console.log('✅ State loaded from localStorage');
     return hydratedState;
   } catch (error) {

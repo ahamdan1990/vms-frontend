@@ -118,14 +118,18 @@ apiClient.interceptors.response.use(
   },
   async (error) => {
     const duration = error.config?.metadata ? new Date() - error.config.metadata.startTime : 0;
-    
-    // ✅ PRODUCTION FIX: Conditional error logging
-    if (process.env.NODE_ENV === 'development') {
+    const hasRefreshToken = document.cookie.includes('refreshToken=');
+    const isUnauthenticated = error.response?.status === 401 && !hasRefreshToken;
+
+    // ✅ PRODUCTION FIX: Conditional error logging (suppress for unauthenticated requests)
+    if (process.env.NODE_ENV === 'development' && !isUnauthenticated) {
       console.error(`❌ API Error: ${error.config?.method?.toUpperCase()} ${error.config?.url} (${duration}ms)`, error);
     }
-    
-    // Log to errorService for monitoring
-    errorService.processApiError(error);
+
+    // Log to errorService for monitoring (skip unauthenticated errors)
+    if (!isUnauthenticated) {
+      errorService.processApiError(error);
+    }
     
     // ✅ FIXED: Handle different types of errors
     if (error.response) {
@@ -133,8 +137,11 @@ apiClient.interceptors.response.use(
       
       switch (status) {
         case HTTP_STATUS.UNAUTHORIZED: {
-          // ✅ FIXED: Unauthorized - try to refresh token first
-          if (error.config.url !== AUTH_ENDPOINTS.REFRESH && !error.config._retry) {
+          // Check if we have refresh token cookie before attempting refresh
+          const hasRefreshToken = document.cookie.includes('refreshToken=');
+
+          // ✅ FIXED: Unauthorized - try to refresh token first (only if we have a refresh token)
+          if (hasRefreshToken && error.config.url !== AUTH_ENDPOINTS.REFRESH && !error.config._retry) {
             try {
               error.config._retry = true;
               if (process.env.NODE_ENV === 'development') {
@@ -153,6 +160,12 @@ apiClient.interceptors.response.use(
               await handleAuthFailure();
               return Promise.reject(error);
             }
+          } else if (!hasRefreshToken) {
+            // No refresh token - user is not authenticated, fail silently
+            if (process.env.NODE_ENV === 'development') {
+              console.log('ℹ️ Unauthenticated request failed - no action needed');
+            }
+            return Promise.reject(error);
           } else {
             // Refresh token failed or this was already a retry
             if (process.env.NODE_ENV === 'development') {

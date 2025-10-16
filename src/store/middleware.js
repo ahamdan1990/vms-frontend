@@ -243,6 +243,8 @@ export const validationMiddleware = (store) => (next) => (action) => {
  */
 export const rateLimitMiddleware = (store) => {
   const actionTimestamps = new Map();
+  const appStartTime = Date.now();
+
   const RATE_LIMITS = {
     default: 200,           // Reduced for better responsiveness
     'auth/loginUser': 2000, // Reduced from 3000ms
@@ -262,19 +264,22 @@ export const rateLimitMiddleware = (store) => {
     const rateLimit = RATE_LIMITS[actionKey] || RATE_LIMITS.default;
 
     if (lastCall && (now - lastCall) < rateLimit) {
-      if (process.env.NODE_ENV === 'development') {
+      // Suppress warnings during app initialization (first 5 seconds)
+      const isInitializing = (now - appStartTime) < 5000;
+
+      if (process.env.NODE_ENV === 'development' && !isInitializing) {
         console.warn(`⚠️  Rate limited action: ${actionKey}`, (now - lastCall) + 'ms ago');
       }
-      
-      return Promise.resolve({ 
-        type: 'RATE_LIMITED', 
+
+      return Promise.resolve({
+        type: 'RATE_LIMITED',
         originalAction: action,
         retryAfter: rateLimit - (now - lastCall)
       });
     }
 
     actionTimestamps.set(actionKey, now);
-    
+
     // ✅ PRODUCTION FIX: Cleanup old timestamps more aggressively
     const twoMinutesAgo = now - (2 * 60 * 1000); // Reduced from 5 minutes
     for (const [key, timestamp] of actionTimestamps.entries()) {

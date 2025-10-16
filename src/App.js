@@ -57,7 +57,12 @@ function App() {
     <Provider store={store}>
       <StorageProvider>
         <HelmetProvider>
-          <BrowserRouter>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true
+            }}
+          >
             <NotificationProvider
               position="top-right"
               maxToasts={5}

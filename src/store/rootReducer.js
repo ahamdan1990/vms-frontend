@@ -836,18 +836,23 @@ export const hydrateState = (persistedState) => {
  * Validates restored state structure
  */
 export const validateState = (state) => {
-  const requiredSlices = ['auth', 'users', 'ui', 'notifications', 'configuration', 'audit', 'visitPurposes', 'locations', 'visitors', 'emergencyContacts', 'invitations', 'capacity', 'timeSlots'];
-  
+  // Only validate critical slices - others can be missing (backward compatibility)
+  const requiredSlices = ['auth', 'ui', 'notifications'];
+
   if (!state || typeof state !== 'object') {
+    console.warn('❌ State validation failed: invalid state object');
+    localStorage.removeItem('vms_app_state');
     return false;
   }
-  
+
   for (const slice of requiredSlices) {
     if (!state[slice] || typeof state[slice] !== 'object') {
+      console.warn(`❌ State validation failed: missing or invalid slice "${slice}"`);
+      localStorage.removeItem('vms_app_state');
       return false;
     }
   }
-  
+
   return true;
 };
 

@@ -499,19 +499,26 @@ export const addNotificationWithDesktop = (notificationData) => (dispatch, getSt
   }
 };
 
-export const initializeNotifications = () => async (dispatch) => {
+export const initializeNotifications = () => async (dispatch, getState) => {
   try {
     // Check browser support
     const pushSupported = 'Notification' in window && 'serviceWorker' in navigator;
-    
-    // Only check permission, don't request automatically  
+
+    // Only check permission, don't request automatically
     if ('Notification' in window) {
       console.log('✅ Unified notifications initialized. Permission:', Notification.permission);
     }
 
-    // Load initial notifications
-    await dispatch(fetchNotifications());
-    
+    // Only load initial notifications if user is authenticated
+    const state = getState();
+    const isAuthenticated = state.auth?.isAuthenticated || false;
+
+    if (isAuthenticated) {
+      await dispatch(fetchNotifications());
+    } else {
+      console.log('ℹ️ Skipping notification fetch - user not authenticated');
+    }
+
     console.log('✅ Unified notification system ready');
   } catch (error) {
     console.error('Failed to initialize notifications:', error);

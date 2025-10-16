@@ -40,7 +40,13 @@ class NotificationService {
       console.log(response)
       return response.data;
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      // Only log error if user is authenticated (has refresh token cookie)
+      const hasRefreshToken = document.cookie.includes('refreshToken=');
+      const isAuthError = error.response?.status === 401;
+
+      if (process.env.NODE_ENV === 'development' && !(isAuthError && !hasRefreshToken)) {
+        console.error('Error fetching notifications:', error);
+      }
       throw this.handleApiError(error);
     }
   }
