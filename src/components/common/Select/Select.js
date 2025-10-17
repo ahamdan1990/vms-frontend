@@ -1,15 +1,15 @@
-import React from 'react';
 import classNames from 'classnames';
 
-const Select = ({ 
-  label, 
-  options = [], 
-  value, 
-  onChange, 
-  error, 
-  disabled = false, 
+const Select = ({
+  label,
+  options = [],
+  value,
+  onChange,
+  error,
+  disabled = false,
+  loading = false, // ✅ Extract loading prop to prevent it from being passed to DOM
   className,
-  ...props 
+  ...props
 }) => {
   const selectClasses = classNames(
     'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm',
@@ -32,7 +32,7 @@ const Select = ({
       className={selectClasses}
       value={value}
       onChange={onChange}
-      disabled={disabled}
+      disabled={disabled || loading}
       {...props}
     >
       {options.length > 0 ? (

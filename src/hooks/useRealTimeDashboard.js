@@ -20,11 +20,11 @@ const useRealTimeDashboard = (options = {}) => {
   } = options;
 
   // SignalR connection
-  const { 
-    getConnectionStatus, 
+  const {
+    getConnectionStatus,
     areConnectionsHealthy,
     getConnectionHealth,
-    admin: adminMethods 
+    admin: adminMethods
   } = useSignalR();
 
   const isAdminConnected = getConnectionStatus('admin') === HubConnectionState.Connected;
@@ -40,6 +40,8 @@ const useRealTimeDashboard = (options = {}) => {
   const fallbackInterval = useRef(null);
   const mounted = useRef(true);
   const dashboardEventSubscription = useRef(null);
+  const setupAttemptTimestamp = useRef(0);
+  const SETUP_COOLDOWN = 2000; // 2 seconds cooldown between setup attempts
 
   /**
    * Fetch dashboard data manually
@@ -97,12 +99,7 @@ const useRealTimeDashboard = (options = {}) => {
     }
   }, [onActivityUpdate]);
 
-  // Debounced versions
-  const debouncedFetchDashboardData = useMemo(() => 
-    debounce(fetchDashboardData, 1000),
-    [fetchDashboardData]
-  );
-
+  // Debounced version for activity updates
   const debouncedFetchRecentActivity = useMemo(() =>
     debounce(fetchRecentActivity, 5000),
     [fetchRecentActivity]
@@ -112,17 +109,34 @@ const useRealTimeDashboard = (options = {}) => {
    * Set up SignalR dashboard event listeners using the new event handler system
    */
   useEffect(() => {
-    if (!isAdminConnected || !enableAutoRefresh) return;
+    if (!isAdminConnected || !enableAutoRefresh) {
+      // Clean up subscription if connection lost
+      if (dashboardEventSubscription.current) {
+        console.log('Connection lost, cleaning up SignalR dashboard listeners');
+        dashboardEventSubscription.current();
+        dashboardEventSubscription.current = null;
+      }
+      return;
+    }
+
     if (dashboardEventSubscription.current) return; // already subscribed
 
+    // Cooldown check to prevent rapid reconnection loops
+    const now = Date.now();
+    if (now - setupAttemptTimestamp.current < SETUP_COOLDOWN) {
+      console.log('SignalR setup cooldown active, skipping setup');
+      return;
+    }
+    setupAttemptTimestamp.current = now;
+
     console.log('Setting up real-time dashboard event listeners');
-    
+
     // Get the dashboard event handler from the SignalR manager
     const eventHandlers = signalRManager.getEventHandlers();
     const dashboardHandler = eventHandlers.getDashboardHandler();
 
     // Subscribe to dashboard events
-     dashboardEventSubscription.current = dashboardHandler.subscribe((eventType, data, hubName) => {
+    dashboardEventSubscription.current = dashboardHandler.subscribe((eventType, data) => {
       if (!mounted.current) return;
 
       switch (eventType) {
@@ -161,9 +175,13 @@ const useRealTimeDashboard = (options = {}) => {
       }
     });
 
-    // Request initial system metrics
+    // Request initial system metrics (with error handling to prevent loops)
     if (adminMethods?.getSystemMetrics) {
-      adminMethods.getSystemMetrics().catch(console.error);
+      adminMethods.getSystemMetrics().catch(err => {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Failed to get system metrics (expected if WebSocket not ready):', err.message);
+        }
+      });
     }
 
     // Cleanup function
@@ -174,37 +192,55 @@ const useRealTimeDashboard = (options = {}) => {
         dashboardEventSubscription.current = null;
       }
     };
-  }, [enableAutoRefresh, isAdminConnected, adminMethods, onDashboardUpdate, onSystemHealthUpdate, debouncedFetchRecentActivity]);
+  }, [enableAutoRefresh, isAdminConnected]); // ✅ FIXED: Removed unstable dependencies
 
   /**
    * Setup fallback polling when SignalR is not available
+   * ✅ FIXED: Simplified to prevent infinite loop
    */
   useEffect(() => {
-    if (!enableAutoRefresh) return;
-
-    const isSignalRHealthy = areConnectionsHealthy();
-    
-    if (!isSignalRHealthy && fallbackIntervalMs && !fallbackInterval.current) {
-      console.log('SignalR not healthy, setting up fallback polling');
-      
-      fallbackInterval.current = setInterval(() => {
-        debouncedFetchDashboardData();
-      }, fallbackIntervalMs);
+    if (!enableAutoRefresh || !fallbackIntervalMs) {
+      // Clear any existing interval
+      if (fallbackInterval.current) {
+        clearInterval(fallbackInterval.current);
+        fallbackInterval.current = null;
+      }
+      return;
     }
 
-    if (isSignalRHealthy && fallbackInterval.current) {
-      console.log('SignalR is healthy, stopping fallback polling');
-      clearInterval(fallbackInterval.current);
-      fallbackInterval.current = null;
-    }
+    // Check SignalR health periodically (not on every render)
+    const checkHealthAndSetupFallback = () => {
+      const isSignalRHealthy = areConnectionsHealthy();
+
+      if (!isSignalRHealthy && !fallbackInterval.current) {
+        console.log('SignalR not healthy, setting up fallback polling');
+
+        fallbackInterval.current = setInterval(() => {
+          fetchDashboardData();
+        }, fallbackIntervalMs);
+      }
+
+      if (isSignalRHealthy && fallbackInterval.current) {
+        console.log('SignalR is healthy, stopping fallback polling');
+        clearInterval(fallbackInterval.current);
+        fallbackInterval.current = null;
+      }
+    };
+
+    // Initial check
+    checkHealthAndSetupFallback();
+
+    // Periodic health check (every 10 seconds)
+    const healthCheckInterval = setInterval(checkHealthAndSetupFallback, 10000);
 
     return () => {
+      clearInterval(healthCheckInterval);
       if (fallbackInterval.current) {
         clearInterval(fallbackInterval.current);
         fallbackInterval.current = null;
       }
     };
-  }, [enableAutoRefresh, fallbackIntervalMs, areConnectionsHealthy, debouncedFetchDashboardData]);
+  }, [enableAutoRefresh, fallbackIntervalMs]); // ✅ FIXED: Stable dependencies only
 
   /**
    * Initial data fetch on mount
