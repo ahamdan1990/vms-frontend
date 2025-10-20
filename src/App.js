@@ -1,5 +1,5 @@
 // src/App.js - UNIFIED NOTIFICATION SYSTEM
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store/store.js';
@@ -20,16 +20,24 @@ import { HelmetProvider } from 'react-helmet-async';
  */
 const AppInitializer = ({ children }) => {
   const dispatch = useDispatch();
-  const { loading } = useAuth();
+  const { loading, isAuthenticated } = useAuth();
   const initialized = useRef(false);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Wait for initial auth check to complete
+  useEffect(() => {
+    if (!loading && !authChecked) {
+      setAuthChecked(true);
+    }
+  }, [loading, authChecked]);
 
   useEffect(() => {
-    if (!initialized.current) {
+    if (!initialized.current && authChecked) {
       console.log('🚀 Initializing app...');
-      
+
       dispatch(initializeUI());
       dispatch(initializeNotifications());
-      
+
       initialized.current = true;
       console.log('✅ App initialization complete');
 
@@ -39,7 +47,7 @@ const AppInitializer = ({ children }) => {
         }
       }, 100);
     }
-  }, [dispatch]);
+  }, [dispatch, authChecked]);
 
   // Centralized loading management
   useEffect(() => {
@@ -48,6 +56,18 @@ const AppInitializer = ({ children }) => {
       dispatch(setPageLoading(false));
     };
   }, [loading, dispatch]);
+
+  // Show loading screen while checking auth
+  if (!authChecked) {
+    return (
+      <div className="fixed inset-0 bg-white dark:bg-gray-900 flex items-center justify-center z-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Initializing application...</p>
+        </div>
+      </div>
+    );
+  }
 
   return children;
 };

@@ -8,7 +8,7 @@ import Button from '../../common/Button/Button';
 import Badge from '../../common/Badge/Badge';
 import Input from '../../common/Input/Input';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
-import DocumentViewer from '../../common/DocumentViewer/DocumentViewer';
+import DocumentPreview from '../../documents/DocumentPreview';
 import Modal, { ConfirmModal } from '../../common/Modal/Modal';
 
 // Icons
@@ -520,23 +520,18 @@ const DocumentManager = ({
         </div>
       </Modal>
 
-      {/* Document Viewer Modal */}
-      <Modal
-        isOpen={showDocumentViewer}
-        onClose={() => setShowDocumentViewer(false)}
-        title=""
-        size="xl"
-        hideHeader={true}
-      >
-        <DocumentViewer
+      {/* Document Preview Modal */}
+      {selectedDocument && (
+        <DocumentPreview
+          visitorId={visitorId}
           document={selectedDocument}
-          onDownload={onDownload}
-          onClose={() => setShowDocumentViewer(false)}
-          showPreview={true}
-          showMetadata={true}
-          size="xl"
+          isOpen={showDocumentViewer}
+          onClose={() => {
+            setShowDocumentViewer(false);
+            setSelectedDocument(null);
+          }}
         />
-      </Modal>
+      )}
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

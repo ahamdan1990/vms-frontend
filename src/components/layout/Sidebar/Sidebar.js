@@ -254,6 +254,11 @@ const Sidebar = () => {
           show: systemPermissions.canUpdate || isAdmin
         },
         {
+          name: 'Escalation Rules',
+          href: '/system/escalation-rules',
+          show: systemPermissions.canRead || isAdmin
+        },
+        {
           name: 'Audit Logs',
           href: '/system/audit',
           show: auditPermissions.canRead || isAdmin

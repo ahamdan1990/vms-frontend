@@ -104,9 +104,9 @@ const EmergencyContactsList = ({
   const updateLoading = useSelector(selectEmergencyContactsUpdateLoading);
   const deleteLoading = useSelector(selectEmergencyContactsDeleteLoading);
   const selectedContacts = useSelector(selectSelectedContacts);
-  const showCreateModal = useSelector(selectShowCreateModal);
-  const showEditModal = useSelector(selectShowEditModal);
-  const showDeleteModal = useSelector(selectShowDeleteModal);
+  const isShowCreateModal = useSelector(selectShowCreateModal);
+  const isShowEditModal = useSelector(selectShowEditModal);
+  const isShowDeleteModal = useSelector(selectShowDeleteModal);
   const currentContact = useSelector(selectCurrentContact);
   const createError = useSelector(selectEmergencyContactsCreateError);
   const updateError = useSelector(selectEmergencyContactsUpdateError);
@@ -212,122 +212,99 @@ const EmergencyContactsList = ({
   // Table columns configuration
   const columns = [
     {
-      id: 'selection',
-      header: ({ table }) => (
-        <input
-          type="checkbox"
-          checked={table.getIsAllRowsSelected()}
-          onChange={table.getToggleAllRowsSelectedHandler()}
-          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-        />
-      ),
-      cell: ({ row }) => (
-        <input
-          type="checkbox"
-          checked={row.getIsSelected()}
-          onChange={row.getToggleSelectedHandler()}
-          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-      size: 50
-    },
-    {
-      id: 'name',
+      key: 'name',
       header: 'Contact Information',
-      cell: ({ row }) => {
-        const contact = row.original;
-        return (
-          <div className="flex items-center space-x-3">
-            {contact.isPrimary && (
-              <StarIconSolid className="w-4 h-4 text-yellow-500" title="Primary Contact" />
-            )}
-            <div className="flex-1 min-w-0">
-              <div className="font-medium text-gray-900">
-                {contact.firstName} {contact.lastName}
-              </div>
-              <div className="flex items-center space-x-4 text-sm text-gray-500">
-                {contact.phoneNumber && (
-                  <div className="flex items-center space-x-1">
-                    <PhoneIcon className="w-3 h-3" />
-                    <span>{contact.phoneNumber}</span>
-                  </div>
-                )}
-                {contact.email && (
-                  <div className="flex items-center space-x-1">
-                    <EnvelopeIcon className="w-3 h-3" />
-                    <span className="truncate">{contact.email}</span>
-                  </div>
-                )}
-              </div>
+      sortable: true,
+      render: (value, contact) => (
+        <div className="flex items-center space-x-3">
+          {contact.isPrimary && (
+            <StarIconSolid className="w-4 h-4 text-yellow-500" title="Primary Contact" />
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="font-medium text-gray-900">
+              {contact.firstName} {contact.lastName}
+            </div>
+            <div className="flex items-center space-x-4 text-sm text-gray-500">
+              {contact.phoneNumber && (
+                <div className="flex items-center space-x-1">
+                  <PhoneIcon className="w-3 h-3" />
+                  <span>{contact.phoneNumber}</span>
+                </div>
+              )}
+              {contact.email && (
+                <div className="flex items-center space-x-1">
+                  <EnvelopeIcon className="w-3 h-3" />
+                  <span className="truncate">{contact.email}</span>
+                </div>
+              )}
             </div>
           </div>
-        );
-      }
+        </div>
+      )
     },
     {
-      id: 'relationship',
+      key: 'relationship',
       header: 'Relationship',
-      accessorKey: 'relationship',
-      cell: ({ row }) => (
+      sortable: true,
+      render: (relationship, contact) => (
         <Badge
-          variant={getRelationshipBadgeVariant(row.original.relationship)}
+          variant={getRelationshipBadgeVariant(relationship)}
           size="sm"
         >
-          {row.original.relationship || 'Other'}
+          {relationship || 'Other'}
         </Badge>
       )
     },
     {
-      id: 'priority',
+      key: 'priority',
       header: 'Priority',
-      accessorKey: 'priority',
-      cell: ({ row }) => {
-        const contact = row.original;
+      sortable: true,
+      render: (priority, contact) => {
         if (contact.isPrimary) {
           return <Badge variant="warning" size="sm">Primary</Badge>;
         }
-        return contact.priority ? (
-          <span className="text-sm text-gray-900">#{contact.priority}</span>
+        return priority ? (
+          <span className="text-sm text-gray-900">#{priority}</span>
         ) : (
           <span className="text-sm text-gray-400">-</span>
         );
       }
     },
     {
-      id: 'actions',
+      key: 'actions',
       header: 'Actions',
-      cell: ({ row }) => {
-        const contact = row.original;
-        return (
-          <div className="flex items-center space-x-2">
-            {canUpdate && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => dispatch(showEditModal(contact))}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                <PencilIcon className="w-4 h-4" />
-              </Button>
-            )}
-            
-            {canDelete && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => dispatch(showDeleteModal(contact))}
-                className="text-red-600 hover:text-red-800"
-              >
-                <TrashIcon className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        );
-      },
-      enableSorting: false,
-      size: 100
+      sortable: false,
+      render: (value, contact) => (
+        <div className="flex items-center space-x-2">
+          {canUpdate && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatch(showEditModal(contact));
+              }}
+              className="text-blue-600 hover:text-blue-800"
+            >
+              <PencilIcon className="w-4 h-4" />
+            </Button>
+          )}
+
+          {canDelete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatch(showDeleteModal(contact));
+              }}
+              className="text-red-600 hover:text-red-800"
+            >
+              <TrashIcon className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
+      )
     }
   ];
   if (!canRead) {
@@ -505,29 +482,9 @@ const EmergencyContactsList = ({
             data={contacts}
             columns={columns}
             loading={listLoading}
-            onRowSelectionChange={(selectedRowIds) => {
-              const selectedIds = Object.keys(selectedRowIds).filter(id => selectedRowIds[id]);
-              dispatch(setSelectedContacts(selectedIds.map(Number)));
-            }}
-            emptyMessage={
-              <div className="text-center py-12">
-                <UserIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No emergency contacts</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Add emergency contacts to ensure visitor safety and compliance.
-                </p>
-                {canCreate && (
-                  <div className="mt-6">
-                    <Button
-                      onClick={() => dispatch(showCreateModal())}
-                      icon={<PlusIcon className="w-5 h-5" />}
-                    >
-                      Add Emergency Contact
-                    </Button>
-                  </div>
-                )}
-              </div>
-            }
+            emptyMessage="No emergency contacts found. Add emergency contacts to ensure visitor safety and compliance."
+            hover={true}
+            striped={false}
             className="emergency-contacts-table"
           />
         )}
@@ -535,7 +492,7 @@ const EmergencyContactsList = ({
 
       {/* Create Modal */}
       <Modal
-        isOpen={showCreateModal}
+        isOpen={isShowCreateModal}
         onClose={() => dispatch(hideCreateModal())}
         title="Add Emergency Contact"
         size="lg"
@@ -551,7 +508,7 @@ const EmergencyContactsList = ({
 
       {/* Edit Modal */}
       <Modal
-        isOpen={showEditModal}
+        isOpen={isShowEditModal}
         onClose={() => dispatch(hideEditModal())}
         title="Edit Emergency Contact"
         size="lg"
@@ -571,7 +528,7 @@ const EmergencyContactsList = ({
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal
-        isOpen={showDeleteModal}
+        isOpen={isShowDeleteModal}
         onClose={() => dispatch(hideDeleteModal())}
         onConfirm={() => handleDeleteContact(false)}
         title="Delete Emergency Contact"

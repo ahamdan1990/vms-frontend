@@ -19,7 +19,7 @@ import Badge from '../../../components/common/Badge/Badge';
 import Card from '../../../components/common/Card/Card';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
 import Modal, { ConfirmModal } from '../../../components/common/Modal/Modal';
-import DocumentViewer from '../../../components/common/DocumentViewer/DocumentViewer';
+import DocumentPreview from '../../../components/documents/DocumentPreview';
 import DocumentManager from '../../../components/visitor/DocumentManager/DocumentManager';
 import VisitorForm from '../../../components/visitor/VisitorForm/VisitorForm';
 import EmergencyContactsList from '../../../components/visitor/EmergencyContactsList/EmergencyContactsList';
@@ -477,23 +477,18 @@ const VisitorProfilePage = () => {
         loading={updateLoading}
       />
 
-      {/* Document Viewer Modal */}
-      <Modal
-        isOpen={showDocumentViewer}
-        onClose={() => setShowDocumentViewer(false)}
-        title=""
-        size="xl"
-        hideHeader={true}
-      >
-        <DocumentViewer
+      {/* Document Preview Modal */}
+      {selectedDocument && (
+        <DocumentPreview
+          visitorId={visitor.id}
           document={selectedDocument}
-          onDownload={handleDownloadDocument}
-          onClose={() => setShowDocumentViewer(false)}
-          showPreview={true}
-          showMetadata={true}
-          size="xl"
+          isOpen={showDocumentViewer}
+          onClose={() => {
+            setShowDocumentViewer(false);
+            setSelectedDocument(null);
+          }}
         />
-      </Modal>
+      )}
     </div>
   );
 

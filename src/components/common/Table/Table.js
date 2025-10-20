@@ -214,8 +214,8 @@ const Table = ({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No Data</h3>
-        <p className="text-gray-600">{emptyMessage}</p>
+        <div className="text-lg font-medium text-gray-900 mb-2">No Data</div>
+        <div className="text-gray-600">{emptyMessage}</div>
       </div>
     );
   }
@@ -264,9 +264,9 @@ const Table = ({
                 />
               </th>
             )}
-            {columns.map((column) => (
+            {columns.map((column, index) => (
               <th
-                key={column.key}
+                key={column.key || `column-${index}`}
                 className={classNames(
                   cellClasses,
                   'text-left text-xs font-medium text-gray-500 uppercase tracking-wider',
@@ -279,11 +279,11 @@ const Table = ({
                 style={{ width: column.width }}
               >
                 <div className="flex items-center">
-                  {column.header}
-                  <SortIcon 
-                    column={column} 
-                    sortColumn={internalSort.column} 
-                    sortDirection={internalSort.direction} 
+                  {typeof column.header === 'function' ? column.header() : column.header}
+                  <SortIcon
+                    column={column}
+                    sortColumn={internalSort.column}
+                    sortDirection={internalSort.direction}
                   />
                 </div>
               </th>
@@ -311,10 +311,10 @@ const Table = ({
                   />
                 </td>
               )}
-              {columns.map((column) => (
-                <td key={column.key} className={cellClasses}>
-                  {column.render ? 
-                    column.render(row[column.key], row, index) : 
+              {columns.map((column, colIndex) => (
+                <td key={column.key || `col-${colIndex}`} className={cellClasses}>
+                  {column.render ?
+                    column.render(row[column.key], row, index) :
                     row[column.key]
                   }
                 </td>

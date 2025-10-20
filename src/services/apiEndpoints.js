@@ -167,6 +167,7 @@ export const VISITOR_DOCUMENT_ENDPOINTS = {
   BY_ID: (visitorId, docId) => `/api/visitors/${visitorId}/documents/${docId}`,
   UPLOAD: (visitorId) => `/api/visitors/${visitorId}/documents/upload`,
   DOWNLOAD: (visitorId, docId) => `/api/visitors/${visitorId}/documents/${docId}/download`,
+  PREVIEW: (visitorId, docId) => `/api/visitors/${visitorId}/documents/${docId}/preview`,
   UPLOAD_INFO: (visitorId) => `/api/visitors/${visitorId}/documents/upload-info`
 };
 

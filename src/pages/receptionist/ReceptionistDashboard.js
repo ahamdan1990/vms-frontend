@@ -17,6 +17,7 @@ import QrCodeScanner from '../../components/checkin/QrCodeScanner/QrCodeScanner'
 import VisitorForm from '../../components/visitor/VisitorForm/VisitorForm';
 import CameraCapture from '../../components/camera/CameraCapture';
 import DocumentScanner from '../../components/scanner/DocumentScanner';
+import DocumentPreview from '../../components/documents/DocumentPreview';
 
 // Icons
 import {
@@ -33,7 +34,10 @@ import {
   ArrowLeftOnRectangleIcon,
   PhoneIcon,
   EnvelopeIcon,
-  XCircleIcon
+  XCircleIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 import {
   CheckCircleIcon as CheckCircleIconSolid,
@@ -82,6 +86,14 @@ const ReceptionistDashboard = () => {
   // Active visitors state
   const [activeVisitors, setActiveVisitors] = useState([]);
   const [activeVisitorsLoading, setActiveVisitorsLoading] = useState(false);
+  const [expandedVisitorId, setExpandedVisitorId] = useState(null);
+  const [visitorDocuments, setVisitorDocuments] = useState({});
+  const [loadingDocuments, setLoadingDocuments] = useState({});
+
+  // Document preview state
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [previewVisitorId, setPreviewVisitorId] = useState(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   // Load dashboard data
   useEffect(() => {
@@ -286,6 +298,60 @@ const ReceptionistDashboard = () => {
     setSelectedVisitorForDocs(visitor);
     setShowDocumentScanner(true);
     setActiveTab('documents');
+  };
+
+  // Handle toggling visitor details
+  const handleToggleVisitorDetails = async (visitorId) => {
+    if (expandedVisitorId === visitorId) {
+      setExpandedVisitorId(null);
+      return;
+    }
+
+    setExpandedVisitorId(visitorId);
+
+    // Load documents if not already loaded
+    if (!visitorDocuments[visitorId]) {
+      try {
+        setLoadingDocuments(prev => ({ ...prev, [visitorId]: true }));
+        const response = await visitorDocumentService.getVisitorDocuments(visitorId);
+        setVisitorDocuments(prev => ({ ...prev, [visitorId]: response.data || [] }));
+      } catch (error) {
+        console.error('Failed to load visitor documents:', error);
+        setVisitorDocuments(prev => ({ ...prev, [visitorId]: [] }));
+      } finally {
+        setLoadingDocuments(prev => ({ ...prev, [visitorId]: false }));
+      }
+    }
+  };
+
+  // Handle document preview
+  const handlePreviewDocument = (visitorId, doc) => {
+    setPreviewVisitorId(visitorId);
+    setSelectedDocument(doc);
+    setIsPreviewOpen(true);
+  };
+
+  const handleClosePreview = () => {
+    setIsPreviewOpen(false);
+    setSelectedDocument(null);
+    setPreviewVisitorId(null);
+  };
+
+  // Handle document download
+  const handleDownloadDocument = async (visitorId, doc) => {
+    try {
+      const blob = await visitorDocumentService.downloadVisitorDocument(visitorId, doc.id);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = doc.originalFileName || doc.fileName || 'document';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to download document:', error);
+    }
   };
 
   // Render stats cards
@@ -596,39 +662,122 @@ const ReceptionistDashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {activeVisitors.map(invitation => (
-                    <div key={invitation.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span className="text-blue-600 font-semibold">
-                              {invitation.visitor?.firstName?.[0]}{invitation.visitor?.lastName?.[0]}
-                            </span>
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-900">
-                              {invitation.visitor?.fullName || 'Unknown Visitor'}
-                            </h3>
-                            <p className="text-gray-500 text-sm">{invitation.visitor?.company}</p>
-                            <p className="text-gray-500 text-sm">
-                              Host: {invitation.host?.fullName || 'N/A'}
-                            </p>
+                  {activeVisitors.map(invitation => {
+                    const visitorId = invitation.visitor?.id;
+                    const isExpanded = expandedVisitorId === visitorId;
+                    const documents = visitorDocuments[visitorId] || [];
+                    const isLoadingDocs = loadingDocuments[visitorId];
+
+                    return (
+                      <div key={invitation.id} className="border rounded-lg overflow-hidden">
+                        <div className="p-4 hover:bg-gray-50">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span className="text-blue-600 font-semibold">
+                                  {invitation.visitor?.firstName?.[0]}{invitation.visitor?.lastName?.[0]}
+                                </span>
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900">
+                                  {invitation.visitor?.fullName || 'Unknown Visitor'}
+                                </h3>
+                                <p className="text-gray-500 text-sm">{invitation.visitor?.company}</p>
+                                <p className="text-gray-500 text-sm">
+                                  Host: {invitation.host?.fullName || 'N/A'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge color="green">Checked In</Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleToggleVisitorDetails(visitorId)}
+                                icon={isExpanded ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+                              >
+                                {isExpanded ? 'Hide' : 'View'} Details
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleCheckOut(invitation.id)}
+                                icon={<ArrowLeftOnRectangleIcon className="w-4 h-4" />}
+                              >
+                                Check Out
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge color="green">Checked In</Badge>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleCheckOut(invitation.id)}
-                            icon={<ArrowLeftOnRectangleIcon className="w-4 h-4" />}
-                          >
-                            Check Out
-                          </Button>
-                        </div>
+
+                        {/* Expanded Details */}
+                        {isExpanded && (
+                          <div className="border-t bg-gray-50 p-4">
+                            <h4 className="text-sm font-semibold text-gray-700 mb-3">Visitor Documents</h4>
+
+                            {isLoadingDocs ? (
+                              <div className="flex items-center space-x-2 text-sm text-gray-600 py-4">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                                <span>Loading documents...</span>
+                              </div>
+                            ) : documents.length > 0 ? (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {documents.map((doc) => (
+                                  <div key={doc.id} className="bg-white rounded-lg p-3 border">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center space-x-2">
+                                          <DocumentTextIcon className="w-4 h-4 text-gray-400" />
+                                          <p className="text-sm font-medium text-gray-900 truncate">
+                                            {doc.documentName}
+                                          </p>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                          {doc.documentType} • {doc.formattedFileSize}
+                                        </p>
+                                        {doc.description && (
+                                          <p className="text-xs text-gray-600 mt-1 truncate">
+                                            {doc.description}
+                                          </p>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center space-x-1">
+                                        {doc.isSensitive && (
+                                          <Badge variant="warning" size="xs">Sensitive</Badge>
+                                        )}
+                                        {doc.isRequired && (
+                                          <Badge variant="info" size="xs">Required</Badge>
+                                        )}
+                                      </div>
+                                    </div>
+                                    {/* Action Buttons */}
+                                    <div className="flex items-center space-x-2 pt-2 border-t border-gray-200">
+                                      <button
+                                        onClick={() => handlePreviewDocument(visitorId, doc)}
+                                        className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
+                                      >
+                                        <EyeIcon className="w-3.5 h-3.5" />
+                                        <span>Preview</span>
+                                      </button>
+                                      <button
+                                        onClick={() => handleDownloadDocument(visitorId, doc)}
+                                        className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
+                                      >
+                                        <ArrowDownTrayIcon className="w-3.5 h-3.5" />
+                                        <span>Download</span>
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-sm text-gray-500 py-4">No documents available for this visitor.</p>
+                            )}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </Card>
@@ -730,6 +879,16 @@ const ReceptionistDashboard = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Document Preview Modal */}
+      {selectedDocument && previewVisitorId && (
+        <DocumentPreview
+          visitorId={previewVisitorId}
+          document={selectedDocument}
+          isOpen={isPreviewOpen}
+          onClose={handleClosePreview}
+        />
+      )}
     </div>
   );
 };

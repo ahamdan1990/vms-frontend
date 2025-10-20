@@ -18,6 +18,7 @@ import Card from '../../common/Card/Card';
 import FileUpload from '../../common/FileUpload/FileUpload';
 import AutocompleteInput from '../../common/AutocompleteInput/AutocompleteInput';
 import ProfilePhotoUpload from '../ProfilePhotoUpload/ProfilePhotoUpload';
+import DocumentPreview from '../../documents/DocumentPreview';
 
 // Redux
 import { getLocations } from '../../../store/slices/locationsSlice';
@@ -29,9 +30,9 @@ import { selectVisitPurposesList } from '../../../store/selectors/visitPurposeSe
 import { extractErrorMessage } from '../../../utils/errorUtils';
 
 // Icons
-import { 
-  UserIcon, 
-  BuildingOfficeIcon, 
+import {
+  UserIcon,
+  BuildingOfficeIcon,
   IdentificationIcon,
   GlobeAltIcon,
   ShieldCheckIcon,
@@ -45,7 +46,9 @@ import {
   PhotoIcon,
   MapPinIcon,
   ClipboardDocumentListIcon,
-  CloudArrowUpIcon
+  CloudArrowUpIcon,
+  EyeIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { getVisitorById } from '../../../store/slices/visitorsSlice';
@@ -168,6 +171,37 @@ const VisitorForm = ({
   // Existing documents state for edit mode
   const [existingDocuments, setExistingDocuments] = useState([]);
   const [loadingDocuments, setLoadingDocuments] = useState(false);
+
+  // Document preview state
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  // Document preview and download handlers
+  const handlePreviewDocument = (doc) => {
+    setSelectedDocument(doc);
+    setIsPreviewOpen(true);
+  };
+
+  const handleClosePreview = () => {
+    setIsPreviewOpen(false);
+    setSelectedDocument(null);
+  };
+
+  const handleDownloadDocument = async (doc) => {
+    try {
+      const blob = await visitorDocumentService.downloadVisitorDocument(initialData.id, doc.id);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = doc.originalFileName || doc.fileName || 'document';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to download document:', error);
+    }
+  };
 
   // Load supporting data on mount
   useEffect(() => {
@@ -1173,7 +1207,7 @@ const VisitorForm = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {existingDocuments.map((doc) => (
                   <div key={doc.id} className="bg-gray-50 rounded-lg p-3 border">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2">
                           <DocumentTextIcon className="w-4 h-4 text-gray-400" />
@@ -1198,6 +1232,23 @@ const VisitorForm = ({
                           <Badge variant="info" size="xs">Required</Badge>
                         )}
                       </div>
+                    </div>
+                    {/* Action Buttons */}
+                    <div className="flex items-center space-x-2 pt-2 border-t border-gray-200">
+                      <button
+                        onClick={() => handlePreviewDocument(doc)}
+                        className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
+                      >
+                        <EyeIcon className="w-3.5 h-3.5" />
+                        <span>Preview</span>
+                      </button>
+                      <button
+                        onClick={() => handleDownloadDocument(doc)}
+                        className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
+                      >
+                        <ArrowDownTrayIcon className="w-3.5 h-3.5" />
+                        <span>Download</span>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -2156,6 +2207,16 @@ const VisitorForm = ({
           )}
         </div>
       </div>
+
+      {/* Document Preview Modal */}
+      {selectedDocument && (
+        <DocumentPreview
+          visitorId={initialData?.id}
+          document={selectedDocument}
+          isOpen={isPreviewOpen}
+          onClose={handleClosePreview}
+        />
+      )}
     </div>
   );
 };

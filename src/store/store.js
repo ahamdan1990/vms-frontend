@@ -20,7 +20,7 @@ const loadPersistedState = () => {
     if (serializedState === null) {
       return undefined;
     }
-    
+
     const persistedState = JSON.parse(serializedState);
 
     // ✅ FIX: Extract timestamp before validation (it's metadata, not state)
@@ -40,6 +40,41 @@ const loadPersistedState = () => {
       console.info('⏰ Persisted state expired, starting fresh');
       localStorage.removeItem(STORAGE_KEY);
       return undefined;
+    }
+
+    // ✅ PRODUCTION FIX: Validate token exists if auth state claims authenticated
+    if (stateWithoutTimestamp?.auth?.isAuthenticated) {
+      const token = localStorage.getItem('vms_auth_token');
+      const refreshToken = localStorage.getItem('vms_refresh_token');
+
+      if (!token || !refreshToken) {
+        console.warn('⚠️ Auth state claims authenticated but tokens missing - clearing auth state');
+        // Clear auth state but keep other persisted data
+        const clearedState = {
+          ...stateWithoutTimestamp,
+          auth: {
+            user: null,
+            isAuthenticated: false,
+            permissions: [],
+            loading: true, // Set loading true to trigger auth check
+            error: null
+          }
+        };
+        return hydrateState(clearedState);
+      }
+
+      // ✅ CRITICAL FIX: Tokens exist but might be invalid (backend restart)
+      // Set isAuthenticated to false and loading to true to force validation
+      console.log('⏳ Tokens found - will validate on app start');
+      const validationState = {
+        ...stateWithoutTimestamp,
+        auth: {
+          ...stateWithoutTimestamp.auth,
+          isAuthenticated: false, // Don't trust persisted auth until validated
+          loading: true // Trigger auth check in useAuth hook
+        }
+      };
+      return hydrateState(validationState);
     }
 
     // ✅ FIX: Pass state without timestamp to hydrateState

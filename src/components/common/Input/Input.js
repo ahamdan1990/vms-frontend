@@ -20,6 +20,7 @@ const Input = forwardRef(({
   error,
   success,
   helperText,
+  helpText, // Legacy support - map to helperText
   className = '',
   inputClassName = '',
   size = 'md',
@@ -33,6 +34,8 @@ const Input = forwardRef(({
   name,
   ...props
 }, ref) => {
+  // Support both helperText and helpText (legacy)
+  const displayHelperText = helperText || helpText;
   const [focused, setFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
@@ -184,7 +187,7 @@ const Input = forwardRef(({
         )}
       </div>
       
-      {(error || success || helperText) && (
+      {(error || success || displayHelperText) && (
         <div className="mt-1.5 text-sm">
           {error && (
             <p className="text-red-600 flex items-center">
@@ -194,7 +197,7 @@ const Input = forwardRef(({
               {error}
             </p>
           )}
-          
+
           {success && !error && (
             <p className="text-green-600 flex items-center">
               <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -203,9 +206,9 @@ const Input = forwardRef(({
               {success}
             </p>
           )}
-          
-          {helperText && !error && !success && (
-            <p className="text-gray-500">{helperText}</p>
+
+          {displayHelperText && !error && !success && (
+            <p className="text-gray-500">{displayHelperText}</p>
           )}
         </div>
       )}
@@ -228,6 +231,7 @@ Input.propTypes = {
   error: PropTypes.string,
   success: PropTypes.string,
   helperText: PropTypes.string,
+  helpText: PropTypes.string, // Legacy support
   className: PropTypes.string,
   inputClassName: PropTypes.string,
   size: PropTypes.oneOf(['sm', 'md', 'lg']),

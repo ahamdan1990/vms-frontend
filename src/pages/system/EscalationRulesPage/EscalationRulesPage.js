@@ -361,7 +361,7 @@ const EscalationRulesPage = () => {
   const columns = [
     {
       key: 'ruleName',
-      title: 'Rule Name',
+      header: 'Rule Name',
       sortable: true,
       render: (value, row) => (
         <div className="flex items-center space-x-3">
@@ -381,7 +381,7 @@ const EscalationRulesPage = () => {
     },
     {
       key: 'alertType',
-      title: 'Alert Type',
+      header: 'Alert Type',
       sortable: true,
       render: (value) => (
         <div className="flex items-center space-x-2">
@@ -392,7 +392,7 @@ const EscalationRulesPage = () => {
     },
     {
       key: 'alertPriority',
-      title: 'Priority',
+      header: 'Priority',
       sortable: true,
       render: (value) => (
         <Badge color={getPriorityBadgeColor(value)} size="sm">
@@ -402,18 +402,20 @@ const EscalationRulesPage = () => {
     },
     {
       key: 'targetRole',
-      title: 'Target Role',
+      header: 'Target Role',
+      sortable: false,
       render: (value) => value || 'All Roles'
     },
     {
       key: 'escalationDelayMinutes',
-      title: 'Delay',
+      header: 'Delay',
       sortable: true,
       render: (value) => `${value} min`
     },
     {
       key: 'action',
-      title: 'Action',
+      header: 'Action',
+      sortable: false,
       render: (value, row) => (
         <div className="flex items-center space-x-2">
           {getActionIcon(value)}
@@ -423,7 +425,8 @@ const EscalationRulesPage = () => {
     },
     {
       key: 'isEnabled',
-      title: 'Status',
+      header: 'Status',
+      sortable: false,
       render: (value, row) => (
         <div className="flex items-center space-x-2">
           {value ? (
@@ -439,7 +442,8 @@ const EscalationRulesPage = () => {
     },
     {
       key: 'actions',
-      title: 'Actions',
+      header: 'Actions',
+      sortable: false,
       width: '120px',
       render: (_, row) => (
         <div className="flex items-center space-x-1">

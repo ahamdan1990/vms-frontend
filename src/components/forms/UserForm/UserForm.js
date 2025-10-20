@@ -28,44 +28,42 @@ const UserForm = ({
   const isEditing = Boolean(user);
 
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    
+    firstName: user?.firstName ?? '',
+    lastName: user?.lastName ?? '',
+    email: user?.email ?? '',
+
     // Enhanced phone number fields with Lebanon default
-    phoneNumber: '',
-    phoneCountryCode: '961', // Lebanon default
-    phoneType: 'Mobile',
-    
-    role: 'Staff',
-    status: 'Active',
-    department: '',
-    jobTitle: '',
-    employeeId: '',
-    isActive: true,
+    phoneNumber: user?.phoneNumber ?? '',
+    phoneCountryCode: user?.phoneCountryCode ?? '961', // Lebanon default
+    phoneType: user?.phoneType ?? 'Mobile',
+
+    role: user?.role ?? 'Staff',
+    status: user?.status ?? 'Active',
+    department: user?.department ?? '',
+    jobTitle: user?.jobTitle ?? '',
+    employeeId: user?.employeeId ?? '',
+    isActive: user?.isActive ?? true,
     mustChangePassword: !isEditing,
-    
+
     // User preferences with Lebanon defaults
-    timeZone: 'Asia/Beirut', // Lebanon timezone
-    language: 'en-US', // Default to English, but Arabic available
-    theme: 'light',
-    
+    timeZone: user?.timeZone ?? 'Asia/Beirut', // Lebanon timezone
+    language: user?.language ?? 'en-US', // Default to English, but Arabic available
+    theme: user?.theme ?? 'light',
+
     // Enhanced address fields with Lebanon defaults
-    addressType: 'Home',
-    street1: '',
-    street2: '',
-    city: '',
-    governorate: '', // Lebanon uses governorates instead of states
-    postalCode: '',
-    country: 'Lebanon', // Default to Lebanon
-    enableCoordinates: false,
-    latitude: '',
-    longitude: '',
-    
+    addressType: user?.addressType ?? 'Home',
+    street1: user?.street1 ?? '',
+    street2: user?.street2 ?? '',
+    city: user?.city ?? '',
+    governorate: user?.state ?? user?.governorate ?? '', // Lebanon uses governorates instead of states
+    postalCode: user?.postalCode ?? '',
+    country: user?.country ?? 'Lebanon', // Default to Lebanon
+    enableCoordinates: Boolean(user?.latitude && user?.longitude),
+    latitude: user?.latitude?.toString() ?? '',
+    longitude: user?.longitude?.toString() ?? '',
+
     // Email preferences
-    sendWelcomeEmail: true,
-    
-    ...user
+    sendWelcomeEmail: !isEditing
   });
 
   const [errors, setErrors] = useState({});

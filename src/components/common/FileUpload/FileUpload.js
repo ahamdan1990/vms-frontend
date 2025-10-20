@@ -25,7 +25,7 @@ import Badge from '../Badge/Badge';
  */
 const FileUpload = ({
   onFileSelect,
-  onFileRemove,
+  onFileRemove = () => {}, // Optional callback with no-op default
   accept = 'image/*,application/pdf,.doc,.docx',
   maxSize = 10 * 1024 * 1024, // 10MB default
   maxFiles = 1,
@@ -346,7 +346,7 @@ const FileUpload = ({
 // PropTypes validation
 FileUpload.propTypes = {
   onFileSelect: PropTypes.func.isRequired,
-  onFileRemove: PropTypes.func.isRequired,
+  onFileRemove: PropTypes.func, // Optional callback
   accept: PropTypes.string,
   maxSize: PropTypes.number,
   maxFiles: PropTypes.number,

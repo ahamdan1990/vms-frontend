@@ -146,7 +146,7 @@ export const useAuth = () => {
     }
   }, [dispatch, logoutImmediate]);
 
-  // ✅ PRODUCTION FIX: Single initialization with proper dependency management
+  // ✅ PRODUCTION FIX: Single initialization with proper dependency management and token validation
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -157,26 +157,34 @@ export const useAuth = () => {
 
         initRef.current = true;
 
-        // Check for stored auth state
+        // Check if tokens exist (store sets loading=true if tokens found)
         const storedData = localStorage.getItem('vms_app_state');
+
         if (!storedData) {
           isInitialized = true;
           return;
         }
 
-        const parsedData = JSON.parse(storedData);
-        if (parsedData?.auth?.isAuthenticated && parsedData?.auth?.user) {
-          await checkAuth();
+        if (storedData && !isAuthenticated) {
+          console.log('⏳ Validating authentication token...');
+          // Try to fetch current user to validate token
+          try {
+            await checkAuth();
+          } catch (error) {
+            console.warn('⚠️ Token validation failed - clearing auth:', error);
+            logoutImmediate();
+          }
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
+        logoutImmediate();
       } finally {
         isInitialized = true;
       }
     };
 
-    // Only initialize if not authenticated and not loading
-    if (!isAuthenticated && !loading && !isInitialized) {
+    // Run initialization once
+    if (!isInitialized && !initRef.current) {
       if (!globalInitializationPromise) {
         globalInitializationPromise = initializeAuth().finally(() => {
           globalInitializationPromise = null;

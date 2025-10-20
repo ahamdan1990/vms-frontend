@@ -1,5 +1,5 @@
 import apiClient, { extractApiData } from './apiClient';
-import { VISITOR_DOCUMENT_ENDPOINTS, buildQueryString } from './apiEndpoints';
+import { VISITOR_DOCUMENT_ENDPOINTS, API_CONFIG, buildQueryString } from './apiEndpoints';
 
 /**
  * Visitor Document management service matching the backend API endpoints exactly
@@ -99,6 +99,27 @@ const visitorDocumentService = {
   },
 
   /**
+   * Previews a visitor document (inline display)
+   * GET /api/visitors/{visitorId}/documents/{id}/preview
+   * Requires: VisitorDocument.Read permission
+   */
+  async previewVisitorDocument(visitorId, documentId) {
+    const response = await apiClient.get(VISITOR_DOCUMENT_ENDPOINTS.PREVIEW(visitorId, documentId), {
+      responseType: 'blob',
+    });
+    return response.data; // Return blob directly
+  },
+
+  /**
+   * Gets preview URL for a visitor document
+   * Returns the full URL for embedding in iframe or img tags
+   * Note: This URL requires authentication (cookies)
+   */
+  getPreviewUrl(visitorId, documentId) {
+    return `${API_CONFIG.BASE_URL}${VISITOR_DOCUMENT_ENDPOINTS.PREVIEW(visitorId, documentId)}`;
+  },
+
+  /**
    * Downloads a visitor document
    * GET /api/visitors/{visitorId}/documents/{id}/download
    * Requires: VisitorDocument.Download permission
@@ -108,6 +129,14 @@ const visitorDocumentService = {
       responseType: 'blob',
     });
     return response.data; // Return blob directly
+  },
+
+  /**
+   * Gets download URL for a visitor document
+   * Returns the full URL for direct download links
+   */
+  getDownloadUrl(visitorId, documentId) {
+    return `${API_CONFIG.BASE_URL}${VISITOR_DOCUMENT_ENDPOINTS.DOWNLOAD(visitorId, documentId)}`;
   },
 
   /**
