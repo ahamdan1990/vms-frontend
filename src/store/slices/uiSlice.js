@@ -136,11 +136,32 @@ const detectSystemTheme = () => {
   return THEMES.LIGHT;
 };
 
-// Helper function to store theme preference in memory
-let memoryTheme = THEMES.LIGHT;
+// Helper function to store theme preference in localStorage
+const THEME_STORAGE_KEY = 'vms_theme_preference';
 
-const getStoredTheme = () => memoryTheme;
-const storeTheme = (theme) => { memoryTheme = theme; };
+const getStoredTheme = () => {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const stored = localStorage.getItem(THEME_STORAGE_KEY);
+      if (stored && Object.values(THEMES).includes(stored)) {
+        return stored;
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to read theme from localStorage:', error);
+  }
+  return THEMES.LIGHT;
+};
+
+const storeTheme = (theme) => {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    }
+  } catch (error) {
+    console.warn('Failed to store theme in localStorage:', error);
+  }
+};
 
 // UI slice
 const uiSlice = createSlice({

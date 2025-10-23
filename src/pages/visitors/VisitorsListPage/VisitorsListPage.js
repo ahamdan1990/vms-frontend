@@ -376,27 +376,51 @@ const VisitorsListPage = () => {
 
   const handleDeleteVisitor = async (permanentDelete = false) => {
     try {
-      await dispatch(deleteVisitor({ 
-        id: currentVisitor.id, 
-        permanentDelete 
+      await dispatch(deleteVisitor({
+        id: currentVisitor.id,
+        permanentDelete
       })).unwrap();
-      // Success handled by Redux state
+
+      // Close the delete modal
+      dispatch(hideDeleteModal());
+
+      // Refresh the visitor list to show updated data
+      const params = { ...filters, pageIndex, pageSize };
+      dispatch(getVisitors(params));
+
+      // Refresh statistics if available
+      if (canViewStats) {
+        dispatch(getVisitorStatistics());
+      }
+
+      console.log('✅ Visitor deleted successfully!');
     } catch (error) {
-      // Error handled by Redux state
       console.error('Delete visitor failed:', error);
     }
   };
 
   const handleBlacklistVisitor = async () => {
     try {
-      await dispatch(blacklistVisitor({ 
-        id: currentVisitor.id, 
-        reason: blacklistReason 
+      await dispatch(blacklistVisitor({
+        id: currentVisitor.id,
+        reason: blacklistReason
       })).unwrap();
       setBlacklistReason('');
-      // Success handled by Redux state
+
+      // Close the blacklist modal
+      dispatch(hideBlacklistModal());
+
+      // Refresh the visitor list
+      const params = { ...filters, pageIndex, pageSize };
+      dispatch(getVisitors(params));
+
+      // Refresh statistics if available
+      if (canViewStats) {
+        dispatch(getVisitorStatistics());
+      }
+
+      console.log('✅ Visitor blacklisted successfully!');
     } catch (error) {
-      // Error handled by Redux state
       console.error('Blacklist visitor failed:', error);
     }
   };
@@ -404,9 +428,18 @@ const VisitorsListPage = () => {
   const handleRemoveBlacklist = async (id) => {
     try {
       await dispatch(removeBlacklist(id)).unwrap();
-      // Success handled by Redux state
+
+      // Refresh the visitor list
+      const params = { ...filters, pageIndex, pageSize };
+      dispatch(getVisitors(params));
+
+      // Refresh statistics if available
+      if (canViewStats) {
+        dispatch(getVisitorStatistics());
+      }
+
+      console.log('✅ Blacklist removed successfully!');
     } catch (error) {
-      // Error handled by Redux state
       console.error('Remove blacklist failed:', error);
     }
   };
@@ -414,9 +447,18 @@ const VisitorsListPage = () => {
   const handleMarkAsVip = async (id) => {
     try {
       await dispatch(markAsVip(id)).unwrap();
-      // Success handled by Redux state
+
+      // Refresh the visitor list
+      const params = { ...filters, pageIndex, pageSize };
+      dispatch(getVisitors(params));
+
+      // Refresh statistics if available
+      if (canViewStats) {
+        dispatch(getVisitorStatistics());
+      }
+
+      console.log('✅ Visitor marked as VIP successfully!');
     } catch (error) {
-      // Error handled by Redux state
       console.error('Mark as VIP failed:', error);
     }
   };
@@ -424,22 +466,42 @@ const VisitorsListPage = () => {
   const handleRemoveVipStatus = async (id) => {
     try {
       await dispatch(removeVipStatus(id)).unwrap();
-      // Success handled by Redux state
+
+      // Refresh the visitor list
+      const params = { ...filters, pageIndex, pageSize };
+      dispatch(getVisitors(params));
+
+      // Refresh statistics if available
+      if (canViewStats) {
+        dispatch(getVisitorStatistics());
+      }
+
+      console.log('✅ VIP status removed successfully!');
     } catch (error) {
-      // Error handled by Redux state
       console.error('Remove VIP status failed:', error);
     }
   };
 
   const handleBulkDelete = async () => {
     try {
-      const deletePromises = selectedVisitors.map(id => 
+      const deletePromises = selectedVisitors.map(id =>
         dispatch(deleteVisitor({ id, permanentDelete: false })).unwrap()
       );
       await Promise.all(deletePromises);
       dispatch(clearSelections());
       setShowBulkConfirm(false);
       setBulkAction('');
+
+      // Refresh the visitor list to show updated data
+      const params = { ...filters, pageIndex, pageSize };
+      dispatch(getVisitors(params));
+
+      // Refresh statistics if available
+      if (canViewStats) {
+        dispatch(getVisitorStatistics());
+      }
+
+      console.log('✅ Bulk delete completed successfully!');
     } catch (error) {
       console.error('Bulk delete failed:', error);
     }
@@ -447,7 +509,7 @@ const VisitorsListPage = () => {
 
   const handleBulkBlacklist = async () => {
     try {
-      const blacklistPromises = selectedVisitors.map(id => 
+      const blacklistPromises = selectedVisitors.map(id =>
         dispatch(blacklistVisitor({ id, reason: blacklistReason })).unwrap()
       );
       await Promise.all(blacklistPromises);
@@ -455,6 +517,17 @@ const VisitorsListPage = () => {
       setShowBulkConfirm(false);
       setBulkAction('');
       setBlacklistReason('');
+
+      // Refresh the visitor list to show updated data
+      const params = { ...filters, pageIndex, pageSize };
+      dispatch(getVisitors(params));
+
+      // Refresh statistics if available
+      if (canViewStats) {
+        dispatch(getVisitorStatistics());
+      }
+
+      console.log('✅ Bulk blacklist completed successfully!');
     } catch (error) {
       console.error('Bulk blacklist failed:', error);
     }
@@ -467,7 +540,18 @@ const VisitorsListPage = () => {
         dispatch(markAsVip(id)).unwrap()
       );
       await Promise.all(vipPromises);
-      setSelectedVisitors([]);
+      dispatch(clearSelections());
+
+      // Refresh the visitor list to show updated data
+      const params = { ...filters, pageIndex, pageSize };
+      dispatch(getVisitors(params));
+
+      // Refresh statistics if available
+      if (canViewStats) {
+        dispatch(getVisitorStatistics());
+      }
+
+      console.log('✅ Bulk VIP marking completed successfully!');
     } catch (error) {
       console.error('Bulk mark VIP failed:', error);
     }
@@ -479,7 +563,18 @@ const VisitorsListPage = () => {
         dispatch(removeVipStatus(id)).unwrap()
       );
       await Promise.all(removeVipPromises);
-      setSelectedVisitors([]);
+      dispatch(clearSelections());
+
+      // Refresh the visitor list to show updated data
+      const params = { ...filters, pageIndex, pageSize };
+      dispatch(getVisitors(params));
+
+      // Refresh statistics if available
+      if (canViewStats) {
+        dispatch(getVisitorStatistics());
+      }
+
+      console.log('✅ Bulk VIP removal completed successfully!');
     } catch (error) {
       console.error('Bulk remove VIP failed:', error);
     }
@@ -521,17 +616,17 @@ const VisitorsListPage = () => {
     return (
       <div className="flex items-center space-x-2">
         {visitor.isVip && (
-          <StarIconSolid className="w-4 h-4 text-yellow-500" title="VIP Visitor" />
+          <StarIconSolid className="w-4 h-4 text-yellow-500 dark:text-yellow-400" title="VIP Visitor" />
         )}
         <div>
-          <div className="font-medium text-gray-900">{fullName}</div>
+          <div className="font-medium text-gray-900 dark:text-gray-100">{fullName}</div>
           {visitor.jobTitle && visitor.company && (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               {visitor.jobTitle} at {visitor.company}
             </div>
           )}
           {(!visitor.jobTitle && visitor.company) && (
-            <div className="text-sm text-gray-500">{visitor.company}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">{visitor.company}</div>
           )}
         </div>
       </div>
@@ -593,14 +688,14 @@ const VisitorsListPage = () => {
         <div className="space-y-1">
           {visitor.email && (
             <div className="flex items-center space-x-1 text-sm">
-              <EnvelopeIcon className="w-4 h-4 text-gray-400" />
-              <span className="truncate">{visitor.email}</span>
+              <EnvelopeIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+              <span className="truncate text-gray-900 dark:text-gray-100">{visitor.email}</span>
             </div>
           )}
           {visitor.phoneNumber && (
             <div className="flex items-center space-x-1 text-sm">
-              <PhoneIcon className="w-4 h-4 text-gray-400" />
-              <span>{visitor.phoneNumber}</span>
+              <PhoneIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+              <span className="text-gray-900 dark:text-gray-100">{visitor.phoneNumber}</span>
             </div>
           )}
         </div>
@@ -613,10 +708,10 @@ const VisitorsListPage = () => {
       render: (value, visitor) => (
         <div className="space-y-1">
           {visitor.company && (
-            <div className="font-medium text-gray-900">{visitor.company}</div>
+            <div className="font-medium text-gray-900 dark:text-gray-100">{visitor.company}</div>
           )}
           {visitor.jobTitle && (
-            <div className="text-sm text-gray-500">{visitor.jobTitle}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">{visitor.jobTitle}</div>
           )}
         </div>
       )
@@ -625,7 +720,7 @@ const VisitorsListPage = () => {
       key: 'nationality',
       header: 'Nationality',
       sortable: true,
-      render: (value, visitor) => visitor.nationality || '-'
+      render: (value, visitor) => <span className="text-gray-900 dark:text-gray-100">{visitor.nationality || '-'}</span>
     },
     {
       key: 'status',
@@ -649,7 +744,7 @@ const VisitorsListPage = () => {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => handleVisitorAction('view', visitor)}
-            className="text-gray-600 hover:text-gray-900 transition-colors"
+            className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
             title="View details"
           >
             <EyeIcon className="w-4 h-4" />
@@ -657,7 +752,7 @@ const VisitorsListPage = () => {
           {canUpdate && (
             <button
               onClick={() => handleVisitorAction('edit', visitor)}
-              className="text-blue-600 hover:text-blue-900 transition-colors"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
               title="Edit visitor"
             >
               <PencilIcon className="w-4 h-4" />
@@ -666,7 +761,7 @@ const VisitorsListPage = () => {
           {canDelete && (
             <button
               onClick={() => handleVisitorAction('delete', visitor)}
-              className="text-red-600 hover:text-red-900 transition-colors"
+              className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
               title="Delete visitor"
             >
               <TrashIcon className="w-4 h-4" />
@@ -677,16 +772,16 @@ const VisitorsListPage = () => {
     }
   ];
   return (
-    <div className="space-y-6">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Visitors</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Visitors</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Manage visitor information, VIP status, and blacklist entries
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 flex space-x-3">
+        <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
           {/* Advanced Search Toggle */}
           <Button
             variant="outline"
@@ -695,7 +790,7 @@ const VisitorsListPage = () => {
           >
             Advanced Search
           </Button>
-          
+
           {canCreate && (
             <Button
               onClick={() => dispatch(showCreateModal())}
@@ -710,18 +805,18 @@ const VisitorsListPage = () => {
 
       {/* Statistics Cards */}
       {statistics && (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <UserIcon className="w-5 h-5 text-blue-600" />
+                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                  <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Visitors</dt>
-                  <dd className="text-lg font-medium text-gray-900">{statistics.totalVisitors || 0}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Visitors</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.totalVisitors || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -730,14 +825,14 @@ const VisitorsListPage = () => {
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <UserIcon className="w-5 h-5 text-green-600" />
+                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                  <UserIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Active</dt>
-                  <dd className="text-lg font-medium text-gray-900">{statistics.activeVisitors || 0}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Active</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.activeVisitors || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -746,14 +841,14 @@ const VisitorsListPage = () => {
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <StarIconSolid className="w-5 h-5 text-yellow-600" />
+                <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center">
+                  <StarIconSolid className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">VIP Visitors</dt>
-                  <dd className="text-lg font-medium text-gray-900">{statistics.vipVisitors || 0}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">VIP Visitors</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.vipVisitors || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -762,14 +857,14 @@ const VisitorsListPage = () => {
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                  <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
+                <div className="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                  <ExclamationTriangleIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Blacklisted</dt>
-                  <dd className="text-lg font-medium text-gray-900">{statistics.blacklistedVisitors || 0}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Blacklisted</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.blacklistedVisitors || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -789,8 +884,9 @@ const VisitorsListPage = () => {
               icon={<MagnifyingGlassIcon className="w-5 h-5" />}
             />
           </div>
-          
-          <div className="flex space-x-3">
+
+
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
@@ -798,8 +894,8 @@ const VisitorsListPage = () => {
             >
               Filters
             </Button>
-            
-            {(filters.company || filters.isVip !== null || filters.isBlacklisted !== null || 
+
+            {(filters.company || filters.isVip !== null || filters.isBlacklisted !== null ||
               filters.nationality || filters.securityClearance || filters.searchTerm || !filters.isActive) && (
               <Button
                 variant="ghost"
@@ -818,11 +914,11 @@ const VisitorsListPage = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-4 pt-4 border-t border-gray-200"
+              className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Company
                   </label>
                   <Input
@@ -834,13 +930,13 @@ const VisitorsListPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     VIP Status
                   </label>
                   <select
                     value={filters.isVip === null ? '' : filters.isVip.toString()}
                     onChange={(e) => handleFilterChange('isVip', e.target.value === '' ? null : e.target.value === 'true')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-200"
                   >
                     <option value="">All Visitors</option>
                     <option value="true">VIP Only</option>
@@ -849,13 +945,13 @@ const VisitorsListPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Blacklist Status
                   </label>
                   <select
                     value={filters.isBlacklisted === null ? '' : filters.isBlacklisted.toString()}
                     onChange={(e) => handleFilterChange('isBlacklisted', e.target.value === '' ? null : e.target.value === 'true')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-200"
                   >
                     <option value="">All Visitors</option>
                     <option value="true">Blacklisted Only</option>
@@ -864,7 +960,7 @@ const VisitorsListPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Nationality
                   </label>
                   <Input
@@ -876,13 +972,13 @@ const VisitorsListPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Security Clearance
                   </label>
                   <select
                     value={filters.securityClearance}
                     onChange={(e) => handleFilterChange('securityClearance', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-200"
                   >
                     <option value="">All Levels</option>
                     <option value="Standard">Standard</option>
@@ -900,9 +996,9 @@ const VisitorsListPage = () => {
                     id="includeInactive"
                     checked={!filters.isActive}
                     onChange={(e) => handleFilterChange('isActive', !e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                   />
-                  <label htmlFor="includeInactive" className="ml-2 block text-sm text-gray-700">
+                  <label htmlFor="includeInactive" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                     Include inactive visitors
                   </label>
                 </div>
@@ -913,9 +1009,9 @@ const VisitorsListPage = () => {
                     id="includeDeleted"
                     checked={filters.includeDeleted}
                     onChange={(e) => handleFilterChange('includeDeleted', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                   />
-                  <label htmlFor="includeDeleted" className="ml-2 block text-sm text-gray-700">
+                  <label htmlFor="includeDeleted" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                     Include deleted visitors
                   </label>
                 </div>
@@ -927,9 +1023,9 @@ const VisitorsListPage = () => {
       {/* Bulk Actions */}
       {hasSelected && (
         <Card className="p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
             <div className="flex items-center space-x-3">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {selectedCount} visitor{selectedCount !== 1 ? 's' : ''} selected
               </span>
               <Button
@@ -940,8 +1036,8 @@ const VisitorsListPage = () => {
                 Clear Selection
               </Button>
             </div>
-            
-            <div className="flex space-x-2">
+
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 sm:space-x-0">
               {canBlacklist && (
                 <Button
                   variant="outline"
@@ -1001,7 +1097,7 @@ const VisitorsListPage = () => {
         onDelete={canDelete ? (visitor) => handleVisitorAction('delete', visitor) : undefined}
         // Bulk operations
         selectedVisitors={selectedVisitors}
-        onSelectionChange={setSelectedVisitors}
+        onSelectionChange={(newSelection) => dispatch(setSelectedVisitors(newSelection))}
         onBulkMarkVip={canMarkVip ? handleBulkMarkVip : undefined}
         onBulkRemoveVip={canRemoveVip ? handleBulkRemoveVip : undefined}
         onBulkBlacklist={canBlacklist ? handleBulkBlacklist : undefined}
@@ -1020,16 +1116,16 @@ const VisitorsListPage = () => {
       {/* Pagination */}
       {total > 0 && (
         <Card>
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-sm text-gray-500">
+          <div className="px-4 sm:px-6 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2 sm:space-x-2 text-sm text-gray-500 dark:text-gray-400">
                 <span>
                   Showing {pageRange.start} to {pageRange.end} of {pageRange.total} visitors
                 </span>
                 <select
                   value={pageSize}
                   onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-                  className="border border-gray-300 rounded px-2 py-1 text-sm"
+                  className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded px-2 py-1 text-sm w-full sm:w-auto transition-colors duration-200"
                 >
                   <option value={10}>10 per page</option>
                   <option value={20}>20 per page</option>
@@ -1037,8 +1133,8 @@ const VisitorsListPage = () => {
                   <option value={100}>100 per page</option>
                 </select>
               </div>
-              
-              <div className="flex items-center space-x-2">
+
+              <div className="flex items-center gap-2 overflow-x-auto">
                 <Button
                   variant="outline"
                   size="sm"
@@ -1047,8 +1143,8 @@ const VisitorsListPage = () => {
                 >
                   Previous
                 </Button>
-                
-                <div className="flex items-center space-x-1">
+
+                <div className="hidden sm:flex items-center space-x-1">
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     let pageNum;
                     if (totalPages <= 5) {
@@ -1065,10 +1161,10 @@ const VisitorsListPage = () => {
                       <button
                         key={pageNum}
                         onClick={() => handlePageChange(pageNum)}
-                        className={`px-3 py-1 text-sm rounded ${
+                        className={`px-3 py-1 text-sm rounded transition-colors duration-200 ${
                           pageNum === pageIndex
-                            ? 'bg-blue-100 text-blue-700 font-medium'
-                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                         }`}
                       >
                         {pageNum + 1}
@@ -1076,7 +1172,12 @@ const VisitorsListPage = () => {
                     );
                   })}
                 </div>
-                
+
+                {/* Mobile: Show current page indicator */}
+                <div className="sm:hidden flex items-center px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
+                  Page {pageIndex + 1} of {totalPages}
+                </div>
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -1163,24 +1264,24 @@ const VisitorsListPage = () => {
       >
         <div className="p-6">
           <div className="mb-4">
-            <p className="text-sm text-gray-600">
-              {currentVisitor && 
-                `You are about to blacklist ${currentVisitor.firstName} ${currentVisitor.lastName}. 
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {currentVisitor &&
+                `You are about to blacklist ${currentVisitor.firstName} ${currentVisitor.lastName}.
                 Please provide a reason for this action.`
               }
             </p>
           </div>
-          
+
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Reason for blacklisting <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Reason for blacklisting <span className="text-red-500 dark:text-red-400">*</span>
             </label>
             <textarea
               value={blacklistReason}
               onChange={(e) => setBlacklistReason(e.target.value)}
               rows={3}
               placeholder="Please provide a detailed reason..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-200"
               required
             />
           </div>
@@ -1237,22 +1338,22 @@ const VisitorsListPage = () => {
       >
         <div className="p-6">
           <div className="mb-4">
-            <p className="text-sm text-gray-600">
-              You are about to blacklist {selectedCount} visitor{selectedCount !== 1 ? 's' : ''}. 
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              You are about to blacklist {selectedCount} visitor{selectedCount !== 1 ? 's' : ''}.
               Please provide a reason for this action.
             </p>
           </div>
-          
+
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Reason for blacklisting <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Reason for blacklisting <span className="text-red-500 dark:text-red-400">*</span>
             </label>
             <textarea
               value={blacklistReason}
               onChange={(e) => setBlacklistReason(e.target.value)}
               rows={3}
               placeholder="Please provide a detailed reason..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-200"
               required
             />
           </div>

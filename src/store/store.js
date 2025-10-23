@@ -44,28 +44,11 @@ const loadPersistedState = () => {
 
     // ✅ PRODUCTION FIX: Validate token exists if auth state claims authenticated
     if (stateWithoutTimestamp?.auth?.isAuthenticated) {
-      const token = localStorage.getItem('vms_auth_token');
-      const refreshToken = localStorage.getItem('vms_refresh_token');
-
-      if (!token || !refreshToken) {
-        console.warn('⚠️ Auth state claims authenticated but tokens missing - clearing auth state');
-        // Clear auth state but keep other persisted data
-        const clearedState = {
-          ...stateWithoutTimestamp,
-          auth: {
-            user: null,
-            isAuthenticated: false,
-            permissions: [],
-            loading: true, // Set loading true to trigger auth check
-            error: null
-          }
-        };
-        return hydrateState(clearedState);
-      }
-
-      // ✅ CRITICAL FIX: Tokens exist but might be invalid (backend restart)
-      // Set isAuthenticated to false and loading to true to force validation
-      console.log('⏳ Tokens found - will validate on app start');
+      // ✅ CRITICAL FIX: Cookies are HttpOnly - JavaScript CANNOT read them via document.cookie!
+      // This is a security feature - HttpOnly cookies can only be read by the server
+      // Solution: Always attempt to re-authenticate on page load
+      // The backend will automatically validate the HttpOnly cookies in the request
+      console.log('⏳ Auth state found - will validate session on app start');
       const validationState = {
         ...stateWithoutTimestamp,
         auth: {

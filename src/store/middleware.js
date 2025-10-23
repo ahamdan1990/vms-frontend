@@ -62,10 +62,13 @@ export const errorMiddleware = (store) => (next) => (action) => {
 
     store.dispatch(incrementErrorCount());
 
+    // Extract actual status from error payload
+    const actualStatus = error?.status || error?.originalError?.status || 500;
+
     const processedError = errorService.processApiError({
       response: {
         data: error,
-        status: 500
+        status: actualStatus
       },
       message: error
     });
@@ -77,12 +80,17 @@ export const errorMiddleware = (store) => (next) => (action) => {
       console.groupEnd();
     }
 
-    if (processedError.type === 'AUTHENTICATION_ERROR') {
+    // Only dispatch logout if user was authenticated (to prevent infinite logout loop)
+    const state = store.getState();
+    const wasAuthenticated = state.auth?.isAuthenticated || false;
+
+    if (processedError.type === 'AUTHENTICATION_ERROR' && wasAuthenticated) {
       store.dispatch(logout());
       return next(action);
     }
 
     // ✅ PRODUCTION FIX: Only show error notifications for important actions
+    // BUT exclude getCurrentUser auth errors (401) when user is not authenticated
     const importantActions = [
       'loginUser',
       'createUser',
@@ -90,10 +98,14 @@ export const errorMiddleware = (store) => (next) => (action) => {
       'deleteUser',
       'getCurrentUser'
     ];
-    
+
     const isImportantAction = importantActions.some(action => actionType.includes(action));
-    
-    if (isImportantAction) {
+
+    // Don't show toast for getCurrentUser auth errors (happens on initial page load)
+    const isGetCurrentUserAuthError = actionType.includes('getCurrentUser') &&
+                                      processedError.type === 'AUTHENTICATION_ERROR';
+
+    if (isImportantAction && !isGetCurrentUserAuthError) {
       store.dispatch(showErrorToast('Error', processedError.message));
     }
   }
@@ -161,7 +173,8 @@ export const notificationMiddleware = (store) => (next) => (action) => {
     }
 
     if (actionType === 'auth/forgotPassword/fulfilled') {
-      store.dispatch(showSuccessToast('Email Sent', 'Password reset instructions sent to your email'));
+      const message = action.payload?.message || 'Password reset instructions sent to your email';
+      store.dispatch(showSuccessToast('Email Sent', message));
     }
   }
 

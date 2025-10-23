@@ -122,67 +122,67 @@ export const COLOR_CLASSES = {
   }
 };
 
-// Button variant color mappings
+// Button variant color mappings with dark mode support
 export const BUTTON_COLORS = {
   primary: {
-    base: 'bg-primary-600 text-white',
-    hover: 'hover:bg-primary-700',
-    active: 'active:bg-primary-800',
-    focus: 'focus:ring-primary-500',
-    disabled: 'disabled:bg-gray-300 disabled:text-gray-500',
+    base: 'bg-primary-600 text-white dark:bg-primary-500',
+    hover: 'hover:bg-primary-700 dark:hover:bg-primary-600',
+    active: 'active:bg-primary-800 dark:active:bg-primary-700',
+    focus: 'focus:ring-primary-500 dark:focus:ring-primary-400',
+    disabled: 'disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-500',
   },
   secondary: {
-    base: 'bg-gray-100 text-gray-900 border border-gray-300',
-    hover: 'hover:bg-gray-200',
-    active: 'active:bg-gray-300',
-    focus: 'focus:ring-gray-500',
-    disabled: 'disabled:bg-gray-100 disabled:text-gray-400',
+    base: 'bg-gray-100 text-gray-900 border border-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600',
+    hover: 'hover:bg-gray-200 dark:hover:bg-gray-600',
+    active: 'active:bg-gray-300 dark:active:bg-gray-500',
+    focus: 'focus:ring-gray-500 dark:focus:ring-gray-400',
+    disabled: 'disabled:bg-gray-100 disabled:text-gray-400 dark:disabled:bg-gray-800 dark:disabled:text-gray-600',
   },
   success: {
-    base: 'bg-green-600 text-white',
-    hover: 'hover:bg-green-700',
-    active: 'active:bg-green-800',
-    focus: 'focus:ring-green-500',
-    disabled: 'disabled:bg-gray-300 disabled:text-gray-500',
+    base: 'bg-green-600 text-white dark:bg-green-500',
+    hover: 'hover:bg-green-700 dark:hover:bg-green-600',
+    active: 'active:bg-green-800 dark:active:bg-green-700',
+    focus: 'focus:ring-green-500 dark:focus:ring-green-400',
+    disabled: 'disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-500',
   },
   danger: {
-    base: 'bg-red-600 text-white',
-    hover: 'hover:bg-red-700',
-    active: 'active:bg-red-800',
-    focus: 'focus:ring-red-500',
-    disabled: 'disabled:bg-gray-300 disabled:text-gray-500',
+    base: 'bg-red-600 text-white dark:bg-red-500',
+    hover: 'hover:bg-red-700 dark:hover:bg-red-600',
+    active: 'active:bg-red-800 dark:active:bg-red-700',
+    focus: 'focus:ring-red-500 dark:focus:ring-red-400',
+    disabled: 'disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-500',
   },
   warning: {
-    base: 'bg-yellow-500 text-white',
-    hover: 'hover:bg-yellow-600',
-    active: 'active:bg-yellow-700',
-    focus: 'focus:ring-yellow-500',
-    disabled: 'disabled:bg-gray-300 disabled:text-gray-500',
+    base: 'bg-yellow-500 text-white dark:bg-yellow-600',
+    hover: 'hover:bg-yellow-600 dark:hover:bg-yellow-700',
+    active: 'active:bg-yellow-700 dark:active:bg-yellow-800',
+    focus: 'focus:ring-yellow-500 dark:focus:ring-yellow-400',
+    disabled: 'disabled:bg-gray-300 disabled:text-gray-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-500',
   },
   outline: {
-    base: 'border-2 border-primary-600 text-primary-600 bg-transparent',
-    hover: 'hover:bg-primary-600 hover:text-white',
-    active: 'active:bg-primary-700 active:text-white',
-    focus: 'focus:ring-primary-500',
-    disabled: 'disabled:border-gray-300 disabled:text-gray-400',
+    base: 'border-2 border-primary-600 text-primary-600 bg-transparent dark:border-primary-400 dark:text-primary-400',
+    hover: 'hover:bg-primary-600 hover:text-white dark:hover:bg-primary-500 dark:hover:border-primary-500',
+    active: 'active:bg-primary-700 active:text-white dark:active:bg-primary-600 dark:active:border-primary-600',
+    focus: 'focus:ring-primary-500 dark:focus:ring-primary-400',
+    disabled: 'disabled:border-gray-300 disabled:text-gray-400 dark:disabled:border-gray-700 dark:disabled:text-gray-600',
   },
   ghost: {
-    base: 'text-primary-600 bg-transparent',
-    hover: 'hover:bg-primary-50',
-    active: 'active:bg-primary-100',
-    focus: 'focus:ring-primary-500',
-    disabled: 'disabled:text-gray-400',
+    base: 'text-primary-600 bg-transparent dark:text-primary-400',
+    hover: 'hover:bg-primary-50 dark:hover:bg-primary-900/20',
+    active: 'active:bg-primary-100 dark:active:bg-primary-900/30',
+    focus: 'focus:ring-primary-500 dark:focus:ring-primary-400',
+    disabled: 'disabled:text-gray-400 dark:disabled:text-gray-600',
   }
 };
 
-// Badge/Status colors
+// Badge/Status colors with dark mode support
 export const BADGE_COLORS = {
-  primary: 'bg-primary-100 text-primary-800',
-  secondary: 'bg-gray-100 text-gray-800',
-  success: 'bg-green-100 text-green-800',
-  warning: 'bg-yellow-100 text-yellow-800',
-  error: 'bg-red-100 text-red-800',
-  info: 'bg-cyan-100 text-cyan-800',
+  primary: 'bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-200',
+  secondary: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+  success: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200',
+  warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200',
+  error: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200',
+  info: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-200',
 };
 
 // Utility functions

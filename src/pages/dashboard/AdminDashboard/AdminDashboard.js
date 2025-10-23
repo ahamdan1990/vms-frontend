@@ -259,22 +259,22 @@ const AdminDashboard = () => {
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.3 }}
-      className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300"
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 hover:shadow-xl transition-all duration-300"
     >
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center space-x-2 mb-1">
-            <p className="text-sm font-medium text-gray-600">{title}</p>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
             {isLive && (
               <div className="flex items-center space-x-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-xs text-green-600 font-medium">LIVE</span>
+                <span className="text-xs text-green-600 dark:text-green-400 font-medium">LIVE</span>
               </div>
             )}
           </div>
-          <p className="text-3xl font-bold text-gray-900">
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">
             {typeof value === 'number' && value % 1 !== 0 ? value.toFixed(1) : value}
-            {unit && <span className="text-lg font-normal text-gray-600">{unit}</span>}
+            {unit && <span className="text-lg font-normal text-gray-600 dark:text-gray-400">{unit}</span>}
           </p>
           {trend && (
             <p className={`text-sm font-medium ${trendColor} mt-1`}>
@@ -316,10 +316,10 @@ const AdminDashboard = () => {
 
   const ActivityItem = ({ activity, index }) => {
     const severityConfig = {
-      info: { bg: 'bg-blue-50', border: 'border-blue-200', icon: 'text-blue-500' },
-      success: { bg: 'bg-green-50', border: 'border-green-200', icon: 'text-green-500' },
-      warning: { bg: 'bg-yellow-50', border: 'border-yellow-200', icon: 'text-yellow-500' },
-      error: { bg: 'bg-red-50', border: 'border-red-200', icon: 'text-red-500' }
+      info: { bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800', icon: 'text-blue-500 dark:text-blue-400' },
+      success: { bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-200 dark:border-green-800', icon: 'text-green-500 dark:text-green-400' },
+      warning: { bg: 'bg-yellow-50 dark:bg-yellow-900/20', border: 'border-yellow-200 dark:border-yellow-800', icon: 'text-yellow-500 dark:text-yellow-400' },
+      error: { bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-red-200 dark:border-red-800', icon: 'text-red-500 dark:text-red-400' }
     };
 
     const config = severityConfig[activity.severity] || severityConfig.info;
@@ -371,8 +371,8 @@ const AdminDashboard = () => {
             {getIcon(activity.type)}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-gray-900 font-medium">{activity.message}</p>
-            <p className="text-xs text-gray-500 mt-1">{activity.timestamp}</p>
+            <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">{activity.message}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{activity.timestamp}</p>
           </div>
         </div>
       </motion.div>
@@ -416,7 +416,7 @@ const AdminDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* System Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Total Users"
             value={userStats?.total || 0}
@@ -497,35 +497,35 @@ const AdminDashboard = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.2 }}
-                className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6"
               >
                 <div className="flex items-center space-x-2 mb-4">
-                  <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
-                  <h3 className="text-lg font-semibold text-gray-900">Capacity Overview</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Capacity Overview</h3>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-900">{overviewSummary.totalLocations}</div>
-                    <div className="text-sm text-gray-600">Total Locations</div>
+                  <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{overviewSummary.totalLocations}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Total Locations</div>
                   </div>
-                  <div className="text-center p-3 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{overviewSummary.averageUtilization}%</div>
-                    <div className="text-sm text-gray-600">Avg Utilization</div>
+                  <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">{overviewSummary.averageUtilization}%</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Avg Utilization</div>
                   </div>
-                  <div className="text-center p-3 bg-yellow-50 rounded-lg">
-                    <div className="text-2xl font-bold text-yellow-600">{overviewSummary.warningLevelCount}</div>
-                    <div className="text-sm text-gray-600">Warning Level</div>
+                  <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{overviewSummary.warningLevelCount}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Warning Level</div>
                   </div>
-                  <div className="text-center p-3 bg-red-50 rounded-lg">
-                    <div className="text-2xl font-bold text-red-600">{overviewSummary.atCapacityCount}</div>
-                    <div className="text-sm text-gray-600">At Capacity</div>
+                  <div className="text-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-red-600 dark:text-red-400">{overviewSummary.atCapacityCount}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">At Capacity</div>
                   </div>
                 </div>
                 
-                <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <Link to="/capacity">
                     <Button
                       variant="outline"
@@ -552,9 +552,9 @@ const AdminDashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6"
             >
-              <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
                 <svg className="w-5 h-5 text-indigo-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
@@ -574,10 +574,10 @@ const AdminDashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.5 }}
-              className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6"
             >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
                   <svg className="w-5 h-5 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -597,7 +597,7 @@ const AdminDashboard = () => {
                 ))}
               </div>
               
-              <div className="mt-6 pt-4 border-t border-gray-200">
+              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <Link to="/system/audit">
                   <Button
                     variant="outline"
@@ -665,13 +665,13 @@ const AdminDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.5 }}
-          className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6"
+          className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
         >
-          <div className="bg-white rounded-lg p-4 shadow-md border border-gray-100">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md border border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Pending Approvals</p>
-                <p className="text-2xl font-bold text-orange-600">0</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Pending Approvals</p>
+                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">0</p>
               </div>
               <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
                 <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -681,19 +681,19 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 shadow-md border border-gray-100">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md border border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Today's Visitors</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Today's Visitors</p>
                 {visitorStatsLoading ? (
                   <div className="flex items-center space-x-2">
                     <LoadingSpinner size="sm" />
-                    <span className="text-sm text-gray-500">Loading...</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Loading...</span>
                   </div>
                 ) : visitorStatsError ? (
-                  <p className="text-2xl font-bold text-red-500">Error</p>
+                  <p className="text-2xl font-bold text-red-500 dark:text-red-400">Error</p>
                 ) : (
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                     {systemData?.todaysVisitors?.toLocaleString() || visitorStats?.todaysVisitors?.toLocaleString() || '0'}
                   </p>
                 )}
@@ -706,19 +706,19 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 shadow-md border border-gray-100">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md border border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Visitors</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total Visitors</p>
                 {visitorStatsLoading ? (
                   <div className="flex items-center space-x-2">
                     <LoadingSpinner size="sm" />
-                    <span className="text-sm text-gray-500">Loading...</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Loading...</span>
                   </div>
                 ) : visitorStatsError ? (
-                  <p className="text-2xl font-bold text-red-500">Error</p>
+                  <p className="text-2xl font-bold text-red-500 dark:text-red-400">Error</p>
                 ) : (
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                     {systemData?.totalVisitors?.toLocaleString() || visitorStats?.total?.toLocaleString() || '0'}
                   </p>
                 )}
@@ -731,11 +731,11 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 shadow-md border border-gray-100">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md border border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">System Health</p>
-                <p className="text-2xl font-bold text-indigo-600">{systemData.systemHealth}%</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">System Health</p>
+                <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{systemData.systemHealth}%</p>
               </div>
               <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
                 <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

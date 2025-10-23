@@ -228,7 +228,7 @@ const UserDetailPage = () => {
       header: 'Event',
       sortable: true,
       render: (action) => (
-        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+        <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
           {action}
         </span>
       )
@@ -286,13 +286,13 @@ const UserDetailPage = () => {
   if (error && !isNewUser) {
     return (
       <div className="text-center py-12">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
-          <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full mb-4">
+          <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading User</h3>
-        <p className="text-gray-600 mb-4">{error}</p>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Error Loading User</h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
         <Button onClick={() => navigate(USER_ROUTES.LIST)}>
           Back to Users
         </Button>
@@ -305,9 +305,9 @@ const UserDetailPage = () => {
       onClick={() => onClick(tab.id)}
       className={`
         flex items-center space-x-2 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
-        ${isActive 
-          ? 'bg-blue-50 text-blue-700 border-2 border-blue-200' 
-          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-2 border-transparent'
+        ${isActive
+          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-2 border-blue-200 dark:border-blue-700'
+          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 border-2 border-transparent'
         }
       `}
     >
@@ -321,12 +321,12 @@ const UserDetailPage = () => {
 
     const getStatusConfig = () => {
       if (user.isLockedOut) {
-        return { text: 'Locked', className: 'bg-red-100 text-red-800 border-red-200' };
+        return { text: 'Locked', className: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700' };
       }
       if (!user.isActive) {
-        return { text: 'Inactive', className: 'bg-gray-100 text-gray-800 border-gray-200' };
+        return { text: 'Inactive', className: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600' };
       }
-      return { text: 'Active', className: 'bg-green-100 text-green-800 border-green-200' };
+      return { text: 'Active', className: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700' };
     };
 
     const config = getStatusConfig();
@@ -356,18 +356,18 @@ const UserDetailPage = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6"
       >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => navigate(USER_ROUTES.LIST)}
-              className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="p-2 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -375,7 +375,7 @@ const UserDetailPage = () => {
             </button>
             
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                 {isNewUser ? 'Create New User' : (
                   currentUser ? formatName(currentUser.firstName, currentUser.lastName) : 'Loading...'
                 )}
@@ -383,9 +383,9 @@ const UserDetailPage = () => {
               <div className="flex items-center space-x-4 mt-2">
                 {!isNewUser && currentUser && (
                   <>
-                    <p className="text-gray-600">{currentUser.email}</p>
+                    <p className="text-gray-600 dark:text-gray-400">{currentUser.email}</p>
                     <StatusBadge user={currentUser} />
-                    <span className="px-3 py-1 text-sm font-medium text-purple-700 bg-purple-100 rounded-full border border-purple-200">
+                    <span className="px-3 py-1 text-sm font-medium text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 rounded-full border border-purple-200 dark:border-purple-700">
                       {currentUser.role}
                     </span>
                   </>
@@ -476,9 +476,9 @@ const UserDetailPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+          className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6"
         >
-          <div className="flex space-x-1 bg-gray-50 p-1 rounded-lg">
+          <div className="flex space-x-1 bg-gray-50 dark:bg-gray-700/50 p-1 rounded-lg">
             {tabs.map((tab) => (
               <TabButton
                 key={tab.id}
@@ -499,7 +499,7 @@ const UserDetailPage = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
-          className="bg-white rounded-xl shadow-lg border border-gray-100"
+          className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700"
         >
           {/* Overview Tab */}
           {(activeTab === 'overview' || isNewUser) && (
@@ -517,13 +517,13 @@ const UserDetailPage = () => {
                   className="max-w-4xl"
                 />
               ) : (
-                <div className="max-w-4xl">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-6">User Information</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="max-w-6xl mx-auto">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 text-center">User Information</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
                     {/* Personal Information */}
-                    <div className="bg-gray-50 rounded-lg p-6">
-                      <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
+                    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
+                      <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
                         <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
@@ -532,25 +532,25 @@ const UserDetailPage = () => {
                       
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-600">Full Name</label>
-                          <p className="text-gray-900 font-medium">{formatName(currentUser.firstName, currentUser.lastName)}</p>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Full Name</label>
+                          <p className="text-gray-900 dark:text-white font-medium">{formatName(currentUser.firstName, currentUser.lastName)}</p>
                         </div>
-                        
+
                         <div>
-                          <label className="block text-sm font-medium text-gray-600">Email</label>
-                          <p className="text-gray-900">{currentUser.email}</p>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Email</label>
+                          <p className="text-gray-900 dark:text-white">{currentUser.email}</p>
                         </div>
-                        
+
                         <div>
-                          <label className="block text-sm font-medium text-gray-600">Phone Number</label>
-                          <p className="text-gray-900">{currentUser.phoneNumber || 'Not provided'}</p>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Phone Number</label>
+                          <p className="text-gray-900 dark:text-white">{currentUser.phoneNumber || 'Not provided'}</p>
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Work Information */}
-                    <div className="bg-gray-50 rounded-lg p-6">
-                      <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
+                    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
+                      <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
                         <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
                         </svg>
@@ -559,30 +559,30 @@ const UserDetailPage = () => {
                       
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-600">Role</label>
-                          <p className="text-gray-900 font-medium">{currentUser.role}</p>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Role</label>
+                          <p className="text-gray-900 dark:text-white font-medium">{currentUser.role}</p>
                         </div>
-                        
+
                         <div>
-                          <label className="block text-sm font-medium text-gray-600">Department</label>
-                          <p className="text-gray-900">{currentUser.department || 'Not assigned'}</p>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Department</label>
+                          <p className="text-gray-900 dark:text-white">{currentUser.department || 'Not assigned'}</p>
                         </div>
-                        
+
                         <div>
-                          <label className="block text-sm font-medium text-gray-600">Job Title</label>
-                          <p className="text-gray-900">{currentUser.jobTitle || 'Not specified'}</p>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Job Title</label>
+                          <p className="text-gray-900 dark:text-white">{currentUser.jobTitle || 'Not specified'}</p>
                         </div>
-                        
+
                         <div>
-                          <label className="block text-sm font-medium text-gray-600">Employee ID</label>
-                          <p className="text-gray-900">{currentUser.employeeId || 'Not assigned'}</p>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Employee ID</label>
+                          <p className="text-gray-900 dark:text-white">{currentUser.employeeId || 'Not assigned'}</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Account Information */}
-                    <div className="bg-gray-50 rounded-lg p-6">
-                      <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
+                    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
+                      <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
                         <svg className="w-5 h-5 text-purple-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
@@ -591,25 +591,25 @@ const UserDetailPage = () => {
                       
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-600">Status</label>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Status</label>
                           <StatusBadge user={currentUser} />
                         </div>
-                        
+
                         <div>
-                          <label className="block text-sm font-medium text-gray-600">Created On</label>
-                          <p className="text-gray-900">{formatDate(currentUser.createdOn)}</p>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Created On</label>
+                          <p className="text-gray-900 dark:text-white">{formatDate(currentUser.createdOn)}</p>
                         </div>
-                        
+
                         <div>
-                          <label className="block text-sm font-medium text-gray-600">Last Login</label>
-                          <p className="text-gray-900">
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Last Login</label>
+                          <p className="text-gray-900 dark:text-white">
                             {currentUser.lastLoginDate ? formatDateTime(currentUser.lastLoginDate) : 'Never'}
                           </p>
                         </div>
 
                         {currentUser.mustChangePassword && (
-                          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <p className="text-yellow-800 text-sm font-medium">
+                          <div className="p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                            <p className="text-yellow-800 dark:text-yellow-300 text-sm font-medium">
                               ⚠️ Password change required on next login
                             </p>
                           </div>
@@ -618,8 +618,8 @@ const UserDetailPage = () => {
                     </div>
 
                     {/* Recent Activity Summary */}
-                    <div className="bg-gray-50 rounded-lg p-6">
-                      <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
+                    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
+                      <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
                         <svg className="w-5 h-5 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
@@ -628,33 +628,33 @@ const UserDetailPage = () => {
                       
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Login Count</span>
-                          <span className="font-medium text-gray-900">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">Login Count</span>
+                          <span className="font-medium text-gray-900 dark:text-white">
                             {currentUser.activitySummary?.loginCount || 0}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Failed Login Attempts</span>
-                          <span className="font-medium text-gray-900">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">Failed Login Attempts</span>
+                          <span className="font-medium text-gray-900 dark:text-white">
                             {currentUser.activitySummary?.failedLoginAttempts || currentUser.failedLoginAttempts || 0}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Invitations Created</span>
-                          <span className="font-medium text-gray-900">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">Invitations Created</span>
+                          <span className="font-medium text-gray-900 dark:text-white">
                             {currentUser.activitySummary?.invitationsCreated || 0}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Password Changes</span>
-                          <span className="font-medium text-gray-900">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">Password Changes</span>
+                          <span className="font-medium text-gray-900 dark:text-white">
                             {currentUser.activitySummary?.passwordChanges || 0}
                           </span>
                         </div>
                         {currentUser.activitySummary?.lastFailedLogin && (
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-600">Last Failed Login</span>
-                            <span className="font-medium text-gray-900">
+                            <span className="text-sm text-gray-600 dark:text-gray-400">Last Failed Login</span>
+                            <span className="font-medium text-gray-900 dark:text-white">
                               {formatDateTime(currentUser.activitySummary.lastFailedLogin)}
                             </span>
                           </div>
@@ -670,7 +670,7 @@ const UserDetailPage = () => {
           {/* Activity Tab */}
           {activeTab === 'activity' && (
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">User Activity</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">User Activity</h3>
               
               <Table
                 columns={activityColumns}
@@ -690,13 +690,13 @@ const UserDetailPage = () => {
           {/* Security Tab */}
           {activeTab === 'security' && (
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Security Management</h3>
-              
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Security Management</h3>
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Password Management */}
                 {canResetPasswords && (
-                  <div className="bg-gray-50 rounded-lg p-6">
-                    <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
+                  <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
+                    <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
                       <svg className="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       </svg>
@@ -704,7 +704,7 @@ const UserDetailPage = () => {
                     </h4>
                     
                     <div className="space-y-4">
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         Manage user password and authentication settings.
                       </p>
                       
@@ -725,8 +725,8 @@ const UserDetailPage = () => {
                 )}
 
                 {/* Session Management */}
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
+                  <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
                     <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
@@ -735,16 +735,16 @@ const UserDetailPage = () => {
                   
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Active Sessions</span>
-                      <span className="font-medium text-gray-900">2</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Active Sessions</span>
+                      <span className="font-medium text-gray-900 dark:text-white">2</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Current Device</span>
-                      <span className="font-medium text-gray-900">Chrome on Windows</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Current Device</span>
+                      <span className="font-medium text-gray-900 dark:text-white">Chrome on Windows</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Last Activity</span>
-                      <span className="font-medium text-gray-900">5 minutes ago</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Last Activity</span>
+                      <span className="font-medium text-gray-900 dark:text-white">5 minutes ago</span>
                     </div>
                   </div>
                 </div>
@@ -775,7 +775,7 @@ const UserDetailPage = () => {
         size="md"
       >
         <div className="space-y-4">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             Are you sure you want to activate this user account? This will allow them to log in to the system.
           </p>
           
@@ -805,7 +805,7 @@ const UserDetailPage = () => {
         size="md"
       >
         <div className="space-y-4">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             Are you sure you want to deactivate this user account? This will prevent them from logging in and revoke all active sessions.
           </p>
           
@@ -836,7 +836,7 @@ const UserDetailPage = () => {
         size="md"
       >
         <div className="space-y-4">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             Are you sure you want to unlock this user account? This will reset their failed login attempts and allow them to log in.
           </p>
           
@@ -866,7 +866,7 @@ const UserDetailPage = () => {
     size="md"
   >
     <div className="space-y-4">
-      <p className="text-gray-600">
+      <p className="text-gray-600 dark:text-gray-400">
         Reset the user's password. They will be required to change it on their next login.
       </p>
       
@@ -893,19 +893,19 @@ const UserDetailPage = () => {
             type="checkbox"
             checked={passwordResetData.mustChangePassword}
             onChange={(e) => setPasswordResetData(prev => ({ ...prev, mustChangePassword: e.target.checked }))}
-            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500"
           />
-          <span className="text-sm text-gray-700">Require password change on next login</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">Require password change on next login</span>
         </label>
-        
+
         <label className="flex items-center space-x-3 cursor-pointer">
           <input
             type="checkbox"
             checked={passwordResetData.notifyUser}
             onChange={(e) => setPasswordResetData(prev => ({ ...prev, notifyUser: e.target.checked }))}
-            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500"
           />
-          <span className="text-sm text-gray-700">Send email notification to user</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">Send email notification to user</span>
         </label>
       </div>
       

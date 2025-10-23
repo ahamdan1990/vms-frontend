@@ -75,13 +75,14 @@ const useRealTimeDashboard = (options = {}) => {
 
   /**
    * Fetch recent activity separately
+   * Only if user has Audit.ReadAll permission
    */
   const fetchRecentActivity = useCallback(async () => {
     if (!mounted.current) return;
 
     try {
       const activity = await dashboardService.getRecentActivity(5);
-      
+
       if (mounted.current) {
         setRecentActivity(prevActivity => {
           if (JSON.stringify(prevActivity) !== JSON.stringify(activity)) {
@@ -95,6 +96,11 @@ const useRealTimeDashboard = (options = {}) => {
         });
       }
     } catch (err) {
+      // Silently handle 403 errors (permission denied) for audit logs
+      if (err.response?.status === 403 || err.status === 403 || err.message?.includes('403')) {
+        console.log('No audit log permission - skipping recent activity');
+        return;
+      }
       console.error('Failed to fetch recent activity:', err);
     }
   }, [onActivityUpdate]);

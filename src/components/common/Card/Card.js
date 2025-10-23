@@ -26,16 +26,16 @@ const Card = ({
   onClick,
   ...props 
 }) => {
-  // Variant styles using design system
+  // Variant styles using design system with dark mode
   const variantClasses = {
-    default: 'bg-white border-gray-200',
-    elevated: 'bg-white border-gray-100 shadow-md',
-    outlined: 'bg-white border-2 border-gray-300',
-    filled: 'bg-gray-50 border-gray-200',
-    success: 'bg-green-50 border-green-200',
-    warning: 'bg-yellow-50 border-yellow-200',
-    error: 'bg-red-50 border-red-200',
-    info: 'bg-blue-50 border-blue-200'
+    default: 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
+    elevated: 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 shadow-md',
+    outlined: 'bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600',
+    filled: 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700',
+    success: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
+    warning: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800',
+    error: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800',
+    info: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
   };
 
   // Size variations
@@ -90,7 +90,7 @@ const Card = ({
     {
       'hover:shadow-md hover:-translate-y-0.5 transform': hover,
       'cursor-pointer': clickable || onClick,
-      'hover:border-primary-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50': 
+      'hover:border-primary-300 dark:hover:border-primary-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:ring-opacity-50':
         clickable || onClick,
     },
     

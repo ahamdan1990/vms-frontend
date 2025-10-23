@@ -38,14 +38,25 @@ export const useSignalR = () => {
   }, [isAuthenticated, user, errorToast]);
 
   /**
-   * Cleanup connections when user logs out
+   * Cleanup connections when user logs out OR component unmounts
    */
   useEffect(() => {
     if (!isAuthenticated && initializationAttempted.current) {
+      console.log('🔌 User logged out - disconnecting SignalR');
       initializationAttempted.current = false;
       initializationPromise.current = null;
       signalRManager.disconnectAll();
     }
+
+    // ✅ CRITICAL FIX: Cleanup on component unmount
+    return () => {
+      if (initializationAttempted.current) {
+        console.log('🔌 Component unmounting - disconnecting SignalR');
+        initializationAttempted.current = false;
+        initializationPromise.current = null;
+        signalRManager.disconnectAll();
+      }
+    };
   }, [isAuthenticated]);
 
   /**

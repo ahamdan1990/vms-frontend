@@ -524,13 +524,13 @@ const UsersListPage = () => {
       className: 'min-w-[200px]',
       render: (value, user) => (
         <div>
-          <Link 
+          <Link
             to={`/users/${user.id}`}
-            className="font-medium text-gray-900 hover:text-blue-600 transition-colors"
+            className="font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
           >
             {user.displayName || formatUserName(user)}
           </Link>
-          <div className="text-sm text-gray-500">{user.email}</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
         </div>
       )
     },
@@ -547,8 +547,8 @@ const UsersListPage = () => {
       sortable: true,
       className: 'min-w-[150px]',
       render: (value, user) => (
-        <span className="text-sm text-gray-900">
-          {user.department || <span className="text-gray-400">—</span>}
+        <span className="text-sm text-gray-900 dark:text-gray-100">
+          {user.department || <span className="text-gray-400 dark:text-gray-600">—</span>}
         </span>
       )
     },
@@ -565,7 +565,7 @@ const UsersListPage = () => {
       sortable: true,
       className: 'min-w-[120px]',
       render: (value, user) => (
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-gray-600 dark:text-gray-400">
           {user.lastLoginFormatted || 'Never'}
         </span>
       )
@@ -660,16 +660,16 @@ const UsersListPage = () => {
 
   // Main render
   return (
-    <div className="space-y-6">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Manage user accounts, roles, and permissions
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 flex space-x-3">
+        <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
           {userPermissions.canCreate && (
             <Button
               onClick={() => dispatch(showCreateModal())}
@@ -684,18 +684,18 @@ const UsersListPage = () => {
 
       {/* Statistics Cards */}
       {userStats && (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <UserIcon className="w-5 h-5 text-blue-600" />
+                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                  <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Users</dt>
-                  <dd className="text-lg font-medium text-gray-900">{userStats.total || 0}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Users</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{userStats.total || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -704,14 +704,14 @@ const UsersListPage = () => {
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircleIcon className="w-5 h-5 text-green-600" />
+                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                  <CheckCircleIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Active Users</dt>
-                  <dd className="text-lg font-medium text-gray-900">{userStats.active || 0}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Active Users</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{userStats.active || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -720,14 +720,14 @@ const UsersListPage = () => {
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                  <XCircleIcon className="w-5 h-5 text-gray-600" />
+                <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                  <XCircleIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Inactive Users</dt>
-                  <dd className="text-lg font-medium text-gray-900">{userStats.inactive || 0}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Inactive Users</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{userStats.inactive || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -736,14 +736,14 @@ const UsersListPage = () => {
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                  <LockClosedIcon className="w-5 h-5 text-red-600" />
+                <div className="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                  <LockClosedIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Locked Users</dt>
-                  <dd className="text-lg font-medium text-gray-900">{userStats.locked || 0}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Locked Users</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{userStats.locked || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -763,8 +763,8 @@ const UsersListPage = () => {
               icon={<MagnifyingGlassIcon className="w-5 h-5" />}
             />
           </div>
-          
-          <div className="flex space-x-3">
+
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
@@ -772,7 +772,7 @@ const UsersListPage = () => {
             >
               Filters
             </Button>
-            
+
             {Object.values(filters).some(v => v && v !== '') && (
               <Button
                 variant="ghost"
@@ -792,17 +792,17 @@ const UsersListPage = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-4 pt-4 border-t border-gray-200"
+              className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Role
                   </label>
                   <select
                     value={filters.role || ''}
                     onChange={(e) => handleFilterChange('role', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">All Roles</option>
                     {availableRoles.map(role => (
@@ -810,15 +810,15 @@ const UsersListPage = () => {
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Status
                   </label>
                   <select
                     value={filters.status || ''}
                     onChange={(e) => handleFilterChange('status', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">All Status</option>
                     <option value="Active">Active</option>
@@ -826,15 +826,15 @@ const UsersListPage = () => {
                     <option value="Locked">Locked</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Department
                   </label>
                   <select
                     value={filters.department || ''}
                     onChange={(e) => handleFilterChange('department', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">All Departments</option>
                     {userStats?.byDepartment && Object.keys(userStats.byDepartment).map(dept => (
@@ -850,9 +850,9 @@ const UsersListPage = () => {
       {/* Bulk Actions */}
       {selectedUsers.length > 0 && (
         <Card className="p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
             <div className="flex items-center space-x-3">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {selectedUsers.length} user{selectedUsers.length !== 1 ? 's' : ''} selected
               </span>
               <Button
@@ -863,8 +863,8 @@ const UsersListPage = () => {
                 Clear Selection
               </Button>
             </div>
-            
-            <div className="flex space-x-2">
+
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 sm:space-x-0">
               {canBulkActivate && (
                 <Button
                   variant="outline"
@@ -907,7 +907,8 @@ const UsersListPage = () => {
 
       {/* Main Table */}
       <Card>
-        <Table
+        <div className="overflow-x-auto">
+          <Table
           data={users}
           columns={columns}
           loading={loading}
@@ -922,20 +923,21 @@ const UsersListPage = () => {
           hover
           bordered
           className="users-table"
-        />
-        
+          />
+        </div>
+
         {/* Pagination */}
         {pagination.totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-gray-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-sm text-gray-500">
+          <div className="px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2 sm:space-x-2 text-sm text-gray-500 dark:text-gray-400">
                 <span>
                   Showing {pageRange.start} to {pageRange.end} of {pageRange.total} users
                 </span>
                 <select
                   value={pagination.pageSize}
                   onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-                  className="border border-gray-300 rounded px-2 py-1 text-sm"
+                  className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded px-2 py-1 text-sm w-full sm:w-auto"
                 >
                   <option value={10}>10 per page</option>
                   <option value={20}>20 per page</option>
@@ -943,8 +945,8 @@ const UsersListPage = () => {
                   <option value={100}>100 per page</option>
                 </select>
               </div>
-              
-              <div className="flex items-center space-x-2">
+
+              <div className="flex items-center gap-2 overflow-x-auto">
                 <Button
                   variant="outline"
                   size="sm"
@@ -954,8 +956,8 @@ const UsersListPage = () => {
                 >
                   Previous
                 </Button>
-                
-                <div className="flex items-center space-x-1">
+
+                <div className="hidden sm:flex items-center space-x-1">
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     let pageNum;
                     if (totalPages <= 5) {
@@ -974,14 +976,19 @@ const UsersListPage = () => {
                         onClick={() => handlePageChange(pageNum)}
                         className={`px-3 py-1 text-sm rounded ${
                           pageNum === pagination.pageIndex
-                            ? 'bg-blue-100 text-blue-700 font-medium'
-                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                            ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                         }`}
                       >
                         {pageNum + 1}
                       </button>
                     );
                   })}
+                </div>
+
+                {/* Mobile: Show current page indicator */}
+                <div className="sm:hidden flex items-center px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
+                  Page {pagination.pageIndex + 1} of {totalPages}
                 </div>
                 
                 <Button

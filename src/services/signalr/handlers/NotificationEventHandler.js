@@ -38,7 +38,10 @@ class NotificationEventHandler {
       ['CriticalAlert', this.handleCriticalAlert.bind(this)],
       ['BulkNotification', this.handleBulkNotification.bind(this)],
       ['AdminRegistered', this.handleAdminRegistered.bind(this)],
-      
+
+      // Notification History Event (from Host Hub)
+      ['NotificationHistory', this.handleNotificationHistory.bind(this)],
+
       // Common Events
       ['Error', this.handleError.bind(this)]
     ]);
@@ -204,6 +207,19 @@ class NotificationEventHandler {
       priority: 'low',
       data: data
     }));
+  }
+
+  handleNotificationHistory(data) {
+    // Handle notification history response from backend
+    // This is typically a response to GetNotificationHistory call
+    console.log('Received notification history:', {
+      days: data.Days,
+      notificationCount: data.Notifications?.length || 0,
+      timestamp: data.Timestamp
+    });
+
+    // You can dispatch this to Redux if needed for historical notification viewing
+    // For now, just log it as it's mainly used for initial loading
   }
 
   // ====== SECURITY HUB EVENT HANDLERS ======

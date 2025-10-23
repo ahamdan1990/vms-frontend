@@ -434,7 +434,7 @@ const InvitationForm = ({
             {/* Visitor Selection */}
             {formData.type === 'Single' ? (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                   Visitor <span className="text-red-500">*</span>
                 </label>
                 <AutocompleteInput
@@ -533,7 +533,7 @@ const InvitationForm = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                   Visit Purpose
                 </label>
                 <AutocompleteInput
@@ -547,7 +547,7 @@ const InvitationForm = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                   Location
                 </label>
                 <AutocompleteInput
@@ -563,7 +563,7 @@ const InvitationForm = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                   Invitation Type
                 </label>
                 <select
@@ -592,7 +592,7 @@ const InvitationForm = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                 Message
               </label>
               <textarea
@@ -626,7 +626,7 @@ const InvitationForm = ({
           </div>
 
           <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-blue-800">
+            <p className="text-sm text-blue-800 dark:text-gray-600">
               📅 <strong>Date & Time Selection:</strong> Click on the date field to select a date, then click on the time portion to set the specific time for your visit.
             </p>
           </div>
@@ -670,8 +670,8 @@ const InvitationForm = ({
           </div>
 
           {/* Quick Time Presets */}
-          <div className="mt-4">
-            <p className="text-sm font-medium text-gray-700 mb-2">Quick Time Presets (Today):</p>
+          <div className="mt-4 dark:text-gray-600">
+            <p className="text-sm font-medium text-gray-700 mb-2 ">Quick Time Presets (Today):</p>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -757,7 +757,7 @@ const InvitationForm = ({
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900">Requires Approval</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">Requires Approval</span>
                     <p className="text-sm text-gray-500">Must be approved before visit</p>
                   </div>
                 </label>
@@ -770,7 +770,7 @@ const InvitationForm = ({
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900">Requires Escort</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">Requires Escort</span>
                     <p className="text-sm text-gray-500">Visitor must be escorted at all times</p>
                   </div>
                 </label>
@@ -783,7 +783,7 @@ const InvitationForm = ({
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900">Requires Badge</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">Requires Badge</span>
                     <p className="text-sm text-gray-500">Visitor badge will be printed</p>
                   </div>
                 </label>
@@ -798,7 +798,7 @@ const InvitationForm = ({
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900">Needs Parking</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">Needs Parking</span>
                     <p className="text-sm text-gray-500">Visitor requires parking space</p>
                   </div>
                 </label>
@@ -812,7 +812,7 @@ const InvitationForm = ({
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <div>
-                      <span className="text-sm font-medium text-gray-900">Submit for Approval</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">Submit for Approval</span>
                       <p className="text-sm text-gray-500">Submit immediately after saving</p>
                     </div>
                   </label>
@@ -835,7 +835,7 @@ const InvitationForm = ({
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                 Special Instructions
               </label>
               <textarea

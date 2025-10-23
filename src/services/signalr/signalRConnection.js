@@ -463,9 +463,16 @@ class SignalRConnectionManager {
    */
   async disconnectAll() {
     console.log('Disconnecting from all SignalR hubs...');
-    
+
     for (const [hubName, connection] of this.connections) {
       try {
+        // ✅ CRITICAL FIX: Remove all event handlers before stopping connection
+        // This prevents handlers from processing events after logout
+        const supportedEvents = this.eventHandlers.getAllSupportedEvents();
+        supportedEvents.forEach(eventName => {
+          connection.off(eventName);
+        });
+
         if (connection.state !== HubConnectionState.Disconnected) {
           await connection.stop();
         }

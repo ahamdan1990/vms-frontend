@@ -21,7 +21,7 @@ const ForgotPasswordPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isValidEmail, setIsValidEmail] = useState(false);
+  const [isEmailValid, setIsEmailValid] = useState(false);
 
   useEffect(() => {
     dispatch(setPageTitle('Reset Password'));
@@ -31,7 +31,7 @@ const ForgotPasswordPage = () => {
     // Validate email in real-time
     if (formData.email) {
       const emailValidation = isValidEmail(formData.email);
-      setIsValidEmail(emailValidation.isValid);
+      setIsEmailValid(emailValidation.isValid);
       
       if (!emailValidation.isValid && formData.email.length > 0) {
         setErrors({ email: emailValidation.message });
@@ -39,7 +39,7 @@ const ForgotPasswordPage = () => {
         setErrors({});
       }
     } else {
-      setIsValidEmail(false);
+      setIsEmailValid(false);
       setErrors({});
     }
   }, [formData.email]);
@@ -210,7 +210,7 @@ const ForgotPasswordPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   error={errors.email}
-                  success={isValidEmail ? "Valid email address" : null}
+                  success={isEmailValid ? "Valid email address" : null}
                   disabled={loading}
                   autoComplete="email"
                   autoFocus
@@ -219,7 +219,7 @@ const ForgotPasswordPage = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                     </svg>
                   }
-                  rightIcon={isValidEmail ? (
+                  rightIcon={isEmailValid ? (
                     <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
@@ -234,7 +234,7 @@ const ForgotPasswordPage = () => {
                 size="lg"
                 fullWidth
                 loading={loading}
-                disabled={!isValidEmail || loading}
+                disabled={!isEmailValid || loading}
                 className="transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
               >
                 {loading ? 'Sending Instructions...' : 'Send Reset Instructions'}
@@ -278,7 +278,7 @@ const ForgotPasswordPage = () => {
         </motion.div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }

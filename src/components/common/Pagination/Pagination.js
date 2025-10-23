@@ -84,16 +84,16 @@ const Pagination = ({
 
     if (variant === 'minimal') {
       return classNames(baseClasses, {
-        'border-transparent text-gray-500 hover:text-gray-700': !isActive && !isDisabled,
-        'border-transparent text-blue-600 bg-blue-50': isActive,
-        'border-transparent text-gray-300': isDisabled
+        'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200': !isActive && !isDisabled,
+        'border-transparent text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30': isActive,
+        'border-transparent text-gray-300 dark:text-gray-700': isDisabled
       });
     }
 
     return classNames(baseClasses, {
-      'border-gray-300 text-gray-500 hover:bg-gray-50': !isActive && !isDisabled,
-      'border-blue-500 bg-blue-50 text-blue-600': isActive,
-      'border-gray-300 text-gray-300': isDisabled
+      'border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800': !isActive && !isDisabled,
+      'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400': isActive,
+      'border-gray-300 dark:border-gray-700 text-gray-300 dark:text-gray-700 bg-white dark:bg-gray-800': isDisabled
     });
   };
 
@@ -122,22 +122,22 @@ const Pagination = ({
       {/* Items info and page size selector */}
       <div className="flex items-center space-x-4">
         {showItemsInfo && (
-          <div className={classNames('text-gray-700', config.text)}>
+          <div className={classNames('text-gray-700 dark:text-gray-300', config.text)}>
             Showing {startItem.toLocaleString()} to {endItem.toLocaleString()} of{' '}
             {totalItems.toLocaleString()} results
           </div>
         )}
-        
+
         {showPageSizeSelector && onPageSizeChange && (
           <div className="flex items-center space-x-2">
-            <label className={classNames('text-gray-700', config.text)}>
+            <label className={classNames('text-gray-700 dark:text-gray-300', config.text)}>
               Show:
             </label>
             <select
               value={pageSize}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
               className={classNames(
-                'border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white',
                 config.select
               )}
             >
@@ -195,7 +195,7 @@ const Pagination = ({
         {/* Ellipsis and last pages */}
         {totalPages > maxVisiblePages && visiblePages[visiblePages.length - 1] < totalPages - 1 && (
           <>
-            <span className={classNames('px-2 text-gray-500', config.text)}>…</span>
+            <span className={classNames('px-2 text-gray-500 dark:text-gray-400', config.text)}>…</span>
             <button
               onClick={() => handlePageChange(totalPages)}
               className={getButtonClasses(totalPages === currentPage)}
@@ -253,30 +253,30 @@ Pagination.propTypes = {
 };
 
 // Simple pagination component for basic use cases
-export const SimplePagination = ({ 
-  currentPage, 
-  totalPages, 
-  onPageChange, 
-  className = '' 
+export const SimplePagination = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  className = ''
 }) => {
   return (
     <div className={classNames('flex items-center justify-center space-x-2', className)}>
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
       >
         Previous
       </button>
-      
-      <span className="px-3 py-2 text-sm text-gray-700">
+
+      <span className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
         Page {currentPage} of {totalPages}
       </span>
-      
+
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
       >
         Next
       </button>

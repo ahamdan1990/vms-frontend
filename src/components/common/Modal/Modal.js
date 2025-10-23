@@ -44,11 +44,11 @@ const Modal = ({
   };
 
   const variantClasses = {
-    default: 'bg-white',
-    danger: 'bg-white border-l-4 border-red-500',
-    warning: 'bg-white border-l-4 border-yellow-500',
-    success: 'bg-white border-l-4 border-green-500',
-    info: 'bg-white border-l-4 border-blue-500'
+    default: 'bg-white dark:bg-gray-800',
+    danger: 'bg-white dark:bg-gray-800 border-l-4 border-red-500 dark:border-red-400',
+    warning: 'bg-white dark:bg-gray-800 border-l-4 border-yellow-500 dark:border-yellow-400',
+    success: 'bg-white dark:bg-gray-800 border-l-4 border-green-500 dark:border-green-400',
+    info: 'bg-white dark:bg-gray-800 border-l-4 border-blue-500 dark:border-blue-400'
   };
 
   const modalClasses = classNames(
@@ -171,9 +171,9 @@ const Modal = ({
           >
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 {title && (
-                  <h3 id="modal-title" className="text-lg font-semibold text-gray-900">
+                  <h3 id="modal-title" className="text-lg font-semibold text-gray-900 dark:text-white">
                     {title}
                   </h3>
                 )}
@@ -181,7 +181,7 @@ const Modal = ({
                 {showCloseButton && (
                   <button
                     type="button"
-                    className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                     onClick={handleClose}
                     aria-label="Close modal"
                   >
@@ -194,13 +194,13 @@ const Modal = ({
             )}
 
             {/* Content */}
-            <div className="p-6 overflow-y-auto flex-1 min-h-0 modal-scroll modal-content">
+            <div className="p-6 overflow-y-auto flex-1 min-h-0 modal-scroll modal-content text-gray-900 dark:text-gray-100">
               {children}
             </div>
 
             {/* Footer */}
             {footer && (
-              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl flex-shrink-0">
+              <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-xl flex-shrink-0">
                 {footer}
               </div>
             )}
@@ -266,7 +266,7 @@ export const ConfirmModal = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} footer={footer} size="sm" variant={variant}>
-      <p className="text-gray-600">{message}</p>
+      <p className="text-gray-600 dark:text-gray-300">{message}</p>
     </Modal>
   );
 };
@@ -283,7 +283,7 @@ export const AlertModal = ({ isOpen, onClose, title = 'Alert', message = '', var
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} footer={footer} size="sm" variant={variant}>
-      <p className="text-gray-600">{message}</p>
+      <p className="text-gray-600 dark:text-gray-300">{message}</p>
     </Modal>
   );
 };

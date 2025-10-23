@@ -524,7 +524,7 @@ const TimeSlotsListPage = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 dark:bg-gray-800 border-gray-700 ">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <Input
@@ -603,7 +603,7 @@ const TimeSlotsListPage = () => {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 dark:bg-gray-800 border-gray-700">
         {listError ? (
           <div className="p-6 text-center">
             <p className="text-red-600">Error loading time slots: {listError}</p>

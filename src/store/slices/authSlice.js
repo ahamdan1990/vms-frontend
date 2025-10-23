@@ -265,6 +265,30 @@ const authSlice = createSlice({
     builder
       .addCase(logoutUser.pending, (state) => {
         state.loading = true;
+        // ✅ CRITICAL FIX: Clear auth state immediately on logout
+        // This prevents useAuth from seeing stale auth in localStorage
+        state.user = null;
+        state.isAuthenticated = false;
+        state.permissions = [];
+        state.sessions = [];
+        state.passwordChangeRequired = false;
+        state.twoFactorRequired = false;
+
+        // Also clear localStorage immediately
+        try {
+          const stored = localStorage.getItem('vms_app_state');
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            parsed.auth = {
+              user: null,
+              isAuthenticated: false,
+              permissions: []
+            };
+            localStorage.setItem('vms_app_state', JSON.stringify(parsed));
+          }
+        } catch (e) {
+          console.warn('Failed to clear auth from localStorage:', e);
+        }
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.loading = false;

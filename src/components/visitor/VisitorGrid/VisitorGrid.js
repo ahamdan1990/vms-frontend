@@ -50,7 +50,9 @@ const VisitorGrid = ({
   className = ''
 }) => {
   const [localViewMode, setLocalViewMode] = useState(viewMode);
-  const [selectAll, setSelectAll] = useState(false);
+
+  // Compute selectAll based on selectedVisitors prop (derive from source of truth)
+  const selectAll = visitors.length > 0 && selectedVisitors.length === visitors.length;
 
   // Handle view mode change
   const handleViewModeChange = (mode) => {
@@ -62,14 +64,13 @@ const VisitorGrid = ({
 
   // Handle bulk selection
   const handleSelectAll = () => {
-    const newSelectAll = !selectAll;
-    setSelectAll(newSelectAll);
-    
     if (onSelectionChange) {
-      if (newSelectAll) {
-        onSelectionChange(visitors.map(v => v.id));
-      } else {
+      if (selectAll) {
+        // If currently all selected, deselect all
         onSelectionChange([]);
+      } else {
+        // If not all selected, select all
+        onSelectionChange(visitors.map(v => v.id));
       }
     }
   };
@@ -77,18 +78,16 @@ const VisitorGrid = ({
   // Handle individual visitor selection
   const handleVisitorSelection = (visitorId, selected) => {
     if (!onSelectionChange) return;
-    
+
     let newSelection;
     if (selected) {
       newSelection = [...selectedVisitors, visitorId];
     } else {
       newSelection = selectedVisitors.filter(id => id !== visitorId);
     }
-    
+
     onSelectionChange(newSelection);
-    
-    // Update select all state
-    setSelectAll(newSelection.length === visitors.length && visitors.length > 0);
+    // Note: selectAll is now computed from selectedVisitors, no need to update state
   };
 
   // Handle clear selection
@@ -96,7 +95,7 @@ const VisitorGrid = ({
     if (onSelectionChange) {
       onSelectionChange([]);
     }
-    setSelectAll(false);
+    // Note: selectAll is now computed from selectedVisitors, no need to update state
   };
 
   // Get current view mode

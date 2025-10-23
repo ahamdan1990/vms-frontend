@@ -243,7 +243,7 @@ const VisitPurposesListPage = () => {
       sortable: true,
       render: (value, purpose) => (
         <div>
-          <div className="font-medium text-gray-900">{purpose.name}</div>
+          <div className="font-medium text-gray-900 dark:text-gray-300">{purpose.name}</div>
           {purpose.description && (
             <div className="text-sm text-gray-500 mt-1">{purpose.description}</div>
           )}
@@ -280,7 +280,7 @@ const VisitPurposesListPage = () => {
       sortable: true,
       render: (value, purpose) => (
         <div className="space-y-1">
-          <div className="text-sm font-medium text-gray-900">
+          <div className="text-sm font-medium text-gray-900 dark:text-gray-300">
             {purpose.usageCount || 0} invitations
           </div>
           {purpose.lastUsed && (
@@ -378,8 +378,8 @@ const VisitPurposesListPage = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total</dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.total}</dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Total</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.total}</dd>
                 </dl>
               </div>
             </div>
@@ -394,8 +394,8 @@ const VisitPurposesListPage = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Active</dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.active}</dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Active</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.active}</dd>
                 </dl>
               </div>
             </div>
@@ -410,8 +410,8 @@ const VisitPurposesListPage = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Inactive</dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.inactive}</dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Inactive</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.inactive}</dd>
                 </dl>
               </div>
             </div>
@@ -426,8 +426,8 @@ const VisitPurposesListPage = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Approval Required</dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.requiresApproval}</dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Approval Required</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.requiresApproval}</dd>
                 </dl>
               </div>
             </div>
@@ -442,8 +442,8 @@ const VisitPurposesListPage = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">No Approval</dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.noApprovalRequired}</dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">No Approval</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.noApprovalRequired}</dd>
                 </dl>
               </div>
             </div>
@@ -492,9 +492,9 @@ const VisitPurposesListPage = () => {
               exit={{ opacity: 0, height: 0 }}
               className="mt-4 pt-4 border-t border-gray-200"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 ">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                     Approval Requirement
                   </label>
                   <select
@@ -519,7 +519,7 @@ const VisitPurposesListPage = () => {
                     onChange={(e) => handleFilterChange('includeInactive', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="includeInactive" className="ml-2 block text-sm text-gray-700">
+                  <label htmlFor="includeInactive" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                     Include inactive purposes
                   </label>
                 </div>
@@ -600,8 +600,8 @@ const VisitPurposesListPage = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <p className="mt-1 text-sm text-gray-900">{viewingPurpose.name}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">{viewingPurpose.name}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Status</label>
@@ -615,8 +615,8 @@ const VisitPurposesListPage = () => {
             
             {viewingPurpose.description && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
-                <p className="mt-1 text-sm text-gray-900">{viewingPurpose.description}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">{viewingPurpose.description}</p>
               </div>
             )}
             

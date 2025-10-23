@@ -150,48 +150,53 @@ export const useAuth = () => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        // Check if already initialized globally
-        if (isInitialized || initRef.current) {
-          return;
+        // ✅ CRITICAL FIX: Check localStorage DIRECTLY instead of Redux state
+        // Redux state hasn't updated yet when this first runs!
+        const storedState = localStorage.getItem('vms_app_state');
+        let hadPreviousAuth = false;
+
+        if (storedState) {
+          try {
+            const parsed = JSON.parse(storedState);
+            hadPreviousAuth = parsed?.auth?.isAuthenticated === true;
+          } catch (e) {
+            console.warn('Failed to parse stored state:', e);
+          }
         }
 
-        initRef.current = true;
+        console.log(`🔍 initializeAuth - hadPreviousAuth: ${hadPreviousAuth}, currentAuth: ${isAuthenticated}`);
 
-        // Check if tokens exist (store sets loading=true if tokens found)
-        const storedData = localStorage.getItem('vms_app_state');
-
-        if (!storedData) {
-          isInitialized = true;
-          return;
-        }
-
-        if (storedData && !isAuthenticated) {
-          console.log('⏳ Validating authentication token...');
-          // Try to fetch current user to validate token
+        // If we had auth before (in localStorage) but not authenticated now, validate session
+        if (hadPreviousAuth && !isAuthenticated) {
+          console.log('⏳ Previous auth found in storage - attempting session validation...');
           try {
             await checkAuth();
           } catch (error) {
-            console.warn('⚠️ Token validation failed - clearing auth:', error);
+            console.warn('⚠️ Session validation failed - clearing auth:', error);
             logoutImmediate();
           }
+        } else if (isAuthenticated) {
+          console.log('✅ Already authenticated - skipping check');
+        } else {
+          console.log('⏹️ No previous auth state - skipping authentication');
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
         logoutImmediate();
       } finally {
         isInitialized = true;
+        initRef.current = true;
       }
     };
 
-    // Run initialization once
-    if (!isInitialized && !initRef.current) {
-      if (!globalInitializationPromise) {
-        globalInitializationPromise = initializeAuth().finally(() => {
-          globalInitializationPromise = null;
-        });
-      }
+    // ✅ CRITICAL FIX: Only run once on mount
+    if (!initRef.current && !globalInitializationPromise) {
+      console.log('🔄 Initializing authentication...');
+      globalInitializationPromise = initializeAuth().finally(() => {
+        globalInitializationPromise = null;
+      });
     }
-  }, []); // Empty dependency array - only run once per component mount
+  }, []); // Empty deps - only run once on mount
 
   // ✅ PRODUCTION FIX: Separate effect for token refresh with proper timing
   useEffect(() => {

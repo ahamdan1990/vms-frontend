@@ -218,7 +218,7 @@ const UnifiedAnalyticsDashboard = () => {
         value: analytics.overview.todayVisitors,
         subtitle: 'Checked in today',
         icon: <CalendarDaysIcon className="w-8 h-8 text-green-500" />,
-        trend: 15.2,
+        trend: 0, // Will be calculated from historical data when available
         color: 'green'
       },
       {
@@ -234,7 +234,7 @@ const UnifiedAnalyticsDashboard = () => {
         value: `${analytics.overview.avgVisitDuration}m`,
         subtitle: 'Average time spent',
         icon: <ClockIcon className="w-8 h-8 text-orange-500" />,
-        trend: -5.3,
+        trend: 0, // Will be calculated from historical data when available
         color: 'orange'
       },
       {
@@ -242,7 +242,7 @@ const UnifiedAnalyticsDashboard = () => {
         value: `${analytics.overview.checkInRate}%`,
         subtitle: 'Successful check-ins',
         icon: <ArrowTrendingUpIcon className="w-8 h-8 text-indigo-500" />,
-        trend: 8.7,
+        trend: 0, // Will be calculated from historical data when available
         color: 'indigo'
       },
       {
@@ -312,40 +312,56 @@ const UnifiedAnalyticsDashboard = () => {
       <Card className="p-6">
         <h3 className={`${TEXT_STYLES.cardTitle} mb-4`}>Peak Hours</h3>
         <div className="space-y-3">
-          {analytics.insights.peakHours.map((hour, index) => (
-            <div key={hour} className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                  <span className="text-sm font-medium text-blue-600">#{index + 1}</span>
+          {analytics.insights.peakHours && analytics.insights.peakHours.length > 0 ? (
+            analytics.insights.peakHours.map((hour, index) => (
+              <div key={hour} className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                    <span className="text-sm font-medium text-blue-600">#{index + 1}</span>
+                  </div>
+                  <span className={TEXT_STYLES.bodyText}>{hour}</span>
                 </div>
-                <span className={TEXT_STYLES.bodyText}>{hour}</span>
+                <Badge variant="primary" size="sm">Peak</Badge>
               </div>
-              <Badge variant="primary" size="sm">Peak</Badge>
+            ))
+          ) : (
+            <div className="text-center py-8">
+              <ClockIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-sm text-gray-500">No peak hour data available yet</p>
+              <p className="text-xs text-gray-400 mt-1">Data will appear as visitors check in</p>
             </div>
-          ))}
+          )}
         </div>
       </Card>
 
       <Card className="p-6">
         <h3 className={`${TEXT_STYLES.cardTitle} mb-4`}>Popular Locations</h3>
         <div className="space-y-3">
-          {analytics.insights.popularLocations.map((location, index) => (
-            <div key={location} className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <MapPinIcon className="w-5 h-5 text-gray-400" />
-                <span className={TEXT_STYLES.bodyText}>{location}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-16 h-2 bg-gray-200 rounded-full">
-                  <div 
-                    className="h-2 bg-green-500 rounded-full"
-                    style={{ width: `${100 - (index * 20)}%` }}
-                  />
+          {analytics.insights.popularLocations && analytics.insights.popularLocations.length > 0 ? (
+            analytics.insights.popularLocations.map((location, index) => (
+              <div key={location} className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <MapPinIcon className="w-5 h-5 text-gray-400" />
+                  <span className={TEXT_STYLES.bodyText}>{location}</span>
                 </div>
-                <span className="text-xs text-gray-500">{100 - (index * 20)}%</span>
+                <div className="flex items-center space-x-2">
+                  <div className="w-16 h-2 bg-gray-200 rounded-full">
+                    <div
+                      className="h-2 bg-green-500 rounded-full"
+                      style={{ width: `${Math.max(20, 100 - (index * 30))}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-gray-500">{Math.max(20, 100 - (index * 30))}%</span>
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="text-center py-8">
+              <MapPinIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-sm text-gray-500">No location data available yet</p>
+              <p className="text-xs text-gray-400 mt-1">Data will appear as invitations are created</p>
             </div>
-          ))}
+          )}
         </div>
       </Card>
     </div>

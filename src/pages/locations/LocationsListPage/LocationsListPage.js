@@ -444,8 +444,8 @@ const LocationsListPage = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Locations</dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.total}</dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Total Locations</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.total}</dd>
                 </dl>
               </div>
             </div>
@@ -460,8 +460,8 @@ const LocationsListPage = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Active</dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.active}</dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Active</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.active}</dd>
                 </dl>
               </div>
             </div>
@@ -476,8 +476,8 @@ const LocationsListPage = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">With Capacity</dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.withCapacity}</dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">With Capacity</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.withCapacity}</dd>
                 </dl>
               </div>
             </div>
@@ -492,8 +492,8 @@ const LocationsListPage = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Requires Escort</dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.requiresEscort}</dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Requires Escort</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.requiresEscort}</dd>
                 </dl>
               </div>
             </div>

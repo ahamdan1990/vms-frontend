@@ -50,10 +50,10 @@ const Input = forwardRef(({
   const labelClasses = classNames(
     'block text-sm font-medium mb-1.5 transition-colors',
     {
-      'text-gray-700': !hasError && !hasSuccess,
-      'text-red-600': hasError,
-      'text-green-600': hasSuccess,
-      'text-gray-400': disabled
+      'text-gray-700 dark:text-gray-300': !hasError && !hasSuccess,
+      'text-red-600 dark:text-red-400': hasError,
+      'text-green-600 dark:text-green-400': hasSuccess,
+      'text-gray-400 dark:text-gray-600': disabled
     }
   );
 
@@ -66,30 +66,31 @@ const Input = forwardRef(({
   const inputClasses = classNames(
     'block w-full rounded-lg border shadow-sm transition-all duration-200',
     'focus:outline-none focus:ring-2 focus:ring-offset-0',
-    'disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed',
-    'placeholder:text-gray-400',
+    'bg-white dark:bg-gray-700 text-gray-900 dark:text-white',
+    'disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:text-gray-500 dark:disabled:text-gray-600 disabled:cursor-not-allowed',
+    'placeholder:text-gray-400 dark:placeholder:text-gray-500',
     sizeClasses[size],
     {
       // Default state
-      'border-gray-300 focus:border-blue-500 focus:ring-blue-500': 
+      'border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400':
         !hasError && !hasSuccess && variant === 'default',
-      
+
       // Error state
-      'border-red-300 focus:border-red-500 focus:ring-red-500 bg-red-50': hasError,
-      
+      'border-red-300 dark:border-red-600 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400 bg-red-50 dark:bg-red-900/20': hasError,
+
       // Success state
-      'border-green-300 focus:border-green-500 focus:ring-green-500 bg-green-50': hasSuccess,
-      
+      'border-green-300 dark:border-green-600 focus:border-green-500 dark:focus:border-green-400 focus:ring-green-500 dark:focus:ring-green-400 bg-green-50 dark:bg-green-900/20': hasSuccess,
+
       // Focused state
       'ring-2': focused,
-      
+
       // Icon padding
       'pl-10': leftIcon,
       'pr-10': rightIcon || rightElement || (isPassword && showPasswordToggle),
-      
+
       // Variants
-      'border-0 bg-gray-100 focus:bg-white focus:ring-gray-300': variant === 'filled',
-      'border-0 border-b-2 rounded-none bg-transparent focus:ring-0 focus:border-blue-500': variant === 'underline'
+      'border-0 bg-gray-100 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-700 focus:ring-gray-300 dark:focus:ring-gray-600': variant === 'filled',
+      'border-0 border-b-2 rounded-none bg-transparent focus:ring-0 focus:border-blue-500 dark:focus:border-blue-400': variant === 'underline'
     },
     inputClassName
   );
@@ -97,9 +98,9 @@ const Input = forwardRef(({
   const iconClasses = classNames(
     'absolute top-1/2 transform -translate-y-1/2 w-5 h-5',
     {
-      'text-gray-400': !hasError && !hasSuccess,
-      'text-red-500': hasError,
-      'text-green-500': hasSuccess
+      'text-gray-400 dark:text-gray-500': !hasError && !hasSuccess,
+      'text-red-500 dark:text-red-400': hasError,
+      'text-green-500 dark:text-green-400': hasSuccess
     }
   );
 
@@ -148,7 +149,7 @@ const Input = forwardRef(({
           id={inputId}
           name={name}
           type={currentType}
-          value={value}
+          value={value ?? ''}
           onChange={onChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
@@ -177,7 +178,7 @@ const Input = forwardRef(({
             type="button"
             className={classNames(
               iconClasses,
-              'right-3 hover:text-gray-600 focus:outline-none transition-colors'
+              'right-3 hover:text-gray-600 dark:hover:text-gray-400 focus:outline-none transition-colors'
             )}
             onClick={togglePasswordVisibility}
             tabIndex={-1}
@@ -190,7 +191,7 @@ const Input = forwardRef(({
       {(error || success || displayHelperText) && (
         <div className="mt-1.5 text-sm">
           {error && (
-            <p className="text-red-600 flex items-center">
+            <p className="text-red-600 dark:text-red-400 flex items-center">
               <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
@@ -199,7 +200,7 @@ const Input = forwardRef(({
           )}
 
           {success && !error && (
-            <p className="text-green-600 flex items-center">
+            <p className="text-green-600 dark:text-green-400 flex items-center">
               <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
@@ -208,7 +209,7 @@ const Input = forwardRef(({
           )}
 
           {displayHelperText && !error && !success && (
-            <p className="text-gray-500">{displayHelperText}</p>
+            <p className="text-gray-500 dark:text-gray-400">{displayHelperText}</p>
           )}
         </div>
       )}

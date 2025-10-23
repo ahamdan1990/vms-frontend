@@ -12,13 +12,14 @@ import { initializeNotifications } from './store/slices/notificationSlice';
 import NotificationProvider from './components/notifications/NotificationProvider';
 import NotificationCenter from './components/notifications/NotificationCenter.js';
 import { HelmetProvider } from 'react-helmet-async';
+import { useTheme } from './hooks/useTheme';
 
 
 /**
  * App initialization component
  * Note: SignalR initialization is now handled by useSignalR hook to avoid conflicts
  */
-const AppInitializer = ({ children }) => {
+const AppInitializer = ({ children, isAuth }) => {
   const dispatch = useDispatch();
   const { loading, isAuthenticated } = useAuth();
   const initialized = useRef(false);
@@ -72,6 +73,25 @@ const AppInitializer = ({ children }) => {
   return children;
 };
 
+/**
+ * Inner app component - has access to Redux context
+ */
+const AppContent = () => {
+  const { isAuthenticated } = useAuth();
+  // Initialize theme - this applies the 'dark' class to <html> element
+  useTheme();
+
+  return (
+    <AppInitializer>
+      <div className="App min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+        <AppRoutes />
+        {/* Only render NotificationCenter when authenticated to prevent SignalR connection attempts */}
+        {isAuthenticated && <NotificationCenter />}
+      </div>
+    </AppInitializer>
+  );
+};
+
 function App() {
   return (
     <Provider store={store}>
@@ -90,12 +110,7 @@ function App() {
               enableDesktop={true}
               enableSound={true}
             >
-              <AppInitializer>
-                <div className="App min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-                  <AppRoutes />
-                  <NotificationCenter />
-                </div>
-              </AppInitializer>
+              <AppContent />
             </NotificationProvider>
           </BrowserRouter>
         </HelmetProvider>

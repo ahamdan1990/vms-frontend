@@ -35,12 +35,16 @@ export const isInRange = (value, min, max) => {
 
 // Email validation
 export const isValidEmail = (email) => {
-  if (!email) return false;
+  if (!email) return { isValid: false, message: 'Email is required' };
   
   // RFC 5322 compliant email regex (simplified)
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
   
-  return emailRegex.test(email.trim().toLowerCase());
+  const isValid = emailRegex.test(email.trim().toLowerCase());
+  return {
+    isValid,
+    message: isValid ? 'Valid email address' : 'Please enter a valid email address'
+  };
 };
 
 export const isValidEmailDomain = (email, allowedDomains = []) => {
@@ -515,7 +519,7 @@ export const validateUserData = (userData, isUpdate = false) => {
   if (!isUpdate || userData.hasOwnProperty('email')) {
     if (!isRequired(userData.email)) {
       errors.email = 'Email is required';
-    } else if (!isValidEmail(userData.email)) {
+    } else if (!isValidEmail(userData.email).isValid) {
       errors.email = 'Please enter a valid email address';
     } else if (!hasMaxLength(userData.email, 255)) {
       errors.email = 'Email cannot exceed 255 characters';
@@ -613,7 +617,7 @@ export const validateLoginData = (loginData) => {
 
   if (!isRequired(loginData.email)) {
     errors.email = 'Email is required';
-  } else if (!isValidEmail(loginData.email)) {
+  } else if (!isValidEmail(loginData.email).isValid) {
     errors.email = 'Please enter a valid email address';
   }
 

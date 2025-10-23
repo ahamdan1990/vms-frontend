@@ -19,6 +19,9 @@ import { getOccupancy } from '../../../store/slices/capacitySlice';
 // Import capacity components
 import { OccupancyCard } from '../../../components/capacity';
 
+// Import dashboard service for real-time metrics
+import dashboardService from '../../../services/dashboardService';
+
 /**
  * Beautiful Operator Dashboard with real-time monitoring and quick actions
  */
@@ -38,30 +41,51 @@ const OperatorDashboard = () => {
     pendingCheckins: 0,
     alerts: 0
   });
+  const [loading, setLoading] = useState(true);
+
+  // Load real dashboard metrics
+  const loadDashboardMetrics = async () => {
+    try {
+      setLoading(true);
+      const metrics = await dashboardService.getDashboardData();
+
+      setRealtimeData({
+        todaysVisitors: metrics.todayVisitors || 0,
+        activeVisitors: metrics.activeVisitors || 0,
+        pendingCheckins: metrics.pendingInvitations || 0,
+        alerts: metrics.systemAlerts || 0
+      });
+    } catch (error) {
+      console.error('Failed to load dashboard metrics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     dispatch(setPageTitle('Operator Dashboard'));
-    
+
+    // Load initial metrics
+    loadDashboardMetrics();
+
     // Load capacity data
-    dispatch(getOccupancy({ 
-      dateTime: new Date().toISOString() 
+    dispatch(getOccupancy({
+      dateTime: new Date().toISOString()
     }));
-    
+
     // Update time every minute
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 60000);
-    
-    // Simulate real-time data updates
+
+    // Refresh real data every 30 seconds
     const dataTimer = setInterval(() => {
-      setRealtimeData(prev => ({
-        todaysVisitors: prev.todaysVisitors + Math.floor(Math.random() * 2),
-        activeVisitors: Math.max(0, prev.activeVisitors + (Math.random() > 0.5 ? 1 : -1)),
-        pendingCheckins: Math.max(0, prev.pendingCheckins + (Math.random() > 0.7 ? 1 : -1)),
-        alerts: Math.max(0, prev.alerts + (Math.random() > 0.9 ? 1 : 0))
+      loadDashboardMetrics();
+      dispatch(getOccupancy({
+        dateTime: new Date().toISOString()
       }));
     }, 30000);
-    
+
     return () => {
       clearInterval(timer);
       clearInterval(dataTimer);
@@ -256,21 +280,19 @@ const OperatorDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
             title="Today's Visitors"
-            value={realtimeData.todaysVisitors}
+            value={loading ? '...' : realtimeData.todaysVisitors}
             icon={
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
               </svg>
             }
             color="bg-blue-500"
-            trend="+15% from yesterday"
-            trendColor="text-green-600"
             isLive={true}
           />
           
           <StatCard
             title="Active Visitors"
-            value={realtimeData.activeVisitors}
+            value={loading ? '...' : realtimeData.activeVisitors}
             icon={
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -279,10 +301,10 @@ const OperatorDashboard = () => {
             color="bg-green-500"
             isLive={true}
           />
-          
+
           <StatCard
             title="Pending Check-ins"
-            value={realtimeData.pendingCheckins}
+            value={loading ? '...' : realtimeData.pendingCheckins}
             icon={
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -291,10 +313,10 @@ const OperatorDashboard = () => {
             color="bg-orange-500"
             isLive={true}
           />
-          
+
           <StatCard
             title="Active Alerts"
-            value={realtimeData.alerts}
+            value={loading ? '...' : realtimeData.alerts}
             icon={
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19l2-7h12l2 7M9 12V9a3 3 0 116 0v3" />

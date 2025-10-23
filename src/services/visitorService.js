@@ -166,9 +166,14 @@ const visitorService = {
    * Requires: Visitor.Blacklist permission
    */
   async blacklistVisitor(id, reason) {
-    const response = await apiClient.post(VISITOR_ENDPOINTS.BLACKLIST(id), reason, {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    // Backend expects [FromBody] string - send as JSON string
+    const response = await apiClient.post(
+      VISITOR_ENDPOINTS.BLACKLIST(id),
+      JSON.stringify(reason),
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
     return extractApiData(response);
   },
 

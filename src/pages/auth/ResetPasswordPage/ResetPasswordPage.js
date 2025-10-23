@@ -33,14 +33,7 @@ const ResetPasswordPage = () => {
 
   useEffect(() => {
     dispatch(setPageTitle('Reset Password'));
-    
-    // Validate URL parameters
-    if (!formData.email || !formData.token) {
-      setErrors({ 
-        global: 'Invalid reset link. Please request a new password reset.' 
-      });
-    }
-  }, [dispatch, formData.email, formData.token]);
+  }, [dispatch]);
 
   useEffect(() => {
     // Validate password strength in real-time
@@ -73,6 +66,11 @@ const ResetPasswordPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
+
+    // Validate email and token from URL
+    if (!formData.email || !formData.token) {
+      newErrors.global = 'Invalid reset link. Please request a new password reset.';
+    }
 
     // Validate new password
     const passwordValidation = validatePassword(formData.newPassword);
@@ -238,6 +236,26 @@ const ResetPasswordPage = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
           >
+            {/* Warning for missing parameters */}
+            {(!formData.email || !formData.token) && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <div className="flex items-start">
+                  <svg className="w-5 h-5 text-yellow-400 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <p className="text-yellow-800 text-sm font-medium mb-1">Reset link required</p>
+                    <p className="text-yellow-700 text-xs">
+                      This page requires a password reset link from your email. Please check your inbox for the reset link or request a new one.
+                    </p>
+                    <Link to="/forgot-password" className="inline-block mt-2 text-xs text-yellow-800 font-semibold hover:text-yellow-900 underline">
+                      Request password reset →
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Global Error */}
               {(error || errors.global) && (
@@ -280,7 +298,7 @@ const ResetPasswordPage = () => {
                   value={formData.newPassword}
                   onChange={handleChange}
                   error={errors.newPassword}
-                  disabled={loading}
+                  disabled={loading || !formData.email || !formData.token}
                   autoComplete="new-password"
                   showPasswordToggle={true}
                   leftIcon={
@@ -332,7 +350,7 @@ const ResetPasswordPage = () => {
                   onChange={handleChange}
                   error={errors.confirmPassword}
                   success={formData.confirmPassword && formData.newPassword === formData.confirmPassword ? "Passwords match" : null}
-                  disabled={loading}
+                  disabled={loading || !formData.email || !formData.token}
                   autoComplete="new-password"
                   showPasswordToggle={true}
                   leftIcon={
@@ -350,7 +368,7 @@ const ResetPasswordPage = () => {
                 size="lg"
                 fullWidth
                 loading={loading}
-                disabled={!formData.newPassword || !formData.confirmPassword || errors.newPassword || errors.confirmPassword || loading}
+                disabled={!formData.email || !formData.token || !formData.newPassword || !formData.confirmPassword || errors.newPassword || errors.confirmPassword || loading}
                 className="transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
               >
                 {loading ? 'Resetting Password...' : 'Reset Password'}
@@ -416,7 +434,7 @@ const ResetPasswordPage = () => {
         </motion.div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }

@@ -53,14 +53,15 @@ const NotificationCenter = ({
 }) => {
   const dispatch = useDispatch();
   
-  // Redux state
+  // Redux state - FIX: Extract lastSyncTime from root level, not from stats
   const {
     notifications,
     unreadCount,
     loading,
     error,
     isSignalRConnected,
-    stats
+    stats,
+    lastSyncTime  // ← ADDED: Extract separately since it's at root level
   } = useSelector(state => state.notifications);
 
   // SignalR integration
@@ -235,185 +236,180 @@ const NotificationCenter = ({
         return <ShieldExclamationIcon className="w-5 h-5 text-red-500" />;
       case 'SystemAlert':
       case 'FRSystemOffline':
-        return <Cog6ToothIcon className={iconClass} />;
-      case 'InvitationApproved':
-        return <CheckIcon className="w-5 h-5 text-green-500" />;
-      case 'InvitationRejected':
-        return <XMarkIcon className="w-5 h-5 text-red-500" />;
-      case 'InvitationPendingApproval':
-        return <EnvelopeIcon className={iconClass} />;
+        return <ExclamationTriangleIcon className="w-5 h-5 text-orange-500" />;
+      case 'MaintenanceNotice':
+        return <Cog6ToothIcon className="w-5 h-5 text-gray-500" />;
+      case 'InvitationSent':
+        return <EnvelopeIcon className="w-5 h-5 text-blue-500" />;
       default:
-        return <InformationCircleIcon className={iconClass} />;
+        return <BellIcon className={iconClass} />;
     }
   };
 
-  // Get priority badge color
+  // Get priority color
   const getPriorityColor = (priority) => {
     switch (priority?.toLowerCase()) {
-      case 'emergency':
       case 'critical':
+      case 'emergency':
         return 'red';
       case 'high':
         return 'orange';
       case 'medium':
         return 'yellow';
       case 'low':
-        return 'gray';
       default:
         return 'blue';
     }
   };
 
   // Render filter tabs
-  const renderFilterTabs = () => (
-    <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-4">
-      {[
-        { label: 'All', value: 'all', count: notifications.length },
-        { label: 'Unread', value: 'unread', count: unreadCount },
-        { label: 'Visitors', value: 'visitors' },
-        { label: 'Security', value: 'security' },
-        { label: 'System', value: 'system' }
-      ].map(tab => (
-        <button
-          key={tab.value}
-          onClick={() => setFilter(tab.value)}
-          className={`flex items-center space-x-1 px-3 py-1 rounded text-sm font-medium transition-colors ${
-            filter === tab.value
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
-          }`}
-        >
-          <span>{tab.label}</span>
-          {tab.count !== undefined && tab.count > 0 && (
-            <Badge color={tab.value === 'unread' ? 'red' : 'gray'} size="xs">
-              {tab.count}
-            </Badge>
-          )}
-        </button>
-      ))}
-    </div>
-  );
+  const renderFilterTabs = () => {
+    const filters = [
+      { id: 'all', label: `All (${notifications.length})` },
+      { id: 'unread', label: `Unread (${unreadCount})` },
+      { id: 'visitors', label: 'Visitors' },
+      { id: 'security', label: 'Security' },
+      { id: 'system', label: 'System' }
+    ];
 
-  // Render notification item
+    return (
+      <div className="flex space-x-2 overflow-x-auto">
+        {filters.map(f => (
+          <button
+            key={f.id}
+            onClick={() => setFilter(f.id)}
+            className={`
+              px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-colors
+              ${filter === f.id
+                ? 'bg-blue-100 text-blue-700'
+                : 'text-gray-600 hover:bg-gray-100'
+              }
+            `}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  // Render individual notification
   const renderNotification = (notification) => (
     <motion.div
       key={notification.id}
+      layout
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className={`border rounded-lg p-4 hover:bg-gray-50 transition-colors ${
-        !notification.read ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
+      exit={{ opacity: 0, x: 20 }}
+      className={`p-4 border rounded-lg transition-colors ${
+        notification.read
+          ? 'bg-gray-50 border-gray-200'
+          : 'bg-blue-50 border-blue-200'
       }`}
     >
       <div className="flex items-start space-x-3">
-        {/* Notification Icon */}
         <div className="flex-shrink-0 mt-1">
           {getNotificationIcon(notification.type, notification.priority)}
         </div>
 
-        {/* Notification Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-1">
-                <h4 className="text-sm font-medium text-gray-900">
-                  {notification.title}
-                </h4>
-                <Badge 
-                  color={getPriorityColor(notification.priority)} 
-                  size="xs"
-                >
-                  {notification.priority}
-                </Badge>
-                {!notification.read && (
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                )}
-              </div>
-              
-              <p className="text-sm text-gray-600 mb-2">
-                {notification.message}
-              </p>
-              
-              <p className="text-xs text-gray-500">
-                {formatters.formatRelativeTime(new Date(notification.timestamp))}
-              </p>
-
-              {/* Related Entity Information */}
-              {notification.data && (
-                <div className="mt-2 text-xs text-gray-500 space-y-1">
-                  {notification.data.visitorName && (
-                    <p><strong>Visitor:</strong> {notification.data.visitorName}</p>
-                  )}
-                  {notification.data.company && (
-                    <p><strong>Company:</strong> {notification.data.company}</p>
-                  )}
-                  {notification.data.hostName && (
-                    <p><strong>Host:</strong> {notification.data.hostName}</p>
-                  )}
-                  {notification.data.location && (
-                    <p><strong>Location:</strong> {notification.data.location}</p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Enhanced Actions Menu */}
-            <div className="flex items-center space-x-1">
-              {!notification.read && (
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  onClick={() => markAsRead(notification.id)}
-                  icon={<CheckIcon className="w-3 h-3" />}
-                  title="Mark as read"
-                />
-              )}
-              
-              {/* Acknowledge Button */}
-              <Button
-                size="xs"
-                variant="ghost"
-                onClick={() => handleDirectAcknowledge(notification.id)}
-                icon={<CheckCircleIcon className="w-3 h-3" />}
-                title="Acknowledge notification"
-                className="text-green-600 hover:text-green-700 hover:bg-green-50"
-              />
-              
-              <Button
-                size="xs"
-                variant="ghost"
-                onClick={() => removeNotificationHandler(notification.id)}
-                icon={<XMarkIcon className="w-3 h-3" />}
-                title="Remove notification"
-              />
-              
-              {/* Acknowledged Status Indicator */}
-              {notification.read && notification.acknowledgedOn && (
-                <div className="flex items-center space-x-1 text-green-600">
-                  <CheckCircleIcon className="w-3 h-3" />
-                  <span className="text-xs">Acknowledged</span>
-                </div>
-              )}
-            </div>
+          <div className="flex items-center space-x-2 mb-1">
+            <h4 className="text-sm font-medium text-gray-900">
+              {notification.title}
+            </h4>
+            <Badge 
+              color={getPriorityColor(notification.priority)} 
+              size="xs"
+            >
+              {notification.priority}
+            </Badge>
+            {!notification.read && (
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            )}
           </div>
+          
+          <p className="text-sm text-gray-600 mb-2">
+            {notification.message}
+          </p>
+          
+          <p className="text-xs text-gray-500">
+            {formatters.formatRelativeTime(new Date(notification.timestamp))}
+          </p>
 
-          {/* Action Buttons */}
-          {notification.actions && notification.actions.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {notification.actions.map((action, index) => (
-                <Button
-                  key={index}
-                  size="xs"
-                  variant="outline"
-                  onClick={() => handleNotificationAction(notification, action)}
-                >
-                  {action.label}
-                </Button>
-              ))}
+          {/* Related Entity Information */}
+          {notification.data && (
+            <div className="mt-2 text-xs text-gray-500 space-y-1">
+              {notification.data.visitorName && (
+                <p><strong>Visitor:</strong> {notification.data.visitorName}</p>
+              )}
+              {notification.data.company && (
+                <p><strong>Company:</strong> {notification.data.company}</p>
+              )}
+              {notification.data.hostName && (
+                <p><strong>Host:</strong> {notification.data.hostName}</p>
+              )}
+              {notification.data.location && (
+                <p><strong>Location:</strong> {notification.data.location}</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Enhanced Actions Menu */}
+        <div className="flex items-center space-x-1">
+          {!notification.read && (
+            <Button
+              size="xs"
+              variant="ghost"
+              onClick={() => markAsRead(notification.id)}
+              icon={<CheckIcon className="w-3 h-3" />}
+              title="Mark as read"
+            />
+          )}
+          
+          {/* Acknowledge Button */}
+          <Button
+            size="xs"
+            variant="ghost"
+            onClick={() => handleDirectAcknowledge(notification.id)}
+            icon={<CheckCircleIcon className="w-3 h-3" />}
+            title="Acknowledge notification"
+            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+          />
+          
+          <Button
+            size="xs"
+            variant="ghost"
+            onClick={() => removeNotificationHandler(notification.id)}
+            icon={<XMarkIcon className="w-3 h-3" />}
+            title="Remove notification"
+          />
+          
+          {/* Acknowledged Status Indicator */}
+          {notification.read && notification.acknowledgedOn && (
+            <div className="flex items-center space-x-1 text-green-600">
+              <CheckCircleIcon className="w-3 h-3" />
+              <span className="text-xs">Acknowledged</span>
             </div>
           )}
         </div>
       </div>
+
+      {/* Action Buttons */}
+      {notification.actions && notification.actions.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {notification.actions.map((action, index) => (
+            <Button
+              key={index}
+              size="xs"
+              variant="outline"
+              onClick={() => handleNotificationAction(notification, action)}
+            >
+              {action.label}
+            </Button>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 
@@ -521,8 +517,9 @@ const NotificationCenter = ({
         <div className="flex items-center justify-between text-xs text-gray-500">
           <div className="flex items-center space-x-4">
             <span>{filteredNotifications.length} notifications</span>
-            {stats.lastSyncTime && (
-              <span>Updated: {formatters.formatRelativeTime(new Date(stats.lastSyncTime))}</span>
+            {/* FIX: Use lastSyncTime directly from root state, not from stats */}
+            {lastSyncTime && (
+              <span>Updated: {formatters.formatRelativeTime(new Date(lastSyncTime))}</span>
             )}
           </div>
           

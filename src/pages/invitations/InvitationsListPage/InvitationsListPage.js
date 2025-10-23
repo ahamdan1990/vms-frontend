@@ -787,12 +787,12 @@ const InvitationsListPage = () => {
   };
   // Main render
   return (
-    <div className="space-y-6">
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Invitations</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Invitations</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Manage visitor invitations and approvals
           </p>
         </div>
@@ -809,18 +809,18 @@ const InvitationsListPage = () => {
 
       {/* Statistics Cards */}
       {statistics && (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <DocumentDuplicateIcon className="w-5 h-5 text-blue-600" />
+                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                  <DocumentDuplicateIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total</dt>
-                  <dd className="text-lg font-medium text-gray-900">{statistics.total || 0}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.total || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -829,14 +829,14 @@ const InvitationsListPage = () => {
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <ClockIconSolid className="w-5 h-5 text-yellow-600" />
+                <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center">
+                  <ClockIconSolid className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Pending</dt>
-                  <dd className="text-lg font-medium text-gray-900">{statistics.pendingApproval || 0}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Pending</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.pendingApproval || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -845,14 +845,14 @@ const InvitationsListPage = () => {
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircleIcon className="w-5 h-5 text-green-600" />
+                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                  <CheckCircleIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Approved</dt>
-                  <dd className="text-lg font-medium text-gray-900">{statistics.byStatus?.approved || 0}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Approved</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.byStatus?.approved || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -861,14 +861,14 @@ const InvitationsListPage = () => {
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <UserIcon className="w-5 h-5 text-blue-600" />
+                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                  <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Active Today</dt>
-                  <dd className="text-lg font-medium text-gray-900">{statistics.activeToday || 0}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Active Today</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.activeToday || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -877,14 +877,14 @@ const InvitationsListPage = () => {
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                  <XCircleIcon className="w-5 h-5 text-red-600" />
+                <div className="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                  <XCircleIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Rejected</dt>
-                  <dd className="text-lg font-medium text-gray-900">{statistics.byStatus?.rejected || 0}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Rejected</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.byStatus?.rejected || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -937,7 +937,7 @@ const InvitationsListPage = () => {
               exit={{ opacity: 0, height: 0 }}
               className="mt-4 pt-4 border-t border-gray-200"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Status

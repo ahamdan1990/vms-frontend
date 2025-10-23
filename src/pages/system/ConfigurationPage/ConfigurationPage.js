@@ -172,8 +172,8 @@ const ConfigurationPage = () => {
         <Card>
           <div className="text-center py-12">
             <ExclamationTriangleIcon className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
-            <p className="text-gray-600">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Access Denied</h3>
+            <p className="text-gray-600 dark:text-gray-400">
               You don't have permission to view system configurations.
             </p>
           </div>
@@ -187,8 +187,8 @@ const ConfigurationPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">System Configuration</h1>
-          <p className="text-gray-600 mt-1">Manage system settings and configurations</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">System Configuration</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Manage system settings and configurations</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -370,8 +370,8 @@ const ConfigurationCategory = ({
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-medium text-gray-900">{category}</h3>
-            <p className="text-sm text-gray-600">{configurations.length} configuration(s)</p>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">{category}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{configurations.length} configuration(s)</p>
           </div>
           
           {canInvalidateCache && (
@@ -453,7 +453,7 @@ const ConfigurationItem = ({
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 mb-2">
-            <h4 className="text-sm font-medium text-gray-900">{config.key}</h4>
+            <h4 className="text-sm font-medium text-gray-900 dark:text-white">{config.key}</h4>
             {getDataTypeBadge(config.dataType)}
             
             {config.isEncrypted && (
@@ -474,12 +474,12 @@ const ConfigurationItem = ({
           </div>
           
           {config.description && (
-            <p className="text-sm text-gray-600 mb-2">{config.description}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{config.description}</p>
           )}
           
-          <div className="bg-gray-50 rounded-md p-3">
-            <div className="text-xs text-gray-500 mb-1">Current Value:</div>
-            <div className="text-sm font-mono text-gray-900">
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-md p-3">
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Current Value:</div>
+            <div className="text-sm font-mono text-gray-900 dark:text-gray-100">
               {config.dataType === 'JSON' ? (
                 <pre className="whitespace-pre-wrap">
                   {formatValue(config.value, config.dataType, config.isSensitive)}
@@ -528,8 +528,14 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
   // Update form when config changes
   useEffect(() => {
     if (config) {
+      // For boolean values, ensure we store them as strings
+      let initialValue = config.value;
+      if (config.dataType === 'Boolean') {
+        initialValue = String(config.value);
+      }
+
       setFormData({
-        value: config.value || '',
+        value: initialValue || '',
         reason: ''
       });
       setFormErrors({});
@@ -578,8 +584,8 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
             onChange={(e) => handleValueChange(e.target.value)}
             error={formErrors.value}
             options={[
-              { value: true, label: 'True' },
-              { value: false, label: 'False' }
+              { value: 'true', label: 'True' },
+              { value: 'false', label: 'False' }
             ]}
             required
           />
@@ -652,15 +658,15 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
     <Modal isOpen={isOpen} onClose={onClose} title="Edit Configuration" size="md">
       <div className="space-y-6">
         {/* Configuration Info */}
-        <div className="bg-gray-50 rounded-lg p-4">
+        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="font-medium text-gray-700">Key:</span>
-              <span className="ml-2 text-gray-900">{config.key}</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300">Key:</span>
+              <span className="ml-2 text-gray-900 dark:text-gray-100">{config.key}</span>
             </div>
             <div>
-              <span className="font-medium text-gray-700">Category:</span>
-              <span className="ml-2 text-gray-900">{config.category}</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300">Category:</span>
+              <span className="ml-2 text-gray-900 dark:text-gray-100">{config.category}</span>
             </div>
             {/* <div>
               <span className="font-medium text-gray-700">Data Type:</span>
@@ -676,18 +682,18 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
           
           {config.description && (
             <div className="mt-3">
-              <span className="font-medium text-gray-700">Description:</span>
-              <p className="mt-1 text-gray-600">{config.description}</p>
+              <span className="font-medium text-gray-700 dark:text-gray-300">Description:</span>
+              <p className="mt-1 text-gray-600 dark:text-gray-400">{config.description}</p>
             </div>
           )}
           
           {config.requiresRestart && (
-            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-              <div className="flex items-center gap-2 text-yellow-800">
+            <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+              <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-400">
                 <ExclamationTriangleIcon className="h-4 w-4" />
                 <span className="text-sm font-medium">Restart Required</span>
               </div>
-              <p className="text-xs text-yellow-700 mt-1">
+              <p className="text-xs text-yellow-700 dark:text-yellow-500 mt-1">
                 Changing this configuration will require a system restart to take effect.
               </p>
             </div>
@@ -707,7 +713,7 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
             error={formErrors.reason}
             placeholder="Enter reason for this configuration change..."
           />
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             This will be logged for audit purposes.
           </p>
         </div>
