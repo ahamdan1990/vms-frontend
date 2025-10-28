@@ -69,6 +69,8 @@ const NotificationCenter = ({
 
   // Local state
   const [filter, setFilter] = useState('all'); // 'all', 'unread', 'security', 'visitors', 'system'
+  const [viewMode, setViewMode] = useState('list'); // 'list', 'card'
+  const [notificationActions, setNotificationActions] = useState({}); // { notificationId: 'markRead'|'acknowledge' }
 
   // Load notifications on mount and when filter changes
   useEffect(() => {
@@ -262,6 +264,30 @@ const NotificationCenter = ({
     }
   };
 
+  // Get selected action for a notification
+  const getNotificationAction = (notificationId) => {
+    return notificationActions[notificationId] || 'markRead';
+  };
+
+  // Set action for a notification
+  const setNotificationAction = (notificationId, action) => {
+    setNotificationActions(prev => ({
+      ...prev,
+      [notificationId]: action
+    }));
+  };
+
+  // Execute the selected action
+  const executeNotificationAction = async (notificationId) => {
+    const action = getNotificationAction(notificationId);
+
+    if (action === 'acknowledge') {
+      await handleDirectAcknowledge(notificationId);
+    } else {
+      markAsRead(notificationId);
+    }
+  };
+
   // Render filter tabs
   const renderFilterTabs = () => {
     const filters = [
@@ -294,124 +320,144 @@ const NotificationCenter = ({
   };
 
   // Render individual notification
-  const renderNotification = (notification) => (
-    <motion.div
-      key={notification.id}
-      layout
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
-      className={`p-4 border rounded-lg transition-colors ${
-        notification.read
-          ? 'bg-gray-50 border-gray-200'
-          : 'bg-blue-50 border-blue-200'
-      }`}
-    >
-      <div className="flex items-start space-x-3">
-        <div className="flex-shrink-0 mt-1">
-          {getNotificationIcon(notification.type, notification.priority)}
-        </div>
+  const renderNotification = (notification) => {
+    const isCardView = viewMode === 'card';
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2 mb-1">
-            <h4 className="text-sm font-medium text-gray-900">
-              {notification.title}
-            </h4>
-            <Badge 
-              color={getPriorityColor(notification.priority)} 
-              size="xs"
-            >
-              {notification.priority}
-            </Badge>
-            {!notification.read && (
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            )}
+    return (
+      <motion.div
+        key={notification.id}
+        layout
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.2 }}
+        className={`p-4 border rounded-lg transition-all duration-200 ${
+          notification.read
+            ? 'bg-white border-gray-200 hover:border-gray-300'
+            : 'bg-blue-50 border-blue-300 hover:border-blue-400'
+        } ${isCardView ? 'shadow-sm hover:shadow-md' : 'hover:shadow-sm'}`}
+      >
+        <div className="flex items-start space-x-3">
+          <div className="flex-shrink-0 mt-1">
+            {getNotificationIcon(notification.type, notification.priority)}
           </div>
-          
-          <p className="text-sm text-gray-600 mb-2">
-            {notification.message}
-          </p>
-          
-          <p className="text-xs text-gray-500">
-            {formatters.formatRelativeTime(new Date(notification.timestamp))}
-          </p>
 
-          {/* Related Entity Information */}
-          {notification.data && (
-            <div className="mt-2 text-xs text-gray-500 space-y-1">
-              {notification.data.visitorName && (
-                <p><strong>Visitor:</strong> {notification.data.visitorName}</p>
-              )}
-              {notification.data.company && (
-                <p><strong>Company:</strong> {notification.data.company}</p>
-              )}
-              {notification.data.hostName && (
-                <p><strong>Host:</strong> {notification.data.hostName}</p>
-              )}
-              {notification.data.location && (
-                <p><strong>Location:</strong> {notification.data.location}</p>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center space-x-2 mb-1">
+              <h4 className="text-sm font-medium text-gray-900">
+                {notification.title}
+              </h4>
+              <Badge
+                color={getPriorityColor(notification.priority)}
+                size="xs"
+              >
+                {notification.priority}
+              </Badge>
+              {!notification.read && (
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
               )}
             </div>
-          )}
-        </div>
 
-        {/* Enhanced Actions Menu */}
-        <div className="flex items-center space-x-1">
-          {!notification.read && (
+            <p className="text-sm text-gray-600 mb-2">
+              {notification.message}
+            </p>
+
+            <p className="text-xs text-gray-500">
+              {formatters.formatRelativeTime(new Date(notification.timestamp))}
+            </p>
+
+            {/* Related Entity Information */}
+            {notification.data && (
+              <div className="mt-2 text-xs text-gray-500 space-y-1">
+                {notification.data.visitorName && (
+                  <p><strong>Visitor:</strong> {notification.data.visitorName}</p>
+                )}
+                {notification.data.company && (
+                  <p><strong>Company:</strong> {notification.data.company}</p>
+                )}
+                {notification.data.hostName && (
+                  <p><strong>Host:</strong> {notification.data.hostName}</p>
+                )}
+                {notification.data.location && (
+                  <p><strong>Location:</strong> {notification.data.location}</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Enhanced Actions Menu with Dropdown */}
+          <div className="flex flex-col items-end space-y-2">
+            {!notification.read && !notification.acknowledgedOn && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex items-center space-x-2 bg-white rounded-lg p-1 shadow-sm border border-gray-200"
+              >
+                {/* Action Type Selector */}
+                <select
+                  value={getNotificationAction(notification.id)}
+                  onChange={(e) => setNotificationAction(notification.id, e.target.value)}
+                  className="text-xs border-0 bg-transparent rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <option value="markRead">📖 Mark as Read</option>
+                  <option value="acknowledge">✅ Acknowledge</option>
+                </select>
+
+                {/* Execute Button */}
+                <Button
+                  size="xs"
+                  variant="primary"
+                  onClick={() => executeNotificationAction(notification.id)}
+                  icon={<CheckIcon className="w-3 h-3" />}
+                  title={getNotificationAction(notification.id) === 'acknowledge' ? 'Acknowledge' : 'Mark as Read'}
+                  className="shadow-sm"
+                />
+              </motion.div>
+            )}
+
+            {/* Remove Button */}
             <Button
               size="xs"
               variant="ghost"
-              onClick={() => markAsRead(notification.id)}
-              icon={<CheckIcon className="w-3 h-3" />}
-              title="Mark as read"
+              onClick={() => removeNotificationHandler(notification.id)}
+              icon={<XMarkIcon className="w-3 h-3" />}
+              title="Remove notification"
+              className="text-gray-400 hover:text-red-500 hover:bg-red-50"
             />
-          )}
-          
-          {/* Acknowledge Button */}
-          <Button
-            size="xs"
-            variant="ghost"
-            onClick={() => handleDirectAcknowledge(notification.id)}
-            icon={<CheckCircleIcon className="w-3 h-3" />}
-            title="Acknowledge notification"
-            className="text-green-600 hover:text-green-700 hover:bg-green-50"
-          />
-          
-          <Button
-            size="xs"
-            variant="ghost"
-            onClick={() => removeNotificationHandler(notification.id)}
-            icon={<XMarkIcon className="w-3 h-3" />}
-            title="Remove notification"
-          />
-          
-          {/* Acknowledged Status Indicator */}
-          {notification.read && notification.acknowledgedOn && (
-            <div className="flex items-center space-x-1 text-green-600">
-              <CheckCircleIcon className="w-3 h-3" />
-              <span className="text-xs">Acknowledged</span>
-            </div>
-          )}
-        </div>
-      </div>
 
-      {/* Action Buttons */}
-      {notification.actions && notification.actions.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {notification.actions.map((action, index) => (
-            <Button
-              key={index}
-              size="xs"
-              variant="outline"
-              onClick={() => handleNotificationAction(notification, action)}
-            >
-              {action.label}
-            </Button>
-          ))}
+            {/* Acknowledged Status Indicator */}
+            {notification.read && notification.acknowledgedOn && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex items-center space-x-1 text-green-600 bg-green-50 px-2 py-1 rounded-lg"
+              >
+                <CheckCircleIcon className="w-4 h-4" />
+                <span className="text-xs font-medium">Acknowledged</span>
+              </motion.div>
+            )}
+          </div>
         </div>
-      )}
-    </motion.div>
-  );
+
+        {/* Action Buttons */}
+        {notification.actions && notification.actions.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {notification.actions.map((action, index) => (
+              <Button
+                key={index}
+                size="xs"
+                variant="outline"
+                onClick={() => handleNotificationAction(notification, action)}
+              >
+                {action.label}
+              </Button>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    );
+  };
 
   if (!isOpen) return null;
 
@@ -435,8 +481,38 @@ const NotificationCenter = ({
             {/* Real-time connection indicator */}
             <ConnectionStatus className="ml-2" />
           </div>
-          
+
           <div className="flex items-center space-x-1">
+            {/* View Mode Toggle */}
+            <div className="flex items-center bg-white rounded-lg border border-gray-200 overflow-hidden mr-2">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-2 py-1 text-xs font-medium transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+                title="List view"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setViewMode('card')}
+                className={`px-2 py-1 text-xs font-medium transition-colors ${
+                  viewMode === 'card'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+                title="Card view"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+              </button>
+            </div>
+
             {unreadCount > 0 && (
               <Button
                 size="sm"
@@ -446,7 +522,7 @@ const NotificationCenter = ({
                 title="Mark all as read"
               />
             )}
-            
+
             <Button
               size="sm"
               variant="ghost"
@@ -504,7 +580,7 @@ const NotificationCenter = ({
             )}
           </div>
         ) : (
-          <div className="p-4 space-y-3">
+          <div className={`p-4 ${viewMode === 'card' ? 'grid grid-cols-1 gap-3' : 'space-y-3'}`}>
             <AnimatePresence>
               {filteredNotifications.map(renderNotification)}
             </AnimatePresence>

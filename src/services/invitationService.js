@@ -58,6 +58,18 @@ const invitationService = {
   },
 
   /**
+   * Gets invitation by reference (ID, invitation number, or QR code)
+   * GET /api/invitations/by-reference/{reference}
+   * Requires: Invitation.Read permission
+   */
+  async getInvitationByReference(reference, includeDeleted = false) {
+    const queryParams = { includeDeleted };
+    const queryString = buildQueryString(queryParams);
+    const response = await apiClient.get(`/api/invitations/by-reference/${encodeURIComponent(reference)}${queryString}`);
+    return extractApiData(response);
+  },
+
+  /**
    * Creates a new invitation
    * POST /api/invitations
    * Requires: Invitation.Create permission

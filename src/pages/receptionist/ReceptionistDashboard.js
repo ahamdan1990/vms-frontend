@@ -8,6 +8,9 @@ import visitorService from '../../services/visitorService';
 import invitationService from '../../services/invitationService';
 import visitorDocumentService from '../../services/visitorDocumentService';
 
+// Hooks
+import { useToast } from '../../hooks/useNotifications';
+
 // Components
 import Card from '../../components/common/Card/Card';
 import Button from '../../components/common/Button/Button';
@@ -57,6 +60,9 @@ import { extractErrorMessage } from '../../utils/errorUtils';
  * - Photo capture and document handling
  */
 const ReceptionistDashboard = () => {
+  // Hooks
+  const toast = useToast();
+
   // State management
   const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'walk-in', 'scanner', 'active', 'documents'
   const [todayStats, setTodayStats] = useState({
@@ -229,21 +235,80 @@ const ReceptionistDashboard = () => {
   const handleQrScan = async (qrData) => {
     try {
       setScanError(null);
-      
+
       // Validate QR code
       const validationResult = await invitationService.validateQrCode(qrData);
-      
-      if (validationResult.isValid) {
+
+      if (validationResult.isValid && validationResult.invitation) {
         // Process check-in
-        const checkInResult = await invitationService.checkInInvitation(qrData, 'QR code scan check-in');
+        const checkInResult = await invitationService.checkInInvitation(
+          validationResult.invitationNumber || qrData,
+          'QR code scan check-in'
+        );
+
         setScanResult(checkInResult);
-        loadDashboardData();
-        loadActiveVisitors();
+
+        // Show success notification with visitor details
+        const visitorName = validationResult.invitation.visitor?.fullName || 'Visitor';
+        const invitationNumber = validationResult.invitationNumber || 'N/A';
+
+        toast.success(
+          'Check-in Successful',
+          `${visitorName} has been checked in successfully. Invitation: ${invitationNumber}`,
+          { duration: 5000 }
+        );
+
+        // Reload dashboard data to update stats
+        await loadDashboardData();
+        await loadActiveVisitors();
       } else {
-        setScanError('Invalid QR code or expired invitation');
+        const errorMsg = 'Invalid QR code format. Please ensure you are scanning a valid VMS invitation QR code.';
+        setScanError(errorMsg);
+        toast.error('Invalid QR Code', errorMsg, { duration: 6000 });
       }
     } catch (error) {
-      setScanError(extractErrorMessage(error));
+      const errorMessage = extractErrorMessage(error);
+      setScanError(errorMessage);
+
+      // Determine the type of error and show appropriate message
+      if (error.message?.includes('Invalid QR code') || error.message?.includes('format')) {
+        toast.error(
+          'QR Code Validation Failed',
+          'The scanned QR code format is not recognized. Please contact your administrator if this issue persists.',
+          { duration: 7000 }
+        );
+      } else if (error.message?.includes('too early') || error.message?.includes('scheduled for')) {
+        // Early check-in attempt
+        toast.warning(
+          'Check-in Too Early',
+          errorMessage,
+          { duration: 8000 }
+        );
+      } else if (error.message?.includes('expired') || error.message?.includes('scheduled to end')) {
+        // Expired invitation
+        toast.error(
+          'Invitation Expired',
+          errorMessage,
+          { duration: 8000 }
+        );
+      } else if (error.message?.includes('not found')) {
+        toast.warning(
+          'Invitation Not Found',
+          'The invitation associated with this QR code could not be found.',
+          { duration: 6000 }
+        );
+      } else if (error.message?.includes('Only approved invitations')) {
+        toast.error(
+          'Invitation Not Approved',
+          'This invitation has not been approved yet. Please ensure the invitation is approved before attempting check-in.',
+          { duration: 7000 }
+        );
+      } else {
+        toast.error('Check-in Failed', errorMessage, { duration: 6000 });
+      }
+
+      // Re-throw error so QR scanner component knows it failed
+      throw error;
     }
   };
 

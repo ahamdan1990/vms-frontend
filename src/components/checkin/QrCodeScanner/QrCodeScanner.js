@@ -1,5 +1,5 @@
 // src/components/checkin/QrCodeScanner/QrCodeScanner.js
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { Scanner, useDevices } from '@yudiel/react-qr-scanner';
@@ -41,6 +41,12 @@ const QrCodeScanner = ({
   const [availableDevices, setAvailableDevices] = useState([]);
   const [scanStats, setScanStats] = useState({ successful: 0, failed: 0 });
   const [lastScanTime, setLastScanTime] = useState(null);
+  const [lastScannedCode, setLastScannedCode] = useState(null);
+  const [scanCooldown, setScanCooldown] = useState(false);
+
+  // Use refs for debouncing to avoid re-creating callback
+  const scanCooldownRef = useRef(false);
+  const lastScannedCodeRef = useRef(null);
 
   // Get available cameras
   const devices = useDevices();
@@ -54,6 +60,25 @@ const QrCodeScanner = ({
       console.log('✅ Selected camera:', devices[0].label || devices[0].deviceId);
     }
   }, [devices, selectedDevice]);
+
+  // Cleanup: Stop camera when component unmounts
+  useEffect(() => {
+    return () => {
+      // Stop all video tracks when unmounting
+      if (isScanning) {
+        const stopAllTracks = async () => {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            stream.getTracks().forEach(track => track.stop());
+            console.log('🛑 Camera stopped on unmount');
+          } catch (err) {
+            // Camera might already be stopped, ignore error
+          }
+        };
+        stopAllTracks();
+      }
+    };
+  }, [isScanning]);
 
   // Audio beep on successful scan
   const playSuccessBeep = useCallback(() => {
@@ -104,29 +129,56 @@ const QrCodeScanner = ({
   const handleScan = useCallback(async (detectedCodes) => {
     if (detectedCodes && detectedCodes.length > 0) {
       const code = detectedCodes[0]; // Get first detected code
+      const qrValue = code.rawValue;
+
+      // Prevent duplicate scans within cooldown period (3 seconds) using refs
+      if (scanCooldownRef.current || qrValue === lastScannedCodeRef.current) {
+        return;
+      }
+
       console.log('🎉 QR CODE DETECTED!');
       console.log('Format:', code.format);
-      console.log('Value:', code.rawValue);
+      console.log('Value:', qrValue);
+
+      // Set cooldown and remember this code in both state and ref
+      scanCooldownRef.current = true;
+      lastScannedCodeRef.current = qrValue;
+      setScanCooldown(true);
+      setLastScannedCode(qrValue);
 
       playSuccessBeep();
       setScanningStatus('✅ QR Code detected! Processing...');
 
       try {
-        await onScan(code.rawValue);
+        await onScan(qrValue);
         setScanResult('✅ Check-in successful!');
         setScanStats(prev => ({ ...prev, successful: prev.successful + 1 }));
         setLastScanTime(new Date());
         setError(null);
 
-        // Pause briefly to show success, then resume
+        // Pause to show success, then resume
         setTimeout(() => {
           setScanResult(null);
           setScanningStatus('📷 Camera active - Ready for next scan');
-        }, 2000);
+          scanCooldownRef.current = false;
+          lastScannedCodeRef.current = null;
+          setScanCooldown(false);
+          setLastScannedCode(null);
+        }, 3000);
       } catch (error) {
         setScanStats(prev => ({ ...prev, failed: prev.failed + 1 }));
         setError(error.message || 'Check-in failed');
-        setScanningStatus('📷 Camera active - Ready to try again');
+        setScanningStatus('⚠️ Scan failed - Ready to try again');
+
+        // Keep cooldown for failed scans to prevent spam
+        setTimeout(() => {
+          setError(null);
+          setScanningStatus('📷 Camera active - Ready for next scan');
+          scanCooldownRef.current = false;
+          lastScannedCodeRef.current = null;
+          setScanCooldown(false);
+          setLastScannedCode(null);
+        }, 3000);
       }
     }
   }, [onScan, playSuccessBeep]);

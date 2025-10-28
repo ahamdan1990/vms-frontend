@@ -27,8 +27,10 @@ import Input from '../../../components/common/Input/Input';
 import Badge from '../../../components/common/Badge/Badge';
 import Table from '../../../components/common/Table/Table';
 import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpinner';
+import Modal from '../../../components/common/Modal/Modal';
 import QrCodeScanner from '../../../components/checkin/QrCodeScanner/QrCodeScanner';
 import CheckInForm from '../../../components/checkin/CheckInForm/CheckInForm';
+import InvitationDetailsModal from '../../../components/checkin/InvitationDetailsModal/InvitationDetailsModal';
 
 // Icons
 import {
@@ -55,6 +57,12 @@ import {
 import formatters from '../../../utils/formatters';
 import { extractErrorMessage } from '../../../utils/errorUtils';
 
+// Services
+import invitationService from '../../../services/invitationService';
+
+// Hooks
+import { useToast } from '../../../hooks/useNotifications';
+
 /**
  * Check-in Dashboard Component
  * Central hub for visitor check-in/check-out operations
@@ -62,6 +70,7 @@ import { extractErrorMessage } from '../../../utils/errorUtils';
  */
 const CheckInDashboard = () => {
   const dispatch = useDispatch();
+  const toast = useToast();
 
   // Redux selectors
   const activeInvitations = useSelector(selectActiveInvitations);
@@ -74,6 +83,13 @@ const CheckInDashboard = () => {
   const [activeTab, setActiveTab] = useState('scanner'); // 'scanner', 'manual', 'active'
   const [showCheckInForm, setShowCheckInForm] = useState(false);
   const [selectedInvitation, setSelectedInvitation] = useState(null);
+  const [showScannerModal, setShowScannerModal] = useState(false);
+  const [scannedInvitationData, setScannedInvitationData] = useState(null);
+  const [showInvitationDetailsModal, setShowInvitationDetailsModal] = useState(false);
+  const [invitationDetailsData, setInvitationDetailsData] = useState(null);
+  const [invitationDetailsError, setInvitationDetailsError] = useState(null);
+  const [loadingInvitationDetails, setLoadingInvitationDetails] = useState(false);
+  const [autoCheckInMode, setAutoCheckInMode] = useState(false); // Toggle for auto vs manual check-in
   const [checkInStats, setCheckInStats] = useState({
     todayCheckIns: 0,
     activeVisitors: 0,
@@ -138,16 +154,154 @@ const CheckInDashboard = () => {
 
   // Handle QR code scan
   const handleQrScan = async (qrData) => {
+    // Close scanner modal immediately after scan
+    setShowScannerModal(false);
+
+    // Small delay to ensure modal is properly closed and body scroll is restored
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // AUTO CHECK-IN MODE: Process check-in immediately
+    if (autoCheckInMode) {
+      try {
+        const result = await dispatch(checkInInvitation({
+          invitationReference: qrData,
+          notes: 'QR Code Check-in'
+        })).unwrap();
+
+        // Store invitation data
+        setScannedInvitationData(result);
+
+        // Show success toast
+        const visitorName = result?.visitor?.fullName || 'Visitor';
+        const invitationNumber = result?.invitationNumber || 'N/A';
+
+        toast.success(
+          'Check-in Successful',
+          `${visitorName} has been checked in successfully. Invitation: ${invitationNumber}`,
+          { duration: 5000 }
+        );
+
+        // Refresh active invitations
+        await dispatch(getActiveInvitations());
+      } catch (error) {
+        console.error('QR check-in failed:', error);
+        const errorMessage = extractErrorMessage(error);
+
+        // Try to fetch invitation details to show in the modal with warning banners
+        try {
+          const invitationDetails = await invitationService.getInvitationByReference(qrData);
+          // We got invitation details - show them with the warning banners
+          // The modal will display appropriate warnings based on the invitation state
+          setInvitationDetailsData(invitationDetails);
+          setInvitationDetailsError(null); // Clear error since we have invitation to show
+        } catch (fetchError) {
+          console.error('Failed to fetch invitation details for error display:', fetchError);
+          // If we can't fetch details, show error message
+          setInvitationDetailsData(null);
+          setInvitationDetailsError({
+            message: errorMessage || 'Check-in failed',
+            details: getErrorDetails(errorMessage)
+          });
+        }
+
+        setShowInvitationDetailsModal(true);
+      }
+    }
+    // MANUAL CONFIRMATION MODE: Fetch invitation details first
+    else {
+      setLoadingInvitationDetails(true);
+      setInvitationDetailsError(null);
+      setInvitationDetailsData(null);
+
+      try {
+        // Fetch invitation details without checking in
+        const invitationDetails = await invitationService.getInvitationByReference(qrData);
+
+        if (invitationDetails) {
+          setInvitationDetailsData(invitationDetails);
+          setShowInvitationDetailsModal(true);
+        } else {
+          setInvitationDetailsError({
+            message: 'Invitation Not Found',
+            details: 'The scanned QR code does not match any invitation in the system.'
+          });
+          setShowInvitationDetailsModal(true);
+        }
+      } catch (error) {
+        console.error('Failed to fetch invitation details:', error);
+        const errorMessage = extractErrorMessage(error);
+
+        // Handle 404 specifically - invitation not found
+        if (error.response?.status === 404 || errorMessage?.includes('not found') || errorMessage?.includes('404')) {
+          setInvitationDetailsError({
+            message: `Invitation with reference '${qrData}' not found.`,
+            details: 'The scanned QR code does not match any invitation in the system.'
+          });
+        } else {
+          setInvitationDetailsError({
+            message: errorMessage || 'Failed to load invitation details',
+            details: getErrorDetails(errorMessage)
+          });
+        }
+        setShowInvitationDetailsModal(true);
+      } finally {
+        setLoadingInvitationDetails(false);
+      }
+    }
+  };
+
+  // Helper function to extract error details
+  const getErrorDetails = (errorMessage) => {
+    if (!errorMessage) return null;
+
+    if (errorMessage.includes('too early') || errorMessage.includes('scheduled for')) {
+      return 'This invitation is scheduled for a future time. Check-in is allowed starting 2 hours before the scheduled time.';
+    } else if (errorMessage.includes('expired') || errorMessage.includes('scheduled to end')) {
+      return 'This invitation has expired and can no longer be used for check-in.';
+    } else if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+      return 'The scanned QR code does not match any invitation in the system.';
+    } else if (errorMessage.includes('Only approved invitations') || errorMessage.includes('not been approved') || errorMessage.includes('not approved')) {
+      return 'This invitation must be approved before check-in is allowed.';
+    } else if (errorMessage.includes('already checked in')) {
+      return 'This visitor has already been checked in.';
+    }
+    return null;
+  };
+
+  // Handle manual confirmation of check-in after viewing details
+  const handleConfirmCheckIn = async (invitationReference, notes = '') => {
     try {
-      await dispatch(checkInInvitation({
-        invitationReference: qrData,
-        notes: 'QR Code Check-in'
+      const result = await dispatch(checkInInvitation({
+        invitationReference,
+        notes: notes || 'Manual confirmation check-in'
       })).unwrap();
-      
+
+      // Close details modal
+      setShowInvitationDetailsModal(false);
+      setInvitationDetailsData(null);
+      setInvitationDetailsError(null);
+
+      // Show success toast
+      const visitorName = result?.visitor?.fullName || 'Visitor';
+      const invitationNumber = result?.invitationNumber || 'N/A';
+
+      toast.success(
+        'Check-in Successful',
+        `${visitorName} has been checked in successfully. Invitation: ${invitationNumber}`,
+        { duration: 5000 }
+      );
+
       // Refresh active invitations
-      dispatch(getActiveInvitations());
+      await dispatch(getActiveInvitations());
     } catch (error) {
-      console.error('QR check-in failed:', error);
+      console.error('Confirmed check-in failed:', error);
+      const errorMessage = extractErrorMessage(error);
+
+      // Update error in modal
+      setInvitationDetailsError({
+        message: errorMessage || 'Check-in failed',
+        details: getErrorDetails(errorMessage)
+      });
     }
   };
 
@@ -527,13 +681,58 @@ const CheckInDashboard = () => {
               <div className="text-center">
                 <QrCodeIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">QR Code Scanner</h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-600 mb-4">
                   Scan visitor QR codes for quick check-in
                 </p>
-                <QrCodeScanner
-                  onScan={handleQrScan}
-                  loading={checkInLoading}
-                />
+
+                {/* Check-in Mode Toggle */}
+                <div className="flex items-center justify-center space-x-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                  <span className="text-sm font-medium text-gray-700">Check-in Mode:</span>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setAutoCheckInMode(false)}
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        !autoCheckInMode
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      Manual Confirmation
+                    </button>
+                    <button
+                      onClick={() => setAutoCheckInMode(true)}
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        autoCheckInMode
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      Auto Check-in
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mb-6 text-sm text-gray-600">
+                  {autoCheckInMode ? (
+                    <p>
+                      ✅ <strong>Auto mode:</strong> Visitors will be checked in immediately after QR scan
+                    </p>
+                  ) : (
+                    <p>
+                      👤 <strong>Manual mode:</strong> Review visitor details before confirming check-in
+                    </p>
+                  )}
+                </div>
+
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={() => setShowScannerModal(true)}
+                  icon={<QrCodeIcon className="h-5 w-5" />}
+                  iconPosition="left"
+                >
+                  Open QR Scanner
+                </Button>
               </div>
             </Card>
           )}
@@ -606,6 +805,168 @@ const CheckInDashboard = () => {
             </div>
           </Card>
         </motion.div>
+      )}
+
+      {/* QR Scanner Modal */}
+      {showScannerModal && (
+        <Modal
+          isOpen={showScannerModal}
+          onClose={() => setShowScannerModal(false)}
+          title="Scan QR Code"
+          size="lg"
+        >
+          <div className="text-center">
+            <p className="text-gray-600 mb-6">
+              Point your camera at the visitor's QR code
+            </p>
+            <QrCodeScanner
+              key={showScannerModal ? 'scanner-open' : 'scanner-closed'}
+              onScan={handleQrScan}
+              loading={checkInLoading}
+            />
+          </div>
+        </Modal>
+      )}
+
+      {/* Invitation Details Modal - For Manual Confirmation Mode */}
+      <InvitationDetailsModal
+        isOpen={showInvitationDetailsModal}
+        onClose={() => {
+          setShowInvitationDetailsModal(false);
+          setInvitationDetailsData(null);
+          setInvitationDetailsError(null);
+        }}
+        invitation={invitationDetailsData}
+        error={invitationDetailsError}
+        onConfirmCheckIn={handleConfirmCheckIn}
+        loading={checkInLoading || loadingInvitationDetails}
+      />
+
+      {/* Invitation Details Modal */}
+      {scannedInvitationData && (
+        <Modal
+          isOpen={!!scannedInvitationData}
+          onClose={() => setScannedInvitationData(null)}
+          title="Check-in Successful"
+          size="xl"
+        >
+          <div className="space-y-6">
+            {/* Success Message */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start">
+              <CheckCircleIconSolid className="h-6 w-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-green-900 font-medium">Visitor Checked In Successfully</h4>
+                <p className="text-green-700 text-sm mt-1">
+                  {new Date().toLocaleString()}
+                </p>
+              </div>
+            </div>
+
+            {/* Visitor Information */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <UserIcon className="h-5 w-5 mr-2" />
+                Visitor Information
+              </h3>
+              <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-500">Full Name</p>
+                  <p className="font-medium text-gray-900">
+                    {scannedInvitationData.visitor?.fullName || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="font-medium text-gray-900">
+                    {scannedInvitationData.visitor?.email?.value || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Phone</p>
+                  <p className="font-medium text-gray-900">
+                    {scannedInvitationData.visitor?.phoneNumber?.value || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Company</p>
+                  <p className="font-medium text-gray-900">
+                    {scannedInvitationData.visitor?.company || 'N/A'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Invitation Information */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <CalendarIcon className="h-5 w-5 mr-2" />
+                Invitation Details
+              </h3>
+              <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-500">Invitation Number</p>
+                  <p className="font-medium text-gray-900">
+                    {scannedInvitationData.invitationNumber || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Purpose</p>
+                  <p className="font-medium text-gray-900">
+                    {scannedInvitationData.purpose || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Scheduled Time</p>
+                  <p className="font-medium text-gray-900">
+                    {scannedInvitationData.scheduledStartTime
+                      ? new Date(scannedInvitationData.scheduledStartTime).toLocaleString()
+                      : 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Host</p>
+                  <p className="font-medium text-gray-900">
+                    {scannedInvitationData.host?.fullName || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Location</p>
+                  <p className="font-medium text-gray-900 flex items-center">
+                    <MapPinIcon className="h-4 w-4 mr-1" />
+                    {scannedInvitationData.location?.name || 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Status</p>
+                  <Badge variant="success">
+                    Checked In
+                  </Badge>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end space-x-3 pt-4 border-t">
+              <Button
+                variant="secondary"
+                onClick={() => setScannedInvitationData(null)}
+              >
+                Close
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  setScannedInvitationData(null);
+                  setShowScannerModal(true);
+                }}
+                icon={<QrCodeIcon className="h-4 w-4" />}
+                iconPosition="left"
+              >
+                Scan Another
+              </Button>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   );

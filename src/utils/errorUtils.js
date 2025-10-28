@@ -12,8 +12,22 @@ export const extractErrorMessage = (error) => {
   if (typeof error === 'string') {
     return error;
   }
-  
+
   if (typeof error === 'object' && error !== null) {
+    // Check for details.errors array (backend API format)
+    if (error.details && error.details.errors && Array.isArray(error.details.errors)) {
+      if (error.details.errors.length > 0) {
+        return error.details.errors[0]; // Return first error message
+      }
+    }
+
+    // Check for originalError with details
+    if (error.originalError && error.originalError.details && error.originalError.details.errors) {
+      if (Array.isArray(error.originalError.details.errors) && error.originalError.details.errors.length > 0) {
+        return error.originalError.details.errors[0];
+      }
+    }
+
     // Check for common error object properties
     if (error.message) {
       return error.message;
@@ -27,7 +41,7 @@ export const extractErrorMessage = (error) => {
     // If it's an error object without message, stringify it safely
     return JSON.stringify(error);
   }
-  
+
   return 'An unknown error occurred';
 };
 

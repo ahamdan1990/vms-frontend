@@ -7,8 +7,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useNotifications } from '../../../hooks/useNotifications';
 import { toggleSidebar, toggleTheme } from '../../../store/slices/uiSlice';
-import { formatName } from '../../../utils/formatters';
-import Button from '../../common/Button/Button';
+import { formatName, formatRelativeTime } from '../../../utils/formatters';
 
 /**
  * Professional Header Component with user menu, notifications, and search
@@ -35,6 +34,7 @@ const Header = () => {
   const notificationsRef = useRef(null);
   
   const { theme, sidebarOpen } = useSelector(state => state.ui);
+  const { notifications: allNotifications } = useSelector(state => state.notifications);
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -188,27 +188,73 @@ const Header = () => {
                     </div>
 
                     <div className="space-y-3 max-h-96 overflow-y-auto">
-                      {/* Sample notifications */}
-                      <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <p className="text-sm font-medium text-blue-900 dark:text-blue-200">New visitor checked in</p>
-                        <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">John Doe has arrived for the 3:00 PM meeting</p>
-                        <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">2 minutes ago</p>
-                      </div>
+                      {/* Real notifications from Redux */}
+                      {(() => {
+                        const recentNotifications = allNotifications.filter(n => !n.read).slice(0, 5);
 
-                      <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                        <p className="text-sm font-medium text-yellow-900 dark:text-yellow-200">Invitation approval needed</p>
-                        <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">5 invitations are pending your approval</p>
-                        <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">1 hour ago</p>
-                      </div>
+                        if (recentNotifications.length === 0) {
+                          return (
+                            <div className="text-center py-6">
+                              <svg className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19l2-7h12l2 7M9 12V9a3 3 0 116 0v3" />
+                              </svg>
+                              <p className="text-gray-500 dark:text-gray-400 text-sm">No new notifications</p>
+                            </div>
+                          );
+                        }
 
-                      {unreadCount === 0 && (
-                        <div className="text-center py-6">
-                          <svg className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19l2-7h12l2 7M9 12V9a3 3 0 116 0v3" />
-                          </svg>
-                          <p className="text-gray-500 dark:text-gray-400 text-sm">No new notifications</p>
-                        </div>
-                      )}
+                        const getPriorityStyles = (priority) => {
+                          switch (priority?.toLowerCase()) {
+                            case 'critical':
+                            case 'emergency':
+                              return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-900 dark:text-red-200';
+                            case 'high':
+                              return 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-900 dark:text-orange-200';
+                            case 'medium':
+                              return 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-900 dark:text-yellow-200';
+                            default:
+                              return 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200';
+                          }
+                        };
+
+                        const getTimeColor = (priority) => {
+                          switch (priority?.toLowerCase()) {
+                            case 'critical':
+                            case 'emergency':
+                              return 'text-red-600 dark:text-red-400';
+                            case 'high':
+                              return 'text-orange-600 dark:text-orange-400';
+                            case 'medium':
+                              return 'text-yellow-600 dark:text-yellow-400';
+                            default:
+                              return 'text-blue-600 dark:text-blue-400';
+                          }
+                        };
+
+                        return recentNotifications.map(notification => (
+                          <div
+                            key={notification.id}
+                            className={`p-3 rounded-lg border cursor-pointer hover:opacity-80 transition-opacity ${getPriorityStyles(notification.priority)}`}
+                            onClick={() => {
+                              setNotificationsOpen(false);
+                              navigate('/notifications');
+                            }}
+                          >
+                            <div className="flex items-start justify-between">
+                              <p className="text-sm font-medium flex-1">{notification.title}</p>
+                              {notification.priority && (
+                                <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-white/50 dark:bg-black/20">
+                                  {notification.priority}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs mt-1 opacity-90">{notification.message}</p>
+                            <p className={`text-xs mt-1 ${getTimeColor(notification.priority)}`}>
+                              {formatRelativeTime(new Date(notification.timestamp || notification.createdOn))}
+                            </p>
+                          </div>
+                        ));
+                      })()}
                     </div>
                   </div>
                 </motion.div>
