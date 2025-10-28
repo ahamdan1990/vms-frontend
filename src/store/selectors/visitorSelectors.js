@@ -252,7 +252,7 @@ export const selectFilteredVisitors = createSelector(
 export const selectSortedVisitors = createSelector(
   [selectFilteredVisitors, selectVisitorsFilters],
   (visitors, filters) => {
-
+    console.log(visitors);
     return [...visitors].sort((a, b) => {
       const { sortBy, sortDirection } = filters;
       const direction = sortDirection === 'desc' ? -1 : 1;

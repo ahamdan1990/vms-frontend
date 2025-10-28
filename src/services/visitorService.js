@@ -134,7 +134,10 @@ const visitorService = {
    * Requires: Visitor.Update permission
    */
   async updateVisitor(id, visitorData) {
-    const response = await apiClient.put(VISITOR_ENDPOINTS.BY_ID(id), visitorData);
+    // Transform data to backend format (same as create)
+    const backendData = this.transformVisitorDataForBackend(visitorData);
+    console.log('Updating visitor with transformed data:', backendData);
+    const response = await apiClient.put(VISITOR_ENDPOINTS.BY_ID(id), backendData);
     return extractApiData(response);
   },
 
@@ -273,6 +276,47 @@ const visitorService = {
     return extractApiData(response);
   },
 
+  /**
+   * Uploads visitor profile photo
+   * POST /api/Visitors/{id}/photo
+   * Requires: Visitor.Update permission
+   */
+  async uploadVisitorPhoto(id, photoFile) {
+    const formData = new FormData();
+    formData.append('file', photoFile);
+
+    const response = await apiClient.post(
+      `${VISITOR_ENDPOINTS.BY_ID(id)}/photo`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+    return extractApiData(response);
+  },
+
+  /**
+   * Gets visitor profile photo URL
+   * GET /api/Visitors/{id}/photo
+   * Requires: Visitor.Read permission
+   */
+  async getVisitorPhoto(id) {
+    const response = await apiClient.get(`${VISITOR_ENDPOINTS.BY_ID(id)}/photo`);
+    return extractApiData(response);
+  },
+
+  /**
+   * Removes visitor profile photo
+   * DELETE /api/Visitors/{id}/photo
+   * Requires: Visitor.Update permission
+   */
+  async removeVisitorPhoto(id) {
+    const response = await apiClient.delete(`${VISITOR_ENDPOINTS.BY_ID(id)}/photo`);
+    return extractApiData(response);
+  },
+
   // Convenience methods
   
   /**
@@ -350,17 +394,13 @@ const visitorService = {
       createdVisitor = await this.createVisitor(transformedData);
       console.log('Visitor created successfully:', createdVisitor.id);
 
-      // Step 2: Upload photo if provided
+      // Step 2: Upload photo if provided (using new profile photo endpoint)
       if (photoFile && createdVisitor.id) {
         try {
-          await visitorDocumentService.uploadVisitorPhoto(createdVisitor.id, photoFile, {
-            description: 'Visitor profile photo',
-            isSensitive: false,
-            isRequired: false
-          });
-          console.log('Photo uploaded successfully');
+          await this.uploadVisitorPhoto(createdVisitor.id, photoFile);
+          console.log('Profile photo uploaded successfully');
         } catch (photoError) {
-          console.error('Photo upload failed:', photoError);
+          console.error('Profile photo upload failed:', photoError);
           errors.push(`Photo upload failed: ${photoError.message}`);
         }
       }

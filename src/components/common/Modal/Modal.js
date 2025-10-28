@@ -40,7 +40,11 @@ const Modal = ({
     '2xl': 'max-w-2xl',
     '3xl': 'max-w-3xl',
     '4xl': 'max-w-4xl',
-    full: 'max-w-full mx-4'
+    '5xl': 'max-w-5xl',
+    '6xl': 'max-w-6xl',
+    '7xl': 'max-w-7xl',
+    full: 'max-w-full mx-4',
+    responsive: 'w-full max-w-[95vw] sm:max-w-[90vw] md:max-w-4xl lg:max-w-5xl xl:max-w-6xl'
   };
 
   const variantClasses = {
@@ -52,7 +56,7 @@ const Modal = ({
   };
 
   const modalClasses = classNames(
-    'relative w-full rounded-xl shadow-2xl transform my-2 sm:my-8 max-h-[calc(100vh-1rem)] sm:max-h-[calc(100vh-4rem)] flex flex-col',
+    'relative w-full rounded-xl shadow-2xl transform my-2 sm:my-4 md:my-8 max-h-[calc(100vh-1rem)] sm:max-h-[calc(100vh-2rem)] md:max-h-[calc(100vh-4rem)] flex flex-col',
     sizeClasses[size],
     variantClasses[variant],
     className
@@ -171,9 +175,9 @@ const Modal = ({
           >
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 {title && (
-                  <h3 id="modal-title" className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 id="modal-title" className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white pr-2">
                     {title}
                   </h3>
                 )}
@@ -181,7 +185,7 @@ const Modal = ({
                 {showCloseButton && (
                   <button
                     type="button"
-                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex-shrink-0"
                     onClick={handleClose}
                     aria-label="Close modal"
                   >
@@ -194,13 +198,13 @@ const Modal = ({
             )}
 
             {/* Content */}
-            <div className="p-6 overflow-y-auto flex-1 min-h-0 modal-scroll modal-content text-gray-900 dark:text-gray-100">
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1 min-h-0 modal-scroll modal-content text-gray-900 dark:text-gray-100">
               {children}
             </div>
 
             {/* Footer */}
             {footer && (
-              <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-xl flex-shrink-0">
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-xl flex-shrink-0">
                 {footer}
               </div>
             )}
@@ -219,7 +223,7 @@ Modal.propTypes = {
   title: PropTypes.string,
   children: PropTypes.node,
   footer: PropTypes.node,
-  size: PropTypes.oneOf(['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl', 'full']),
+  size: PropTypes.oneOf(['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl', '6xl', '7xl', 'full', 'responsive']),
   variant: PropTypes.oneOf(['default', 'danger', 'warning', 'success', 'info']),
   closeOnBackdrop: PropTypes.bool,
   closeOnEscape: PropTypes.bool,

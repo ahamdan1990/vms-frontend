@@ -6,6 +6,7 @@ const AutocompleteInput = ({
   value = null,
   onChange,
   onSelect,
+  onBlur,
   options = [],
   placeholder = 'Search...',
   disabled = false,
@@ -117,6 +118,11 @@ const AutocompleteInput = ({
   };
 
   const handleBlur = (e) => {
+    // Call parent's onBlur if provided
+    if (onBlur) {
+      onBlur(e);
+    }
+
     // Close dropdown when clicking outside
     setTimeout(() => {
       if (!optionsRef.current?.contains(document.activeElement)) {

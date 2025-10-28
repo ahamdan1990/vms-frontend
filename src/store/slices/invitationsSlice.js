@@ -363,6 +363,20 @@ export const getInvitationTemplates = createAsyncThunk(
     }
   }
 );
+
+// Get invitation statistics
+export const getInvitationStatistics = createAsyncThunk(
+  'invitations/getInvitationStatistics',
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const data = await invitationService.getInvitationStatistics(params);
+      return data;
+    } catch (error) {
+      const errorMessage = handleApiError(error);
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
 // Invitations slice
 const invitationsSlice = createSlice({
   name: 'invitations',
@@ -922,6 +936,22 @@ const invitationsSlice = createSlice({
       .addCase(getInvitationTemplates.rejected, (state, action) => {
         state.templatesLoading = false;
         state.templatesError = action.payload;
+      })
+
+      // Statistics
+      .addCase(getInvitationStatistics.pending, (state) => {
+        state.statisticsLoading = true;
+        state.statisticsError = null;
+      })
+      .addCase(getInvitationStatistics.fulfilled, (state, action) => {
+        state.statisticsLoading = false;
+        state.statistics = action.payload;
+        state.statisticsLastFetch = Date.now();
+        state.statisticsError = null;
+      })
+      .addCase(getInvitationStatistics.rejected, (state, action) => {
+        state.statisticsLoading = false;
+        state.statisticsError = action.payload;
       });
   }
 });

@@ -6,9 +6,36 @@
 // Date formatting functions
 export const formatDate = (date, format = 'MM/dd/yyyy') => {
   if (!date) return '';
-  
+
   try {
-    const dateObj = new Date(date);
+    // Parse the date string
+    let dateObj;
+
+    if (typeof date === 'string') {
+      // If the date string has 'Z' at the end, it's UTC and JavaScript will handle it correctly
+      // If it doesn't have timezone info, JavaScript may interpret it as UTC (depending on format)
+      // For ISO strings without 'Z' (like "2024-10-28T10:00:00"), we need to treat them as local time
+      if (!date.includes('Z') && !date.match(/[+-]\d{2}:\d{2}$/)) {
+        // No timezone indicator - the API is sending local time
+        // Replace 'T' with space to force local interpretation, or parse manually
+        const parts = date.split(/[T ]/);
+        if (parts.length >= 2) {
+          const [datePart, timePart] = parts;
+          const [year, month, day] = datePart.split('-').map(Number);
+          const [hour, minute, second = 0] = (timePart || '00:00:00').split(':').map(Number);
+          // Create date using local timezone
+          dateObj = new Date(year, month - 1, day, hour, minute, second);
+        } else {
+          dateObj = new Date(date);
+        }
+      } else {
+        // Has timezone info or is just a date - let JavaScript handle it
+        dateObj = new Date(date);
+      }
+    } else {
+      dateObj = new Date(date);
+    }
+
     if (isNaN(dateObj.getTime())) return '';
 
     const year = dateObj.getFullYear();
@@ -17,7 +44,7 @@ export const formatDate = (date, format = 'MM/dd/yyyy') => {
     const hours = dateObj.getHours();
     const minutes = String(dateObj.getMinutes()).padStart(2, '0');
     const seconds = String(dateObj.getSeconds()).padStart(2, '0');
-    
+
     // 12-hour format helpers
     const hours12 = hours % 12 || 12;
     const ampm = hours >= 12 ? 'PM' : 'AM';

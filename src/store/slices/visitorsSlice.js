@@ -498,6 +498,7 @@ const visitorsSlice = createSlice({
         state.listError = null;
       })
       .addCase(getVisitors.fulfilled, (state, action) => {
+        console.log(action.payload);
         state.listLoading = false;
         const { data, params } = action.payload;
         
@@ -531,6 +532,7 @@ const visitorsSlice = createSlice({
       .addCase(getVisitorById.fulfilled, (state, action) => {
         state.loading = false;
         state.currentVisitor = action.payload;
+        console.log(action.payload);
         state.error = null;
       })
       .addCase(getVisitorById.rejected, (state, action) => {

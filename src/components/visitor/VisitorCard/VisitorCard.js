@@ -88,6 +88,7 @@ const VisitorCard = ({
     compact: 'w-12 h-12',
     minimal: 'w-10 h-10'
   };
+  
 
   return (
     <div className={`relative bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 ${variantClasses[variant]} ${className} ${selected ? 'ring-2 ring-blue-500 border-blue-500' : ''}`}>
@@ -107,9 +108,9 @@ const VisitorCard = ({
       <div className="flex items-start space-x-4">
         {/* Profile Photo */}
         <div className={`flex-shrink-0 ${photoSize[variant]}`}>
-          {visitor.profilePhotoUrl ? (
+          {(visitor.profilePhotoUrl || visitor.ProfilePhotoUrl) ? (
             <img
-              src={visitor.profilePhotoUrl}
+              src={visitor.profilePhotoUrl || visitor.ProfilePhotoUrl}
               alt={`${visitor.firstName} ${visitor.lastName}`}
               className={`${photoSize[variant]} rounded-full object-cover border-2 border-white shadow-sm`}
               onError={(e) => {
@@ -118,7 +119,7 @@ const VisitorCard = ({
               }}
             />
           ) : null}
-          <div className={`${photoSize[variant]} rounded-full bg-gray-100 border-2 border-white shadow-sm flex items-center justify-center ${visitor.profilePhotoUrl ? 'hidden' : 'flex'}`}>
+          <div className={`${photoSize[variant]} rounded-full bg-gray-100 border-2 border-white shadow-sm flex items-center justify-center ${(visitor.profilePhotoUrl || visitor.ProfilePhotoUrl) ? 'hidden' : 'flex'}`}>
             <UserIcon className={`${variant === 'minimal' ? 'w-4 h-4' : 'w-6 h-6'} text-gray-400`} />
           </div>
         </div>

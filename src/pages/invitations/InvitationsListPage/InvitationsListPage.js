@@ -35,7 +35,8 @@ import {
   showDeleteModal,
   showDetailsModal,
   showApprovalModal,
-  showQrModal
+  showQrModal,
+  getInvitationStatistics
 } from '../../../store/slices/invitationsSlice';
 
 // Also need to load supporting data
@@ -154,7 +155,7 @@ const InvitationsListPage = () => {
   const showEditModalState = useSelector(selectShowEditModal);
   const showDeleteModalState = useSelector(selectShowDeleteModal);
   const showDetailsModalState = useSelector(selectShowDetailsModal);
-  const showApprovalModal = useSelector(selectShowApprovalModal);
+  const showApprovalModalState = useSelector(selectShowApprovalModal);
   const showQrModalState = useSelector(selectShowQrModal);
   const currentInvitation = useSelector(selectCurrentInvitation);
 
@@ -201,6 +202,11 @@ const InvitationsListPage = () => {
     dispatch(getVisitPurposes({ pageSize: 1000, isActive: true }));
   }, [dispatch, pageIndex, pageSize, filters]);
 
+  // Load statistics
+  useEffect(() => {
+    dispatch(getInvitationStatistics());
+  }, [dispatch]);
+
   // Handle search input changes with debouncing
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -232,6 +238,15 @@ const InvitationsListPage = () => {
     try {
       await dispatch(createInvitation(invitationData)).unwrap();
       // Modal will be closed by the reducer
+
+      // Refresh the invitations list and statistics
+      const params = {
+        pageNumber: pageIndex + 1,
+        pageSize,
+        ...filters
+      };
+      dispatch(getInvitations(params));
+      dispatch(getInvitationStatistics());
     } catch (error) {
       console.error('Create invitation failed:', error);
     }
@@ -244,6 +259,14 @@ const InvitationsListPage = () => {
         invitationData
       })).unwrap();
       // Modal will be closed by the reducer
+
+      // Refresh the invitations list
+      const params = {
+        pageNumber: pageIndex + 1,
+        pageSize,
+        ...filters
+      };
+      dispatch(getInvitations(params));
     } catch (error) {
       console.error('Update invitation failed:', error);
     }
@@ -268,13 +291,14 @@ const InvitationsListPage = () => {
         id: invitationId,
         comments
       })).unwrap();
-      // Refresh the list after approval
+      // Refresh the list and statistics after approval
       const params = {
         pageNumber: pageIndex + 1,
         pageSize,
         ...filters
       };
       dispatch(getInvitations(params));
+      dispatch(getInvitationStatistics());
     } catch (error) {
       console.error('Approve invitation failed:', error);
     }
@@ -286,13 +310,14 @@ const InvitationsListPage = () => {
         id: invitationId,
         reason
       })).unwrap();
-      // Refresh the list after rejection
+      // Refresh the list and statistics after rejection
       const params = {
         pageNumber: pageIndex + 1,
         pageSize,
         ...filters
       };
       dispatch(getInvitations(params));
+      dispatch(getInvitationStatistics());
     } catch (error) {
       console.error('Reject invitation failed:', error);
     }
@@ -305,6 +330,14 @@ const InvitationsListPage = () => {
         comments
       })).unwrap();
       // Modal will be closed by the reducer
+
+      // Refresh the invitations list
+      const params = {
+        pageNumber: pageIndex + 1,
+        pageSize,
+        ...filters
+      };
+      dispatch(getInvitations(params));
     } catch (error) {
       console.error('Approve invitation failed:', error);
     }
@@ -317,6 +350,14 @@ const InvitationsListPage = () => {
         reason
       })).unwrap();
       // Modal will be closed by the reducer
+
+      // Refresh the invitations list
+      const params = {
+        pageNumber: pageIndex + 1,
+        pageSize,
+        ...filters
+      };
+      dispatch(getInvitations(params));
     } catch (error) {
       console.error('Reject invitation failed:', error);
     }
@@ -380,14 +421,15 @@ const InvitationsListPage = () => {
       dispatch(clearSelections());
       setShowBulkConfirm(false);
       setBulkAction('');
-      
-      // Refresh the list
+
+      // Refresh the list and statistics
       const params = {
         pageNumber: pageIndex + 1,
         pageSize,
         ...filters
       };
       dispatch(getInvitations(params));
+      dispatch(getInvitationStatistics());
 
     } catch (error) {
       console.error('Bulk action failed:', error);
@@ -450,12 +492,30 @@ const InvitationsListPage = () => {
     }
   };
 
+  // Helper to normalize status for case-insensitive matching
+  const normalizeStatus = (status) => {
+    if (!status) return 'draft';
+    return status.toLowerCase();
+  };
+
+  // Helper to check if invitation is pending approval
+  const isPendingApproval = (invitation) => {
+    const status = normalizeStatus(invitation.status);
+    return status === 'submitted' || status === 'underreview';
+  };
+
+  // Helper to check if invitation can be approved (includes rejected invitations)
+  const canBeApproved = (invitation) => {
+    const status = normalizeStatus(invitation.status);
+    return status === 'submitted' || status === 'underreview' || status === 'rejected';
+  };
+
   // Status badge helper
   const getStatusBadge = (invitation) => {
     const statusConfig = {
       draft: { variant: 'secondary', icon: DocumentDuplicateIcon, text: 'Draft' },
       submitted: { variant: 'info', icon: ClockIconSolid, text: 'Submitted' },
-      underReview: { variant: 'warning', icon: ExclamationTriangleIconSolid, text: 'Under Review' },
+      underreview: { variant: 'warning', icon: ExclamationTriangleIconSolid, text: 'Under Review' },
       approved: { variant: 'success', icon: CheckCircleIcon, text: 'Approved' },
       rejected: { variant: 'danger', icon: XCircleIcon, text: 'Rejected' },
       cancelled: { variant: 'secondary', icon: XMarkIcon, text: 'Cancelled' },
@@ -464,9 +524,10 @@ const InvitationsListPage = () => {
       completed: { variant: 'success', icon: CheckCircleIcon, text: 'Completed' }
     };
 
-    const config = statusConfig[invitation.status] || statusConfig.Draft;
+    const normalizedStatus = normalizeStatus(invitation.status);
+    const config = statusConfig[normalizedStatus] || statusConfig.draft;
     const IconComponent = config.icon;
-    console.log(invitation)
+
     return (
       <Badge variant={config.variant} size="sm" className="flex items-center space-x-1">
         <IconComponent className="w-3 h-3" />
@@ -589,7 +650,7 @@ const InvitationsListPage = () => {
         break;
     }
   };
-  // Table columns configuration
+  // Table columns configuration - MINIMAL DESIGN
   const columns = [
     {
       key: 'selection',
@@ -607,7 +668,7 @@ const InvitationsListPage = () => {
               dispatch(setSelectedInvitations(selectedInvitations.filter(id => id !== invitation.id)));
             }
           }}
-          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
         />
       ),
       headerRender: () => (
@@ -622,27 +683,18 @@ const InvitationsListPage = () => {
               dispatch(clearSelections());
             }
           }}
-          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
         />
       )
     },
     {
-      key: 'invitation',
-      header: 'Invitation',
+      key: 'invitationNumber',
+      header: 'Invitation #',
       sortable: true,
-      className: 'min-w-[250px]',
+      className: 'min-w-[180px]',
       render: (value, invitation) => (
-        <div className="space-y-1">
-          <div className="flex items-center space-x-2">
-            <span className="font-medium text-gray-900">#{invitation.invitationNumber}</span>
-            {getTypeBadge(invitation)}
-          </div>
-          <div className="text-sm font-medium text-gray-700">{invitation.subject}</div>
-          {invitation.message && (
-            <div className="text-sm text-gray-500 truncate max-w-xs">
-              {invitation.message}
-            </div>
-          )}
+        <div className="flex items-center space-x-2">
+          <span className="font-semibold text-gray-900">#{invitation.invitationNumber}</span>
         </div>
       )
     },
@@ -651,116 +703,137 @@ const InvitationsListPage = () => {
       header: 'Visitor',
       sortable: true,
       className: 'min-w-[200px]',
-      render: (value, invitation) => formatVisitorInfo(invitation)
-    },
-    {
-      key: 'host',
-      header: 'Host',
-      sortable: true,
-      className: 'min-w-[150px]',
-      render: (value, invitation) => formatHostInfo(invitation)
+      render: (value, invitation) => (
+        <div className="flex items-center space-x-2">
+          <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+            <UserIcon className="w-5 h-5 text-blue-600" />
+          </div>
+          <div>
+            <div className="font-medium text-gray-900 text-sm">
+              {invitation.visitor?.firstName} {invitation.visitor?.lastName}
+            </div>
+            {invitation.visitor?.company && (
+              <div className="text-xs text-gray-500 flex items-center space-x-1">
+                <BuildingOfficeIcon className="w-3 h-3" />
+                <span>{invitation.visitor?.company}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )
     },
     {
       key: 'schedule',
       header: 'Schedule',
       sortable: true,
       className: 'min-w-[180px]',
-      render: (value, invitation) => formatVisitTime(invitation)
-    },
-    {
-      key: 'location',
-      header: 'Location',
-      sortable: true,
-      className: 'min-w-[150px]',
-      render: (value, invitation) => formatLocationInfo(invitation)
+      render: (value, invitation) => (
+        <div className="text-sm">
+          <div className="flex items-center space-x-1 text-gray-900 font-medium">
+            <CalendarIcon className="w-4 h-4 text-gray-400" />
+            <span>{formatters.formatDate(invitation.scheduledStartTime)}</span>
+          </div>
+          <div className="flex items-center space-x-1 text-gray-600">
+            <ClockIcon className="w-4 h-4 text-gray-400" />
+            <span>{formatters.formatTime(invitation.scheduledStartTime)}</span>
+          </div>
+        </div>
+      )
     },
     {
       key: 'status',
       header: 'Status',
       sortable: true,
-      className: 'min-w-[120px]',
-      render: (value, invitation) => getStatusBadge(invitation)
+      className: 'min-w-[140px]',
+      render: (value, invitation) => (
+        <div className="flex flex-col space-y-2">
+          {getStatusBadge(invitation)}
+          {getTypeBadge(invitation)}
+        </div>
+      )
     },
     {
       key: 'actions',
       header: 'Actions',
       sortable: false,
-      className: 'min-w-[180px]',
-      render: (value, invitation) => (
-        <div className="flex items-center space-x-1">
-          <Tooltip content="View Details">
+      className: 'min-w-[300px]',
+      render: (value, invitation) => {
+        const isSelected = selectedInvitations.includes(invitation.id);
+        return (
+          <div className={`flex items-center justify-end space-x-2 ${isSelected ? 'bg-blue-50 -mx-2 px-2 py-2 rounded' : ''}`}>
+            {/* View Button - Always visible */}
             <button
               onClick={() => handleInvitationAction('view', invitation)}
-              className="text-gray-600 hover:text-gray-900 transition-colors p-1 rounded"
+              className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
               title="View details"
             >
-              <EyeIcon className="w-4 h-4" />
+              <EyeIcon className="w-5 h-5" />
+              <span>View</span>
             </button>
-          </Tooltip>
 
-          {invitation.canBeModified && (
-            <Tooltip content="Edit">
+            {/* Edit Button - Conditional */}
+            {invitation.canBeModified && (
               <button
                 onClick={() => handleInvitationAction('edit', invitation)}
-                className="text-blue-600 hover:text-blue-900 transition-colors p-1 rounded"
+                className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-300 rounded-md hover:bg-blue-100 transition-colors"
                 title="Edit invitation"
               >
-                <PencilIcon className="w-4 h-4" />
+                <PencilIcon className="w-5 h-5" />
+                <span>Edit</span>
               </button>
-            </Tooltip>
-          )}
+            )}
 
-          {/* Individual Approve button for Submitted status */}
-          {invitation.status === 'Submitted' && (
-            <Tooltip content="Approve">
-              <button
-                onClick={() => handleInvitationAction('approve', invitation)}
-                className="text-green-600 hover:text-green-900 transition-colors p-1 rounded"
-                title="Approve invitation"
-                disabled={approvalLoading}
-              >
-                <CheckIcon className="w-4 h-4" />
-              </button>
-            </Tooltip>
-          )}
+            {/* Approve Button - For pending and rejected invitations */}
+            {canBeApproved(invitation) && (
+              <>
+                <button
+                  onClick={() => handleInvitationAction('approve', invitation)}
+                  className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-white bg-green-600 border border-green-700 rounded-md hover:bg-green-700 transition-colors shadow-sm"
+                  title={normalizeStatus(invitation.status) === 'rejected' ? 'Re-approve invitation' : 'Approve invitation'}
+                  disabled={approvalLoading}
+                >
+                  <CheckIcon className="w-5 h-5 stroke-2" />
+                  <span>{normalizeStatus(invitation.status) === 'rejected' ? 'Re-approve' : 'Approve'}</span>
+                </button>
+                {/* Only show reject button for pending invitations, not rejected ones */}
+                {isPendingApproval(invitation) && (
+                  <button
+                    onClick={() => dispatch(showApprovalModal(invitation))}
+                    className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-white bg-red-600 border border-red-700 rounded-md hover:bg-red-700 transition-colors shadow-sm"
+                    title="Reject invitation"
+                  >
+                    <XMarkIcon className="w-5 h-5 stroke-2" />
+                    <span>Reject</span>
+                  </button>
+                )}
+              </>
+            )}
 
-          {(invitation.status === 'Submitted' || invitation.status === 'UnderReview') && (
-            <Tooltip content="Approve/Reject">
-              <button
-                onClick={() => handleInvitationAction('approval', invitation)}
-                className="text-yellow-600 hover:text-yellow-900 transition-colors p-1 rounded"
-                title="Approve/Reject"
-              >
-                <ShieldCheckIcon className="w-4 h-4" />
-              </button>
-            </Tooltip>
-          )}
-
-          {invitation.isApproved && (
-            <Tooltip content="QR Code">
+            {/* QR Code Button - For approved invitations */}
+            {invitation.isApproved && (
               <button
                 onClick={() => handleInvitationAction('qr', invitation)}
-                className="text-indigo-600 hover:text-indigo-900 transition-colors p-1 rounded"
-                title="QR Code"
+                className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 border border-indigo-300 rounded-md hover:bg-indigo-100 transition-colors"
+                title="View QR Code"
               >
-                <QrCodeIcon className="w-4 h-4" />
+                <QrCodeIcon className="w-5 h-5" />
+                <span>QR</span>
               </button>
-            </Tooltip>
-          )}
+            )}
 
-          {invitation.canBeCancelled && (
-            <Tooltip content="Delete">
+            {/* Delete Button - Conditional */}
+            {invitation.canBeCancelled && (
               <button
                 onClick={() => handleInvitationAction('delete', invitation)}
-                className="text-red-600 hover:text-red-900 transition-colors p-1 rounded"
+                className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md hover:bg-red-50 transition-colors"
                 title="Delete invitation"
               >
-                <TrashIcon className="w-4 h-4" />
+                <TrashIcon className="w-5 h-5" />
               </button>
-            </Tooltip>
-          )}
-        </div>
-      )
+            )}
+          </div>
+        );
+      }
     }
   ];
 
@@ -820,7 +893,7 @@ const InvitationsListPage = () => {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total</dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.total || 0}</dd>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.totalInvitations || statistics.total || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -836,7 +909,7 @@ const InvitationsListPage = () => {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Pending</dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.pendingApproval || 0}</dd>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.pendingApprovals || statistics.pendingApproval || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -852,7 +925,7 @@ const InvitationsListPage = () => {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Approved</dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.byStatus?.approved || 0}</dd>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.approvedInvitations || statistics.byStatus?.approved || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -868,7 +941,7 @@ const InvitationsListPage = () => {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Active Today</dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.activeToday || 0}</dd>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.activeVisitors || statistics.activeToday || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -884,7 +957,7 @@ const InvitationsListPage = () => {
               <div className="ml-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Rejected</dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.byStatus?.rejected || 0}</dd>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.cancelledInvitations || statistics.byStatus?.rejected || 0}</dd>
                 </dl>
               </div>
             </div>
@@ -1075,57 +1148,70 @@ const InvitationsListPage = () => {
         </div>
       )}
 
-      {/* Bulk Actions */}
-      {selectedInvitations.length > 0 && (
-        <Card className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <span className="text-sm text-gray-500">
-                {selectedInvitations.length} invitation{selectedInvitations.length !== 1 ? 's' : ''} selected
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => dispatch(clearSelections())}
-              >
-                Clear Selection
-              </Button>
-            </div>
-            
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleBulkAction('approve')}
-                icon={<CheckIcon className="w-4 h-4" />}
-                className="text-green-600 border-green-300 hover:bg-green-50"
-              >
-                Approve Selected
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleBulkAction('reject')}
-                icon={<XMarkIcon className="w-4 h-4" />}
-                className="text-yellow-600 border-yellow-300 hover:bg-yellow-50"
-              >
-                Reject Selected
-              </Button>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleBulkAction('delete')}
-                className="text-red-600 border-red-300 hover:bg-red-50"
-                icon={<TrashIcon className="w-4 h-4" />}
-              >
-                Delete Selected
-              </Button>
-            </div>
-          </div>
-        </Card>
-      )}
+      {/* Bulk Actions - Enhanced */}
+      <AnimatePresence>
+        {selectedInvitations.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Card className="p-4 bg-blue-50 border-blue-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full font-semibold text-sm">
+                    {selectedInvitations.length}
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">
+                    {selectedInvitations.length} invitation{selectedInvitations.length !== 1 ? 's' : ''} selected
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => dispatch(clearSelections())}
+                    className="text-gray-600 hover:text-gray-900"
+                  >
+                    Clear
+                  </Button>
+                </div>
+
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleBulkAction('approve')}
+                    icon={<CheckIcon className="w-4 h-4" />}
+                    className="bg-white text-green-700 border-green-300 hover:bg-green-50 font-medium"
+                  >
+                    Approve
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleBulkAction('reject')}
+                    icon={<XMarkIcon className="w-4 h-4" />}
+                    className="bg-white text-orange-700 border-orange-300 hover:bg-orange-50 font-medium"
+                  >
+                    Reject
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleBulkAction('delete')}
+                    className="bg-white text-red-700 border-red-300 hover:bg-red-50 font-medium"
+                    icon={<TrashIcon className="w-4 h-4" />}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Table */}
       <Card>
@@ -1268,14 +1354,14 @@ const InvitationsListPage = () => {
         isOpen={showDetailsModalState}
         onClose={handleCloseDetailsModal}
         title="Invitation Details"
-        size="xl"
+        size="responsive"
       >
         {renderInvitationDetails()}
       </Modal>
 
       {/* Approval Modal */}
       <Modal
-        isOpen={showApprovalModal}
+        isOpen={showApprovalModalState}
         onClose={handleCloseApprovalModal}
         title="Manage Approval"
         size="md"
@@ -1333,100 +1419,174 @@ const InvitationsListPage = () => {
 
     return (
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-          <div>
-            <div className="flex items-center space-x-3">
-              <h3 className="text-lg font-medium text-gray-900">
-                #{currentInvitation.invitationNumber}
-              </h3>
-              {getStatusBadge(currentInvitation)}
+        {/* Enhanced Header with Actions */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 -m-6 mb-6 p-4 sm:p-6 border-b border-gray-200">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
+                  {currentInvitation.invitationNumber}
+                </h3>
+                {getStatusBadge(currentInvitation)}
+                {getTypeBadge(currentInvitation)}
+              </div>
+              <h4 className="text-base sm:text-lg font-semibold text-gray-700 mb-1 break-words">{currentInvitation.subject}</h4>
+              {currentInvitation.message && (
+                <p className="text-sm text-gray-600 line-clamp-3 sm:line-clamp-none">{currentInvitation.message}</p>
+              )}
             </div>
-            <p className="text-gray-600 mt-1">{currentInvitation.subject}</p>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2 lg:ml-4 shrink-0">
+              {/* Approve/Reject for pending and rejected invitations */}
+              {canBeApproved(currentInvitation) && (
+                <>
+                  <button
+                    onClick={() => handleApproveInvitation(currentInvitation.id, normalizeStatus(currentInvitation.status) === 'rejected' ? 'Re-approved from details' : 'Approved from details')}
+                    className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-green-600 border border-green-700 rounded-lg hover:bg-green-700 transition-colors shadow-sm whitespace-nowrap"
+                    disabled={approvalLoading}
+                  >
+                    <CheckIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">{normalizeStatus(currentInvitation.status) === 'rejected' ? 'Re-approve' : 'Approve'}</span>
+                    <span className="sm:hidden">OK</span>
+                  </button>
+                  {/* Only show reject button for pending invitations, not rejected ones */}
+                  {isPendingApproval(currentInvitation) && (
+                    <button
+                      onClick={() => {
+                        handleCloseDetailsModal();
+                        setTimeout(() => dispatch(showApprovalModal(currentInvitation)), 100);
+                      }}
+                      className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-red-600 border border-red-700 rounded-lg hover:bg-red-700 transition-colors shadow-sm whitespace-nowrap"
+                    >
+                      <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span>Reject</span>
+                    </button>
+                  )}
+                </>
+              )}
+
+              {/* QR Code for approved invitations */}
+              {currentInvitation.isApproved && (
+                <button
+                  onClick={() => {
+                    handleCloseDetailsModal();
+                    setTimeout(() => handleInvitationAction('qr', currentInvitation), 100);
+                  }}
+                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-indigo-700 bg-indigo-100 border border-indigo-300 rounded-lg hover:bg-indigo-200 transition-colors whitespace-nowrap"
+                >
+                  <QrCodeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">View QR Code</span>
+                  <span className="sm:hidden">QR</span>
+                </button>
+              )}
+
+              {/* Edit Button */}
+              {currentInvitation.canBeModified && (
+                <button
+                  onClick={() => {
+                    handleCloseDetailsModal();
+                    setTimeout(() => handleInvitationAction('edit', currentInvitation), 100);
+                  }}
+                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-blue-700 bg-blue-100 border border-blue-300 rounded-lg hover:bg-blue-200 transition-colors whitespace-nowrap"
+                >
+                  <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>Edit</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
           {/* Visitor Information */}
-          <Card className="p-4">
+          <Card className="p-4 hover:shadow-lg transition-shadow">
             <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-              <UserIcon className="w-4 h-4" />
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <UserIcon className="w-4 h-4 text-blue-600" />
+              </div>
               <span>Visitor Information</span>
             </h4>
             <div className="space-y-2 text-sm">
-              <div>
-                <strong>Name:</strong> {currentInvitation.visitor?.firstName} {currentInvitation.visitor?.lastName}
+              <div className="break-words">
+                <strong className="text-gray-700">Name:</strong> <span className="text-gray-900">{currentInvitation.visitor?.firstName} {currentInvitation.visitor?.lastName}</span>
               </div>
-              <div>
-                <strong>Email:</strong> {currentInvitation.visitor?.email}
+              <div className="break-all">
+                <strong className="text-gray-700">Email:</strong> <span className="text-gray-900">{currentInvitation.visitor?.email}</span>
               </div>
               {currentInvitation.visitor?.phoneNumber && (
-                <div>
-                  <strong>Phone:</strong> {currentInvitation.visitor?.phoneNumber}
+                <div className="break-words">
+                  <strong className="text-gray-700">Phone:</strong> <span className="text-gray-900">{currentInvitation.visitor?.phoneNumber}</span>
                 </div>
               )}
               {currentInvitation.visitor?.company && (
-                <div>
-                  <strong>Company:</strong> {currentInvitation.visitor?.company}
+                <div className="break-words">
+                  <strong className="text-gray-700">Company:</strong> <span className="text-gray-900">{currentInvitation.visitor?.company}</span>
                 </div>
               )}
             </div>
           </Card>
 
           {/* Host Information */}
-          <Card className="p-4">
+          <Card className="p-4 hover:shadow-lg transition-shadow">
             <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-              <UserIcon className="w-4 h-4" />
+              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                <UserIcon className="w-4 h-4 text-purple-600" />
+              </div>
               <span>Host Information</span>
             </h4>
             <div className="space-y-2 text-sm">
-              <div>
-                <strong>Name:</strong> {currentInvitation.host?.firstName} {currentInvitation.host?.lastName}
+              <div className="break-words">
+                <strong className="text-gray-700">Name:</strong> <span className="text-gray-900">{currentInvitation.host?.firstName} {currentInvitation.host?.lastName}</span>
               </div>
-              <div>
-                <strong>Email:</strong> {currentInvitation.host?.email}
+              <div className="break-all">
+                <strong className="text-gray-700">Email:</strong> <span className="text-gray-900">{currentInvitation.host?.email}</span>
               </div>
             </div>
           </Card>
 
           {/* Schedule */}
-          <Card className="p-4">
+          <Card className="p-4 hover:shadow-lg transition-shadow">
             <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-              <CalendarIcon className="w-4 h-4" />
+              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                <CalendarIcon className="w-4 h-4 text-green-600" />
+              </div>
               <span>Schedule</span>
             </h4>
             <div className="space-y-2 text-sm">
-              <div>
-                <strong>Date:</strong> {formatters.formatDate(currentInvitation.scheduledStartTime)}
+              <div className="break-words">
+                <strong className="text-gray-700">Date:</strong> <span className="text-gray-900">{formatters.formatDate(currentInvitation.scheduledStartTime)}</span>
+              </div>
+              <div className="break-words">
+                <strong className="text-gray-700">Time:</strong> <span className="text-gray-900">{formatters.formatTime(currentInvitation.scheduledStartTime)} - {formatters.formatTime(currentInvitation.scheduledEndTime)}</span>
               </div>
               <div>
-                <strong>Time:</strong> {formatters.formatTime(currentInvitation.scheduledStartTime)} - {formatters.formatTime(currentInvitation.scheduledEndTime)}
-              </div>
-              <div>
-                <strong>Duration:</strong> {currentInvitation.visitDurationHours}h
+                <strong className="text-gray-700">Duration:</strong> <span className="text-gray-900">{currentInvitation.visitDurationHours}h</span>
               </div>
             </div>
           </Card>
 
           {/* Location & Purpose */}
-          <Card className="p-4">
+          <Card className="p-4 hover:shadow-lg transition-shadow">
             <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-              <MapPinIcon className="w-4 h-4" />
+              <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                <MapPinIcon className="w-4 h-4 text-orange-600" />
+              </div>
               <span>Location & Purpose</span>
             </h4>
             <div className="space-y-2 text-sm">
               {currentInvitation.location && (
-                <div>
-                  <strong>Location:</strong> {currentInvitation.location.name}
+                <div className="break-words">
+                  <strong className="text-gray-700">Location:</strong> <span className="text-gray-900">{currentInvitation.location.name}</span>
                 </div>
               )}
               {currentInvitation.visitPurpose && (
-                <div>
-                  <strong>Purpose:</strong> {currentInvitation.visitPurpose.name}
+                <div className="break-words">
+                  <strong className="text-gray-700">Purpose:</strong> <span className="text-gray-900">{currentInvitation.visitPurpose.name}</span>
                 </div>
               )}
               <div>
-                <strong>Expected Visitors:</strong> {currentInvitation.expectedVisitorCount}
+                <strong className="text-gray-700">Expected Visitors:</strong> <span className="text-gray-900">{currentInvitation.expectedVisitorCount}</span>
               </div>
             </div>
           </Card>
@@ -1434,83 +1594,102 @@ const InvitationsListPage = () => {
 
         {/* Message */}
         {currentInvitation.message && (
-          <Card className="p-4">
+          <Card className="p-4 hover:shadow-lg transition-shadow">
             <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-              <DocumentTextIcon className="w-4 h-4" />
+              <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <DocumentTextIcon className="w-4 h-4 text-indigo-600" />
+              </div>
               <span>Message</span>
             </h4>
-            <p className="text-sm text-gray-700">{currentInvitation.message}</p>
+            <p className="text-sm text-gray-700 break-words whitespace-pre-wrap">{currentInvitation.message}</p>
           </Card>
         )}
 
         {/* Requirements */}
-        <Card className="p-4">
+        <Card className="p-4 hover:shadow-lg transition-shadow">
           <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-            <InformationCircleIcon className="w-4 h-4" />
+            <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <InformationCircleIcon className="w-4 h-4 text-yellow-600" />
+            </div>
             <span>Requirements</span>
           </h4>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="flex items-center space-x-2">
-              <span className={`w-2 h-2 rounded-full ${currentInvitation.requiresApproval ? 'bg-yellow-500' : 'bg-gray-300'}`}></span>
-              <span>Requires Approval</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-sm">
+            <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded-lg">
+              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresApproval ? 'bg-yellow-500' : 'bg-gray-300'}`}></span>
+              <span className="truncate">Requires Approval</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className={`w-2 h-2 rounded-full ${currentInvitation.requiresEscort ? 'bg-red-500' : 'bg-gray-300'}`}></span>
-              <span>Requires Escort</span>
+            <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded-lg">
+              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresEscort ? 'bg-red-500' : 'bg-gray-300'}`}></span>
+              <span className="truncate">Requires Escort</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className={`w-2 h-2 rounded-full ${currentInvitation.requiresBadge ? 'bg-blue-500' : 'bg-gray-300'}`}></span>
-              <span>Requires Badge</span>
+            <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded-lg">
+              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresBadge ? 'bg-blue-500' : 'bg-gray-300'}`}></span>
+              <span className="truncate">Requires Badge</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className={`w-2 h-2 rounded-full ${currentInvitation.needsParking ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-              <span>Needs Parking</span>
+            <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded-lg">
+              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.needsParking ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+              <span className="truncate">Needs Parking</span>
             </div>
           </div>
-          
+
           {currentInvitation.specialInstructions && (
-            <div className="mt-4">
-              <strong>Special Instructions:</strong>
-              <p className="mt-1 text-gray-700">{currentInvitation.specialInstructions}</p>
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <strong className="text-gray-900 flex items-center space-x-1 mb-2">
+                <InformationCircleIcon className="w-4 h-4 text-blue-600" />
+                <span>Special Instructions:</span>
+              </strong>
+              <p className="text-sm text-gray-700 break-words whitespace-pre-wrap">{currentInvitation.specialInstructions}</p>
             </div>
           )}
-          
+
           {currentInvitation.parkingInstructions && (
-            <div className="mt-4">
-              <strong>Parking Instructions:</strong>
-              <p className="mt-1 text-gray-700">{currentInvitation.parkingInstructions}</p>
+            <div className="mt-4 p-3 bg-green-50 rounded-lg">
+              <strong className="text-gray-900 flex items-center space-x-1 mb-2">
+                <MapPinIcon className="w-4 h-4 text-green-600" />
+                <span>Parking Instructions:</span>
+              </strong>
+              <p className="text-sm text-gray-700 break-words whitespace-pre-wrap">{currentInvitation.parkingInstructions}</p>
             </div>
           )}
         </Card>
 
         {/* Approval Information */}
         {(currentInvitation.approvedOn || currentInvitation.rejectedOn) && (
-          <Card className="p-4">
-            <h4 className="font-medium text-gray-900 mb-3">Approval Status</h4>
-            <div className="space-y-2 text-sm">
+          <Card className="p-4 hover:shadow-lg transition-shadow">
+            <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${currentInvitation.approvedOn ? 'bg-green-100' : 'bg-red-100'}`}>
+                {currentInvitation.approvedOn ? (
+                  <CheckCircleIcon className="w-4 h-4 text-green-600" />
+                ) : (
+                  <XCircleIcon className="w-4 h-4 text-red-600" />
+                )}
+              </div>
+              <span>Approval Status</span>
+            </h4>
+            <div className="space-y-3 text-sm">
               {currentInvitation.approvedOn && (
-                <>
-                  <div>
-                    <strong>Approved:</strong> {formatters.formatDateTime(currentInvitation.approvedOn)}
+                <div className="p-3 bg-green-50 rounded-lg">
+                  <div className="break-words">
+                    <strong className="text-gray-700">Approved:</strong> <span className="text-gray-900">{formatters.formatDateTime(currentInvitation.approvedOn)}</span>
                   </div>
                   {currentInvitation.approvalComments && (
-                    <div>
-                      <strong>Comments:</strong> {currentInvitation.approvalComments}
+                    <div className="mt-2 break-words">
+                      <strong className="text-gray-700">Comments:</strong> <p className="text-gray-900 mt-1 whitespace-pre-wrap">{currentInvitation.approvalComments}</p>
                     </div>
                   )}
-                </>
+                </div>
               )}
               {currentInvitation.rejectedOn && (
-                <>
-                  <div>
-                    <strong>Rejected:</strong> {formatters.formatDateTime(currentInvitation.rejectedOn)}
+                <div className="p-3 bg-red-50 rounded-lg">
+                  <div className="break-words">
+                    <strong className="text-gray-700">Rejected:</strong> <span className="text-gray-900">{formatters.formatDateTime(currentInvitation.rejectedOn)}</span>
                   </div>
                   {currentInvitation.rejectionReason && (
-                    <div>
-                      <strong>Reason:</strong> {currentInvitation.rejectionReason}
+                    <div className="mt-2 break-words">
+                      <strong className="text-gray-700">Reason:</strong> <p className="text-gray-900 mt-1 whitespace-pre-wrap">{currentInvitation.rejectionReason}</p>
                     </div>
                   )}
-                </>
+                </div>
               )}
             </div>
           </Card>

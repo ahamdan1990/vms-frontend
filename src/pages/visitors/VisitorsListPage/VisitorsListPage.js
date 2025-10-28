@@ -610,24 +610,49 @@ const VisitorsListPage = () => {
     return <Badge variant="success" size="sm">Active</Badge>;
   };
 
-  // Helper function to format visitor name with title
+  // Helper function to format visitor name with photo and title
   const formatVisitorName = (visitor) => {
     const fullName = `${visitor.fullName}`;
+    const photoUrl = visitor.profilePhotoUrl;
+
     return (
-      <div className="flex items-center space-x-2">
-        {visitor.isVip && (
-          <StarIconSolid className="w-4 h-4 text-yellow-500 dark:text-yellow-400" title="VIP Visitor" />
-        )}
-        <div>
-          <div className="font-medium text-gray-900 dark:text-gray-100">{fullName}</div>
-          {visitor.jobTitle && visitor.company && (
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {visitor.jobTitle} at {visitor.company}
-            </div>
+      <div className="flex items-center space-x-3">
+        {/* Profile Photo */}
+        <div className="flex-shrink-0">
+          {photoUrl ? (
+            <img
+              src={photoUrl}
+              alt={fullName}
+              className="w-10 h-10 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          <div
+            className={`w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center ${photoUrl ? 'hidden' : 'flex'}`}
+          >
+            <UserIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+          </div>
+        </div>
+
+        {/* Name and VIP badge */}
+        <div className="flex items-center space-x-2 min-w-0 flex-1">
+          {visitor.isVip && (
+            <StarIconSolid className="w-4 h-4 text-yellow-500 dark:text-yellow-400 flex-shrink-0" title="VIP Visitor" />
           )}
-          {(!visitor.jobTitle && visitor.company) && (
-            <div className="text-sm text-gray-500 dark:text-gray-400">{visitor.company}</div>
-          )}
+          <div className="min-w-0 flex-1">
+            <div className="font-medium text-gray-900 dark:text-gray-100 truncate">{fullName}</div>
+            {visitor.jobTitle && visitor.company && (
+              <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                {visitor.jobTitle} at {visitor.company}
+              </div>
+            )}
+            {(!visitor.jobTitle && visitor.company) && (
+              <div className="text-sm text-gray-500 dark:text-gray-400 truncate">{visitor.company}</div>
+            )}
+          </div>
         </div>
       </div>
     );

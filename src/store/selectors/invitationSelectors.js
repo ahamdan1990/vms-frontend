@@ -467,26 +467,39 @@ export const selectCanGenerateQr = createSelector(
   }
 );
 
-// Statistics
+// Helper to normalize status for case-insensitive matching
+const normalizeStatus = (status) => {
+  if (!status) return 'draft';
+  return status.toLowerCase();
+};
+
+// Statistics - NOTE: This selector now prioritizes API statistics
+// The API statistics are accurate across all pages
 export const selectInvitationStatistics = createSelector(
-  [selectInvitationsList],
-  (invitations) => {
+  [selectInvitationsList, selectInvitationsState],
+  (invitations, state) => {
+    // If we have API statistics, return those (they're accurate across all pages)
+    if (state.statistics) {
+      return state.statistics;
+    }
+
+    // Fallback to calculating from current page (less accurate but better than nothing)
     const total = invitations.length;
-    const draft = invitations.filter(i => i.status === 'Draft').length;
-    const submitted = invitations.filter(i => i.status === 'Submitted').length;
-    const underReview = invitations.filter(i => i.status === 'UnderReview').length;
-    const approved = invitations.filter(i => i.status === 'Approved').length;
-    const rejected = invitations.filter(i => i.status === 'Rejected').length;
-    const cancelled = invitations.filter(i => i.status === 'Cancelled').length;
-    const expired = invitations.filter(i => i.status === 'Expired').length;
-    const active = invitations.filter(i => i.status === 'Active').length;
-    const completed = invitations.filter(i => i.status === 'Completed').length;
+    const draft = invitations.filter(i => normalizeStatus(i.status) === 'draft').length;
+    const submitted = invitations.filter(i => normalizeStatus(i.status) === 'submitted').length;
+    const underReview = invitations.filter(i => normalizeStatus(i.status) === 'underreview').length;
+    const approved = invitations.filter(i => normalizeStatus(i.status) === 'approved').length;
+    const rejected = invitations.filter(i => normalizeStatus(i.status) === 'rejected').length;
+    const cancelled = invitations.filter(i => normalizeStatus(i.status) === 'cancelled').length;
+    const expired = invitations.filter(i => normalizeStatus(i.status) === 'expired').length;
+    const active = invitations.filter(i => normalizeStatus(i.status) === 'active').length;
+    const completed = invitations.filter(i => normalizeStatus(i.status) === 'completed').length;
 
     // By type
-    const single = invitations.filter(i => i.type === 'Single').length;
-    const group = invitations.filter(i => i.type === 'Group').length;
-    const recurring = invitations.filter(i => i.type === 'Recurring').length;
-    const walkIn = invitations.filter(i => i.type === 'WalkIn').length;
+    const single = invitations.filter(i => (i.type || '').toLowerCase() === 'single').length;
+    const group = invitations.filter(i => (i.type || '').toLowerCase() === 'group').length;
+    const recurring = invitations.filter(i => (i.type || '').toLowerCase() === 'recurring').length;
+    const walkIn = invitations.filter(i => (i.type || '').toLowerCase() === 'walkin').length;
 
     return {
       total,

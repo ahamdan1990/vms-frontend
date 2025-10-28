@@ -6,10 +6,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { usePermissions } from '../../../hooks/usePermissions';
 
 // Redux
-import { getVisitorById, updateVisitor, deleteVisitor, clearError } from '../../../store/slices/visitorsSlice';
+import {
+  getVisitorById,
+  updateVisitor,
+  deleteVisitor,
+  clearError,
+  markAsVip,
+  removeVipStatus,
+  blacklistVisitor,
+  removeBlacklist
+} from '../../../store/slices/visitorsSlice';
 import { selectCurrentVisitor, selectVisitorsLoading, selectVisitorsUpdateLoading } from '../../../store/selectors/visitorSelectors';
 
 // Services
+import visitorService from '../../../services/visitorService';
 import visitorDocumentService from '../../../services/visitorDocumentService';
 import visitorNoteService from '../../../services/visitorNoteService';
 
@@ -23,9 +33,10 @@ import DocumentPreview from '../../../components/documents/DocumentPreview';
 import DocumentManager from '../../../components/visitor/DocumentManager/DocumentManager';
 import VisitorForm from '../../../components/visitor/VisitorForm/VisitorForm';
 import EmergencyContactsList from '../../../components/visitor/EmergencyContactsList/EmergencyContactsList';
+import AddNoteModal from '../../../components/visitor/AddNoteModal/AddNoteModal';
 
 // Icons
-import { 
+import {
   UserIcon,
   DocumentTextIcon,
   PhotoIcon,
@@ -46,7 +57,8 @@ import {
   ChartBarIcon,
   ExclamationTriangleIcon,
   CloudArrowDownIcon,
-  EyeIcon
+  EyeIcon,
+  PlusIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
@@ -77,13 +89,17 @@ const VisitorProfilePage = () => {
   const [notes, setNotes] = useState([]);
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [notesLoading, setNotesLoading] = useState(false);
-  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
   
   // Modal states
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDocumentViewer, setShowDocumentViewer] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const [showAddNoteModal, setShowAddNoteModal] = useState(false);
+  const [showBlacklistModal, setShowBlacklistModal] = useState(false);
+  const [blacklistReason, setBlacklistReason] = useState('');
+  const [statusChangeLoading, setStatusChangeLoading] = useState(false);
 
   // Tab configuration
   const tabs = [
@@ -110,24 +126,17 @@ const VisitorProfilePage = () => {
     if (visitor?.id) {
       loadDocuments();
       loadNotes();
-      loadProfilePhoto();
     }
   }, [visitor?.id]);
 
   // Load documents
   const loadDocuments = async () => {
     if (!visitor?.id) return;
-    
+
     setDocumentsLoading(true);
     try {
       const docs = await visitorDocumentService.getVisitorDocuments(visitor.id);
       setDocuments(docs);
-      
-      // Find profile photo among documents
-      const photo = docs.find(doc => doc.documentType === 'Photo');
-      if (photo) {
-        setProfilePhoto(photo);
-      }
     } catch (error) {
       console.error('Failed to load documents:', error);
     } finally {
@@ -138,7 +147,7 @@ const VisitorProfilePage = () => {
   // Load notes
   const loadNotes = async () => {
     if (!visitor?.id) return;
-    
+
     setNotesLoading(true);
     try {
       const visitorNotes = await visitorNoteService.getVisitorNotes(visitor.id);
@@ -150,17 +159,60 @@ const VisitorProfilePage = () => {
     }
   };
 
-  // Load profile photo
-  const loadProfilePhoto = async () => {
-    if (!visitor?.id) return;
-    
+  // Handle profile photo upload
+  const handleUploadPhoto = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file || !visitor?.id) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a valid image file (JPG, PNG, or GIF)');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB');
+      return;
+    }
+
+    setPhotoUploading(true);
     try {
-      const photos = await visitorDocumentService.getVisitorPhotos(visitor.id);
-      if (photos.length > 0) {
-        setProfilePhoto(photos[0]); // Use the first photo
-      }
+      await visitorService.uploadVisitorPhoto(visitor.id, file);
+
+      // Reload visitor data to get updated photo URL
+      await dispatch(getVisitorById(visitor.id));
+
+      // Clear the file input
+      event.target.value = '';
     } catch (error) {
-      console.error('Failed to load profile photo:', error);
+      console.error('Failed to upload photo:', error);
+      alert(`Failed to upload photo: ${extractErrorMessage(error)}`);
+    } finally {
+      setPhotoUploading(false);
+    }
+  };
+
+  // Handle profile photo remove
+  const handleRemovePhoto = async () => {
+    if (!visitor?.id || !visitor.profilePhotoUrl) return;
+
+    if (!window.confirm('Are you sure you want to remove this photo?')) {
+      return;
+    }
+
+    setPhotoUploading(true);
+    try {
+      await visitorService.removeVisitorPhoto(visitor.id);
+
+      // Reload visitor data to get updated photo URL (will be null)
+      await dispatch(getVisitorById(visitor.id));
+    } catch (error) {
+      console.error('Failed to remove photo:', error);
+      alert(`Failed to remove photo: ${extractErrorMessage(error)}`);
+    } finally {
+      setPhotoUploading(false);
     }
   };
 
@@ -244,12 +296,99 @@ const VisitorProfilePage = () => {
   const handleDeleteDocument = async (documentId) => {
     try {
       await visitorDocumentService.deleteVisitorDocument(visitor.id, documentId, false);
-      
+
       // Reload documents
       loadDocuments();
     } catch (error) {
       console.error('Failed to delete document:', error);
       throw error;
+    }
+  };
+
+  // Handle add note
+  const handleAddNote = async (noteData) => {
+    if (!visitor?.id) return;
+
+    try {
+      await visitorNoteService.createVisitorNote(visitor.id, noteData);
+
+      // Reload notes
+      await loadNotes();
+
+      // Close modal
+      setShowAddNoteModal(false);
+    } catch (error) {
+      console.error('Failed to add note:', error);
+      throw error;
+    }
+  };
+
+  // Handle mark as VIP
+  const handleMarkAsVip = async () => {
+    setStatusChangeLoading(true);
+    try {
+      await dispatch(markAsVip(visitor.id)).unwrap();
+
+      // Reload visitor data
+      dispatch(getVisitorById(visitor.id));
+    } catch (error) {
+      console.error('Failed to mark as VIP:', error);
+    } finally {
+      setStatusChangeLoading(false);
+    }
+  };
+
+  // Handle remove VIP status
+  const handleRemoveVipStatus = async () => {
+    setStatusChangeLoading(true);
+    try {
+      await dispatch(removeVipStatus(visitor.id)).unwrap();
+
+      // Reload visitor data
+      dispatch(getVisitorById(visitor.id));
+    } catch (error) {
+      console.error('Failed to remove VIP status:', error);
+    } finally {
+      setStatusChangeLoading(false);
+    }
+  };
+
+  // Handle blacklist visitor
+  const handleBlacklistVisitor = async () => {
+    if (!blacklistReason.trim()) return;
+
+    setStatusChangeLoading(true);
+    try {
+      await dispatch(blacklistVisitor({
+        id: visitor.id,
+        reason: blacklistReason
+      })).unwrap();
+
+      // Close modal and reset
+      setShowBlacklistModal(false);
+      setBlacklistReason('');
+
+      // Reload visitor data
+      dispatch(getVisitorById(visitor.id));
+    } catch (error) {
+      console.error('Failed to blacklist visitor:', error);
+    } finally {
+      setStatusChangeLoading(false);
+    }
+  };
+
+  // Handle remove from blacklist
+  const handleRemoveBlacklist = async () => {
+    setStatusChangeLoading(true);
+    try {
+      await dispatch(removeBlacklist(visitor.id)).unwrap();
+
+      // Reload visitor data
+      dispatch(getVisitorById(visitor.id));
+    } catch (error) {
+      console.error('Failed to remove from blacklist:', error);
+    } finally {
+      setStatusChangeLoading(false);
     }
   };
 
@@ -314,6 +453,59 @@ const VisitorProfilePage = () => {
           </div>
           
           <div className="flex items-center space-x-3">
+            {/* VIP Status Button */}
+            {hasPermission('Visitor.MarkAsVip') && !visitor.isVip && !visitor.isBlacklisted && (
+              <Button
+                onClick={handleMarkAsVip}
+                variant="outline"
+                size="sm"
+                loading={statusChangeLoading}
+                className="text-yellow-600 hover:text-yellow-700 border-yellow-300 hover:border-yellow-400"
+              >
+                <StarIconOutline className="w-4 h-4 mr-2" />
+                Mark as VIP
+              </Button>
+            )}
+
+            {hasPermission('Visitor.RemoveVipStatus') && visitor.isVip && (
+              <Button
+                onClick={handleRemoveVipStatus}
+                variant="outline"
+                size="sm"
+                loading={statusChangeLoading}
+                className="text-gray-600 hover:text-gray-700"
+              >
+                <StarIconSolid className="w-4 h-4 mr-2 text-yellow-500" />
+                Remove VIP
+              </Button>
+            )}
+
+            {/* Blacklist Status Button */}
+            {hasPermission('Visitor.Blacklist') && !visitor.isBlacklisted && (
+              <Button
+                onClick={() => setShowBlacklistModal(true)}
+                variant="outline"
+                size="sm"
+                className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
+              >
+                <ShieldExclamationIcon className="w-4 h-4 mr-2" />
+                Blacklist
+              </Button>
+            )}
+
+            {hasPermission('Visitor.RemoveBlacklist') && visitor.isBlacklisted && (
+              <Button
+                onClick={handleRemoveBlacklist}
+                variant="outline"
+                size="sm"
+                loading={statusChangeLoading}
+                className="text-green-600 hover:text-green-700 border-green-300 hover:border-green-400"
+              >
+                <ShieldExclamationIcon className="w-4 h-4 mr-2" />
+                Remove Blacklist
+              </Button>
+            )}
+
             {hasPermission('Visitor.Update') && (
               <Button
                 onClick={() => setShowEditModal(true)}
@@ -345,21 +537,62 @@ const VisitorProfilePage = () => {
           <div className="flex items-start space-x-6">
             {/* Profile Photo */}
             <div className="flex-shrink-0">
-              {profilePhoto ? (
-                <img
-                  src={profilePhoto.downloadUrl || `/api/visitors/${visitor.id}/documents/${profilePhoto.id}/download`}
-                  alt={`${visitor.firstName} ${visitor.lastName}`}
-                  className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-              ) : null}
-              <div 
-                className={`w-24 h-24 rounded-full bg-gray-200 border-4 border-white shadow-lg flex items-center justify-center ${profilePhoto ? 'hidden' : 'flex'}`}
-              >
-                <UserIcon className="w-8 h-8 text-gray-400" />
+              <div className="relative group">
+                {visitor.profilePhotoUrl ? (
+                  <img
+                    src={visitor.profilePhotoUrl}
+                    alt={`${visitor.firstName} ${visitor.lastName}`}
+                    className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div
+                  className={`w-24 h-24 rounded-full bg-gray-200 border-4 border-white shadow-lg flex items-center justify-center ${visitor.profilePhotoUrl ? 'hidden' : 'flex'}`}
+                >
+                  <UserIcon className="w-8 h-8 text-gray-400" />
+                </div>
+
+                {/* Photo upload/remove overlay */}
+                {hasPermission('Visitor.Update') && (
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black bg-opacity-50 rounded-full">
+                    <div className="flex space-x-2">
+                      <label
+                        htmlFor="photo-upload"
+                        className="cursor-pointer p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
+                        title="Upload photo"
+                      >
+                        <PhotoIcon className="w-4 h-4 text-gray-700" />
+                        <input
+                          id="photo-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleUploadPhoto}
+                          className="hidden"
+                          disabled={photoUploading}
+                        />
+                      </label>
+                      {visitor.profilePhotoUrl && (
+                        <button
+                          onClick={handleRemovePhoto}
+                          className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
+                          title="Remove photo"
+                          disabled={photoUploading}
+                        >
+                          <TrashIcon className="w-4 h-4 text-red-600" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {photoUploading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                    <LoadingSpinner size="sm" />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -451,8 +684,9 @@ const VisitorProfilePage = () => {
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
         title="Edit Visitor"
-        size="2xl"
+        size="full"
         hasUnsavedChanges={hasUnsavedEditChanges}
+        confirmCloseMessage="You have unsaved changes. Are you sure you want to close without saving?"
       >
         <VisitorForm
           initialData={visitor}
@@ -489,6 +723,69 @@ const VisitorProfilePage = () => {
           }}
         />
       )}
+
+      {/* Add Note Modal */}
+      <AddNoteModal
+        isOpen={showAddNoteModal}
+        onClose={() => setShowAddNoteModal(false)}
+        onSubmit={handleAddNote}
+        loading={notesLoading}
+      />
+
+      {/* Blacklist Modal */}
+      <Modal
+        isOpen={showBlacklistModal}
+        onClose={() => {
+          setShowBlacklistModal(false);
+          setBlacklistReason('');
+        }}
+        title="Add to Blacklist"
+        size="md"
+      >
+        <div className="p-6">
+          <div className="mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              You are about to blacklist {visitor.fullName || `${visitor.firstName} ${visitor.lastName}`}.
+              Please provide a reason for this action.
+            </p>
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Reason for blacklisting <span className="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <textarea
+              value={blacklistReason}
+              onChange={(e) => setBlacklistReason(e.target.value)}
+              rows={3}
+              placeholder="Please provide a detailed reason..."
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-200"
+              required
+            />
+          </div>
+
+          <div className="flex justify-end space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowBlacklistModal(false);
+                setBlacklistReason('');
+              }}
+              disabled={statusChangeLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleBlacklistVisitor}
+              loading={statusChangeLoading}
+              disabled={!blacklistReason.trim()}
+            >
+              Add to Blacklist
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 
@@ -696,9 +993,21 @@ const VisitorProfilePage = () => {
   function renderNotesTab() {
     return (
       <div>
-        <div className="mb-6">
-          <h3 className="text-lg font-medium text-gray-900">Visitor Notes</h3>
-          <p className="text-sm text-gray-600 mt-1">Internal notes and observations about this visitor.</p>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Visitor Notes</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Internal notes and observations about this visitor.</p>
+          </div>
+          {hasPermission('VisitorNote.Create') && (
+            <Button
+              onClick={() => setShowAddNoteModal(true)}
+              variant="primary"
+              size="sm"
+              icon={<PlusIcon className="w-4 h-4" />}
+            >
+              Add Note
+            </Button>
+          )}
         </div>
 
         {notesLoading ? (
@@ -708,9 +1017,19 @@ const VisitorProfilePage = () => {
         ) : notes.length === 0 ? (
           <Card>
             <div className="p-12 text-center">
-              <ClipboardDocumentListIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Notes</h3>
-              <p className="text-gray-600">No notes have been added for this visitor yet.</p>
+              <ClipboardDocumentListIcon className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Notes</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">No notes have been added for this visitor yet.</p>
+              {hasPermission('VisitorNote.Create') && (
+                <Button
+                  onClick={() => setShowAddNoteModal(true)}
+                  variant="primary"
+                  size="sm"
+                  icon={<PlusIcon className="w-4 h-4" />}
+                >
+                  Add First Note
+                </Button>
+              )}
             </div>
           </Card>
         ) : (
@@ -720,24 +1039,58 @@ const VisitorProfilePage = () => {
                 <div className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h4 className="text-sm font-medium text-gray-900 mb-2">
-                        {note.title || 'Note'}
-                      </h4>
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                          {note.title || 'Note'}
+                        </h4>
+                        {note.category && (
+                          <Badge variant="info" size="sm">{note.category}</Badge>
+                        )}
+                        {note.priority && note.priority !== 'Medium' && (
+                          <Badge
+                            variant={
+                              note.priority === 'Critical' || note.priority === 'High'
+                                ? 'danger'
+                                : 'secondary'
+                            }
+                            size="sm"
+                          >
+                            {note.priority}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                         {note.content}
                       </p>
+                      {note.tags && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {note.tags.split(',').map((tag, idx) => (
+                            <span
+                              key={idx}
+                              className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded"
+                            >
+                              {tag.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    {note.isImportant && (
-                      <Badge variant="warning" size="sm">Important</Badge>
-                    )}
+                    <div className="flex flex-col items-end space-y-2">
+                      {note.isFlagged && (
+                        <Badge variant="warning" size="sm">Flagged</Badge>
+                      )}
+                      {note.isConfidential && (
+                        <Badge variant="danger" size="sm">Confidential</Badge>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between mt-4 pt-2 border-t border-gray-100">
-                    <span className="text-xs text-gray-500">
-                      By {note.createdByName} on {formatDateTime(note.createdOn)}
+                  <div className="flex items-center justify-between mt-4 pt-2 border-t border-gray-100 dark:border-gray-700">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      By {note.createdByName || 'Unknown'} on {formatDateTime(note.createdAt || note.createdOn)}
                     </span>
-                    {note.modifiedOn && note.modifiedOn !== note.createdOn && (
-                      <span className="text-xs text-gray-500">
-                        Modified {formatDateTime(note.modifiedOn)}
+                    {note.modifiedAt && note.modifiedAt !== note.createdAt && (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        Modified {formatDateTime(note.modifiedAt || note.modifiedOn)}
                       </span>
                     )}
                   </div>

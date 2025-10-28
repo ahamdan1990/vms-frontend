@@ -362,17 +362,27 @@ const VisitorForm = ({
   // Track form changes
   useEffect(() => {
     if (!initialFormData) return;
-    
-    const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData) || 
+
+    const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData) ||
                       (createInvitation && (invitationData.subject || invitationData.scheduledStartTime));
-    
+
     setHasUnsavedChanges(hasChanges);
-    
+
     // Notify parent component of form changes
     if (onFormChange) {
       onFormChange(hasChanges);
     }
   }, [formData, invitationData, createInvitation, initialFormData, onFormChange]);
+
+  // Cleanup blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      // Clean up photo preview URL if it's a blob
+      if (formData.photo?.downloadUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(formData.photo.downloadUrl);
+      }
+    };
+  }, [formData.photo?.downloadUrl]);
 
   // Enhanced form steps configuration
   const steps = [
@@ -522,11 +532,15 @@ const VisitorForm = ({
   const handlePhotoUpload = async (files) => {
     if (files.length > 0) {
       const file = files[0];
-      
-      // Always update local state first
+
+      // Create a preview URL for immediate display
+      const previewUrl = URL.createObjectURL(file);
+
+      // Always update local state first with preview URL
       setFormData(prev => ({
         ...prev,
-        photoFile: file
+        photoFile: file,
+        photo: { downloadUrl: previewUrl } // Temporary preview URL
       }));
 
       // If editing existing visitor, upload to server immediately
@@ -542,7 +556,8 @@ const VisitorForm = ({
             }
           );
 
-          // Update with server response
+          // Update with server response and clean up preview URL
+          URL.revokeObjectURL(previewUrl);
           setFormData(prev => ({
             ...prev,
             photo: result,
@@ -550,7 +565,7 @@ const VisitorForm = ({
           }));
         } catch (error) {
           console.error('Photo upload failed:', error);
-          // Keep local file, will be uploaded when visitor is saved
+          // Keep local file with preview URL, will be uploaded when visitor is saved
         }
       }
     }
@@ -558,7 +573,12 @@ const VisitorForm = ({
 
   const handlePhotoRemove = async () => {
     const currentPhoto = formData.photo;
-    
+
+    // Clean up preview URL if it's a blob URL
+    if (currentPhoto?.downloadUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(currentPhoto.downloadUrl);
+    }
+
     // Remove from UI immediately
     setFormData(prev => ({
       ...prev,

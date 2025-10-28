@@ -13,9 +13,12 @@
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
       script-src 'self' 'unsafe-inline' 'unsafe-eval';
+      worker-src 'self' blob:;
+      child-src 'self' blob:;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       img-src 'self' data: blob: https: http://localhost:5000 https://localhost:7000 http://192.168.0.24:5000 https://192.168.0.24:7000 http://192.168.0.59:5000 https://192.168.0.59:7000;
       font-src 'self' data: https://fonts.gstatic.com;
+      media-src 'self' data: blob:;
       connect-src 'self'
         http://localhost:5000
         https://localhost:7000
@@ -24,7 +27,9 @@
         ws://localhost:5000
         wss://localhost:7000
         ws://192.168.0.24:5000
-        wss://192.168.0.24:7000;
+        wss://192.168.0.24:7000
+        https://fastly.jsdelivr.net
+        https://cdn.jsdelivr.net;
       frame-src 'self' blob:;
       object-src 'none';
     " />

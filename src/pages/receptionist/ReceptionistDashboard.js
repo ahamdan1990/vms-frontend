@@ -401,7 +401,7 @@ const ReceptionistDashboard = () => {
 
   // Render tab navigation
   const renderTabNavigation = () => (
-    <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+    <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
       {[
         { id: 'overview', label: 'Overview', icon: EyeIcon },
         { id: 'scanner', label: 'QR Scanner', icon: QrCodeIcon },

@@ -214,9 +214,12 @@ const ProfilePhotoUpload = ({
       {/* Upload Confirmation Modal */}
       <Modal
         isOpen={showUploadModal}
-        onClose={!uploading ? handleUploadCancel : undefined}
+        onClose={handleUploadCancel}
         title="Upload Profile Photo"
         size="md"
+        closeOnBackdrop={!uploading}
+        closeOnEscape={!uploading}
+        showCloseButton={!uploading}
       >
         <div className="p-6">
           <div className="text-center mb-6">

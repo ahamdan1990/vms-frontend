@@ -1,7 +1,7 @@
 // src/components/invitation/InvitationForm/InvitationForm.js
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Components
@@ -11,11 +11,16 @@ import Card from '../../common/Card/Card';
 import Badge from '../../common/Badge/Badge';
 import AutocompleteInput from '../../common/AutocompleteInput/AutocompleteInput';
 import { CapacityValidator } from '../../capacity';
+import Modal from '../../common/Modal/Modal';
+import LocationForm from '../../forms/LocationForm/LocationForm';
 
 // Selectors
 import { selectVisitorsList } from '../../../store/selectors/visitorSelectors';
 import { selectLocationsList } from '../../../store/selectors/locationSelectors';
 import { selectVisitPurposesList } from '../../../store/selectors/visitPurposeSelectors';
+
+// Redux actions
+import { createLocation, getActiveLocations } from '../../../store/slices/locationsSlice';
 
 // Icons
 import {
@@ -49,11 +54,17 @@ const InvitationForm = ({
   error = null,
   isEdit = false
 }) => {
-  
+  const dispatch = useDispatch();
+
   // Redux selectors for autocomplete data
   const visitors = useSelector(selectVisitorsList);
   const locations = useSelector(selectLocationsList);
   const visitPurposes = useSelector(selectVisitPurposesList);
+
+  // Location creation modal state
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [locationCreating, setLocationCreating] = useState(false);
+  const [locationError, setLocationError] = useState(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -131,6 +142,62 @@ const InvitationForm = ({
     }
   }, [initialData]);
 
+  // Revalidate time and location fields when they change to clear errors
+  useEffect(() => {
+    // Only revalidate if field has been touched
+    if (!touched.scheduledStartTime && !touched.scheduledEndTime && !touched.locationId) {
+      return;
+    }
+
+    setFormErrors(prev => {
+      const newErrors = { ...prev };
+
+      // Revalidate scheduledStartTime
+      if (touched.scheduledStartTime) {
+        if (!formData.scheduledStartTime) {
+          newErrors.scheduledStartTime = 'Start time is required';
+        } else if (new Date(formData.scheduledStartTime) <= new Date()) {
+          newErrors.scheduledStartTime = 'Start time must be in the future';
+        } else {
+          delete newErrors.scheduledStartTime;
+        }
+      }
+
+      // Revalidate scheduledEndTime
+      if (touched.scheduledEndTime) {
+        if (!formData.scheduledEndTime) {
+          newErrors.scheduledEndTime = 'End time is required';
+        } else if (formData.scheduledStartTime && new Date(formData.scheduledEndTime) <= new Date(formData.scheduledStartTime)) {
+          newErrors.scheduledEndTime = 'End time must be after start time';
+        } else {
+          // Check duration
+          const startTime = new Date(formData.scheduledStartTime);
+          const endTime = new Date(formData.scheduledEndTime);
+          const durationHours = (endTime - startTime) / (1000 * 60 * 60);
+
+          if (durationHours > 24) {
+            newErrors.scheduledEndTime = 'Visit duration cannot exceed 24 hours';
+          } else if (durationHours < 0.25) {
+            newErrors.scheduledEndTime = 'Visit duration must be at least 15 minutes';
+          } else {
+            delete newErrors.scheduledEndTime;
+          }
+        }
+      }
+
+      // Revalidate locationId
+      if (touched.locationId) {
+        if (!formData.locationId) {
+          newErrors.locationId = 'Location is required. Please select a location or create a new one.';
+        } else {
+          delete newErrors.locationId;
+        }
+      }
+
+      return newErrors;
+    });
+  }, [formData.scheduledStartTime, formData.scheduledEndTime, formData.locationId, touched.scheduledStartTime, touched.scheduledEndTime, touched.locationId]);
+
   // Validation functions
   const validateField = (field, value) => {
     switch (field) {
@@ -143,6 +210,9 @@ const InvitationForm = ({
       case 'subject':
         if (!value?.trim()) return 'Subject is required';
         if (value.length > 200) return 'Subject must be less than 200 characters';
+        break;
+      case 'locationId':
+        if (!value) return 'Location is required. Please select a location or create a new one.';
         break;
       case 'scheduledStartTime':
         if (!value) return 'Start time is required';
@@ -228,14 +298,17 @@ const InvitationForm = ({
       [field]: true
     }));
 
-    // Validate field on blur
+    // Validate field on blur and update error state (add or remove)
     const error = validateField(field, formData[field]);
-    if (error) {
-      setFormErrors(prev => ({
-        ...prev,
-        [field]: error
-      }));
-    }
+    setFormErrors(prev => {
+      const newErrors = { ...prev };
+      if (error) {
+        newErrors[field] = error;
+      } else {
+        delete newErrors[field]; // Remove error if field is now valid
+      }
+      return newErrors;
+    });
   };
 
   // Handle capacity validation changes
@@ -313,6 +386,43 @@ const InvitationForm = ({
     handleChange('visitPurposeId', visitPurpose?.id || null);
   };
 
+  // Handle opening location creation modal
+  const handleOpenLocationModal = () => {
+    setShowLocationModal(true);
+    setLocationError(null);
+  };
+
+  // Handle closing location creation modal
+  const handleCloseLocationModal = () => {
+    setShowLocationModal(false);
+    setLocationError(null);
+  };
+
+  // Handle location creation
+  const handleCreateLocation = async (locationData) => {
+    setLocationCreating(true);
+    setLocationError(null);
+
+    try {
+      const result = await dispatch(createLocation(locationData)).unwrap();
+
+      // Refresh locations list
+      await dispatch(getActiveLocations()).unwrap();
+
+      // Auto-select the newly created location
+      setSelectedLocation(result);
+      handleChange('locationId', result.id);
+
+      // Close modal
+      setShowLocationModal(false);
+      setLocationCreating(false);
+    } catch (error) {
+      console.error('Failed to create location:', error);
+      setLocationError(error.message || 'Failed to create location. Please try again.');
+      setLocationCreating(false);
+    }
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -359,20 +469,40 @@ const InvitationForm = ({
     const today = new Date();
     const startDate = new Date(today);
     startDate.setHours(startHour, 0, 0, 0);
-    
+
     const endDate = new Date(startDate);
     endDate.setHours(startHour + durationHours, 0, 0, 0);
 
-    handleChange('scheduledStartTime', formatDateTimeForInput(startDate));
-    handleChange('scheduledEndTime', formatDateTimeForInput(endDate));
+    // Format for datetime-local input (local time, not UTC)
+    handleChange('scheduledStartTime', formatDateTimeForLocalInput(startDate));
+    handleChange('scheduledEndTime', formatDateTimeForLocalInput(endDate));
   };
 
-  // Helper to format datetime for display
+  // Helper to format datetime for datetime-local input (local time)
+  const formatDateTimeForLocalInput = (date) => {
+    if (!date) return '';
+    try {
+      const d = new Date(date);
+      // Get local time components
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return '';
+    }
+  };
+
+  // Helper to format datetime for display (from ISO string to local time)
   const formatDateTimeForInput = (dateString) => {
     if (!dateString) return '';
     try {
       const date = new Date(dateString);
-      return date.toISOString().slice(0, 16);
+      return formatDateTimeForLocalInput(date);
     } catch (error) {
       console.error('Date formatting error:', error);
       return '';
@@ -548,16 +678,35 @@ const InvitationForm = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
-                  Location
+                  Location <span className="text-red-500">*</span>
                 </label>
-                <AutocompleteInput
-                  options={locations}
-                  value={selectedLocation}
-                  onChange={handleLocationSelect}
-                  getOptionLabel={(location) => location.name}
-                  getOptionDescription={(location) => location.description}
-                  placeholder="Select location..."
-                />
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <AutocompleteInput
+                      options={locations}
+                      value={selectedLocation}
+                      onChange={handleLocationSelect}
+                      onBlur={() => handleBlur('locationId')}
+                      getOptionLabel={(location) => location.name}
+                      getOptionDescription={(location) => location.description}
+                      placeholder="Select location..."
+                      error={touched.locationId ? formErrors.locationId : undefined}
+                      required
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleOpenLocationModal}
+                    className="whitespace-nowrap"
+                    title="Add new location"
+                  >
+                    + Add
+                  </Button>
+                </div>
+                {touched.locationId && formErrors.locationId && (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.locationId}</p>
+                )}
               </div>
             </div>
 
@@ -907,6 +1056,22 @@ const InvitationForm = ({
           </div>
         )}
       </form>
+
+      {/* Location Creation Modal */}
+      <Modal
+        isOpen={showLocationModal}
+        onClose={handleCloseLocationModal}
+        title="Create New Location"
+        size="lg"
+      >
+        <LocationForm
+          onSubmit={handleCreateLocation}
+          onCancel={handleCloseLocationModal}
+          loading={locationCreating}
+          error={locationError}
+          isEdit={false}
+        />
+      </Modal>
     </div>
   );
 };
