@@ -28,39 +28,39 @@ const UserForm = ({
   const isEditing = Boolean(user);
 
   const [formData, setFormData] = useState({
-    firstName: user?.firstName ?? '',
-    lastName: user?.lastName ?? '',
-    email: user?.email ?? '',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    email: user?.email || '',
 
     // Enhanced phone number fields with Lebanon default
-    phoneNumber: user?.phoneNumber ?? '',
-    phoneCountryCode: user?.phoneCountryCode ?? '961', // Lebanon default
-    phoneType: user?.phoneType ?? 'Mobile',
+    phoneNumber: user?.phoneNumber || '',
+    phoneCountryCode: user?.phoneCountryCode || '961', // Lebanon default
+    phoneType: user?.phoneType || 'Mobile',
 
-    role: user?.role ?? 'Staff',
-    status: user?.status ?? 'Active',
-    department: user?.department ?? '',
-    jobTitle: user?.jobTitle ?? '',
-    employeeId: user?.employeeId ?? '',
-    isActive: user?.isActive ?? true,
+    role: user?.role || 'Staff',
+    status: user?.status || 'Active',
+    department: user?.department || '',
+    jobTitle: user?.jobTitle || '',
+    employeeId: user?.employeeId || '',
+    isActive: user?.isActive !== undefined ? user.isActive : true,
     mustChangePassword: !isEditing,
 
     // User preferences with Lebanon defaults
-    timeZone: user?.timeZone ?? 'Asia/Beirut', // Lebanon timezone
-    language: user?.language ?? 'en-US', // Default to English, but Arabic available
-    theme: user?.theme ?? 'light',
+    timeZone: user?.timeZone || 'Asia/Beirut', // Lebanon timezone
+    language: user?.language || 'en-US', // Default to English, but Arabic available
+    theme: user?.theme || 'light',
 
     // Enhanced address fields with Lebanon defaults
-    addressType: user?.addressType ?? 'Home',
-    street1: user?.street1 ?? '',
-    street2: user?.street2 ?? '',
-    city: user?.city ?? '',
-    governorate: user?.state ?? user?.governorate ?? '', // Lebanon uses governorates instead of states
-    postalCode: user?.postalCode ?? '',
-    country: user?.country ?? 'Lebanon', // Default to Lebanon
+    addressType: user?.addressType || 'Home',
+    street1: user?.street1 || '',
+    street2: user?.street2 || '',
+    city: user?.city || '',
+    governorate: user?.state || user?.governorate || '', // Lebanon uses governorates instead of states
+    postalCode: user?.postalCode || '',
+    country: user?.country || 'Lebanon', // Default to Lebanon
     enableCoordinates: Boolean(user?.latitude && user?.longitude),
-    latitude: user?.latitude?.toString() ?? '',
-    longitude: user?.longitude?.toString() ?? '',
+    latitude: user?.latitude ? String(user.latitude) : '',
+    longitude: user?.longitude ? String(user.longitude) : '',
 
     // Email preferences
     sendWelcomeEmail: !isEditing
@@ -86,32 +86,32 @@ const UserForm = ({
   useEffect(() => {
     if (user) {
       setFormData({
-        firstName: user.firstName ?? '',
-        lastName: user.lastName ?? '',
-        email: user.email ?? '',
-        phoneNumber: user?.phoneNumber ?? '',
-        phoneCountryCode: user.phoneCountryCode ?? '961',
-        phoneType: user.phoneType ?? 'Mobile',
-        role: user.role ?? 'Staff',
-        status: user.status ?? 'Active',
-        department: user.department ?? '',
-        jobTitle: user.jobTitle ?? '',
-        employeeId: user?.employeeId ?? '',
-        isActive: user.isActive ?? true,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phoneNumber: user.phoneNumber || '',
+        phoneCountryCode: user.phoneCountryCode || '961',
+        phoneType: user.phoneType || 'Mobile',
+        role: user.role || 'Staff',
+        status: user.status || 'Active',
+        department: user.department || '',
+        jobTitle: user.jobTitle || '',
+        employeeId: user.employeeId || '',
+        isActive: user.isActive !== undefined ? user.isActive : true,
         mustChangePassword: false,
-        timeZone: user.timeZone ?? 'Asia/Beirut',
-        language: user.language ?? 'en-US',
-        theme: user.theme ?? 'light',
-        addressType: user.addressType ?? 'Home',
-        street1: user.street1 ?? '',
-        street2: user.street2 ?? '',
-        city: user.city ?? '',
-        governorate: user.state ?? user.governorate ?? '', 
-        postalCode: user?.postalCode ?? '',
-        country: user.country ?? 'Lebanon',
-        enableCoordinates: user.latitude && user.longitude,
-        latitude: user?.latitude?.toString() ?? '',
-        longitude: user?.longitude?.toString() ?? '',
+        timeZone: user.timeZone || 'Asia/Beirut',
+        language: user.language || 'en-US',
+        theme: user.theme || 'light',
+        addressType: user.addressType || 'Home',
+        street1: user.street1 || '',
+        street2: user.street2 || '',
+        city: user.city || '',
+        governorate: user.state || user.governorate || '',
+        postalCode: user.postalCode || '',
+        country: user.country || 'Lebanon',
+        enableCoordinates: Boolean(user.latitude && user.longitude),
+        latitude: user.latitude ? String(user.latitude) : '',
+        longitude: user.longitude ? String(user.longitude) : '',
         sendWelcomeEmail: false
       });
     }
@@ -305,12 +305,12 @@ const UserForm = ({
     >
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>
         {/* Header */}
-        <div className="border-b border-gray-200 pb-4">
-          <h3 className="text-lg font-semibold text-gray-900">
+        <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             {isEditing ? 'Edit User' : 'Create New User'}
           </h3>
-          <p className="text-sm text-gray-600 mt-1">
-            {isEditing 
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            {isEditing
               ? 'Update user information and permissions'
               : 'Add a new user to the system with appropriate access level'
             }
@@ -322,21 +322,21 @@ const UserForm = ({
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-red-50 border border-red-200 rounded-lg p-4"
+            className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
           >
             <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 text-red-400 dark:text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
-              <span className="text-red-800 text-sm font-medium">{error || errors.global}</span>
+              <span className="text-red-800 dark:text-red-300 text-sm font-medium">{error || errors.global}</span>
             </div>
           </motion.div>
         )}
 
         {/* Personal Information Section */}
-        <div className="bg-gray-50 rounded-lg p-6">
-          <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
-            <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+          <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+            <svg className="w-5 h-5 text-blue-500 dark:text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
             Personal Information
@@ -427,7 +427,7 @@ const UserForm = ({
                 {/* Country Code Selector - Lebanon First */}
                 <select
                   name="phoneCountryCode"
-                  value={formData.phoneCountryCode ?? ""}
+                  value={formData.phoneCountryCode || ''}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   disabled={isLoading}
@@ -456,7 +456,7 @@ const UserForm = ({
                     type="tel"
                     name="phoneNumber"
                     placeholder="71 123 456"
-                    value={formData.phoneNumber ?? ""}
+                    value={formData.phoneNumber || ''}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     error={touchedFields.has('phoneNumber') ? errors.phoneNumber : null}
@@ -473,7 +473,7 @@ const UserForm = ({
                 {/* Phone Type Selector */}
                 <select
                   name="phoneType"
-                  value={formData.phoneType ?? ""}
+                  value={formData.phoneType || ''}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   disabled={isLoading}
@@ -498,9 +498,9 @@ const UserForm = ({
         </div>
 
         {/* Work Information Section */}
-        <div className="bg-gray-50 rounded-lg p-6">
-          <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
-            <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+          <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+            <svg className="w-5 h-5 text-green-500 dark:text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
             </svg>
             Work Information
@@ -518,7 +518,7 @@ const UserForm = ({
               </label>
               <select
                 name="role"
-                value={formData.role ?? ""}
+                value={formData.role || ''}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isLoading}
@@ -551,7 +551,7 @@ const UserForm = ({
                 name="employeeId"
                 label="Employee ID"
                 placeholder="Enter employee ID"
-                value={formData.employeeId ?? ""}
+                value={formData.employeeId || ''}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={touchedFields.has('employeeId') ? errors.employeeId : null}
@@ -571,7 +571,7 @@ const UserForm = ({
                 name="department"
                 label="Department"
                 placeholder="Enter department"
-                value={formData.department ?? ""}
+                value={formData.department || ''}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={touchedFields.has('department') ? errors.department : null}
@@ -590,7 +590,7 @@ const UserForm = ({
                 name="jobTitle"
                 label="Job Title"
                 placeholder="Enter job title"
-                value={formData.jobTitle ?? ""}
+                value={formData.jobTitle || ''}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={touchedFields.has('jobTitle') ? errors.jobTitle : null}
@@ -607,7 +607,7 @@ const UserForm = ({
           </label>
           <select
             name="status"
-            value={formData.status ?? ""}
+            value={formData.status || ''}
             onChange={handleChange}
             onBlur={handleBlur}
             disabled={isLoading}
@@ -623,9 +623,9 @@ const UserForm = ({
         </div>
         
         {/* Enhanced Address Section - Lebanon Specific */}
-        <div className="bg-gray-50 rounded-lg p-6">
-          <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
-            <svg className="w-5 h-5 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+          <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+            <svg className="w-5 h-5 text-orange-500 dark:text-orange-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -634,10 +634,10 @@ const UserForm = ({
 
           {/* Address Type Selector */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Address Type</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Address Type</label>
             <select
               name="addressType"
-              value={formData.addressType ?? ""}
+              value={formData.addressType || ''}
               onChange={handleChange}
               onBlur={handleBlur}
               disabled={isLoading}
@@ -657,7 +657,7 @@ const UserForm = ({
               name="street1"
               label="Street Address"
               placeholder="Building name, Street name"
-              value={formData.street1 ?? ""}
+              value={formData.street1 || ''}
               onChange={handleChange}
               onBlur={handleBlur}
               error={touchedFields.has('street1') ? errors.street1 : null}
@@ -665,11 +665,11 @@ const UserForm = ({
             />
 
             <Input
-              type="text" 
+              type="text"
               name="street2"
               label="Additional Address (Optional)"
               placeholder="Floor, Apartment, Unit"
-              value={formData.street2 ?? ""}
+              value={formData.street2 || ''}
               onChange={handleChange}
               onBlur={handleBlur}
               error={touchedFields.has('street2') ? errors.street2 : null}
@@ -681,7 +681,7 @@ const UserForm = ({
               name="city"
               label="City"
               placeholder="e.g., Beirut, Tripoli, Sidon"
-              value={formData.city ?? ""}
+              value={formData.city || ''}
               onChange={handleChange}
               onBlur={handleBlur}
               error={touchedFields.has('city') ? errors.city : null}
@@ -695,7 +695,7 @@ const UserForm = ({
               </label>
               <select
                 name="governorate"
-                value={formData.governorate ?? ""}
+                value={formData.governorate || ''}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isLoading}
@@ -718,7 +718,7 @@ const UserForm = ({
               name="postalCode"
               label="Postal Code (Optional)"
               placeholder="e.g., 1107-2180"
-              value={formData.postalCode ?? ""}
+              value={formData.postalCode || ''}
               onChange={handleChange}
               onBlur={handleBlur}
               error={touchedFields.has('postalCode') ? errors.postalCode : null}
@@ -733,7 +733,7 @@ const UserForm = ({
               </label>
               <select
                 name="country"
-                value={formData.country ?? ""}
+                value={formData.country || ''}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isLoading}
@@ -793,7 +793,7 @@ const UserForm = ({
                   label="Latitude"
                   placeholder="33.8938"
                   step="any"
-                  value={formData.latitude ?? ""}
+                  value={formData.latitude || ''}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   error={touchedFields.has('latitude') ? errors.latitude : null}
@@ -806,7 +806,7 @@ const UserForm = ({
                   label="Longitude"
                   placeholder="35.5018"
                   step="any"
-                  value={formData.longitude ?? ""}
+                  value={formData.longitude || ''}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   error={touchedFields.has('longitude') ? errors.longitude : null}
@@ -819,9 +819,9 @@ const UserForm = ({
         </div>
 
         {/* User Preferences Section - Lebanon Localized */}
-        <div className="bg-gray-50 rounded-lg p-6">
-          <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
-            <svg className="w-5 h-5 text-indigo-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+          <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+            <svg className="w-5 h-5 text-indigo-500 dark:text-indigo-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
             </svg>
             User Preferences
@@ -830,10 +830,10 @@ const UserForm = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Time Zone - Lebanon First */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Time Zone</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Time Zone</label>
               <select
                 name="timeZone"
-                value={formData.timeZone ?? ""}
+                value={formData.timeZone || ''}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isLoading}
@@ -860,14 +860,14 @@ const UserForm = ({
 
             {/* Language - Arabic and English Priority */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Language</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Language</label>
               <select
                 name="language"
-                value={formData.language ?? ""}
+                value={formData.language || ''}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isLoading}
-                className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
               >
                 <option value="en-US">🇺🇸 English (US)</option>
                 <option value="ar-LB">🇱🇧 Arabic (Lebanon)</option>
@@ -882,10 +882,10 @@ const UserForm = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Theme</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Theme</label>
               <select
                 name="theme"
-                value={formData.theme ?? ""}
+                value={formData.theme || ''}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 disabled={isLoading}
@@ -900,9 +900,9 @@ const UserForm = ({
         </div>
 
         {/* Account Settings Section */}
-        <div className="bg-gray-50 rounded-lg p-6">
-          <h4 className="text-md font-medium text-gray-900 mb-4 flex items-center">
-            <svg className="w-5 h-5 text-purple-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+          <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+            <svg className="w-5 h-5 text-purple-500 dark:text-purple-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -926,8 +926,8 @@ const UserForm = ({
                   className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                 />
                 <div>
-                  <span className="text-sm font-medium text-gray-900">Active Account</span>
-                  <p className="text-xs text-gray-500">User can log in and access the system</p>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">Active Account</span>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">User can log in and access the system</p>
                 </div>
               </label>
             </motion.div>
@@ -946,11 +946,11 @@ const UserForm = ({
                     checked={formData.mustChangePassword}
                     onChange={handleChange}
                     disabled={isLoading}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                    className="h-4 w-4 text-blue-600 dark:text-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900">Require Password Change</span>
-                    <p className="text-xs text-gray-500">User must change password on first login</p>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">Require Password Change</span>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">User must change password on first login</p>
                   </div>
                 </label>
               </motion.div>
@@ -970,11 +970,11 @@ const UserForm = ({
                     checked={formData.sendWelcomeEmail}
                     onChange={handleChange}
                     disabled={isLoading}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                    className="h-4 w-4 text-blue-600 dark:text-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900">Send Welcome Email</span>
-                    <p className="text-xs text-gray-500">Send welcome email with login credentials</p>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">Send Welcome Email</span>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Send welcome email with login credentials</p>
                   </div>
                 </label>
               </motion.div>

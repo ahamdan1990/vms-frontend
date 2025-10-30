@@ -30,6 +30,7 @@ const VisitorGrid = ({
   onDelete,
   onToggleVip,
   onToggleBlacklist,
+  onCreateInvitation,
   // Bulk operations
   selectedVisitors = [],
   onSelectionChange,
@@ -192,22 +193,25 @@ const VisitorGrid = ({
           {/* Bulk Selection Controls */}
           {allowBulkSelection && visitors.length > 0 && (
             <div className="flex items-center space-x-4">
-              <label className="flex items-center">
+              <label className="flex items-center cursor-pointer group">
                 <input
                   type="checkbox"
                   checked={selectAll}
                   onChange={handleSelectAll}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="w-5 h-5 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer transition-all duration-150 hover:border-blue-400 dark:hover:border-blue-500 checked:border-blue-600 dark:checked:border-blue-500"
                 />
-                <span className="ml-2 text-sm text-gray-700">
+                <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors">
                   Select all ({visitors.length})
                 </span>
               </label>
-              
+
               {selectedVisitors.length > 0 && (
-                <span className="text-sm text-gray-600">
-                  {selectedVisitors.length} selected
-                </span>
+                <div className="flex items-center space-x-2">
+                  <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
+                  <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                    {selectedVisitors.length} selected
+                  </span>
+                </div>
               )}
             </div>
           )}
@@ -253,6 +257,7 @@ const VisitorGrid = ({
             onDelete={onDelete}
             onToggleVip={onToggleVip}
             onToggleBlacklist={onToggleBlacklist}
+            onCreateInvitation={onCreateInvitation}
             showActions={showActions}
             showSelection={allowBulkSelection}
           />
@@ -303,6 +308,7 @@ VisitorGrid.propTypes = {
   onDelete: PropTypes.func,
   onToggleVip: PropTypes.func,
   onToggleBlacklist: PropTypes.func,
+  onCreateInvitation: PropTypes.func,
   // Bulk operations
   selectedVisitors: PropTypes.arrayOf(PropTypes.number),
   onSelectionChange: PropTypes.func,

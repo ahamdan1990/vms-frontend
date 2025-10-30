@@ -12,25 +12,18 @@ export const formatDate = (date, format = 'MM/dd/yyyy') => {
     let dateObj;
 
     if (typeof date === 'string') {
-      // If the date string has 'Z' at the end, it's UTC and JavaScript will handle it correctly
-      // If it doesn't have timezone info, JavaScript may interpret it as UTC (depending on format)
-      // For ISO strings without 'Z' (like "2024-10-28T10:00:00"), we need to treat them as local time
-      if (!date.includes('Z') && !date.match(/[+-]\d{2}:\d{2}$/)) {
-        // No timezone indicator - the API is sending local time
-        // Replace 'T' with space to force local interpretation, or parse manually
-        const parts = date.split(/[T ]/);
-        if (parts.length >= 2) {
-          const [datePart, timePart] = parts;
-          const [year, month, day] = datePart.split('-').map(Number);
-          const [hour, minute, second = 0] = (timePart || '00:00:00').split(':').map(Number);
-          // Create date using local timezone
-          dateObj = new Date(year, month - 1, day, hour, minute, second);
-        } else {
-          dateObj = new Date(date);
-        }
-      } else {
-        // Has timezone info or is just a date - let JavaScript handle it
+      // Check if the date string has timezone information
+      const hasTimezone = date.includes('Z') || date.match(/[+-]\d{2}:\d{2}$/);
+
+      if (hasTimezone) {
+        // Has timezone info - use it directly
         dateObj = new Date(date);
+      } else {
+        // No timezone indicator - assume server is sending UTC time
+        // Backend sends dates in UTC without 'Z' suffix
+        // We need to parse as UTC to avoid local timezone conversion
+        const dateWithZ = date.endsWith('Z') ? date : `${date}Z`;
+        dateObj = new Date(dateWithZ);
       }
     } else {
       dateObj = new Date(date);

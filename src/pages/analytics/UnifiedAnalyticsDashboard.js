@@ -270,32 +270,32 @@ const UnifiedAnalyticsDashboard = () => {
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <p className={`${TEXT_STYLES.label} mb-1`}>
+                  <p className={`${TEXT_STYLES.label} mb-1 text-gray-600 dark:text-gray-400`}>
                     {card.title}
                   </p>
-                  <p className={`text-3xl font-bold mb-1 text-${card.color}-600`}>
+                  <p className={`text-3xl font-bold mb-1 text-${card.color}-600 dark:text-${card.color}-400`}>
                     {card.value}
                   </p>
-                  <p className={`${TEXT_STYLES.helpText}`}>
+                  <p className={`${TEXT_STYLES.helpText} text-gray-500 dark:text-gray-400`}>
                     {card.subtitle}
                   </p>
-                  
+
                   {card.trend !== 0 && (
                     <div className={`flex items-center mt-3 ${
-                      card.trend > 0 ? 'text-green-600' : 'text-red-600'
+                      card.trend > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                     }`}>
-                      {card.trend > 0 ? 
-                        <ArrowTrendingUpIcon className="w-4 h-4 mr-1" /> : 
+                      {card.trend > 0 ?
+                        <ArrowTrendingUpIcon className="w-4 h-4 mr-1" /> :
                         <ArrowTrendingDownIcon className="w-4 h-4 mr-1" />
                       }
                       <span className="text-sm font-medium">
                         {Math.abs(card.trend)}%
                       </span>
-                      <span className="text-xs text-gray-500 ml-1">vs last week</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">vs last week</span>
                     </div>
                   )}
                 </div>
-                <div className={`p-3 bg-${card.color}-50 rounded-lg`}>
+                <div className={`p-3 bg-${card.color}-50 dark:bg-${card.color}-900/30 rounded-lg`}>
                   {card.icon}
                 </div>
               </div>
@@ -310,56 +310,56 @@ const UnifiedAnalyticsDashboard = () => {
   const renderInsights = () => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card className="p-6">
-        <h3 className={`${TEXT_STYLES.cardTitle} mb-4`}>Peak Hours</h3>
+        <h3 className={`${TEXT_STYLES.cardTitle} mb-4 text-gray-900 dark:text-white`}>Peak Hours</h3>
         <div className="space-y-3">
           {analytics.insights.peakHours && analytics.insights.peakHours.length > 0 ? (
             analytics.insights.peakHours.map((hour, index) => (
               <div key={hour} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                    <span className="text-sm font-medium text-blue-600">#{index + 1}</span>
+                  <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400">#{index + 1}</span>
                   </div>
-                  <span className={TEXT_STYLES.bodyText}>{hour}</span>
+                  <span className={`${TEXT_STYLES.bodyText} text-gray-900 dark:text-gray-100`}>{hour}</span>
                 </div>
                 <Badge variant="primary" size="sm">Peak</Badge>
               </div>
             ))
           ) : (
             <div className="text-center py-8">
-              <ClockIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">No peak hour data available yet</p>
-              <p className="text-xs text-gray-400 mt-1">Data will appear as visitors check in</p>
+              <ClockIcon className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">No peak hour data available yet</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Data will appear as visitors check in</p>
             </div>
           )}
         </div>
       </Card>
 
       <Card className="p-6">
-        <h3 className={`${TEXT_STYLES.cardTitle} mb-4`}>Popular Locations</h3>
+        <h3 className={`${TEXT_STYLES.cardTitle} mb-4 text-gray-900 dark:text-white`}>Popular Locations</h3>
         <div className="space-y-3">
           {analytics.insights.popularLocations && analytics.insights.popularLocations.length > 0 ? (
             analytics.insights.popularLocations.map((location, index) => (
               <div key={location} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <MapPinIcon className="w-5 h-5 text-gray-400" />
-                  <span className={TEXT_STYLES.bodyText}>{location}</span>
+                  <MapPinIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                  <span className={`${TEXT_STYLES.bodyText} text-gray-900 dark:text-gray-100`}>{location}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-16 h-2 bg-gray-200 rounded-full">
+                  <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
                     <div
-                      className="h-2 bg-green-500 rounded-full"
+                      className="h-2 bg-green-500 dark:bg-green-400 rounded-full"
                       style={{ width: `${Math.max(20, 100 - (index * 30))}%` }}
                     />
                   </div>
-                  <span className="text-xs text-gray-500">{Math.max(20, 100 - (index * 30))}%</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{Math.max(20, 100 - (index * 30))}%</span>
                 </div>
               </div>
             ))
           ) : (
             <div className="text-center py-8">
-              <MapPinIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">No location data available yet</p>
-              <p className="text-xs text-gray-400 mt-1">Data will appear as invitations are created</p>
+              <MapPinIcon className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">No location data available yet</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Data will appear as invitations are created</p>
             </div>
           )}
         </div>
@@ -368,13 +368,13 @@ const UnifiedAnalyticsDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Enhanced Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className={TEXT_STYLES.pageTitle}>Unified Analytics</h1>
-            <p className={`${TEXT_STYLES.helpText} mt-1`}>
+            <h1 className={`${TEXT_STYLES.pageTitle} text-gray-900 dark:text-white`}>Unified Analytics</h1>
+            <p className={`${TEXT_STYLES.helpText} mt-1 text-gray-600 dark:text-gray-400`}>
               Comprehensive visitor and capacity analytics • Last updated {formatters.formatTime(lastUpdated)}
             </p>
           </div>

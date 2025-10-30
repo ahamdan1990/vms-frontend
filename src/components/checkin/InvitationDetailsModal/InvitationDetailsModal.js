@@ -57,14 +57,14 @@ const InvitationDetailsModal = ({
         size="md"
       >
         <div className="text-center py-6">
-          <ExclamationTriangleIconSolid className="mx-auto h-16 w-16 text-red-500 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Check-in Failed</h3>
-          <p className="text-gray-600 mb-6">
+          <ExclamationTriangleIconSolid className="mx-auto h-16 w-16 text-red-500 dark:text-red-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Check-in Failed</h3>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
             {error.message || 'Unable to process check-in at this time.'}
           </p>
           {error.details && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-left">
-              <p className="text-sm text-red-700">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 text-left">
+              <p className="text-sm text-red-700 dark:text-red-300">
                 {error.details}
               </p>
             </div>
@@ -91,9 +91,9 @@ const InvitationDetailsModal = ({
         size="md"
       >
         <div className="text-center py-6">
-          <InformationCircleIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Invitation Not Found</h3>
-          <p className="text-gray-600 mb-6">
+          <InformationCircleIcon className="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Invitation Not Found</h3>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
             The scanned QR code does not match any invitation in the system.
           </p>
           <Button
@@ -165,12 +165,12 @@ const InvitationDetailsModal = ({
     >
       <div className="space-y-6">
         {/* Header with Status */}
-        <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+        <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
           <div>
-            <h3 className="text-xl font-semibold text-gray-900">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
               {invitation.invitationNumber}
             </h3>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               Invitation Reference
             </p>
           </div>
@@ -179,17 +179,17 @@ const InvitationDetailsModal = ({
 
         {/* Too Early Warning - Cannot Check In */}
         {isTooEarly && (
-          <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 flex items-start">
-            <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
+          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-800 rounded-lg p-4 flex items-start">
+            <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 dark:text-red-400 mr-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-red-900 font-bold text-sm">⚠️ TOO EARLY - CANNOT CHECK IN</h4>
-              <p className="text-red-800 text-sm mt-1 font-medium">
+              <h4 className="text-red-900 dark:text-red-200 font-bold text-sm">⚠️ TOO EARLY - CANNOT CHECK IN</h4>
+              <p className="text-red-800 dark:text-red-300 text-sm mt-1 font-medium">
                 This visitor is arriving too early.
               </p>
-              <p className="text-red-700 text-sm mt-1">
+              <p className="text-red-700 dark:text-red-300 text-sm mt-1">
                 <strong>Scheduled time:</strong> {formatters.formatDateTime(scheduledStart)}
               </p>
-              <p className="text-red-700 text-sm mt-1">
+              <p className="text-red-700 dark:text-red-300 text-sm mt-1">
                 <strong>Check-in allowed from:</strong> {formatters.formatDateTime(twoHoursBeforeStart)}
               </p>
             </div>
@@ -198,17 +198,17 @@ const InvitationDetailsModal = ({
 
         {/* Expired Warning - Cannot Check In */}
         {isExpired && (
-          <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 flex items-start">
-            <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
+          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-800 rounded-lg p-4 flex items-start">
+            <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 dark:text-red-400 mr-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-red-900 font-bold text-sm">⚠️ EXPIRED - CANNOT CHECK IN</h4>
-              <p className="text-red-800 text-sm mt-1 font-medium">
+              <h4 className="text-red-900 dark:text-red-200 font-bold text-sm">⚠️ EXPIRED - CANNOT CHECK IN</h4>
+              <p className="text-red-800 dark:text-red-300 text-sm mt-1 font-medium">
                 This invitation has expired.
               </p>
-              <p className="text-red-700 text-sm mt-1">
+              <p className="text-red-700 dark:text-red-300 text-sm mt-1">
                 <strong>Scheduled end time:</strong> {formatters.formatDateTime(scheduledEnd)}
               </p>
-              <p className="text-red-700 text-sm mt-1">
+              <p className="text-red-700 dark:text-red-300 text-sm mt-1">
                 <strong>Expired on:</strong> {formatters.formatDateTime(twentyFourHoursAfterEnd)}
               </p>
             </div>
@@ -217,17 +217,17 @@ const InvitationDetailsModal = ({
 
         {/* Early Arrival Notice - Can Still Check In */}
         {isEarlyButAllowed && !isCheckedIn && !isCompleted && (
-          <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 flex items-start">
-            <ClockIcon className="h-6 w-6 text-yellow-600 mr-3 flex-shrink-0 mt-0.5" />
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300 dark:border-yellow-800 rounded-lg p-4 flex items-start">
+            <ClockIcon className="h-6 w-6 text-yellow-600 dark:text-yellow-400 mr-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-yellow-900 font-bold text-sm">🕐 EARLY ARRIVAL</h4>
-              <p className="text-yellow-800 text-sm mt-1 font-medium">
+              <h4 className="text-yellow-900 dark:text-yellow-200 font-bold text-sm">🕐 EARLY ARRIVAL</h4>
+              <p className="text-yellow-800 dark:text-yellow-300 text-sm mt-1 font-medium">
                 Visitor arrived early!
               </p>
-              <p className="text-yellow-700 text-sm mt-1">
+              <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
                 <strong>Scheduled time:</strong> {formatters.formatDateTime(scheduledStart)}
               </p>
-              <p className="text-yellow-700 text-sm mt-1">
+              <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
                 ✅ They can be checked in now, but please notify the host that the visitor has arrived early.
               </p>
             </div>
@@ -236,33 +236,45 @@ const InvitationDetailsModal = ({
 
         {/* Late Arrival Notice - Can Still Check In */}
         {isLateButAllowed && !isCheckedIn && !isCompleted && (
-          <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4 flex items-start">
-            <ClockIcon className="h-6 w-6 text-orange-600 mr-3 flex-shrink-0 mt-0.5" />
+          <div className="bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-300 dark:border-orange-800 rounded-lg p-4 flex items-start">
+            <ClockIcon className="h-6 w-6 text-orange-600 dark:text-orange-400 mr-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-orange-900 font-bold text-sm">🕐 LATE ARRIVAL</h4>
-              <p className="text-orange-800 text-sm mt-1 font-medium">
+              <h4 className="text-orange-900 dark:text-orange-200 font-bold text-sm">🕐 LATE ARRIVAL</h4>
+              <p className="text-orange-800 dark:text-orange-300 text-sm mt-1 font-medium">
                 Visitor arrived late!
               </p>
-              <p className="text-orange-700 text-sm mt-1">
-                <strong>Scheduled time:</strong> {formatters.formatDateTime(scheduledStart)}
-              </p>
-              <p className="text-orange-700 text-sm mt-1">
-                ⚠️ They can still be checked in. Consider contacting the host to confirm.
-              </p>
+              <div className="mt-2 space-y-1">
+                <p className="text-orange-700 dark:text-orange-300 text-sm">
+                  <strong>Originally scheduled:</strong> {formatters.formatDateTime(scheduledStart)} - {formatters.formatTime(scheduledEnd)}
+                </p>
+                <p className="text-orange-700 dark:text-orange-300 text-sm">
+                  <strong>Scheduled duration:</strong> {formatters.formatDuration(Math.round((scheduledEnd - scheduledStart) / (1000 * 60)))}
+                </p>
+              </div>
+              <div className="mt-3 bg-orange-100 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800 rounded p-3">
+                <p className="text-orange-900 dark:text-orange-200 text-sm font-medium">
+                  ℹ️ What happens when you check in:
+                </p>
+                <ul className="mt-2 space-y-1 text-orange-800 dark:text-orange-300 text-sm list-disc list-inside">
+                  <li>Visitor's expected end time will be recalculated based on the scheduled duration</li>
+                  <li>Overstay notifications will use the adjusted end time</li>
+                  <li>Please contact the host to confirm the visitor's arrival</li>
+                </ul>
+              </div>
             </div>
           </div>
         )}
 
         {/* Not Approved Warning */}
         {!isApproved && !isCheckedIn && !isCompleted && (
-          <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 flex items-start">
-            <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
+          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-800 rounded-lg p-4 flex items-start">
+            <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 dark:text-red-400 mr-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-red-900 font-bold text-sm">⚠️ NOT APPROVED - CANNOT CHECK IN</h4>
-              <p className="text-red-800 text-sm mt-1 font-medium">
+              <h4 className="text-red-900 dark:text-red-200 font-bold text-sm">⚠️ NOT APPROVED - CANNOT CHECK IN</h4>
+              <p className="text-red-800 dark:text-red-300 text-sm mt-1 font-medium">
                 Current status: <strong>{invitation.status}</strong>
               </p>
-              <p className="text-red-700 text-sm mt-1">
+              <p className="text-red-700 dark:text-red-300 text-sm mt-1">
                 This invitation must be approved before check-in is allowed.
               </p>
             </div>
@@ -271,11 +283,11 @@ const InvitationDetailsModal = ({
 
         {/* Already Checked In Warning */}
         {isCheckedIn && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start">
-            <CheckCircleIconSolid className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start">
+            <CheckCircleIconSolid className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-3 flex-shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-blue-900 font-medium text-sm">Already Checked In</h4>
-              <p className="text-blue-700 text-sm mt-1">
+              <h4 className="text-blue-900 dark:text-blue-200 font-medium text-sm">Already Checked In</h4>
+              <p className="text-blue-700 dark:text-blue-300 text-sm mt-1">
                 This visitor has already been checked in at {formatters.formatDateTime(invitation.checkedInAt)}
               </p>
             </div>
@@ -284,11 +296,11 @@ const InvitationDetailsModal = ({
 
         {/* Completed Visit Warning */}
         {isCompleted && (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-start">
-            <InformationCircleIcon className="h-5 w-5 text-gray-600 mr-3 flex-shrink-0 mt-0.5" />
+          <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-start">
+            <InformationCircleIcon className="h-5 w-5 text-gray-600 dark:text-gray-400 mr-3 flex-shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-gray-900 font-medium text-sm">Visit Completed</h4>
-              <p className="text-gray-700 text-sm mt-1">
+              <h4 className="text-gray-900 dark:text-gray-200 font-medium text-sm">Visit Completed</h4>
+              <p className="text-gray-700 dark:text-gray-300 text-sm mt-1">
                 This visitor checked out at {formatters.formatDateTime(invitation.checkedOutAt)}
               </p>
             </div>
@@ -297,38 +309,38 @@ const InvitationDetailsModal = ({
 
         {/* Visitor Information */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <UserIcon className="h-5 w-5 mr-2" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+            <UserIcon className="h-5 w-5 mr-2 text-gray-900 dark:text-white" />
             Visitor Information
           </h3>
-          <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+          <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
             <div>
-              <p className="text-sm text-gray-500">Name</p>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Name</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
                 {visitor.fullName || `${visitor.firstName} ${visitor.lastName}`}
               </p>
             </div>
             {visitor.company && (
               <div>
-                <p className="text-sm text-gray-500">Company</p>
-                <p className="text-sm font-medium text-gray-900">{visitor.company}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Company</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{visitor.company}</p>
               </div>
             )}
             {visitor.email && (
               <div>
-                <p className="text-sm text-gray-500">Email</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
                 <div className="flex items-center">
-                  <EnvelopeIcon className="h-4 w-4 text-gray-400 mr-1" />
-                  <p className="text-sm font-medium text-gray-900">{visitor.email}</p>
+                  <EnvelopeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" />
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{visitor.email}</p>
                 </div>
               </div>
             )}
             {visitor.phoneNumber && (
               <div>
-                <p className="text-sm text-gray-500">Phone</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
                 <div className="flex items-center">
-                  <PhoneIcon className="h-4 w-4 text-gray-400 mr-1" />
-                  <p className="text-sm font-medium text-gray-900">{visitor.phoneNumber}</p>
+                  <PhoneIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" />
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{visitor.phoneNumber}</p>
                 </div>
               </div>
             )}
@@ -337,51 +349,51 @@ const InvitationDetailsModal = ({
 
         {/* Visit Details */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <CalendarIcon className="h-5 w-5 mr-2" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+            <CalendarIcon className="h-5 w-5 mr-2 text-gray-900 dark:text-white" />
             Visit Details
           </h3>
-          <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+          <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
             <div>
-              <p className="text-sm text-gray-500">Scheduled Time</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Scheduled Time</p>
               <div className="flex items-center">
-                <ClockIcon className="h-4 w-4 text-gray-400 mr-1" />
-                <p className="text-sm font-medium text-gray-900">
+                <ClockIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" />
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {formatters.formatDateTime(invitation.scheduledStartTime)}
                 </p>
               </div>
             </div>
             <div>
-              <p className="text-sm text-gray-500">End Time</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">End Time</p>
               <div className="flex items-center">
-                <ClockIcon className="h-4 w-4 text-gray-400 mr-1" />
-                <p className="text-sm font-medium text-gray-900">
+                <ClockIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" />
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {formatters.formatDateTime(invitation.scheduledEndTime)}
                 </p>
               </div>
             </div>
             {location.name && (
               <div>
-                <p className="text-sm text-gray-500">Location</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Location</p>
                 <div className="flex items-center">
-                  <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" />
-                  <p className="text-sm font-medium text-gray-900">{location.name}</p>
+                  <MapPinIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" />
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{location.name}</p>
                 </div>
               </div>
             )}
             {visitPurpose.name && (
               <div>
-                <p className="text-sm text-gray-500">Purpose</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Purpose</p>
                 <div className="flex items-center">
-                  <BuildingOfficeIcon className="h-4 w-4 text-gray-400 mr-1" />
-                  <p className="text-sm font-medium text-gray-900">{visitPurpose.name}</p>
+                  <BuildingOfficeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" />
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{visitPurpose.name}</p>
                 </div>
               </div>
             )}
             {host.fullName && (
               <div className="col-span-2">
-                <p className="text-sm text-gray-500">Host</p>
-                <p className="text-sm font-medium text-gray-900">{host.fullName}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Host</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">{host.fullName}</p>
               </div>
             )}
           </div>
@@ -390,7 +402,7 @@ const InvitationDetailsModal = ({
         {/* Notes Input (only if not checked in yet) */}
         {!isCheckedIn && !isCompleted && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Check-in Notes (Optional)
             </label>
             <textarea
@@ -398,13 +410,13 @@ const InvitationDetailsModal = ({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Add any notes about this check-in..."
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent resize-none placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
         )}
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
           <Button
             variant="outline"
             onClick={onClose}

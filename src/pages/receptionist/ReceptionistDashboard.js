@@ -3,6 +3,19 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Redux imports
+import {
+  checkInInvitation,
+  checkOutInvitation,
+  getActiveInvitations
+} from '../../store/slices/invitationsSlice';
+
+// Selectors
+import {
+  selectActiveInvitations,
+  selectActiveInvitationsLoading
+} from '../../store/selectors/invitationSelectors';
+
 // Services
 import visitorService from '../../services/visitorService';
 import invitationService from '../../services/invitationService';
@@ -10,13 +23,22 @@ import visitorDocumentService from '../../services/visitorDocumentService';
 
 // Hooks
 import { useToast } from '../../hooks/useNotifications';
+import { useSignalR } from '../../hooks/useSignalR';
+
+// SignalR Handlers
+import DashboardEventHandler from '../../services/signalr/handlers/DashboardEventHandler';
+import NotificationEventHandler from '../../services/signalr/handlers/NotificationEventHandler';
 
 // Components
 import Card from '../../components/common/Card/Card';
 import Button from '../../components/common/Button/Button';
 import Input from '../../components/common/Input/Input';
 import Badge from '../../components/common/Badge/Badge';
+import Modal from '../../components/common/Modal/Modal';
+import Table from '../../components/common/Table/Table';
+import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinner';
 import QrCodeScanner from '../../components/checkin/QrCodeScanner/QrCodeScanner';
+import InvitationDetailsModal from '../../components/checkin/InvitationDetailsModal/InvitationDetailsModal';
 import VisitorForm from '../../components/visitor/VisitorForm/VisitorForm';
 import CameraCapture from '../../components/camera/CameraCapture';
 import DocumentScanner from '../../components/scanner/DocumentScanner';
@@ -40,7 +62,11 @@ import {
   XCircleIcon,
   ChevronDownIcon,
   ChevronUpIcon,
-  ArrowDownTrayIcon
+  ArrowDownTrayIcon,
+  UserIcon,
+  CalendarIcon,
+  BuildingOfficeIcon,
+  MapPinIcon
 } from '@heroicons/react/24/outline';
 import {
   CheckCircleIcon as CheckCircleIconSolid,
@@ -60,8 +86,13 @@ import { extractErrorMessage } from '../../utils/errorUtils';
  * - Photo capture and document handling
  */
 const ReceptionistDashboard = () => {
-  // Hooks
+  const dispatch = useDispatch();
   const toast = useToast();
+  const { isConnected, host, operator, security, admin } = useSignalR();
+
+  // Redux selectors
+  const activeInvitationsFromRedux = useSelector(selectActiveInvitations);
+  const activeInvitationsLoading = useSelector(selectActiveInvitationsLoading);
 
   // State management
   const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'walk-in', 'scanner', 'active', 'documents'
@@ -71,27 +102,30 @@ const ReceptionistDashboard = () => {
     pendingCheckOut: 0,
     walkIns: 0
   });
-  
+
   // Walk-in registration state
   const [showWalkInForm, setShowWalkInForm] = useState(false);
   const [walkInLoading, setWalkInLoading] = useState(false);
   const [walkInError, setWalkInError] = useState(null);
   const [showCameraCapture, setShowCameraCapture] = useState(false);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
-  
+
   // Document scanning state
   const [showDocumentScanner, setShowDocumentScanner] = useState(false);
   const [scannedDocuments, setScannedDocuments] = useState([]);
   const [selectedVisitorForDocs, setSelectedVisitorForDocs] = useState(null);
-  
-  // Scanner state
-  const [scannerActive, setScannerActive] = useState(false);
+
+  // Scanner state - Modal based like CheckInDashboard
+  const [showScannerModal, setShowScannerModal] = useState(false);
   const [scanResult, setScanResult] = useState(null);
   const [scanError, setScanError] = useState(null);
-  
+  const [showInvitationDetailsModal, setShowInvitationDetailsModal] = useState(false);
+  const [invitationDetailsData, setInvitationDetailsData] = useState(null);
+  const [invitationDetailsError, setInvitationDetailsError] = useState(null);
+  const [loadingInvitationDetails, setLoadingInvitationDetails] = useState(false);
+  const [autoCheckInMode, setAutoCheckInMode] = useState(false);
+
   // Active visitors state
-  const [activeVisitors, setActiveVisitors] = useState([]);
-  const [activeVisitorsLoading, setActiveVisitorsLoading] = useState(false);
   const [expandedVisitorId, setExpandedVisitorId] = useState(null);
   const [visitorDocuments, setVisitorDocuments] = useState({});
   const [loadingDocuments, setLoadingDocuments] = useState({});
@@ -104,15 +138,59 @@ const ReceptionistDashboard = () => {
   // Load dashboard data
   useEffect(() => {
     loadDashboardData();
-    loadActiveVisitors();
-  }, []);
+    dispatch(getActiveInvitations());
+  }, [dispatch]);
 
   const loadDashboardData = async () => {
     try {
-      // Get today's invitations for stats
-      const today = new Date();
-      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+      // Get today's invitations for stats - use UTC to avoid timezone issues
+      const now = new Date();
+
+      // Create start of day in UTC (00:00:00 UTC)
+      const startOfDay = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        0, 0, 0, 0
+      ));
+
+      // Create end of day in UTC (23:59:59 UTC)
+      const endOfDay = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        23, 59, 59, 999
+      ));
+
+      console.log('📅 Loading dashboard data for date range:', {
+        startOfDay: startOfDay.toISOString(),
+        endOfDay: endOfDay.toISOString(),
+        localTime: now.toLocaleString(),
+        utcTime: now.toUTCString()
+      });
+
+      // TEMPORARY: Fetch ALL invitations INCLUDING DELETED to debug
+      const allInvitations = await invitationService.getInvitations({
+        pageSize: 100,
+        includeDeleted: true, // Include soft-deleted items
+        sortBy: 'ScheduledStartTime',
+        sortDirection: 'desc'
+      });
+
+      console.log('🔍 ALL invitations INCLUDING DELETED (for debugging):', {
+        total: allInvitations.data?.items?.length || 0,
+        invitations: (allInvitations.data?.items || []).map(inv => ({
+          id: inv.id,
+          invitationNumber: inv.invitationNumber,
+          scheduledStartTime: inv.scheduledStartTime,
+          scheduledLocalTime: new Date(inv.scheduledStartTime).toLocaleString(),
+          status: inv.status,
+          isDeleted: inv.isDeleted,
+          hostId: inv.hostId,
+          createdOn: inv.createdOn,
+          isToday: new Date(inv.scheduledStartTime) >= startOfDay && new Date(inv.scheduledStartTime) <= endOfDay
+        }))
+      });
 
       const todayInvitations = await invitationService.getInvitations({
         startDate: startOfDay.toISOString(),
@@ -120,28 +198,101 @@ const ReceptionistDashboard = () => {
         pageSize: 1000 // Get all for counting
       });
 
-      setTodayStats({
-        expectedVisitors: todayInvitations.data?.totalCount || 0,
-        checkedIn: todayInvitations.data?.items?.filter(inv => inv.status === 'CheckedIn').length || 0,
-        pendingCheckOut: todayInvitations.data?.items?.filter(inv => inv.status === 'CheckedIn').length || 0,
-        walkIns: todayInvitations.data?.items?.filter(inv => inv.type === 'WalkIn').length || 0
+      const items = todayInvitations.data?.items || [];
+
+      console.log('📊 Today\'s invitations received (with date filter):', {
+        total: items.length,
+        invitations: items.map(inv => ({
+          id: inv.id,
+          invitationNumber: inv.invitationNumber,
+          scheduledStartTime: inv.scheduledStartTime,
+          status: inv.status,
+          checkedInAt: inv.checkedInAt,
+          checkedOutAt: inv.checkedOutAt,
+          type: inv.type
+        }))
       });
+
+      const stats = {
+        expectedVisitors: items.length,
+        checkedIn: items.filter(inv => inv.checkedInAt).length,
+        pendingCheckOut: items.filter(inv => inv.checkedInAt && !inv.checkedOutAt).length,
+        walkIns: items.filter(inv => inv.type === 'WalkIn').length
+      };
+
+      console.log('📈 Calculated stats:', stats);
+
+      setTodayStats(stats);
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
     }
   };
 
-  const loadActiveVisitors = async () => {
-    try {
-      setActiveVisitorsLoading(true);
-      const active = await invitationService.getActiveInvitations();
-      setActiveVisitors(active.data?.items || []);
-    } catch (error) {
-      console.error('Failed to load active visitors:', error);
-    } finally {
-      setActiveVisitorsLoading(false);
+  // Calculate stats from Redux data
+  useEffect(() => {
+    if (activeInvitationsFromRedux && activeInvitationsFromRedux.length > 0) {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      const todayCheckIns = activeInvitationsFromRedux.filter(invitation => {
+        return invitation.checkedInAt && new Date(invitation.checkedInAt) >= today;
+      }).length;
+
+      const activeVisitors = activeInvitationsFromRedux.filter(invitation => {
+        return invitation.checkedInAt && !invitation.checkedOutAt;
+      }).length;
+
+      // Update stats with real data from Redux
+      setTodayStats(prev => ({
+        ...prev,
+        checkedIn: todayCheckIns,
+        pendingCheckOut: activeVisitors
+      }));
     }
-  };
+  }, [activeInvitationsFromRedux]);
+
+  // ===== SIGNALR REAL-TIME UPDATES =====
+  // Subscribe to dashboard metrics updates
+  useEffect(() => {
+    const unsubscribe = DashboardEventHandler.subscribe((eventType, data, hubName) => {
+      console.log('📊 Dashboard event received:', eventType, data);
+
+      if (eventType === 'dashboard-update') {
+        // Update stats with real-time data
+        setTodayStats(prev => ({
+          ...prev,
+          ...data
+        }));
+      } else if (eventType === 'queue-update') {
+        // Handle queue updates if needed
+        console.log('Queue update:', data);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Subscribe to visitor check-in/check-out events
+  useEffect(() => {
+    const unsubscribe = NotificationEventHandler.subscribe((eventType, data, hubName) => {
+      console.log('🔔 Notification event received:', eventType, data);
+
+      if (eventType === 'visitor-checked-in' || eventType === 'visitor-checked-out') {
+        // Refresh dashboard data and active invitations
+        loadDashboardData();
+        dispatch(getActiveInvitations());
+
+        // Show toast notification
+        if (eventType === 'visitor-checked-in') {
+          toast.success(`Visitor ${data.visitorName} checked in`);
+        } else {
+          toast.info(`Visitor ${data.visitorName} checked out`);
+        }
+      }
+    });
+
+    return unsubscribe;
+  }, [dispatch, toast]);
 
   // Handle photo capture from camera
   const handlePhotoCapture = (photoData) => {
@@ -217,11 +368,11 @@ const ReceptionistDashboard = () => {
       setShowWalkInForm(false);
       setShowCameraCapture(false);
       setCapturedPhoto(null);
-      
+
       // Refresh data
       loadDashboardData();
-      loadActiveVisitors();
-      
+      dispatch(getActiveInvitations());
+
       return { success: true, visitor, invitation };
     } catch (error) {
       setWalkInError(extractErrorMessage(error));
@@ -231,95 +382,151 @@ const ReceptionistDashboard = () => {
     }
   };
 
-  // Handle QR code scanning
+  // Handle QR code scan - same as CheckInDashboard
   const handleQrScan = async (qrData) => {
-    try {
-      setScanError(null);
+    // Close scanner modal immediately
+    setShowScannerModal(false);
 
-      // Validate QR code
-      const validationResult = await invitationService.validateQrCode(qrData);
+    // Small delay to ensure modal closes properly
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-      if (validationResult.isValid && validationResult.invitation) {
-        // Process check-in
-        const checkInResult = await invitationService.checkInInvitation(
-          validationResult.invitationNumber || qrData,
-          'QR code scan check-in'
-        );
-
-        setScanResult(checkInResult);
-
-        // Show success notification with visitor details
-        const visitorName = validationResult.invitation.visitor?.fullName || 'Visitor';
-        const invitationNumber = validationResult.invitationNumber || 'N/A';
+    // AUTO CHECK-IN MODE: Process immediately
+    if (autoCheckInMode) {
+      try {
+        const result = await dispatch(checkInInvitation({
+          invitationReference: qrData,
+          notes: 'QR Code Check-in by receptionist'
+        })).unwrap();
 
         toast.success(
           'Check-in Successful',
-          `${visitorName} has been checked in successfully. Invitation: ${invitationNumber}`,
+          `${result?.visitor?.fullName || 'Visitor'} has been checked in successfully.`,
           { duration: 5000 }
         );
 
-        // Reload dashboard data to update stats
+        // Refresh data
+        await dispatch(getActiveInvitations());
         await loadDashboardData();
-        await loadActiveVisitors();
-      } else {
-        const errorMsg = 'Invalid QR code format. Please ensure you are scanning a valid VMS invitation QR code.';
-        setScanError(errorMsg);
-        toast.error('Invalid QR Code', errorMsg, { duration: 6000 });
+      } catch (error) {
+        console.error('QR check-in failed:', error);
+        const errorMessage = extractErrorMessage(error);
+
+        // Try to fetch invitation details to show in modal
+        try {
+          const invitationDetails = await invitationService.getInvitationByReference(qrData);
+          setInvitationDetailsData(invitationDetails);
+          setInvitationDetailsError(null);
+        } catch (fetchError) {
+          setInvitationDetailsData(null);
+          setInvitationDetailsError({
+            message: errorMessage || 'Check-in failed',
+            details: getErrorDetails(errorMessage)
+          });
+        }
+        setShowInvitationDetailsModal(true);
       }
+    }
+    // MANUAL CONFIRMATION MODE: Fetch details first
+    else {
+      setLoadingInvitationDetails(true);
+      setInvitationDetailsError(null);
+      setInvitationDetailsData(null);
+
+      try {
+        const invitationDetails = await invitationService.getInvitationByReference(qrData);
+        if (invitationDetails) {
+          setInvitationDetailsData(invitationDetails);
+          setShowInvitationDetailsModal(true);
+        } else {
+          setInvitationDetailsError({
+            message: 'Invitation Not Found',
+            details: 'The scanned QR code does not match any invitation in the system.'
+          });
+          setShowInvitationDetailsModal(true);
+        }
+      } catch (error) {
+        console.error('Failed to fetch invitation details:', error);
+        const errorMessage = extractErrorMessage(error);
+
+        if (error.response?.status === 404 || errorMessage?.includes('not found')) {
+          setInvitationDetailsError({
+            message: `Invitation with reference '${qrData}' not found.`,
+            details: 'The scanned QR code does not match any invitation in the system.'
+          });
+        } else {
+          setInvitationDetailsError({
+            message: errorMessage || 'Failed to load invitation details',
+            details: getErrorDetails(errorMessage)
+          });
+        }
+        setShowInvitationDetailsModal(true);
+      } finally {
+        setLoadingInvitationDetails(false);
+      }
+    }
+  };
+
+  // Helper function to extract error details
+  const getErrorDetails = (errorMessage) => {
+    if (!errorMessage) return null;
+
+    if (errorMessage.includes('too early') || errorMessage.includes('scheduled for')) {
+      return 'This invitation is scheduled for a future time. Check-in is allowed starting 2 hours before the scheduled time.';
+    } else if (errorMessage.includes('expired') || errorMessage.includes('scheduled to end')) {
+      return 'This invitation has expired and can no longer be used for check-in.';
+    } else if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+      return 'The scanned QR code does not match any invitation in the system.';
+    } else if (errorMessage.includes('Only approved invitations') || errorMessage.includes('not been approved') || errorMessage.includes('not approved')) {
+      return 'This invitation must be approved before check-in is allowed.';
+    } else if (errorMessage.includes('already checked in')) {
+      return 'This visitor has already been checked in.';
+    }
+    return null;
+  };
+
+  // Handle manual confirmation of check-in
+  const handleConfirmCheckIn = async (invitationReference, notes = '') => {
+    try {
+      const result = await dispatch(checkInInvitation({
+        invitationReference,
+        notes: notes || 'Manual confirmation check-in by receptionist'
+      })).unwrap();
+
+      setShowInvitationDetailsModal(false);
+      setInvitationDetailsData(null);
+      setInvitationDetailsError(null);
+
+      toast.success(
+        'Check-in Successful',
+        `${result?.visitor?.fullName || 'Visitor'} has been checked in successfully.`,
+        { duration: 5000 }
+      );
+
+      // Refresh data
+      await dispatch(getActiveInvitations());
+      await loadDashboardData();
     } catch (error) {
+      console.error('Confirmed check-in failed:', error);
       const errorMessage = extractErrorMessage(error);
-      setScanError(errorMessage);
-
-      // Determine the type of error and show appropriate message
-      if (error.message?.includes('Invalid QR code') || error.message?.includes('format')) {
-        toast.error(
-          'QR Code Validation Failed',
-          'The scanned QR code format is not recognized. Please contact your administrator if this issue persists.',
-          { duration: 7000 }
-        );
-      } else if (error.message?.includes('too early') || error.message?.includes('scheduled for')) {
-        // Early check-in attempt
-        toast.warning(
-          'Check-in Too Early',
-          errorMessage,
-          { duration: 8000 }
-        );
-      } else if (error.message?.includes('expired') || error.message?.includes('scheduled to end')) {
-        // Expired invitation
-        toast.error(
-          'Invitation Expired',
-          errorMessage,
-          { duration: 8000 }
-        );
-      } else if (error.message?.includes('not found')) {
-        toast.warning(
-          'Invitation Not Found',
-          'The invitation associated with this QR code could not be found.',
-          { duration: 6000 }
-        );
-      } else if (error.message?.includes('Only approved invitations')) {
-        toast.error(
-          'Invitation Not Approved',
-          'This invitation has not been approved yet. Please ensure the invitation is approved before attempting check-in.',
-          { duration: 7000 }
-        );
-      } else {
-        toast.error('Check-in Failed', errorMessage, { duration: 6000 });
-      }
-
-      // Re-throw error so QR scanner component knows it failed
-      throw error;
+      toast.error('Check-in Failed', errorMessage, { duration: 6000 });
     }
   };
 
   // Handle visitor check-out
   const handleCheckOut = async (invitationId) => {
     try {
-      await invitationService.checkOutInvitation(invitationId, 'Manual check-out by receptionist');
+      await dispatch(checkOutInvitation({
+        invitationId,
+        notes: 'Manual check-out by receptionist'
+      })).unwrap();
+
+      toast.success('Check-out Successful', 'Visitor has been checked out successfully.');
+
       loadDashboardData();
-      loadActiveVisitors();
+      dispatch(getActiveInvitations());
     } catch (error) {
       console.error('Check-out failed:', error);
+      toast.error('Check-out Failed', extractErrorMessage(error));
     }
   };
 
@@ -419,85 +626,340 @@ const ReceptionistDashboard = () => {
     }
   };
 
+  // Helper function to parse UTC dates correctly
+  const parseUtcDate = (dateString) => {
+    if (!dateString) return null;
+    const dateWithZ = dateString.endsWith('Z') ? dateString : `${dateString}Z`;
+    return new Date(dateWithZ);
+  };
+
+  // Format visitor information for table
+  const formatVisitorInfo = (invitation) => {
+    const visitor = invitation.visitor;
+    if (!visitor) return 'Unknown Visitor';
+
+    return (
+      <div className="flex items-center space-x-3">
+        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+          <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+        </div>
+        <div>
+          <div className="font-medium text-gray-900 dark:text-white">
+            {visitor.firstName} {visitor.lastName}
+          </div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">{visitor.email?.value || visitor.email}</div>
+          {visitor.company && (
+            <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center space-x-1">
+              <BuildingOfficeIcon className="w-3 h-3" />
+              <span>{visitor.company}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Format visit information for table
+  const formatVisitInfo = (invitation) => {
+    return (
+      <div className="space-y-1">
+        <div className="font-medium text-gray-900 dark:text-white">{invitation.subject || 'Walk-in Visit'}</div>
+        <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-1">
+          <CalendarIcon className="w-3 h-3" />
+          <span>{formatters.formatDateTime(invitation.scheduledStartTime)}</span>
+        </div>
+        {invitation.location && (
+          <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-1">
+            <MapPinIcon className="w-3 h-3" />
+            <span>{invitation.location.name}</span>
+          </div>
+        )}
+        {invitation.host && (
+          <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-1">
+            <UserIcon className="w-3 h-3" />
+            <span>Host: {invitation.host.fullName}</span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Format check-in status for table
+  const formatCheckInStatus = (invitation) => {
+    if (invitation.checkedInAt && invitation.checkedOutAt) {
+      const checkInTime = parseUtcDate(invitation.checkedInAt);
+      const checkOutTime = parseUtcDate(invitation.checkedOutAt);
+      const duration = checkOutTime.getTime() - checkInTime.getTime();
+      const hours = Math.floor(duration / (1000 * 60 * 60));
+      const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+
+      return (
+        <div className="space-y-1">
+          <div className="text-sm text-gray-900 dark:text-white">
+            <strong>In:</strong> {formatters.formatTime(invitation.checkedInAt)}
+          </div>
+          <div className="text-sm text-gray-900 dark:text-white">
+            <strong>Out:</strong> {formatters.formatTime(invitation.checkedOutAt)}
+          </div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Duration: {hours}h {minutes}m
+          </div>
+        </div>
+      );
+    } else if (invitation.checkedInAt) {
+      const checkInTime = parseUtcDate(invitation.checkedInAt);
+      const now = new Date();
+      const duration = now.getTime() - checkInTime.getTime();
+      const hours = Math.floor(duration / (1000 * 60 * 60));
+      const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+
+      return (
+        <div className="space-y-1">
+          <div className="text-sm text-gray-900 dark:text-white">
+            <strong>Checked in:</strong> {formatters.formatTime(invitation.checkedInAt)}
+          </div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Duration: {hours}h {minutes}m
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          Not checked in
+        </div>
+      );
+    }
+  };
+
+  // Get status badge for invitation
+  const getStatusBadge = (invitation) => {
+    if (invitation.checkedInAt && !invitation.checkedOutAt) {
+      return <Badge variant="success" size="sm">Checked In</Badge>;
+    } else if (invitation.checkedInAt && invitation.checkedOutAt) {
+      return <Badge variant="secondary" size="sm">Completed</Badge>;
+    } else if (invitation.status === 'Approved') {
+      return <Badge variant="warning" size="sm">Approved</Badge>;
+    } else {
+      return <Badge variant="info" size="sm">{invitation.status}</Badge>;
+    }
+  };
+
+  // Table columns for active visitors
+  const activeVisitorsColumns = [
+    {
+      key: 'visitor',
+      header: 'Visitor',
+      sortable: true,
+      render: (value, invitation) => formatVisitorInfo(invitation)
+    },
+    {
+      key: 'visit',
+      header: 'Visit Details',
+      sortable: true,
+      render: (value, invitation) => formatVisitInfo(invitation)
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      sortable: true,
+      render: (value, invitation) => getStatusBadge(invitation)
+    },
+    {
+      key: 'checkin_status',
+      header: 'Check-in Status',
+      sortable: false,
+      render: (value, invitation) => formatCheckInStatus(invitation)
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      width: '200px',
+      sortable: false,
+      render: (value, invitation) => {
+        const isCheckedIn = invitation.checkedInAt && !invitation.checkedOutAt;
+        const canCheckIn = invitation.status === 'Approved' && !invitation.checkedInAt;
+
+        return (
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => handleToggleVisitorDetails(invitation.visitor?.id)}
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+              title="View details"
+            >
+              <EyeIcon className="w-4 h-4" />
+            </button>
+
+            {canCheckIn && (
+              <button
+                onClick={async () => {
+                  try {
+                    await dispatch(checkInInvitation({
+                      invitationReference: invitation.invitationNumber || invitation.id.toString(),
+                      notes: 'Quick check-in by receptionist'
+                    })).unwrap();
+                    toast.success('Check-in Successful', 'Visitor checked in successfully');
+                    loadDashboardData();
+                    dispatch(getActiveInvitations());
+                  } catch (error) {
+                    toast.error('Check-in Failed', extractErrorMessage(error));
+                  }
+                }}
+                className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200 transition-colors"
+                title="Check In"
+              >
+                <ArrowRightOnRectangleIcon className="w-4 h-4" />
+              </button>
+            )}
+
+            {isCheckedIn && (
+              <button
+                onClick={() => handleCheckOut(invitation.id)}
+                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200 transition-colors"
+                title="Check Out"
+              >
+                <ArrowLeftOnRectangleIcon className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        );
+      }
+    }
+  ];
+
   // Render stats cards
   const renderStatsCards = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <Card className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800">Expected Visitors</h3>
-            <p className="text-3xl font-bold text-blue-600">{todayStats.expectedVisitors}</p>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <Card className="p-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-md">
+              <ClockIconSolid className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Expected Visitors</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{todayStats.expectedVisitors}</p>
+            </div>
           </div>
-          <ClockIconSolid className="w-12 h-12 text-blue-500" />
-        </div>
-      </Card>
+        </Card>
+      </motion.div>
 
-      <Card className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800">Checked In</h3>
-            <p className="text-3xl font-bold text-green-600">{todayStats.checkedIn}</p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <Card className="p-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-green-100 dark:bg-green-900 rounded-md">
+              <CheckCircleIconSolid className="w-6 h-6 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Checked In</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{todayStats.checkedIn}</p>
+            </div>
           </div>
-          <CheckCircleIconSolid className="w-12 h-12 text-green-500" />
-        </div>
-      </Card>
+        </Card>
+      </motion.div>
 
-      <Card className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800">Pending Check-out</h3>
-            <p className="text-3xl font-bold text-orange-600">{todayStats.pendingCheckOut}</p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <Card className="p-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-md">
+              <UsersIcon className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Check-out</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{todayStats.pendingCheckOut}</p>
+            </div>
           </div>
-          <UsersIcon className="w-12 h-12 text-orange-500" />
-        </div>
-      </Card>
+        </Card>
+      </motion.div>
 
-      <Card className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800">Walk-ins Today</h3>
-            <p className="text-3xl font-bold text-purple-600">{todayStats.walkIns}</p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+      >
+        <Card className="p-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-md">
+              <UserPlusIcon className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Walk-ins Today</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{todayStats.walkIns}</p>
+            </div>
           </div>
-          <UserPlusIcon className="w-12 h-12 text-purple-500" />
-        </div>
-      </Card>
+        </Card>
+      </motion.div>
     </div>
   );
 
   // Render tab navigation
   const renderTabNavigation = () => (
-    <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-      {[
-        { id: 'overview', label: 'Overview', icon: EyeIcon },
-        { id: 'scanner', label: 'QR Scanner', icon: QrCodeIcon },
-        { id: 'walk-in', label: 'Walk-in Registration', icon: UserPlusIcon },
-        { id: 'documents', label: 'Document Scanner', icon: DocumentTextIcon },
-        { id: 'active', label: 'Active Visitors', icon: UsersIcon }
-      ].map(tab => (
-        <button
-          key={tab.id}
-          onClick={() => setActiveTab(tab.id)}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-md font-medium transition-colors ${
-            activeTab === tab.id
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
-          }`}
-        >
-          <tab.icon className="w-5 h-5" />
-          <span>{tab.label}</span>
-        </button>
-      ))}
+    <div className="border-b border-gray-200 dark:border-gray-700">
+      <nav className="-mb-px flex space-x-8">
+        {[
+          { id: 'overview', label: 'Overview', icon: EyeIcon },
+          { id: 'scanner', label: 'QR Scanner', icon: QrCodeIcon },
+          { id: 'walk-in', label: 'Walk-in Registration', icon: UserPlusIcon },
+          { id: 'active', label: `Active Visitors (${todayStats.pendingCheckOut})`, icon: UsersIcon },
+          { id: 'documents', label: 'Documents', icon: DocumentTextIcon }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === tab.id
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            <div className="flex items-center space-x-2">
+              <tab.icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </div>
+          </button>
+        ))}
+      </nav>
     </div>
   );
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Receptionist Dashboard</h1>
-        <p className="text-gray-600 mt-2">Manage visitor check-ins, walk-in registrations, and daily operations</p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Receptionist Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400">Manage visitor check-ins, walk-in registrations, and daily operations</p>
+        </div>
+        <div className="flex items-center space-x-3">
+          <Button
+            variant="outline"
+            onClick={() => {
+              loadDashboardData();
+              dispatch(getActiveInvitations());
+            }}
+            icon={<ArrowRightOnRectangleIcon className="w-4 h-4" />}
+          >
+            Refresh
+          </Button>
+        </div>
       </div>
 
+      {/* Statistics Cards */}
       {renderStatsCards()}
+
+      {/* Tab Navigation */}
       {renderTabNavigation()}
 
       {/* Tab Content */}
@@ -554,22 +1016,48 @@ const ReceptionistDashboard = () => {
             exit={{ opacity: 0, y: -20 }}
           >
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">QR Code Scanner</h2>
-              <QrCodeScanner
-                onScan={handleQrScan}
-                loading={false}
-                className="max-w-md mx-auto"
-              />
-              {scanError && (
-                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
-                  <p className="text-red-600">{scanError}</p>
+              <div className="text-center py-12">
+                <QrCodeIcon className="w-24 h-24 text-gray-400 dark:text-gray-500 mx-auto mb-6" />
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">QR Code Scanner</h2>
+                <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-md mx-auto">
+                  Scan visitor QR codes for quick check-in. Click the button below to open the scanner.
+                </p>
+
+                {/* Auto/Manual Check-in Mode Toggle */}
+                <div className="flex justify-center items-center space-x-4 mb-6">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={autoCheckInMode}
+                      onChange={(e) => setAutoCheckInMode(e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Auto Check-in Mode
+                    </span>
+                  </label>
                 </div>
-              )}
-              {scanResult && (
-                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-                  <p className="text-green-600">Check-in successful!</p>
-                </div>
-              )}
+
+                <Button
+                  onClick={() => setShowScannerModal(true)}
+                  icon={<QrCodeIcon className="w-5 h-5" />}
+                  size="lg"
+                  className="mx-auto"
+                >
+                  Open QR Scanner
+                </Button>
+
+                {scanError && (
+                  <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md max-w-md mx-auto">
+                    <p className="text-red-600 dark:text-red-300 text-sm">{scanError}</p>
+                  </div>
+                )}
+                {scanResult && (
+                  <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md max-w-md mx-auto">
+                    <p className="text-green-600 dark:text-green-300">Check-in successful!</p>
+                  </div>
+                )}
+              </div>
             </Card>
           </motion.div>
         )}
@@ -712,140 +1200,99 @@ const ReceptionistDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Active Visitors</h2>
-              {activeVisitorsLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-gray-500 mt-2">Loading active visitors...</p>
+            <Card>
+              {activeInvitationsLoading ? (
+                <div className="flex justify-center items-center py-12">
+                  <LoadingSpinner size="lg" />
                 </div>
-              ) : activeVisitors.length === 0 ? (
-                <div className="text-center py-8">
-                  <UsersIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-700 mb-2">No Active Visitors</h3>
-                  <p className="text-gray-500">No visitors are currently checked in</p>
-                </div>
+              ) : activeInvitationsFromRedux && activeInvitationsFromRedux.length > 0 ? (
+                <Table
+                  data={activeInvitationsFromRedux}
+                  columns={activeVisitorsColumns}
+                  emptyMessage="No active visitors"
+                />
               ) : (
-                <div className="space-y-4">
-                  {activeVisitors.map(invitation => {
-                    const visitorId = invitation.visitor?.id;
-                    const isExpanded = expandedVisitorId === visitorId;
-                    const documents = visitorDocuments[visitorId] || [];
-                    const isLoadingDocs = loadingDocuments[visitorId];
-
-                    return (
-                      <div key={invitation.id} className="border rounded-lg overflow-hidden">
-                        <div className="p-4 hover:bg-gray-50">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4">
-                              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                <span className="text-blue-600 font-semibold">
-                                  {invitation.visitor?.firstName?.[0]}{invitation.visitor?.lastName?.[0]}
-                                </span>
-                              </div>
-                              <div>
-                                <h3 className="font-semibold text-gray-900">
-                                  {invitation.visitor?.fullName || 'Unknown Visitor'}
-                                </h3>
-                                <p className="text-gray-500 text-sm">{invitation.visitor?.company}</p>
-                                <p className="text-gray-500 text-sm">
-                                  Host: {invitation.host?.fullName || 'N/A'}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Badge color="green">Checked In</Badge>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleToggleVisitorDetails(visitorId)}
-                                icon={isExpanded ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
-                              >
-                                {isExpanded ? 'Hide' : 'View'} Details
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleCheckOut(invitation.id)}
-                                icon={<ArrowLeftOnRectangleIcon className="w-4 h-4" />}
-                              >
-                                Check Out
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Expanded Details */}
-                        {isExpanded && (
-                          <div className="border-t bg-gray-50 p-4">
-                            <h4 className="text-sm font-semibold text-gray-700 mb-3">Visitor Documents</h4>
-
-                            {isLoadingDocs ? (
-                              <div className="flex items-center space-x-2 text-sm text-gray-600 py-4">
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                                <span>Loading documents...</span>
-                              </div>
-                            ) : documents.length > 0 ? (
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {documents.map((doc) => (
-                                  <div key={doc.id} className="bg-white rounded-lg p-3 border">
-                                    <div className="flex items-center justify-between mb-2">
-                                      <div className="flex-1 min-w-0">
-                                        <div className="flex items-center space-x-2">
-                                          <DocumentTextIcon className="w-4 h-4 text-gray-400" />
-                                          <p className="text-sm font-medium text-gray-900 truncate">
-                                            {doc.documentName}
-                                          </p>
-                                        </div>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                          {doc.documentType} • {doc.formattedFileSize}
-                                        </p>
-                                        {doc.description && (
-                                          <p className="text-xs text-gray-600 mt-1 truncate">
-                                            {doc.description}
-                                          </p>
-                                        )}
-                                      </div>
-                                      <div className="flex items-center space-x-1">
-                                        {doc.isSensitive && (
-                                          <Badge variant="warning" size="xs">Sensitive</Badge>
-                                        )}
-                                        {doc.isRequired && (
-                                          <Badge variant="info" size="xs">Required</Badge>
-                                        )}
-                                      </div>
-                                    </div>
-                                    {/* Action Buttons */}
-                                    <div className="flex items-center space-x-2 pt-2 border-t border-gray-200">
-                                      <button
-                                        onClick={() => handlePreviewDocument(visitorId, doc)}
-                                        className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
-                                      >
-                                        <EyeIcon className="w-3.5 h-3.5" />
-                                        <span>Preview</span>
-                                      </button>
-                                      <button
-                                        onClick={() => handleDownloadDocument(visitorId, doc)}
-                                        className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
-                                      >
-                                        <ArrowDownTrayIcon className="w-3.5 h-3.5" />
-                                        <span>Download</span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <p className="text-sm text-gray-500 py-4">No documents available for this visitor.</p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                <div className="text-center py-12">
+                  <UserIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No active visitors</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Visitors will appear here when they check in.
+                  </p>
                 </div>
               )}
             </Card>
+
+            {/* Expanded Details Modal for Documents */}
+            {expandedVisitorId && (
+              <Modal
+                isOpen={!!expandedVisitorId}
+                onClose={() => setExpandedVisitorId(null)}
+                title="Visitor Documents"
+                size="lg"
+              >
+                <div className="p-4">
+                  {loadingDocuments[expandedVisitorId] ? (
+                    <div className="flex items-center justify-center py-8">
+                      <LoadingSpinner size="md" />
+                    </div>
+                  ) : (visitorDocuments[expandedVisitorId] || []).length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {(visitorDocuments[expandedVisitorId] || []).map((doc) => (
+                        <div key={doc.id} className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2">
+                                <DocumentTextIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                  {doc.documentName}
+                                </p>
+                              </div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {doc.documentType} • {doc.formattedFileSize}
+                              </p>
+                              {doc.description && (
+                                <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 truncate">
+                                  {doc.description}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              {doc.isSensitive && (
+                                <Badge variant="warning" size="xs">Sensitive</Badge>
+                              )}
+                              {doc.isRequired && (
+                                <Badge variant="info" size="xs">Required</Badge>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                            <button
+                              onClick={() => handlePreviewDocument(expandedVisitorId, doc)}
+                              className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                            >
+                              <EyeIcon className="w-3.5 h-3.5" />
+                              <span>Preview</span>
+                            </button>
+                            <button
+                              onClick={() => handleDownloadDocument(expandedVisitorId, doc)}
+                              className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                            >
+                              <ArrowDownTrayIcon className="w-3.5 h-3.5" />
+                              <span>Download</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">No documents available for this visitor.</p>
+                    </div>
+                  )}
+                </div>
+              </Modal>
+            )}
           </motion.div>
         )}
 
@@ -944,6 +1391,41 @@ const ReceptionistDashboard = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* QR Scanner Modal */}
+      {showScannerModal && (
+        <Modal
+          isOpen={showScannerModal}
+          onClose={() => setShowScannerModal(false)}
+          title="Scan QR Code"
+          size="lg"
+        >
+          <div className="text-center">
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Point your camera at the visitor's QR code
+            </p>
+            <QrCodeScanner
+              key={showScannerModal ? 'scanner-open' : 'scanner-closed'}
+              onScan={handleQrScan}
+              loading={false}
+            />
+          </div>
+        </Modal>
+      )}
+
+      {/* Invitation Details Modal */}
+      <InvitationDetailsModal
+        isOpen={showInvitationDetailsModal}
+        onClose={() => {
+          setShowInvitationDetailsModal(false);
+          setInvitationDetailsData(null);
+          setInvitationDetailsError(null);
+        }}
+        invitation={invitationDetailsData}
+        error={invitationDetailsError}
+        onConfirmCheckIn={handleConfirmCheckIn}
+        loading={loadingInvitationDetails}
+      />
 
       {/* Document Preview Modal */}
       {selectedDocument && previewVisitorId && (

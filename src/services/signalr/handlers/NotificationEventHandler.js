@@ -8,6 +8,9 @@ import { addNotificationWithDesktop, showSuccessToast, showErrorToast, showWarni
  */
 class NotificationEventHandler {
   constructor() {
+    // Set of callback functions that subscribe to notification events
+    this.subscribers = new Set();
+
     // Map of event names to handler methods
     this.eventHandlers = new Map([
       // Operator Hub Events
@@ -45,6 +48,32 @@ class NotificationEventHandler {
       // Common Events
       ['Error', this.handleError.bind(this)]
     ]);
+  }
+
+  /**
+   * Subscribe to notification events
+   * @param {Function} callback - Function to call when events occur
+   * @returns {Function} Unsubscribe function
+   */
+  subscribe(callback) {
+    this.subscribers.add(callback);
+    return () => this.subscribers.delete(callback);
+  }
+
+  /**
+   * Notify all subscribers of a notification event
+   * @param {string} eventType - Type of event that occurred
+   * @param {*} data - Event data
+   * @param {string} hubName - Name of the hub that triggered the event
+   */
+  notifySubscribers(eventType, data, hubName = null) {
+    this.subscribers.forEach(callback => {
+      try {
+        callback(eventType, data, hubName);
+      } catch (error) {
+        console.error('Error notifying notification subscriber:', error);
+      }
+    });
   }
 
   /**
@@ -190,23 +219,29 @@ class NotificationEventHandler {
     store.dispatch(addNotificationWithDesktop({
       type: 'visitor_checkin',
       title: 'Visitor Checked In',
-      message: `${data.VisitorName} has checked in at ${data.Location}`,
+      message: `${data.visitorName || data.VisitorName} has checked in`,
       priority: 'low',
       data: data,
       actions: [
         { label: 'View Details', action: 'view_visitor' }
       ]
     }));
+
+    // Notify subscribers for dashboard updates
+    this.notifySubscribers('visitor-checked-in', data, 'host');
   }
 
   handleVisitorCheckOut(data) {
     store.dispatch(addNotificationWithDesktop({
       type: 'visitor_checkout',
       title: 'Visitor Checked Out',
-      message: `${data.VisitorName} has checked out at ${data.CheckOutTime}`,
+      message: `${data.visitorName || data.VisitorName} has checked out`,
       priority: 'low',
       data: data
     }));
+
+    // Notify subscribers for dashboard updates
+    this.notifySubscribers('visitor-checked-out', data, 'host');
   }
 
   handleNotificationHistory(data) {

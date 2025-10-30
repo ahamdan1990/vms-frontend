@@ -92,12 +92,21 @@ export const useSignalR = () => {
 
       return await signalRManager.invokeHubMethod(hubName, methodName, ...args);
     } catch (error) {
-      console.error(`Failed to invoke ${methodName} on ${hubName}:`, error);
-      errorToast(
-        'Connection Error',
-        `Failed to perform action: ${error.message}`,
-        { duration: 5000 }
-      );
+      // Suppress errors for connection closures (happens during navigation)
+      if (error.message && error.message.includes('connection being closed')) {
+        console.debug(`Invocation of ${methodName} on ${hubName} cancelled during navigation`);
+        return null;
+      }
+
+      // Only show error toast for actual errors, not connection issues
+      if (!error.message?.includes('not connected')) {
+        console.error(`Failed to invoke ${methodName} on ${hubName}:`, error);
+        errorToast(
+          'Connection Error',
+          `Failed to perform action: ${error.message}`,
+          { duration: 5000 }
+        );
+      }
       throw error;
     }
   }, [errorToast]);

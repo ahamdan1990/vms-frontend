@@ -73,65 +73,66 @@ const Toast = ({ toast, index = 0, position = 'top-right' }) => {
     const configs = {
       success: {
         icon: CheckCircleIcon,
-        bgColor: 'bg-green-50',
-        borderColor: 'border-green-200',
-        iconColor: 'text-green-500',
-        titleColor: 'text-green-800',
-        messageColor: 'text-green-700',
-        progressColor: 'bg-green-500'
+        bgColor: 'bg-green-50 dark:bg-green-900/20',
+        borderColor: 'border-green-200 dark:border-green-800',
+        iconColor: 'text-green-500 dark:text-green-400',
+        titleColor: 'text-green-800 dark:text-green-200',
+        messageColor: 'text-green-700 dark:text-green-300',
+        progressColor: 'bg-green-500 dark:bg-green-400'
       },
       error: {
         icon: XCircleIcon,
-        bgColor: 'bg-red-50',
-        borderColor: 'border-red-200',
-        iconColor: 'text-red-500',
-        titleColor: 'text-red-800',
-        messageColor: 'text-red-700',
-        progressColor: 'bg-red-500'
+        bgColor: 'bg-red-50 dark:bg-red-900/20',
+        borderColor: 'border-red-200 dark:border-red-800',
+        iconColor: 'text-red-500 dark:text-red-400',
+        titleColor: 'text-red-800 dark:text-red-200',
+        messageColor: 'text-red-700 dark:text-red-300',
+        progressColor: 'bg-red-500 dark:bg-red-400'
       },
       warning: {
         icon: ExclamationTriangleIcon,
-        bgColor: 'bg-yellow-50',
-        borderColor: 'border-yellow-200',
-        iconColor: 'text-yellow-500',
-        titleColor: 'text-yellow-800',
-        messageColor: 'text-yellow-700',
-        progressColor: 'bg-yellow-500'
+        bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
+        borderColor: 'border-yellow-200 dark:border-yellow-800',
+        iconColor: 'text-yellow-500 dark:text-yellow-400',
+        titleColor: 'text-yellow-800 dark:text-yellow-200',
+        messageColor: 'text-yellow-700 dark:text-yellow-300',
+        progressColor: 'bg-yellow-500 dark:bg-yellow-400'
       },
       info: {
         icon: InformationCircleIcon,
-        bgColor: 'bg-blue-50',
-        borderColor: 'border-blue-200',
-        iconColor: 'text-blue-500',
-        titleColor: 'text-blue-800',
-        messageColor: 'text-blue-700',
-        progressColor: 'bg-blue-500'
-      },      visitor_checkin: {
+        bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+        borderColor: 'border-blue-200 dark:border-blue-800',
+        iconColor: 'text-blue-500 dark:text-blue-400',
+        titleColor: 'text-blue-800 dark:text-blue-200',
+        messageColor: 'text-blue-700 dark:text-blue-300',
+        progressColor: 'bg-blue-500 dark:bg-blue-400'
+      },
+      visitor_checkin: {
         icon: UserPlusIcon,
-        bgColor: 'bg-green-50',
-        borderColor: 'border-green-200',
-        iconColor: 'text-green-500',
-        titleColor: 'text-green-800',
-        messageColor: 'text-green-700',
-        progressColor: 'bg-green-500'
+        bgColor: 'bg-green-50 dark:bg-green-900/20',
+        borderColor: 'border-green-200 dark:border-green-800',
+        iconColor: 'text-green-500 dark:text-green-400',
+        titleColor: 'text-green-800 dark:text-green-200',
+        messageColor: 'text-green-700 dark:text-green-300',
+        progressColor: 'bg-green-500 dark:bg-green-400'
       },
       visitor_checkout: {
         icon: UserMinusIcon,
-        bgColor: 'bg-blue-50',
-        borderColor: 'border-blue-200',
-        iconColor: 'text-blue-500',
-        titleColor: 'text-blue-800',
-        messageColor: 'text-blue-700',
-        progressColor: 'bg-blue-500'
+        bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+        borderColor: 'border-blue-200 dark:border-blue-800',
+        iconColor: 'text-blue-500 dark:text-blue-400',
+        titleColor: 'text-blue-800 dark:text-blue-200',
+        messageColor: 'text-blue-700 dark:text-blue-300',
+        progressColor: 'bg-blue-500 dark:bg-blue-400'
       },
       visitor_overdue: {
         icon: ClockIcon,
-        bgColor: 'bg-orange-50',
-        borderColor: 'border-orange-200',
-        iconColor: 'text-orange-500',
-        titleColor: 'text-orange-800',
-        messageColor: 'text-orange-700',
-        progressColor: 'bg-orange-500'
+        bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+        borderColor: 'border-orange-200 dark:border-orange-800',
+        iconColor: 'text-orange-500 dark:text-orange-400',
+        titleColor: 'text-orange-800 dark:text-orange-200',
+        messageColor: 'text-orange-700 dark:text-orange-300',
+        progressColor: 'bg-orange-500 dark:bg-orange-400'
       },
       loading: {
         icon: () => (
@@ -140,12 +141,12 @@ const Toast = ({ toast, index = 0, position = 'top-right' }) => {
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
         ),
-        bgColor: 'bg-gray-50',
-        borderColor: 'border-gray-200',
-        iconColor: 'text-gray-500',
-        titleColor: 'text-gray-800',
-        messageColor: 'text-gray-700',
-        progressColor: 'bg-gray-500'
+        bgColor: 'bg-gray-50 dark:bg-gray-800',
+        borderColor: 'border-gray-200 dark:border-gray-700',
+        iconColor: 'text-gray-500 dark:text-gray-400',
+        titleColor: 'text-gray-800 dark:text-gray-200',
+        messageColor: 'text-gray-700 dark:text-gray-300',
+        progressColor: 'bg-gray-500 dark:bg-gray-400'
       }
     };
 
@@ -232,7 +233,7 @@ const Toast = ({ toast, index = 0, position = 'top-right' }) => {
           <div className="ml-4 flex-shrink-0 flex">
             <button
               type="button"
-              className={`rounded-md inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+              className={`rounded-md inline-flex text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400`}
               onClick={handleClose}
             >
               <span className="sr-only">Close</span>
@@ -241,10 +242,10 @@ const Toast = ({ toast, index = 0, position = 'top-right' }) => {
           </div>
         </div>
       </div>
-      
+
       {/* Progress Bar */}
       {!persistent && duration > 0 && (
-        <div className="h-1 bg-gray-200">
+        <div className="h-1 bg-gray-200 dark:bg-gray-700">
           <div
             className={`h-full transition-all duration-75 ${config.progressColor}`}
             style={{ width: `${progress}%` }}

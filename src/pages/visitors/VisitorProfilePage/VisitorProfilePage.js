@@ -18,6 +18,9 @@ import {
 } from '../../../store/slices/visitorsSlice';
 import { selectCurrentVisitor, selectVisitorsLoading, selectVisitorsUpdateLoading } from '../../../store/selectors/visitorSelectors';
 
+// Invitation actions
+import { createInvitation } from '../../../store/slices/invitationsSlice';
+
 // Services
 import visitorService from '../../../services/visitorService';
 import visitorDocumentService from '../../../services/visitorDocumentService';
@@ -34,6 +37,7 @@ import DocumentManager from '../../../components/visitor/DocumentManager/Documen
 import VisitorForm from '../../../components/visitor/VisitorForm/VisitorForm';
 import EmergencyContactsList from '../../../components/visitor/EmergencyContactsList/EmergencyContactsList';
 import AddNoteModal from '../../../components/visitor/AddNoteModal/AddNoteModal';
+import InvitationForm from '../../../components/invitation/InvitationForm/InvitationForm';
 
 // Icons
 import {
@@ -100,6 +104,7 @@ const VisitorProfilePage = () => {
   const [showBlacklistModal, setShowBlacklistModal] = useState(false);
   const [blacklistReason, setBlacklistReason] = useState('');
   const [statusChangeLoading, setStatusChangeLoading] = useState(false);
+  const [showCreateInvitationModal, setShowCreateInvitationModal] = useState(false);
 
   // Tab configuration
   const tabs = [
@@ -392,6 +397,22 @@ const VisitorProfilePage = () => {
     }
   };
 
+  // Handle create invitation
+  const handleCreateInvitation = async (invitationData) => {
+    try {
+      await dispatch(createInvitation({
+        ...invitationData,
+        visitorId: visitor.id
+      })).unwrap();
+
+      setShowCreateInvitationModal(false);
+      console.log('✅ Invitation created successfully!');
+    } catch (error) {
+      console.error('Failed to create invitation:', error);
+      throw error;
+    }
+  };
+
   // Get visitor status badge
   const getVisitorStatusBadge = (visitor) => {
     if (visitor.isBlacklisted) {
@@ -452,7 +473,20 @@ const VisitorProfilePage = () => {
             </div>
           </div>
           
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 flex-wrap gap-2">
+            {/* Create Invitation Button - Primary Action */}
+            {hasPermission('Invitation.Create') && !visitor.isBlacklisted && (
+              <Button
+                onClick={() => setShowCreateInvitationModal(true)}
+                variant="primary"
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <PlusIcon className="w-4 h-4 mr-2" />
+                Create Invitation
+              </Button>
+            )}
+
             {/* VIP Status Button */}
             {hasPermission('Visitor.MarkAsVip') && !visitor.isVip && !visitor.isBlacklisted && (
               <Button
@@ -785,6 +819,24 @@ const VisitorProfilePage = () => {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      {/* Create Invitation Modal */}
+      <Modal
+        isOpen={showCreateInvitationModal}
+        onClose={() => setShowCreateInvitationModal(false)}
+        title={`Create Invitation for ${visitor.fullName || `${visitor.firstName} ${visitor.lastName}`}`}
+        size="full"
+      >
+        <InvitationForm
+          initialData={{
+            visitorId: visitor.id
+          }}
+          onSubmit={handleCreateInvitation}
+          onCancel={() => setShowCreateInvitationModal(false)}
+          loading={false}
+          isEdit={false}
+        />
       </Modal>
     </div>
   );

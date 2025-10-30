@@ -82,20 +82,20 @@ const BulkActions = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className={`bg-blue-50 border border-blue-200 rounded-lg p-4 ${className}`}
+          className={`bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 ${className}`}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
-                <CheckIcon className="w-4 h-4 text-blue-600" />
+              <div className="flex items-center justify-center w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full">
+                <CheckIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-blue-900">
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
                   {selectedCount} visitor{selectedCount !== 1 ? 's' : ''} selected
                 </p>
                 <button
                   onClick={onClearSelection}
-                  className="text-xs text-blue-700 hover:text-blue-800 underline"
+                  className="text-xs text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 underline"
                 >
                   Clear selection
                 </button>
@@ -199,18 +199,18 @@ const BulkActions = ({
         <div className="p-6">
           <div className="mb-4">
             <div className="flex items-center space-x-2 mb-2">
-              <ExclamationTriangleIcon className="w-5 h-5 text-amber-500" />
-              <p className="text-sm font-medium text-gray-900">
+              <ExclamationTriangleIcon className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 Blacklist {selectedCount} visitor{selectedCount !== 1 ? 's' : ''}?
               </p>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Blacklisted visitors will be restricted from future visits. Please provide a reason for this action.
             </p>
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Blacklist Reason *
             </label>
             <Input
@@ -251,12 +251,12 @@ const BulkActions = ({
         <div className="p-6">
           <div className="mb-6">
             <div className="flex items-center space-x-2 mb-2">
-              <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />
-              <p className="text-sm font-medium text-gray-900">
+              <ExclamationTriangleIcon className="w-5 h-5 text-red-500 dark:text-red-400" />
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 Delete {selectedCount} visitor{selectedCount !== 1 ? 's' : ''}?
               </p>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               This action cannot be undone. All visitor data, including documents and visit history, will be permanently removed.
             </p>
           </div>
@@ -288,14 +288,14 @@ const BulkActions = ({
       >
         <div className="p-6">
           <div className="mb-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Send invitations to {selectedCount} selected visitor{selectedCount !== 1 ? 's' : ''}.
             </p>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Subject *
               </label>
               <Input
@@ -308,7 +308,7 @@ const BulkActions = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Message
               </label>
               <textarea
@@ -316,13 +316,13 @@ const BulkActions = ({
                 onChange={(e) => setInviteDetails(prev => ({ ...prev, message: e.target.value }))}
                 placeholder="Invitation message..."
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-200"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Visit Date
                 </label>
                 <Input
@@ -333,7 +333,7 @@ const BulkActions = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Visit Purpose
                 </label>
                 <Input

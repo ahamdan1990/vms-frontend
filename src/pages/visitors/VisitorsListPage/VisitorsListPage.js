@@ -105,6 +105,7 @@ import EmergencyContactsList from '../../../components/visitor/EmergencyContacts
 import VisitorForm from '../../../components/visitor/VisitorForm/VisitorForm';
 import VisitorGrid from '../../../components/visitor/VisitorGrid/VisitorGrid';
 import AdvancedSearchModal from '../../../components/visitor/AdvancedSearch/AdvancedSearchModal';
+import InvitationForm from '../../../components/invitation/InvitationForm/InvitationForm';
 
 // Icons
 import { 
@@ -149,6 +150,8 @@ const VisitorsListPage = () => {
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const [blacklistReason, setBlacklistReason] = useState('');
   const [viewMode, setViewMode] = useState('list'); // 'grid', 'list', 'compact'
+  const [showInvitationModal, setShowInvitationModal] = useState(false);
+  const [selectedVisitorForInvitation, setSelectedVisitorForInvitation] = useState(null);
 
   // Permissions
   const canRead = hasPermission('Visitor.Read');
@@ -595,6 +598,29 @@ const VisitorsListPage = () => {
 
   const handlePageSizeChange = (newPageSize) => {
     dispatch(setPageSize(newPageSize));
+  };
+
+  // Handle create invitation for visitor
+  const handleCreateInvitationForVisitor = (visitor) => {
+    setSelectedVisitorForInvitation(visitor);
+    setShowInvitationModal(true);
+  };
+
+  // Handle submit invitation
+  const handleSubmitInvitation = async (invitationData) => {
+    try {
+      await dispatch(createInvitation({
+        ...invitationData,
+        visitorId: selectedVisitorForInvitation.id
+      })).unwrap();
+
+      setShowInvitationModal(false);
+      setSelectedVisitorForInvitation(null);
+      console.log('✅ Invitation created successfully!');
+    } catch (error) {
+      console.error('Failed to create invitation:', error);
+      throw error;
+    }
   };
   // Helper function to get visitor status icons and colors
   const getVisitorStatusBadge = (visitor) => {
@@ -1120,6 +1146,7 @@ const VisitorsListPage = () => {
         onViewModeChange={setViewMode}
         onEdit={canUpdate ? (visitor) => handleVisitorAction('edit', visitor) : undefined}
         onDelete={canDelete ? (visitor) => handleVisitorAction('delete', visitor) : undefined}
+        onCreateInvitation={hasPermission('Invitation.Create') ? handleCreateInvitationForVisitor : undefined}
         // Bulk operations
         selectedVisitors={selectedVisitors}
         onSelectionChange={(newSelection) => dispatch(setSelectedVisitors(newSelection))}
@@ -1434,9 +1461,35 @@ const VisitorsListPage = () => {
         variant="warning"
         loading={statusChangeLoading}
       />
-      
+
       {/* Advanced Search Modal */}
       <AdvancedSearchModal />
+
+      {/* Create Invitation Modal */}
+      {selectedVisitorForInvitation && (
+        <Modal
+          isOpen={showInvitationModal}
+          onClose={() => {
+            setShowInvitationModal(false);
+            setSelectedVisitorForInvitation(null);
+          }}
+          title={`Create Invitation for ${selectedVisitorForInvitation.fullName || `${selectedVisitorForInvitation.firstName} ${selectedVisitorForInvitation.lastName}`}`}
+          size="full"
+        >
+          <InvitationForm
+            initialData={{
+              visitorId: selectedVisitorForInvitation.id
+            }}
+            onSubmit={handleSubmitInvitation}
+            onCancel={() => {
+              setShowInvitationModal(false);
+              setSelectedVisitorForInvitation(null);
+            }}
+            loading={false}
+            isEdit={false}
+          />
+        </Modal>
+      )}
     </div>
   );
 };

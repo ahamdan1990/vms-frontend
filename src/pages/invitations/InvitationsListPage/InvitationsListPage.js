@@ -694,7 +694,7 @@ const InvitationsListPage = () => {
       className: 'min-w-[180px]',
       render: (value, invitation) => (
         <div className="flex items-center space-x-2">
-          <span className="font-semibold text-gray-900">#{invitation.invitationNumber}</span>
+          <span className="font-semibold text-gray-900 dark:text-white">#{invitation.invitationNumber}</span>
         </div>
       )
     },
@@ -705,15 +705,15 @@ const InvitationsListPage = () => {
       className: 'min-w-[200px]',
       render: (value, invitation) => (
         <div className="flex items-center space-x-2">
-          <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-            <UserIcon className="w-5 h-5 text-blue-600" />
+          <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+            <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <div className="font-medium text-gray-900 text-sm">
+            <div className="font-medium text-gray-900 dark:text-white text-sm">
               {invitation.visitor?.firstName} {invitation.visitor?.lastName}
             </div>
             {invitation.visitor?.company && (
-              <div className="text-xs text-gray-500 flex items-center space-x-1">
+              <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-1">
                 <BuildingOfficeIcon className="w-3 h-3" />
                 <span>{invitation.visitor?.company}</span>
               </div>
@@ -729,12 +729,12 @@ const InvitationsListPage = () => {
       className: 'min-w-[180px]',
       render: (value, invitation) => (
         <div className="text-sm">
-          <div className="flex items-center space-x-1 text-gray-900 font-medium">
-            <CalendarIcon className="w-4 h-4 text-gray-400" />
+          <div className="flex items-center space-x-1 text-gray-900 dark:text-white font-medium">
+            <CalendarIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
             <span>{formatters.formatDate(invitation.scheduledStartTime)}</span>
           </div>
-          <div className="flex items-center space-x-1 text-gray-600">
-            <ClockIcon className="w-4 h-4 text-gray-400" />
+          <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
+            <ClockIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
             <span>{formatters.formatTime(invitation.scheduledStartTime)}</span>
           </div>
         </div>
@@ -760,11 +760,11 @@ const InvitationsListPage = () => {
       render: (value, invitation) => {
         const isSelected = selectedInvitations.includes(invitation.id);
         return (
-          <div className={`flex items-center justify-end space-x-2 ${isSelected ? 'bg-blue-50 -mx-2 px-2 py-2 rounded' : ''}`}>
+          <div className={`flex items-center justify-end space-x-2 ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20 -mx-2 px-2 py-2 rounded' : ''}`}>
             {/* View Button - Always visible */}
             <button
               onClick={() => handleInvitationAction('view', invitation)}
-              className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               title="View details"
             >
               <EyeIcon className="w-5 h-5" />
@@ -775,7 +775,7 @@ const InvitationsListPage = () => {
             {invitation.canBeModified && (
               <button
                 onClick={() => handleInvitationAction('edit', invitation)}
-                className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-300 rounded-md hover:bg-blue-100 transition-colors"
+                className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
                 title="Edit invitation"
               >
                 <PencilIcon className="w-5 h-5" />
@@ -813,7 +813,7 @@ const InvitationsListPage = () => {
             {invitation.isApproved && (
               <button
                 onClick={() => handleInvitationAction('qr', invitation)}
-                className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 border border-indigo-300 rounded-md hover:bg-indigo-100 transition-colors"
+                className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-300 dark:border-indigo-700 rounded-md hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
                 title="View QR Code"
               >
                 <QrCodeIcon className="w-5 h-5" />
@@ -825,7 +825,7 @@ const InvitationsListPage = () => {
             {invitation.canBeCancelled && (
               <button
                 onClick={() => handleInvitationAction('delete', invitation)}
-                className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md hover:bg-red-50 transition-colors"
+                className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-red-700 dark:text-red-400 bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-md hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                 title="Delete invitation"
               >
                 <TrashIcon className="w-5 h-5" />
@@ -1420,19 +1420,19 @@ const InvitationsListPage = () => {
     return (
       <div className="space-y-6">
         {/* Enhanced Header with Actions */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 -m-6 mb-6 p-4 sm:p-6 border-b border-gray-200">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 -m-6 mb-6 p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-2">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white truncate">
                   {currentInvitation.invitationNumber}
                 </h3>
                 {getStatusBadge(currentInvitation)}
                 {getTypeBadge(currentInvitation)}
               </div>
-              <h4 className="text-base sm:text-lg font-semibold text-gray-700 mb-1 break-words">{currentInvitation.subject}</h4>
+              <h4 className="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1 break-words">{currentInvitation.subject}</h4>
               {currentInvitation.message && (
-                <p className="text-sm text-gray-600 line-clamp-3 sm:line-clamp-none">{currentInvitation.message}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 sm:line-clamp-none">{currentInvitation.message}</p>
               )}
             </div>
 
@@ -1501,27 +1501,27 @@ const InvitationsListPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
           {/* Visitor Information */}
           <Card className="p-4 hover:shadow-lg transition-shadow">
-            <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <UserIcon className="w-4 h-4 text-blue-600" />
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <UserIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
               <span>Visitor Information</span>
             </h4>
             <div className="space-y-2 text-sm">
               <div className="break-words">
-                <strong className="text-gray-700">Name:</strong> <span className="text-gray-900">{currentInvitation.visitor?.firstName} {currentInvitation.visitor?.lastName}</span>
+                <strong className="text-gray-700 dark:text-gray-300">Name:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitor?.firstName} {currentInvitation.visitor?.lastName}</span>
               </div>
               <div className="break-all">
-                <strong className="text-gray-700">Email:</strong> <span className="text-gray-900">{currentInvitation.visitor?.email}</span>
+                <strong className="text-gray-700 dark:text-gray-300">Email:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitor?.email}</span>
               </div>
               {currentInvitation.visitor?.phoneNumber && (
                 <div className="break-words">
-                  <strong className="text-gray-700">Phone:</strong> <span className="text-gray-900">{currentInvitation.visitor?.phoneNumber}</span>
+                  <strong className="text-gray-700 dark:text-gray-300">Phone:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitor?.phoneNumber}</span>
                 </div>
               )}
               {currentInvitation.visitor?.company && (
                 <div className="break-words">
-                  <strong className="text-gray-700">Company:</strong> <span className="text-gray-900">{currentInvitation.visitor?.company}</span>
+                  <strong className="text-gray-700 dark:text-gray-300">Company:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitor?.company}</span>
                 </div>
               )}
             </div>
@@ -1529,64 +1529,64 @@ const InvitationsListPage = () => {
 
           {/* Host Information */}
           <Card className="p-4 hover:shadow-lg transition-shadow">
-            <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                <UserIcon className="w-4 h-4 text-purple-600" />
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+              <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                <UserIcon className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               </div>
               <span>Host Information</span>
             </h4>
             <div className="space-y-2 text-sm">
               <div className="break-words">
-                <strong className="text-gray-700">Name:</strong> <span className="text-gray-900">{currentInvitation.host?.firstName} {currentInvitation.host?.lastName}</span>
+                <strong className="text-gray-700 dark:text-gray-300">Name:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.host?.firstName} {currentInvitation.host?.lastName}</span>
               </div>
               <div className="break-all">
-                <strong className="text-gray-700">Email:</strong> <span className="text-gray-900">{currentInvitation.host?.email}</span>
+                <strong className="text-gray-700 dark:text-gray-300">Email:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.host?.email}</span>
               </div>
             </div>
           </Card>
 
           {/* Schedule */}
           <Card className="p-4 hover:shadow-lg transition-shadow">
-            <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <CalendarIcon className="w-4 h-4 text-green-600" />
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+              <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                <CalendarIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
               </div>
               <span>Schedule</span>
             </h4>
             <div className="space-y-2 text-sm">
               <div className="break-words">
-                <strong className="text-gray-700">Date:</strong> <span className="text-gray-900">{formatters.formatDate(currentInvitation.scheduledStartTime)}</span>
+                <strong className="text-gray-700 dark:text-gray-300">Date:</strong> <span className="text-gray-900 dark:text-white">{formatters.formatDate(currentInvitation.scheduledStartTime)}</span>
               </div>
               <div className="break-words">
-                <strong className="text-gray-700">Time:</strong> <span className="text-gray-900">{formatters.formatTime(currentInvitation.scheduledStartTime)} - {formatters.formatTime(currentInvitation.scheduledEndTime)}</span>
+                <strong className="text-gray-700 dark:text-gray-300">Time:</strong> <span className="text-gray-900 dark:text-white">{formatters.formatTime(currentInvitation.scheduledStartTime)} - {formatters.formatTime(currentInvitation.scheduledEndTime)}</span>
               </div>
               <div>
-                <strong className="text-gray-700">Duration:</strong> <span className="text-gray-900">{currentInvitation.visitDurationHours}h</span>
+                <strong className="text-gray-700 dark:text-gray-300">Duration:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitDurationHours}h</span>
               </div>
             </div>
           </Card>
 
           {/* Location & Purpose */}
           <Card className="p-4 hover:shadow-lg transition-shadow">
-            <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-              <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                <MapPinIcon className="w-4 h-4 text-orange-600" />
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+              <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                <MapPinIcon className="w-4 h-4 text-orange-600 dark:text-orange-400" />
               </div>
               <span>Location & Purpose</span>
             </h4>
             <div className="space-y-2 text-sm">
               {currentInvitation.location && (
                 <div className="break-words">
-                  <strong className="text-gray-700">Location:</strong> <span className="text-gray-900">{currentInvitation.location.name}</span>
+                  <strong className="text-gray-700 dark:text-gray-300">Location:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.location.name}</span>
                 </div>
               )}
               {currentInvitation.visitPurpose && (
                 <div className="break-words">
-                  <strong className="text-gray-700">Purpose:</strong> <span className="text-gray-900">{currentInvitation.visitPurpose.name}</span>
+                  <strong className="text-gray-700 dark:text-gray-300">Purpose:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitPurpose.name}</span>
                 </div>
               )}
               <div>
-                <strong className="text-gray-700">Expected Visitors:</strong> <span className="text-gray-900">{currentInvitation.expectedVisitorCount}</span>
+                <strong className="text-gray-700 dark:text-gray-300">Expected Visitors:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.expectedVisitorCount}</span>
               </div>
             </div>
           </Card>
@@ -1595,60 +1595,60 @@ const InvitationsListPage = () => {
         {/* Message */}
         {currentInvitation.message && (
           <Card className="p-4 hover:shadow-lg transition-shadow">
-            <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-              <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                <DocumentTextIcon className="w-4 h-4 text-indigo-600" />
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+              <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                <DocumentTextIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               </div>
               <span>Message</span>
             </h4>
-            <p className="text-sm text-gray-700 break-words whitespace-pre-wrap">{currentInvitation.message}</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300 break-words whitespace-pre-wrap">{currentInvitation.message}</p>
           </Card>
         )}
 
         {/* Requirements */}
         <Card className="p-4 hover:shadow-lg transition-shadow">
-          <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-            <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <InformationCircleIcon className="w-4 h-4 text-yellow-600" />
+          <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+            <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
+              <InformationCircleIcon className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
             </div>
             <span>Requirements</span>
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-sm">
-            <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded-lg">
-              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresApproval ? 'bg-yellow-500' : 'bg-gray-300'}`}></span>
-              <span className="truncate">Requires Approval</span>
+            <div className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
+              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresApproval ? 'bg-yellow-500 dark:bg-yellow-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
+              <span className="truncate text-gray-900 dark:text-white">Requires Approval</span>
             </div>
-            <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded-lg">
-              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresEscort ? 'bg-red-500' : 'bg-gray-300'}`}></span>
-              <span className="truncate">Requires Escort</span>
+            <div className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
+              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresEscort ? 'bg-red-500 dark:bg-red-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
+              <span className="truncate text-gray-900 dark:text-white">Requires Escort</span>
             </div>
-            <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded-lg">
-              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresBadge ? 'bg-blue-500' : 'bg-gray-300'}`}></span>
-              <span className="truncate">Requires Badge</span>
+            <div className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
+              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresBadge ? 'bg-blue-500 dark:bg-blue-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
+              <span className="truncate text-gray-900 dark:text-white">Requires Badge</span>
             </div>
-            <div className="flex items-center space-x-2 bg-gray-50 p-2 rounded-lg">
-              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.needsParking ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-              <span className="truncate">Needs Parking</span>
+            <div className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
+              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.needsParking ? 'bg-green-500 dark:bg-green-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
+              <span className="truncate text-gray-900 dark:text-white">Needs Parking</span>
             </div>
           </div>
 
           {currentInvitation.specialInstructions && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <strong className="text-gray-900 flex items-center space-x-1 mb-2">
-                <InformationCircleIcon className="w-4 h-4 text-blue-600" />
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <strong className="text-gray-900 dark:text-blue-200 flex items-center space-x-1 mb-2">
+                <InformationCircleIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <span>Special Instructions:</span>
               </strong>
-              <p className="text-sm text-gray-700 break-words whitespace-pre-wrap">{currentInvitation.specialInstructions}</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 break-words whitespace-pre-wrap">{currentInvitation.specialInstructions}</p>
             </div>
           )}
 
           {currentInvitation.parkingInstructions && (
-            <div className="mt-4 p-3 bg-green-50 rounded-lg">
-              <strong className="text-gray-900 flex items-center space-x-1 mb-2">
-                <MapPinIcon className="w-4 h-4 text-green-600" />
+            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              <strong className="text-gray-900 dark:text-green-200 flex items-center space-x-1 mb-2">
+                <MapPinIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
                 <span>Parking Instructions:</span>
               </strong>
-              <p className="text-sm text-gray-700 break-words whitespace-pre-wrap">{currentInvitation.parkingInstructions}</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 break-words whitespace-pre-wrap">{currentInvitation.parkingInstructions}</p>
             </div>
           )}
         </Card>
@@ -1656,37 +1656,37 @@ const InvitationsListPage = () => {
         {/* Approval Information */}
         {(currentInvitation.approvedOn || currentInvitation.rejectedOn) && (
           <Card className="p-4 hover:shadow-lg transition-shadow">
-            <h4 className="font-medium text-gray-900 mb-3 flex items-center space-x-2">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${currentInvitation.approvedOn ? 'bg-green-100' : 'bg-red-100'}`}>
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${currentInvitation.approvedOn ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
                 {currentInvitation.approvedOn ? (
-                  <CheckCircleIcon className="w-4 h-4 text-green-600" />
+                  <CheckCircleIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
                 ) : (
-                  <XCircleIcon className="w-4 h-4 text-red-600" />
+                  <XCircleIcon className="w-4 h-4 text-red-600 dark:text-red-400" />
                 )}
               </div>
               <span>Approval Status</span>
             </h4>
             <div className="space-y-3 text-sm">
               {currentInvitation.approvedOn && (
-                <div className="p-3 bg-green-50 rounded-lg">
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <div className="break-words">
-                    <strong className="text-gray-700">Approved:</strong> <span className="text-gray-900">{formatters.formatDateTime(currentInvitation.approvedOn)}</span>
+                    <strong className="text-gray-700 dark:text-gray-300">Approved:</strong> <span className="text-gray-900 dark:text-white">{formatters.formatDateTime(currentInvitation.approvedOn)}</span>
                   </div>
                   {currentInvitation.approvalComments && (
                     <div className="mt-2 break-words">
-                      <strong className="text-gray-700">Comments:</strong> <p className="text-gray-900 mt-1 whitespace-pre-wrap">{currentInvitation.approvalComments}</p>
+                      <strong className="text-gray-700 dark:text-gray-300">Comments:</strong> <p className="text-gray-900 dark:text-white mt-1 whitespace-pre-wrap">{currentInvitation.approvalComments}</p>
                     </div>
                   )}
                 </div>
               )}
               {currentInvitation.rejectedOn && (
-                <div className="p-3 bg-red-50 rounded-lg">
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                   <div className="break-words">
-                    <strong className="text-gray-700">Rejected:</strong> <span className="text-gray-900">{formatters.formatDateTime(currentInvitation.rejectedOn)}</span>
+                    <strong className="text-gray-700 dark:text-gray-300">Rejected:</strong> <span className="text-gray-900 dark:text-white">{formatters.formatDateTime(currentInvitation.rejectedOn)}</span>
                   </div>
                   {currentInvitation.rejectionReason && (
                     <div className="mt-2 break-words">
-                      <strong className="text-gray-700">Reason:</strong> <p className="text-gray-900 mt-1 whitespace-pre-wrap">{currentInvitation.rejectionReason}</p>
+                      <strong className="text-gray-700 dark:text-gray-300">Reason:</strong> <p className="text-gray-900 dark:text-white mt-1 whitespace-pre-wrap">{currentInvitation.rejectionReason}</p>
                     </div>
                   )}
                 </div>

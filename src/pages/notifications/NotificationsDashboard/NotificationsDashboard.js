@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { useSignalR } from '../../../hooks/useSignalR';
 import { Link } from 'react-router-dom';
 
 // Redux actions
@@ -82,7 +83,7 @@ const NotificationsDashboard = () => {
   const [bulkAction, setBulkAction] = useState('');
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'unread', 'acknowledged'
-  const [viewMode, setViewMode] = useState('list'); // 'list', 'cards'
+  const [viewMode, setViewMode] = useState('cards'); // 'list', 'cards'
   const [refreshInterval, setRefreshInterval] = useState(30000); // 30 seconds
   
   // New state for individual notification action selection
@@ -101,11 +102,38 @@ const NotificationsDashboard = () => {
     unreadCount,
     loading,
     error,
-    isSignalRConnected,
     stats,
     settings,
     lastSyncTime
   } = useSelector(state => state.notifications);
+
+  // Get real-time SignalR connection status with reactive polling
+  const { areConnectionsHealthy, getConnectionHealth } = useSignalR();
+  const [isSignalRConnected, setIsSignalRConnected] = useState(false);
+
+  // Poll connection status every 2 seconds for reactive updates
+  useEffect(() => {
+    const checkConnection = () => {
+      const connected = areConnectionsHealthy();
+      const health = getConnectionHealth();
+
+      // Debug logging
+      console.log('SignalR Health Check:', {
+        connected,
+        health
+      });
+
+      setIsSignalRConnected(connected);
+    };
+
+    // Initial check
+    checkConnection();
+
+    // Set up polling interval
+    const intervalId = setInterval(checkConnection, 2000);
+
+    return () => clearInterval(intervalId);
+  }, [areConnectionsHealthy, getConnectionHealth]);
 
   // Computed values
   const hasSelectedNotifications = selectedNotifications.length > 0;
@@ -248,32 +276,60 @@ const NotificationsDashboard = () => {
     setShowBulkConfirm(true);
   };
 
-  const handleConfirmBulkAction = () => {
-    if (bulkAction === 'markRead') {
-      selectedNotifications.forEach(id => {
-        dispatch(markNotificationAsRead(id));
-      });
+  const handleConfirmBulkAction = async () => {
+    const count = selectedNotifications.length;
+
+    try {
+      if (bulkAction === 'markRead') {
+        // Mark all as read synchronously
+        selectedNotifications.forEach(id => {
+          dispatch(markNotificationAsRead(id));
+        });
+
+        dispatch(addToast({
+          type: 'success',
+          title: 'Bulk Action Complete',
+          message: `${count} notification${count !== 1 ? 's' : ''} marked as read`,
+          duration: 3000
+        }));
+      } else if (bulkAction === 'acknowledge') {
+        // Acknowledge all notifications with proper async handling
+        const promises = selectedNotifications.map(id =>
+          dispatch(acknowledgeNotificationAsync({ notificationId: id, notes: 'Bulk acknowledgment' })).unwrap()
+        );
+
+        // Wait for all acknowledgments to complete
+        await Promise.all(promises);
+
+        // Refresh notifications to reflect backend state
+        await dispatch(fetchNotifications());
+
+        dispatch(addToast({
+          type: 'success',
+          title: 'Bulk Action Complete',
+          message: `${count} notification${count !== 1 ? 's' : ''} acknowledged`,
+          duration: 3000
+        }));
+      }
+
+      // Update statistics after bulk action
+      if (canViewStats) {
+        dispatch(fetchNotificationStats());
+      }
+    } catch (error) {
+      console.error('Bulk action failed:', error);
       dispatch(addToast({
-        type: 'success',
-        title: 'Bulk Action Complete',
-        message: `${selectedNotifications.length} notifications marked as read`,
-        duration: 3000
+        type: 'error',
+        title: 'Bulk Action Failed',
+        message: extractErrorMessage(error),
+        duration: 5000
       }));
-    } else if (bulkAction === 'acknowledge') {
-      selectedNotifications.forEach(id => {
-        dispatch(acknowledgeNotificationAsync({ notificationId: id, notes: 'Bulk acknowledgment' }));
-      });
-      dispatch(addToast({
-        type: 'success',
-        title: 'Bulk Action Complete',
-        message: `${selectedNotifications.length} notifications acknowledged`,
-        duration: 3000
-      }));
+    } finally {
+      // Always clear selections and close modal
+      setSelectedNotifications([]);
+      setBulkAction('');
+      setShowBulkConfirm(false);
     }
-    
-    setSelectedNotifications([]);
-    setBulkAction('');
-    setShowBulkConfirm(false);
   };
 
   const handleNotificationSelect = (notificationId, checked) => {
@@ -421,9 +477,9 @@ const NotificationsDashboard = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className={`border rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
-        !notification.read ? 'border-blue-200 bg-blue-50' : 'border-gray-200 bg-white'
-      } ${selectedNotifications.includes(notification.id) ? 'ring-2 ring-blue-500' : ''}`}
+      className={`border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer ${
+        !notification.read ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
+      } ${selectedNotifications.includes(notification.id) ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}`}
       onClick={() => !notification.read && handleMarkAsRead(notification.id)}
     >
       <div className="flex items-start space-x-3">
@@ -450,28 +506,28 @@ const NotificationsDashboard = () => {
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
-                <h4 className="text-sm font-medium text-gray-900">
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white">
                   {notification.title}
                 </h4>
                 <Badge color={getPriorityColor(notification.priority)} size="xs">
                   {notification.priority}
                 </Badge>
                 {!notification.read && (
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full"></div>
                 )}
               </div>
-              
-              <p className="text-sm text-gray-600 mb-2">
+
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                 {notification.message}
               </p>
-              
-              <p className="text-xs text-gray-500">
+
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 {formatRelativeTime(new Date(notification.timestamp || notification.createdOn))}
               </p>
 
               {/* Related Entity Information */}
               {notification.data && (
-                <div className="mt-2 text-xs text-gray-500 space-y-1">
+                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 space-y-1">
                   {notification.data.visitorName && (
                     <p><strong>Visitor:</strong> {notification.data.visitorName}</p>
                   )}
@@ -510,7 +566,7 @@ const NotificationsDashboard = () => {
 
                   {/* Dropdown Menu */}
                   {showActionDropdowns[notification.id] && (
-                    <div className="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                    <div className="absolute right-0 mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50">
                       <div className="py-1">
                         <button
                           onClick={(e) => {
@@ -518,8 +574,8 @@ const NotificationsDashboard = () => {
                             setNotificationAction(notification.id, 'markRead');
                             setShowActionDropdowns(prev => ({ ...prev, [notification.id]: false }));
                           }}
-                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center space-x-2 ${
-                            getNotificationAction(notification.id) === 'markRead' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-2 ${
+                            getNotificationAction(notification.id) === 'markRead' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
                           }`}
                         >
                           <CheckIcon className="w-3 h-3" />
@@ -531,8 +587,8 @@ const NotificationsDashboard = () => {
                             setNotificationAction(notification.id, 'acknowledge');
                             setShowActionDropdowns(prev => ({ ...prev, [notification.id]: false }));
                           }}
-                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center space-x-2 ${
-                            getNotificationAction(notification.id) === 'acknowledge' ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-2 ${
+                            getNotificationAction(notification.id) === 'acknowledge' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
                           }`}
                         >
                           <CheckCircleIcon className="w-3 h-3" />
@@ -611,19 +667,19 @@ const NotificationsDashboard = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Notifications</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Manage and acknowledge system notifications
           </p>
           <div className="flex items-center space-x-4 mt-2">
             <div className="flex items-center space-x-2">
               <div className={`w-2 h-2 rounded-full ${isSignalRConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
                 {isSignalRConnected ? 'Connected' : 'Disconnected'}
               </span>
             </div>
             {lastSyncTime && (
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-400 dark:text-gray-500">
                 Last updated: {formatRelativeTime(new Date(lastSyncTime))}
               </span>
             )}
@@ -664,50 +720,50 @@ const NotificationsDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <BellIconSolid className="w-6 h-6 text-blue-600" />
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <BellIconSolid className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-600">Total</h3>
-                <p className="text-2xl font-bold text-gray-900">{notifications.length}</p>
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Total</h3>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{notifications.length}</p>
               </div>
             </div>
           </Card>
-          
+
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                <ExclamationTriangleIconSolid className="w-6 h-6 text-orange-600" />
+              <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+                <ExclamationTriangleIconSolid className="w-6 h-6 text-orange-600 dark:text-orange-400" />
               </div>
               <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-600">Unread</h3>
-                <p className="text-2xl font-bold text-gray-900">{unreadCount}</p>
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Unread</h3>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{unreadCount}</p>
               </div>
             </div>
           </Card>
-          
+
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                <ExclamationTriangleIconSolid className="w-6 h-6 text-red-600" />
+              <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                <ExclamationTriangleIconSolid className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
               <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-600">Critical</h3>
-                <p className="text-2xl font-bold text-gray-900">
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Critical</h3>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {notifications.filter(n => n.priority === 'Critical' || n.priority === 'Emergency').length}
                 </p>
               </div>
             </div>
           </Card>
-          
+
           <Card className="p-4">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircleIcon className="w-6 h-6 text-green-600" />
+              <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                <CheckCircleIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
               <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-600">Last 24h</h3>
-                <p className="text-2xl font-bold text-gray-900">
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Last 24h</h3>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {stats.last24Hours || 0}
                 </p>
               </div>
@@ -717,7 +773,7 @@ const NotificationsDashboard = () => {
       )}
 
       {/* Navigation Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-gray-200 dark:border-gray-700">
         <nav className="-mb-px flex space-x-8">
           {[
             { id: 'all', label: 'All Notifications' },
@@ -729,8 +785,8 @@ const NotificationsDashboard = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center space-x-2 ${
                 activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               <span>{tab.label}</span>
@@ -761,10 +817,10 @@ const NotificationsDashboard = () => {
             
             {/* View Mode Toggle */}
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500">View:</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">View:</span>
               <Select
                 value={viewMode}
-                onChange={setViewMode}
+                onChange={(e) => setViewMode(e.target.value)}
                 size="sm"
                 className="w-24"
               >
@@ -778,11 +834,12 @@ const NotificationsDashboard = () => {
               <div className="flex items-center space-x-2">
                 <Select
                   value={bulkAction}
-                  onChange={setBulkAction}
+                  onChange={(e) => setBulkAction(e.target.value)}
                   placeholder="Bulk actions"
                   size="sm"
                   className="w-40"
                 >
+                  <option value="">Select action...</option>
                   <option value="markRead">Mark as Read</option>
                   <option value="acknowledge">Acknowledge</option>
                 </Select>
@@ -951,13 +1008,71 @@ const NotificationsDashboard = () => {
             />
           </Card>
         ) : (
-          <div className={viewMode === 'cards' ? 'grid gap-4' : 'space-y-2'}>
+          <div className={viewMode === 'cards' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-2'}>
             <AnimatePresence>
               {filteredNotifications.map(notification => renderNotificationCard(notification))}
             </AnimatePresence>
           </div>
         )}
       </div>
+
+      {/* Bulk Action Confirmation Modal */}
+      <AnimatePresence>
+        {showBulkConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setShowBulkConfirm(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                  <ExclamationTriangleIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    Confirm Bulk Action
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                    Are you sure you want to{' '}
+                    <strong>
+                      {bulkAction === 'markRead'
+                        ? 'mark as read'
+                        : bulkAction === 'acknowledge'
+                          ? 'acknowledge'
+                          : bulkAction}
+                    </strong>{' '}
+                    <strong>{selectedNotifications.length}</strong> notification{selectedNotifications.length !== 1 ? 's' : ''}?
+                  </p>
+
+                  <div className="flex justify-end space-x-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowBulkConfirm(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="primary"
+                      onClick={handleConfirmBulkAction}
+                    >
+                      Confirm
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Settings Panel (if needed later) */}
       {/* You can add notification settings here */}

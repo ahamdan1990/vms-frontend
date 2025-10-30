@@ -326,26 +326,6 @@ const TimeSlotsListPage = () => {
   // Table columns configuration
   const columns = useMemo(() => [
     {
-      key: 'selection',
-      header: '',
-      width: '50px',
-      sortable: false,
-      render: (value, timeSlot) => (
-        <input
-          type="checkbox"
-          checked={selectedTimeSlots.includes(timeSlot.id)}
-          onChange={(e) => {
-            if (e.target.checked) {
-              dispatch(setSelectedTimeSlots([...selectedTimeSlots, timeSlot.id]));
-            } else {
-              dispatch(setSelectedTimeSlots(selectedTimeSlots.filter(id => id !== timeSlot.id)));
-            }
-          }}
-          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-        />
-      )
-    },
-    {
       key: 'name',
       header: 'Time Slot',
       sortable: true,
@@ -389,15 +369,24 @@ const TimeSlotsListPage = () => {
       header: 'Capacity',
       sortable: true,
       render: (value, timeSlot) => (
-        <div className="text-center">
-          <Badge variant="neutral" size="sm">
-            {timeSlot.maxVisitors} visitors
-          </Badge>
-          {timeSlot.bufferTime && (
-            <div className="text-xs text-gray-500 mt-1">
-              Buffer: {timeSlot.bufferTime}min
+        <div className="space-y-2">
+          <div className="flex items-center justify-center gap-2">
+            <Badge variant="info" size="sm">
+              {timeSlot.maxVisitors} max
+            </Badge>
+          </div>
+          {timeSlot.bufferMinutes > 0 && (
+            <div className="text-xs text-gray-500 text-center">
+              +{timeSlot.bufferMinutes}min buffer
             </div>
           )}
+          <div className="w-full bg-gray-200 rounded-full h-1.5">
+            <div
+              className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+              style={{ width: '0%' }}
+              title="Current utilization (live data not implemented)"
+            />
+          </div>
         </div>
       )
     },
@@ -634,12 +623,11 @@ const TimeSlotsListPage = () => {
         {total > 0 && (
           <div className="border-t border-gray-200 px-6 py-4">
             <Pagination
-              currentPage={pagination.pageIndex}
-              totalPages={pagination.totalPages}
+              currentPage={pagination.pageIndex + 1}
               totalItems={total}
-              itemsPerPage={pagination.pageSize}
-              onPageChange={handlePageChange}
-              showSizeChanger={false}
+              pageSize={pagination.pageSize}
+              onPageChange={(newPage) => handlePageChange(newPage - 1)}
+              showPageSizeSelector={false}
             />
           </div>
         )}
@@ -652,7 +640,7 @@ const TimeSlotsListPage = () => {
         isOpen={isCreateModalOpen}
         onClose={() => dispatch(hideCreateModal())}
         title="Create Time Slot"
-        size="lg"
+        size="xl"
       >
         <TimeSlotForm
           onSubmit={handleCreateTimeSlot}
@@ -668,7 +656,7 @@ const TimeSlotsListPage = () => {
         isOpen={isEditModalOpen}
         onClose={() => dispatch(hideEditModal())}
         title="Edit Time Slot"
-        size="lg"
+        size="xl"
       >
         {currentTimeSlot && (
           <TimeSlotForm
@@ -831,9 +819,9 @@ const TimeSlotsListPage = () => {
                 <p className="mt-1 text-sm text-gray-900">
                   {viewingTimeSlot.maxVisitors} visitors maximum
                 </p>
-                {viewingTimeSlot.bufferTime && (
+                {viewingTimeSlot.bufferMinutes > 0 && (
                   <p className="text-sm text-gray-500">
-                    Buffer time: {viewingTimeSlot.bufferTime} minutes
+                    Buffer time: {viewingTimeSlot.bufferMinutes} minutes
                   </p>
                 )}
               </div>

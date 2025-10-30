@@ -466,9 +466,21 @@ const InvitationForm = ({
 
   // Helper to set preset times
   const setPresetTime = (startHour, durationHours) => {
+    const now = new Date();
     const today = new Date();
     const startDate = new Date(today);
     startDate.setHours(startHour, 0, 0, 0);
+
+    // Check if the time is in the past
+    if (startDate < now) {
+      // If the time is in the past, use tomorrow instead
+      startDate.setDate(startDate.getDate() + 1);
+
+      // Show a notification to the user
+      if (typeof ErrorService !== 'undefined') {
+        console.warn(`Selected time ${startHour}:00 is in the past. Using tomorrow's date instead.`);
+      }
+    }
 
     const endDate = new Date(startDate);
     endDate.setHours(startHour + durationHours, 0, 0, 0);
@@ -820,7 +832,8 @@ const InvitationForm = ({
 
           {/* Quick Time Presets */}
           <div className="mt-4 dark:text-gray-600">
-            <p className="text-sm font-medium text-gray-700 mb-2 ">Quick Time Presets (Today):</p>
+            <p className="text-sm font-medium text-gray-700 mb-2 ">Quick Time Presets:</p>
+            <p className="text-xs text-gray-500 mb-2">Past times will automatically use tomorrow's date</p>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"

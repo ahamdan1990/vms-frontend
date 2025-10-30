@@ -2,12 +2,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  fetchNotifications, 
-  acknowledgeNotificationAsync, 
+import {
+  fetchNotifications,
+  acknowledgeNotificationAsync,
   markNotificationAsRead,
   removeNotification,
-  fetchNotificationStats
+  fetchNotificationStats,
+  clearNotifications
 } from '../../store/slices/notificationSlice';
 import { useSignalR } from '../../hooks/useSignalR';
 
@@ -34,7 +35,8 @@ import {
   EllipsisVerticalIcon,
   ArchiveBoxIcon,
   ArrowPathIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 import { BellIcon as BellIconSolid } from '@heroicons/react/24/solid';
 
@@ -121,11 +123,18 @@ const NotificationCenter = ({
     const unreadNotificationIds = notifications
       .filter(n => !n.read)
       .map(n => n.id);
-    
+
     unreadNotificationIds.forEach(id => {
       dispatch(markNotificationAsRead(id));
     });
   }, [dispatch, notifications]);
+
+  // Clear all notifications
+  const handleClearAll = useCallback(() => {
+    if (window.confirm('Are you sure you want to clear all notifications? This action cannot be undone.')) {
+      dispatch(clearNotifications());
+    }
+  }, [dispatch]);
 
   // Remove notification
   const removeNotificationHandler = useCallback((notificationId) => {
@@ -307,8 +316,8 @@ const NotificationCenter = ({
             className={`
               px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-colors
               ${filter === f.id
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               }
             `}
           >
@@ -333,8 +342,8 @@ const NotificationCenter = ({
         transition={{ duration: 0.2 }}
         className={`p-4 border rounded-lg transition-all duration-200 ${
           notification.read
-            ? 'bg-white border-gray-200 hover:border-gray-300'
-            : 'bg-blue-50 border-blue-300 hover:border-blue-400'
+            ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+            : 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-700'
         } ${isCardView ? 'shadow-sm hover:shadow-md' : 'hover:shadow-sm'}`}
       >
         <div className="flex items-start space-x-3">
@@ -344,7 +353,7 @@ const NotificationCenter = ({
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center space-x-2 mb-1">
-              <h4 className="text-sm font-medium text-gray-900">
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white">
                 {notification.title}
               </h4>
               <Badge
@@ -354,21 +363,21 @@ const NotificationCenter = ({
                 {notification.priority}
               </Badge>
               {!notification.read && (
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full"></div>
               )}
             </div>
 
-            <p className="text-sm text-gray-600 mb-2">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
               {notification.message}
             </p>
 
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {formatters.formatRelativeTime(new Date(notification.timestamp))}
             </p>
 
             {/* Related Entity Information */}
             {notification.data && (
-              <div className="mt-2 text-xs text-gray-500 space-y-1">
+              <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 space-y-1">
                 {notification.data.visitorName && (
                   <p><strong>Visitor:</strong> {notification.data.visitorName}</p>
                 )}
@@ -391,17 +400,17 @@ const NotificationCenter = ({
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center space-x-2 bg-white rounded-lg p-1 shadow-sm border border-gray-200"
+                className="flex items-center space-x-2 bg-white dark:bg-gray-700 rounded-lg p-1 shadow-sm border border-gray-200 dark:border-gray-600"
               >
                 {/* Action Type Selector */}
                 <select
                   value={getNotificationAction(notification.id)}
                   onChange={(e) => setNotificationAction(notification.id, e.target.value)}
-                  className="text-xs border-0 bg-transparent rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                  className="text-xs border-0 bg-transparent dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 cursor-pointer"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <option value="markRead">📖 Mark as Read</option>
-                  <option value="acknowledge">✅ Acknowledge</option>
+                  <option value="markRead" className="dark:bg-gray-800">📖 Mark as Read</option>
+                  <option value="acknowledge" className="dark:bg-gray-800">✅ Acknowledge</option>
                 </select>
 
                 {/* Execute Button */}
@@ -466,15 +475,15 @@ const NotificationCenter = ({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className={`fixed inset-y-0 right-0 w-96 bg-white shadow-2xl z-50 overflow-hidden ${className}`}
+      className={`fixed inset-y-0 right-0 w-96 bg-white dark:bg-gray-800 shadow-2xl z-50 overflow-hidden ${className}`}
     >
       {/* Header */}
 
-      <div className="p-6 border-b border-gray-200 bg-gray-50">
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <BellIconSolid className="w-6 h-6 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
+            <BellIconSolid className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h2>
             {unreadCount > 0 && (
               <Badge color="red" size="sm">{unreadCount}</Badge>
             )}
@@ -484,13 +493,13 @@ const NotificationCenter = ({
 
           <div className="flex items-center space-x-1">
             {/* View Mode Toggle */}
-            <div className="flex items-center bg-white rounded-lg border border-gray-200 overflow-hidden mr-2">
+            <div className="flex items-center bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden mr-2">
               <button
                 onClick={() => setViewMode('list')}
                 className={`px-2 py-1 text-xs font-medium transition-colors ${
                   viewMode === 'list'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                 }`}
                 title="List view"
               >
@@ -502,8 +511,8 @@ const NotificationCenter = ({
                 onClick={() => setViewMode('card')}
                 className={`px-2 py-1 text-xs font-medium transition-colors ${
                   viewMode === 'card'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                 }`}
                 title="Card view"
               >
@@ -520,6 +529,17 @@ const NotificationCenter = ({
                 onClick={markAllAsRead}
                 icon={<CheckIcon className="w-4 h-4" />}
                 title="Mark all as read"
+              />
+            )}
+
+            {notifications.length > 0 && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleClearAll}
+                icon={<TrashIcon className="w-4 h-4" />}
+                title="Clear all notifications"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
               />
             )}
 

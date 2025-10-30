@@ -514,6 +514,7 @@ const invitationsSlice = createSlice({
       state.approvalError = null;
       state.qrError = null;
       state.checkInError = null;
+      state.checkInData = null; // Clear check-in data as well
     },
     
     // Set current invitation

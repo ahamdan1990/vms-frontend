@@ -109,6 +109,14 @@ const CheckInDashboard = () => {
     //return () => clearInterval(interval);
   }, [dispatch]);
 
+  // Helper function to parse UTC dates correctly
+  const parseUtcDate = (dateString) => {
+    if (!dateString) return null;
+    // If the date string doesn't end with 'Z', append it to ensure UTC parsing
+    const dateWithZ = dateString.endsWith('Z') ? dateString : `${dateString}Z`;
+    return new Date(dateWithZ);
+  };
+
   // Calculate stats when active invitations change
   useEffect(() => {
     if (activeInvitations && activeInvitations.length > 0) {
@@ -116,7 +124,9 @@ const CheckInDashboard = () => {
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
       const todayCheckIns = activeInvitations.filter(invitation => {
-        return invitation.checkedInAt && new Date(invitation.checkedInAt) >= today;
+        if (!invitation.checkedInAt) return false;
+        const checkInDate = parseUtcDate(invitation.checkedInAt);
+        return checkInDate >= today;
       }).length;
 
       const activeVisitors = activeInvitations.filter(invitation => {
@@ -129,16 +139,17 @@ const CheckInDashboard = () => {
 
       // Calculate average visit duration for completed visits today
       const completedVisitsToday = activeInvitations.filter(invitation => {
-        return invitation.checkedInAt && invitation.checkedOutAt &&
-               new Date(invitation.checkedInAt) >= today;
+        if (!invitation.checkedInAt || !invitation.checkedOutAt) return false;
+        const checkInDate = parseUtcDate(invitation.checkedInAt);
+        return checkInDate >= today;
       });
 
       let averageVisitDuration = 0;
       if (completedVisitsToday.length > 0) {
         const totalDuration = completedVisitsToday.reduce((sum, invitation) => {
-          const checkIn = new Date(invitation.checkedInAt);
-          const checkOut = new Date(invitation.checkedOutAt);
-          return sum + (checkOut - checkIn);
+          const checkIn = parseUtcDate(invitation.checkedInAt);
+          const checkOut = parseUtcDate(invitation.checkedOutAt);
+          return sum + (checkOut.getTime() - checkIn.getTime());
         }, 0);
         averageVisitDuration = totalDuration / completedVisitsToday.length / (1000 * 60 * 60); // Convert to hours
       }
@@ -398,10 +409,13 @@ const CheckInDashboard = () => {
   // Format check-in status
   const formatCheckInStatus = (invitation) => {
     if (invitation.checkedInAt && invitation.checkedOutAt) {
-      const duration = new Date(invitation.checkedOutAt) - new Date(invitation.checkedInAt);
+      // Parse as UTC and calculate duration in milliseconds
+      const checkInTime = parseUtcDate(invitation.checkedInAt);
+      const checkOutTime = parseUtcDate(invitation.checkedOutAt);
+      const duration = checkOutTime.getTime() - checkInTime.getTime();
       const hours = Math.floor(duration / (1000 * 60 * 60));
       const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
-      
+
       return (
         <div className="space-y-1">
           <div className="text-sm text-gray-900">
@@ -416,10 +430,13 @@ const CheckInDashboard = () => {
         </div>
       );
     } else if (invitation.checkedInAt) {
-      const duration = new Date() - new Date(invitation.checkedInAt);
+      // Parse as UTC and calculate duration from check-in to now
+      const checkInTime = parseUtcDate(invitation.checkedInAt);
+      const now = new Date(); // Current time in user's timezone
+      const duration = now.getTime() - checkInTime.getTime();
       const hours = Math.floor(duration / (1000 * 60 * 60));
       const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
-      
+
       return (
         <div className="space-y-1">
           <div className="text-sm text-gray-900">
@@ -493,10 +510,10 @@ const CheckInDashboard = () => {
             <button
               onClick={() => {
                 setSelectedInvitation(invitation);
-                // View details functionality
-                console.log('View invitation details:', invitation);
+                setInvitationDetailsData(invitation);
+                setShowInvitationDetailsModal(true);
               }}
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
               title="View details"
             >
               <EyeIcon className="w-4 h-4" />

@@ -544,7 +544,7 @@ class SignalRConnectionManager {
    */
   async invokeHubMethod(hubName, methodName, ...args) {
     const connection = this.connections.get(hubName);
-    
+
     if (!connection || connection.state !== HubConnectionState.Connected) {
       throw new Error(`${hubName} hub is not connected`);
     }
@@ -552,6 +552,13 @@ class SignalRConnectionManager {
     try {
       return await connection.invoke(methodName, ...args);
     } catch (error) {
+      // Suppress errors if the connection was closed during invocation
+      // This is normal during navigation/unmounting
+      if (error.message && error.message.includes('connection being closed')) {
+        console.debug(`Invocation of ${methodName} on ${hubName} was cancelled due to connection closure (expected during navigation)`);
+        return null; // Return null instead of throwing
+      }
+
       console.error(`Failed to invoke ${methodName} on ${hubName} hub:`, error);
       throw error;
     }

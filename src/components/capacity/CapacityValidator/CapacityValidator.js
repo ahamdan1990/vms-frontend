@@ -217,7 +217,9 @@ const CapacityValidator = ({
                 {/* Capacity Details */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                   <div>
-                    <span className="text-gray-600">Current:</span>
+                    <span className="text-gray-600">
+                      {validation.result.isCurrentTime ? 'Current:' : 'Scheduled:'}
+                    </span>
                     <span className="ml-1 font-medium">
                       {validation.result.currentOccupancy}
                     </span>

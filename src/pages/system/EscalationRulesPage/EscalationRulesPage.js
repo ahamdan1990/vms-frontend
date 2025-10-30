@@ -419,7 +419,7 @@ const EscalationRulesPage = () => {
       render: (value, row) => (
         <div className="flex items-center space-x-2">
           {getActionIcon(value)}
-          <span className="text-sm text-gray-900">{value}</span>
+          <span className="text-sm text-gray-900 dark:text-gray-100">{value}</span>
         </div>
       )
     },
@@ -449,19 +449,19 @@ const EscalationRulesPage = () => {
         <div className="flex items-center space-x-1">
           <button
             onClick={() => handleViewRule(row)}
-            className="p-1 text-gray-500 hover:text-gray-700 rounded transition-colors"
+            className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 rounded transition-colors"
             title="View rule details"
           >
             <EyeIcon className="w-4 h-4" />
           </button>
-          
+
           {canUpdate && (
             <button
               onClick={() => handleToggleRule(row)}
               className={`p-1 rounded transition-colors ${
-                row.isEnabled 
-                  ? 'text-green-600 hover:text-green-700' 
-                  : 'text-gray-400 hover:text-gray-600'
+                row.isEnabled
+                  ? 'text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400'
+                  : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400'
               }`}
               title={row.isEnabled ? 'Disable rule' : 'Enable rule'}
               disabled={updateLoading}
@@ -469,21 +469,21 @@ const EscalationRulesPage = () => {
               <PowerIcon className="w-4 h-4" />
             </button>
           )}
-          
+
           {canUpdate && (
             <button
               onClick={() => handleEditRule(row)}
-              className="p-1 text-blue-600 hover:text-blue-700 rounded transition-colors"
+              className="p-1 text-blue-600 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-400 rounded transition-colors"
               title="Edit rule"
             >
               <PencilIcon className="w-4 h-4" />
             </button>
           )}
-          
+
           {canDelete && (
             <button
               onClick={() => handleDeleteRule(row)}
-              className="p-1 text-red-600 hover:text-red-700 rounded transition-colors"
+              className="p-1 text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-400 rounded transition-colors"
               title="Delete rule"
               disabled={deleteLoading}
             >
@@ -513,12 +513,12 @@ const EscalationRulesPage = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Escalation Rules</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Escalation Rules</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Configure alert escalation and notification rules
           </p>
           {lastSyncTime && (
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
               Last updated: {formatRelativeTime(new Date(lastSyncTime))}
             </p>
           )}

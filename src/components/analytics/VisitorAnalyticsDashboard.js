@@ -81,24 +81,41 @@ const VisitorAnalyticsDashboard = () => {
       const now = new Date();
       const startDate = getStartDateForRange(dateRange);
 
-      // Fetch visitor and invitation data
-      const [visitorsData, invitationsData] = await Promise.all([
-        visitorService.getVisitors({
-          startDate: startDate.toISOString(),
-          endDate: now.toISOString(),
-          pageSize: 1000,
-          includeStatistics: true
-        }),
-        invitationService.getInvitations({
-          startDate: startDate.toISOString(),
-          endDate: now.toISOString(),
-          pageSize: 1000,
-          includeStatistics: true
-        })
-      ]);
+      // Fetch invitation data (invitations represent actual visits with date ranges)
+      // Note: Visitors are entities without date ranges, so we analyze based on invitations
+      const invitationsData = await invitationService.getInvitations({
+        pageSize: 1000,
+        pageIndex: 0,
+        includeDeleted: false
+      });
+
+      // Filter invitations by date range on the client side
+      // (Backend doesn't support date filtering in the list endpoint)
+      const filteredInvitations = (invitationsData?.items || []).filter(inv => {
+        const invDate = new Date(inv.scheduledStartTime || inv.createdAt);
+        return invDate >= startDate && invDate <= now;
+      });
+
+      // Get unique visitors from filtered invitations
+      const uniqueVisitorIds = new Set(filteredInvitations.map(inv => inv.visitorId));
+
+      // Create a visitor lookup object from invitation data
+      const visitorsLookup = {};
+      filteredInvitations.forEach(inv => {
+        if (inv.visitor && !visitorsLookup[inv.visitorId]) {
+          visitorsLookup[inv.visitorId] = inv.visitor;
+        }
+      });
+
+      const visitorsData = Object.values(visitorsLookup);
 
       // Process analytics
-      const processedAnalytics = processAnalyticsData(visitorsData, invitationsData, startDate, now);
+      const processedAnalytics = processAnalyticsData(
+        { items: visitorsData },
+        { items: filteredInvitations },
+        startDate,
+        now
+      );
       setAnalytics(processedAnalytics);
       setLastUpdated(new Date());
 
@@ -130,8 +147,8 @@ const VisitorAnalyticsDashboard = () => {
 
   // Process raw data into analytics
   const processAnalyticsData = (visitorsData, invitationsData, startDate, endDate) => {
-    const visitors = visitorsData.data?.items || [];
-    const invitations = invitationsData.data?.items || [];
+    const visitors = visitorsData?.items || visitorsData?.data?.items || [];
+    const invitations = invitationsData?.items || invitationsData?.data?.items || [];
 
     return {
       overview: {
@@ -163,12 +180,12 @@ const VisitorAnalyticsDashboard = () => {
 
   // Analytics calculation functions
   const calculateAverageVisitDuration = (invitations) => {
-    const completedVisits = invitations.filter(inv => inv.checkInTime && inv.checkOutTime);
+    const completedVisits = invitations.filter(inv => inv.checkedInAt && inv.checkedOutAt);
     if (completedVisits.length === 0) return 0;
 
     const totalDuration = completedVisits.reduce((sum, inv) => {
-      const checkIn = new Date(inv.checkInTime);
-      const checkOut = new Date(inv.checkOutTime);
+      const checkIn = new Date(inv.checkedInAt);
+      const checkOut = new Date(inv.checkedOutAt);
       return sum + (checkOut - checkIn);
     }, 0);
 
@@ -177,7 +194,7 @@ const VisitorAnalyticsDashboard = () => {
 
   const calculateCheckInRate = (invitations) => {
     if (invitations.length === 0) return 0;
-    const checkedIn = invitations.filter(inv => inv.checkInTime).length;
+    const checkedIn = invitations.filter(inv => inv.checkedInAt).length;
     return Math.round((checkedIn / invitations.length) * 100);
   };
 
@@ -185,9 +202,9 @@ const VisitorAnalyticsDashboard = () => {
     const overdueInvitations = invitations.filter(inv => {
       const scheduled = new Date(inv.scheduledStartTime);
       const now = new Date();
-      return !inv.checkInTime && scheduled < now && (now - scheduled) > 30 * 60 * 1000; // 30 min grace period
+      return !inv.checkedInAt && scheduled < now && (now - scheduled) > 30 * 60 * 1000; // 30 min grace period
     });
-    
+
     if (invitations.length === 0) return 0;
     return Math.round((overdueInvitations.length / invitations.length) * 100);
   };
@@ -206,7 +223,7 @@ const VisitorAnalyticsDashboard = () => {
       trend.push({
         date: date.toISOString().split('T')[0],
         visitors: dayInvitations.length,
-        checkedIn: dayInvitations.filter(inv => inv.checkInTime).length
+        checkedIn: dayInvitations.filter(inv => inv.checkedInAt).length
       });
     }
 
@@ -309,7 +326,7 @@ const VisitorAnalyticsDashboard = () => {
         };
       }
       hostData[hostName].invitations++;
-      if (inv.checkInTime) {
+      if (inv.checkedInAt) {
         hostData[hostName].checkedIn++;
       }
     });
@@ -362,10 +379,10 @@ const VisitorAnalyticsDashboard = () => {
 
   const calculateAverageWaitTime = (invitations) => {
     const waitTimes = invitations
-      .filter(inv => inv.checkInTime && inv.scheduledStartTime)
+      .filter(inv => inv.checkedInAt && inv.scheduledStartTime)
       .map(inv => {
         const scheduled = new Date(inv.scheduledStartTime);
-        const checkedIn = new Date(inv.checkInTime);
+        const checkedIn = new Date(inv.checkedInAt);
         return Math.max(0, checkedIn - scheduled);
       });
 

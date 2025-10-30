@@ -184,8 +184,12 @@ const useRealTimeDashboard = (options = {}) => {
     // Request initial system metrics (with error handling to prevent loops)
     if (adminMethods?.getSystemMetrics) {
       adminMethods.getSystemMetrics().catch(err => {
+        // Suppress connection closure errors (happens during navigation)
+        if (err?.message?.includes('connection being closed') || err?.message?.includes('not connected')) {
+          return; // Silently ignore
+        }
         if (process.env.NODE_ENV === 'development') {
-          console.log('Failed to get system metrics (expected if WebSocket not ready):', err.message);
+          console.log('Failed to get system metrics (expected if WebSocket not ready):', err?.message || err);
         }
       });
     }
@@ -278,7 +282,13 @@ const useRealTimeDashboard = (options = {}) => {
   const refresh = useCallback(async () => {
     await fetchDashboardData();
     if (adminMethods?.getSystemMetrics) {
-      adminMethods.getSystemMetrics().catch(console.error);
+      adminMethods.getSystemMetrics().catch(err => {
+        // Suppress connection closure errors
+        if (err?.message?.includes('connection being closed') || err?.message?.includes('not connected')) {
+          return;
+        }
+        console.error(err);
+      });
     }
   }, [fetchDashboardData, adminMethods]);
 
