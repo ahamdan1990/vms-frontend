@@ -14,6 +14,8 @@ import capacityReducer from './slices/capacitySlice';
 import timeSlotsReducer from './slices/timeSlotsSlice';
 import escalationRulesReducer from './slices/escalationRulesSlice';
 import camerasReducer from './slices/camerasSlice';
+import permissionsReducer from './slices/permissionsSlice';
+import rolesReducer from './slices/rolesSlice';
 
 /**
  * Root reducer that combines all feature slices
@@ -35,6 +37,8 @@ const rootReducer = combineReducers({
   timeSlots: timeSlotsReducer,
   escalationRules: escalationRulesReducer,
   cameras: camerasReducer,
+  permissions: permissionsReducer,
+  roles: rolesReducer,
 });
 
 /**

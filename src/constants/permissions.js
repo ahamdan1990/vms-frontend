@@ -279,6 +279,16 @@ export const ROLE_PERMISSIONS = {
   STAFF_ACCESS: 'Staff.Access'
 };
 
+// Role Management Permissions (for managing roles themselves)
+export const ROLE_MANAGEMENT_PERMISSIONS = {
+  CREATE: 'Role.Create',
+  READ: 'Role.Read',
+  READ_ALL: 'Role.ReadAll',
+  UPDATE: 'Role.Update',
+  DELETE: 'Role.Delete',
+  MANAGE_PERMISSIONS: 'Role.ManagePermissions'
+};
+
 // ✅ ADDED: Role hierarchy and utilities (needed by guards)
 export const ROLE_HIERARCHY = {
   'Staff': 1,
@@ -539,6 +549,7 @@ export default {
   INTEGRATION_PERMISSIONS,
   PROFILE_PERMISSIONS,
   ROLE_PERMISSIONS,
+  ROLE_MANAGEMENT_PERMISSIONS,
   ALL_PERMISSIONS,
   STAFF_PERMISSIONS,
   OPERATOR_PERMISSIONS,

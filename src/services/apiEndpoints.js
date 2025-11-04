@@ -78,6 +78,20 @@ export const AUDIT_ENDPOINTS = {
   SECURITY_EVENTS: '/api/Audit/security-events'
 };
 
+// Permission endpoints
+export const PERMISSION_ENDPOINTS = {
+  BASE: '/api/permissions',
+  CATEGORIES: '/api/permissions/categories'
+};
+
+// Role endpoints
+export const ROLE_ENDPOINTS = {
+  BASE: '/api/roles',
+  BY_ID: (id) => `/api/roles/${id}`,
+  GRANT_PERMISSIONS: (id) => `/api/roles/${id}/permissions/grant`,
+  REVOKE_PERMISSIONS: (id) => `/api/roles/${id}/permissions/revoke`
+};
+
 // Configuration management endpoints
 export const CONFIGURATION_ENDPOINTS = {
   BASE: '/api/admin/configuration',
@@ -325,7 +339,9 @@ export const API_ENDPOINTS = {
   ADMIN: ADMIN_ENDPOINTS,
   CONFIGURATION: CONFIGURATION_ENDPOINTS,
   FILES: FILE_ENDPOINTS,
-  AUDIT: AUDIT_ENDPOINTS
+  AUDIT: AUDIT_ENDPOINTS,
+  PERMISSIONS: PERMISSION_ENDPOINTS,
+  ROLES: ROLE_ENDPOINTS
 };
 
 export default API_ENDPOINTS;

@@ -184,6 +184,18 @@ export const SYSTEM_ROUTES = {
   BULK_EXPORT: '/system/bulk-export'
 };
 
+// Role management routes
+export const ROLE_ROUTES = {
+  BASE: '/admin/roles',
+  LIST: '/admin/roles',
+  DETAIL: '/admin/roles/:roleId',
+  PERMISSIONS: '/admin/roles/:roleId/permissions',
+
+  // Dynamic route builders
+  getDetailRoute: (roleId) => `/admin/roles/${roleId}`,
+  getPermissionsRoute: (roleId) => `/admin/roles/${roleId}/permissions`
+};
+
 // Capacity management routes
 export const CAPACITY_ROUTES = {
   BASE: '/capacity',
@@ -426,6 +438,22 @@ export const ROUTE_METADATA = {
     permissions: ['Configuration.Read']
   },
 
+  [ROLE_ROUTES.LIST]: {
+    title: 'Role Management',
+    breadcrumb: 'Roles',
+    requiresAuth: true,
+    roles: ['Administrator'],
+    permissions: ['Role.ReadAll']
+  },
+
+  [ROLE_ROUTES.DETAIL]: {
+    title: 'Role Details',
+    breadcrumb: 'Role Details',
+    requiresAuth: true,
+    roles: ['Administrator'],
+    permissions: ['Role.ReadAll']
+  },
+
   [NOTIFICATION_ROUTES.DASHBOARD]: {
     title: 'Notifications',
     breadcrumb: 'Notifications',
@@ -627,6 +655,12 @@ export const NAVIGATION_MENU = {
           roles: ['Administrator']
         },
         {
+          id: 'system-roles',
+          label: 'Roles',
+          path: ROLE_ROUTES.LIST,
+          roles: ['Administrator']
+        },
+        {
           id: 'system-audit',
           label: 'Audit Logs',
           path: SYSTEM_ROUTES.AUDIT,
@@ -778,6 +812,7 @@ export default {
   CHECKIN_ROUTES,
   REPORT_ROUTES,
   SYSTEM_ROUTES,
+  ROLE_ROUTES,
   CAPACITY_ROUTES,
   PROFILE_ROUTES,
   ALERT_ROUTES,
@@ -788,7 +823,7 @@ export default {
   ROUTE_METADATA,
   NAVIGATION_MENU,
   ROUTE_GUARDS,
-  
+
   // Utility functions
   buildRoute,
   buildQueryString,

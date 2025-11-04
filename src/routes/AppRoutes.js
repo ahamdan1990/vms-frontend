@@ -34,6 +34,7 @@ import {
   CAMERA_ROUTES,
   CHECKIN_ROUTES,
   SYSTEM_ROUTES,
+  ROLE_ROUTES,
   CAPACITY_ROUTES,
   PROFILE_ROUTES,
   NOTIFICATION_ROUTES
@@ -89,6 +90,10 @@ const ReceptionistDashboard = lazy(() => import('../pages/receptionist/Reception
 const UnifiedAnalyticsDashboard = lazy(() => import('../pages/analytics/UnifiedAnalyticsDashboard'));
 const ExcelManagementPage = lazy(() => import('../pages/admin/ExcelManagementPage'));
 //const IntegratedVisitorManagement = lazy(() => import('../pages/IntegratedVisitorManagement'));
+
+// Role Management Pages
+const RolesListPage = lazy(() => import('../pages/admin/roles/RolesListPage'));
+const RoleDetailsPage = lazy(() => import('../pages/admin/roles/RoleDetailsPage'));
 
 // User Management Pages
 const UsersListPage = lazy(() => import('../pages/users/UsersListPage/UsersListPage'));
@@ -380,8 +385,8 @@ const AppRoutes = () => {
         } 
       />
 
-      <Route 
-        path={USER_ROUTES.EDIT} 
+      <Route
+        path={USER_ROUTES.EDIT}
         element={
           <AuthGuard>
             <PermissionGuard permission={USER_PERMISSIONS.UPDATE}>
@@ -392,7 +397,38 @@ const AppRoutes = () => {
               </Layout>
             </PermissionGuard>
           </AuthGuard>
-        } 
+        }
+      />
+
+      {/* === ROLE MANAGEMENT ROUTES === */}
+      <Route
+        path={ROLE_ROUTES.LIST}
+        element={
+          <AuthGuard>
+            <PermissionGuard permission="Role.ReadAll">
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <RolesListPage />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        }
+      />
+
+      <Route
+        path={ROLE_ROUTES.DETAIL}
+        element={
+          <AuthGuard>
+            <PermissionGuard permission="Role.ReadAll">
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <RoleDetailsPage />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        }
       />
 
       {/* === CAMERA MANAGEMENT ROUTES === */}

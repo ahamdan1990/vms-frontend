@@ -8,7 +8,7 @@ import {
   selectNavigationAccess,
   selectFormAccess
 } from '../store/selectors/authSelectors';
-import { 
+import {
   USER_PERMISSIONS,
   INVITATION_PERMISSIONS,
   VISITOR_PERMISSIONS,
@@ -26,7 +26,8 @@ import {
   SYSTEM_CONFIG_PERMISSIONS,
   AUDIT_PERMISSIONS,
   INTEGRATION_PERMISSIONS,
-  PROFILE_PERMISSIONS
+  PROFILE_PERMISSIONS,
+  ROLE_MANAGEMENT_PERMISSIONS
 } from '../constants/permissions';
 
 /**
@@ -307,6 +308,22 @@ export const usePermissions = () => {
     canManage: hasPermission(CALENDAR_PERMISSIONS.MANAGE)
   }), [hasPermission]);
 
+  // Role Management Permissions
+  const roleManagementPermissions = useMemo(() => ({
+    canCreate: hasPermission(ROLE_MANAGEMENT_PERMISSIONS.CREATE),
+    canRead: hasPermission(ROLE_MANAGEMENT_PERMISSIONS.READ),
+    canReadAll: hasPermission(ROLE_MANAGEMENT_PERMISSIONS.READ_ALL),
+    canUpdate: hasPermission(ROLE_MANAGEMENT_PERMISSIONS.UPDATE),
+    canDelete: hasPermission(ROLE_MANAGEMENT_PERMISSIONS.DELETE),
+    canManagePermissions: hasPermission(ROLE_MANAGEMENT_PERMISSIONS.MANAGE_PERMISSIONS),
+    canManage: hasAnyPermission([
+      ROLE_MANAGEMENT_PERMISSIONS.CREATE,
+      ROLE_MANAGEMENT_PERMISSIONS.UPDATE,
+      ROLE_MANAGEMENT_PERMISSIONS.DELETE,
+      ROLE_MANAGEMENT_PERMISSIONS.MANAGE_PERMISSIONS
+    ])
+  }), [hasPermission, hasAnyPermission]);
+
   // High-level capability checks
   const canAccessAdminFeatures = useMemo(() => {
     return isAdmin || hasAnyPermission([
@@ -400,6 +417,7 @@ export const usePermissions = () => {
     integration: integrationPermissions,
     profile: profilePermissions,
     calendar: calendarPermissions,
+    role: roleManagementPermissions,
 
     // From selectors
     capabilities,
