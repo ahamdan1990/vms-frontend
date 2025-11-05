@@ -45,10 +45,8 @@ import {
   USER_PERMISSIONS,
   INVITATION_PERMISSIONS,
   VISITOR_PERMISSIONS,
-  CAMERA_PERMISSIONS,
   CHECKIN_PERMISSIONS,
   SYSTEM_CONFIG_PERMISSIONS,
-  CONFIGURATION_PERMISSIONS,
   AUDIT_PERMISSIONS
 } from '../constants/permissions';
 
@@ -432,11 +430,11 @@ const AppRoutes = () => {
       />
 
       {/* === CAMERA MANAGEMENT ROUTES === */}
-      <Route 
-        path={CAMERA_ROUTES.LIST} 
+      <Route
+        path={CAMERA_ROUTES.LIST}
         element={
           <AuthGuard>
-            <PermissionGuard permission={CAMERA_PERMISSIONS.READ}>
+            <PermissionGuard permission={SYSTEM_CONFIG_PERMISSIONS.READ}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <CamerasListPage />
@@ -444,14 +442,14 @@ const AppRoutes = () => {
               </Layout>
             </PermissionGuard>
           </AuthGuard>
-        } 
+        }
       />
 
-      <Route 
-        path={CAMERA_ROUTES.DETAIL} 
+      <Route
+        path={CAMERA_ROUTES.DETAIL}
         element={
           <AuthGuard>
-            <PermissionGuard permission={CAMERA_PERMISSIONS.READ}>
+            <PermissionGuard permission={SYSTEM_CONFIG_PERMISSIONS.READ}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <CameraDetailsPage />
@@ -459,7 +457,7 @@ const AppRoutes = () => {
               </Layout>
             </PermissionGuard>
           </AuthGuard>
-        } 
+        }
       />
 
       {/* === PROFILE ROUTES === */}
@@ -495,7 +493,7 @@ const AppRoutes = () => {
         path={SYSTEM_ROUTES.MANAGEMENT} 
         element={
           <AuthGuard>
-            <PermissionGuard permission={CONFIGURATION_PERMISSIONS.READ}>
+            <PermissionGuard permission={SYSTEM_CONFIG_PERMISSIONS.READ}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <SystemManagementPage />
@@ -510,7 +508,7 @@ const AppRoutes = () => {
         path={SYSTEM_ROUTES.BACKUP} 
         element={
           <AuthGuard>
-            <PermissionGuard permission={CONFIGURATION_PERMISSIONS.READ}>
+            <PermissionGuard permission={SYSTEM_CONFIG_PERMISSIONS.READ}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <BackupPage />
@@ -525,7 +523,7 @@ const AppRoutes = () => {
         path={SYSTEM_ROUTES.CONFIG} 
         element={
           <AuthGuard>
-            <PermissionGuard permission={CONFIGURATION_PERMISSIONS.READ}>
+            <PermissionGuard permission={SYSTEM_CONFIG_PERMISSIONS.READ}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <ConfigurationPage />
@@ -600,7 +598,7 @@ const AppRoutes = () => {
         path={SYSTEM_ROUTES.ESCALATION_RULES} 
         element={
           <AuthGuard>
-            <PermissionGuard permission={CONFIGURATION_PERMISSIONS.READ}>
+            <PermissionGuard permission={SYSTEM_CONFIG_PERMISSIONS.READ}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <EscalationRulesPage />

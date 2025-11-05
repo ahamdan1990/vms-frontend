@@ -85,7 +85,7 @@ import { formatDateTime, formatRelativeTime } from '../../../utils/formatters';
 import { extractErrorMessage } from '../../../utils/errorUtils';
 
 // Constants
-import { CONFIGURATION_PERMISSIONS } from '../../../constants/permissions';
+import { SYSTEM_CONFIG_PERMISSIONS } from '../../../constants/permissions';
 import { PRIORITY_COLORS } from '../../../constants/escalationRules';
 
 /**
@@ -105,10 +105,10 @@ const EscalationRulesPage = () => {
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
 
   // Permissions
-  const canRead = hasPermission(CONFIGURATION_PERMISSIONS.READ);
-  const canCreate = hasPermission(CONFIGURATION_PERMISSIONS.CREATE);
-  const canUpdate = hasPermission(CONFIGURATION_PERMISSIONS.UPDATE);
-  const canDelete = hasPermission(CONFIGURATION_PERMISSIONS.DELETE);
+  const canRead = hasPermission(SYSTEM_CONFIG_PERMISSIONS.READ);
+  const canCreate = hasPermission(SYSTEM_CONFIG_PERMISSIONS.UPDATE);
+  const canUpdate = hasPermission(SYSTEM_CONFIG_PERMISSIONS.UPDATE);
+  const canDelete = hasPermission(SYSTEM_CONFIG_PERMISSIONS.UPDATE);
 
   // Redux selectors
   const {

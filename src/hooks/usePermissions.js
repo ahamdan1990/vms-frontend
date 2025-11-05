@@ -13,7 +13,7 @@ import {
   INVITATION_PERMISSIONS,
   VISITOR_PERMISSIONS,
   CHECKIN_PERMISSIONS,
-  ALERT_PERMISSIONS,
+  NOTIFICATION_PERMISSIONS,
   EMERGENCY_PERMISSIONS,
   BULK_IMPORT_PERMISSIONS,
   TEMPLATE_PERMISSIONS,
@@ -25,7 +25,6 @@ import {
   CALENDAR_PERMISSIONS,
   SYSTEM_CONFIG_PERMISSIONS,
   AUDIT_PERMISSIONS,
-  INTEGRATION_PERMISSIONS,
   PROFILE_PERMISSIONS,
   ROLE_MANAGEMENT_PERMISSIONS
 } from '../constants/permissions';
@@ -79,7 +78,7 @@ export const usePermissions = () => {
   // Specific role checks
   const isAdmin = useMemo(() => userRole === 'Administrator', [userRole]);
   const isStaff = useMemo(() => userRole === 'Staff', [userRole]);
-  const isOperator = useMemo(() => userRole === 'Operator', [userRole]);
+  const isReceptionist = useMemo(() => userRole === 'Receptionist', [userRole]);
 
   // User Management Permissions
   const userPermissions = useMemo(() => ({
@@ -171,13 +170,14 @@ export const usePermissions = () => {
     ])
   }), [hasPermission, hasAnyPermission]);
 
-  // Alert Permissions
-  const alertPermissions = useMemo(() => ({
-    canReceiveFREvents: hasPermission(ALERT_PERMISSIONS.RECEIVE_FR_EVENTS),
-    canAcknowledge: hasPermission(ALERT_PERMISSIONS.ACKNOWLEDGE),
-    canNotifyHost: hasPermission(ALERT_PERMISSIONS.HOST_NOTIFY),
-    canSendNotifications: hasPermission(ALERT_PERMISSIONS.NOTIFICATION_SEND_HOST),
-    canReadOwnNotifications: hasPermission(ALERT_PERMISSIONS.NOTIFICATION_READ_OWN)
+  // Notification Permissions
+  const notificationPermissions = useMemo(() => ({
+    canReadOwn: hasPermission(NOTIFICATION_PERMISSIONS.READ_OWN),
+    canReadAll: hasPermission(NOTIFICATION_PERMISSIONS.READ_ALL),
+    canSendSystem: hasPermission(NOTIFICATION_PERMISSIONS.SEND_SYSTEM),
+    canSendBulk: hasPermission(NOTIFICATION_PERMISSIONS.SEND_BULK),
+    canReceive: hasPermission(NOTIFICATION_PERMISSIONS.RECEIVE),
+    canAcknowledge: hasPermission(NOTIFICATION_PERMISSIONS.ACKNOWLEDGE)
   }), [hasPermission]);
 
   // Emergency Permissions
@@ -289,13 +289,6 @@ export const usePermissions = () => {
     canPurge: hasPermission(AUDIT_PERMISSIONS.PURGE)
   }), [hasPermission]);
 
-  // Integration Permissions
-  const integrationPermissions = useMemo(() => ({
-    canConfigure: hasPermission(INTEGRATION_PERMISSIONS.CONFIGURE),
-    canManage: hasPermission(INTEGRATION_PERMISSIONS.MANAGE),
-    canTest: hasPermission(INTEGRATION_PERMISSIONS.TEST)
-  }), [hasPermission]);
-
   // Profile Permissions
   const profilePermissions = useMemo(() => ({
     canUpdateOwn: hasPermission(PROFILE_PERMISSIONS.UPDATE_OWN)
@@ -328,26 +321,26 @@ export const usePermissions = () => {
   const canAccessAdminFeatures = useMemo(() => {
     return isAdmin || hasAnyPermission([
       USER_PERMISSIONS.CREATE,
-      SYSTEM_CONFIG_PERMISSIONS.MANAGE,
+      SYSTEM_CONFIG_PERMISSIONS.UPDATE,
       AUDIT_PERMISSIONS.READ
     ]);
   }, [isAdmin, hasAnyPermission]);
 
-  const canAccessOperatorFeatures = useMemo(() => {
-    return isOperator || isAdmin || hasAnyPermission([
+  const canAccessReceptionistFeatures = useMemo(() => {
+    return isReceptionist || isAdmin || hasAnyPermission([
       CHECKIN_PERMISSIONS.PROCESS,
       VISITOR_PERMISSIONS.READ_TODAY,
-      ALERT_PERMISSIONS.RECEIVE_FR_EVENTS
+      NOTIFICATION_PERMISSIONS.RECEIVE
     ]);
-  }, [isOperator, isAdmin, hasAnyPermission]);
+  }, [isReceptionist, isAdmin, hasAnyPermission]);
 
   const canAccessStaffFeatures = useMemo(() => {
-    return isStaff || isOperator || isAdmin || hasAnyPermission([
-      INVITATION_PERMISSIONS.CREATE_SINGLE_OWN,
+    return isStaff || isReceptionist || isAdmin || hasAnyPermission([
+      INVITATION_PERMISSIONS.CREATE_OWN,
       INVITATION_PERMISSIONS.READ_OWN,
       CALENDAR_PERMISSIONS.VIEW_OWN
     ]);
-  }, [isStaff, isOperator, isAdmin, hasAnyPermission]);
+  }, [isStaff, isReceptionist, isAdmin, hasAnyPermission]);
 
   // Permission utility functions
   const checkPermission = useMemo(() => {
@@ -391,11 +384,11 @@ export const usePermissions = () => {
     // Role checks
     isAdmin,
     isStaff,
-    isOperator,
+    isReceptionist,
 
     // Feature access
     canAccessAdminFeatures,
-    canAccessOperatorFeatures,
+    canAccessReceptionistFeatures,
     canAccessStaffFeatures,
 
     // Specific permission groups
@@ -403,7 +396,7 @@ export const usePermissions = () => {
     invitation: invitationPermissions,
     visitor: visitorPermissions,
     checkin: checkinPermissions,
-    alert: alertPermissions,
+    notification: notificationPermissions,
     emergency: emergencyPermissions,
     bulkImport: bulkImportPermissions,
     template: templatePermissions,
@@ -414,7 +407,6 @@ export const usePermissions = () => {
     dashboard: dashboardPermissions,
     systemConfig: systemConfigPermissions,
     audit: auditPermissions,
-    integration: integrationPermissions,
     profile: profilePermissions,
     calendar: calendarPermissions,
     role: roleManagementPermissions,

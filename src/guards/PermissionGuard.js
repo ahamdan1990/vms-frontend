@@ -2,7 +2,6 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../hooks/useAuth';
-import { ROLE_PERMISSIONS } from '../constants/permissions'; 
 import PropTypes from 'prop-types';
 
 /**
@@ -241,65 +240,6 @@ export const createPermissionRoute = (element, guardOptions = {}) => {
       {element}
     </PermissionGuard>
   );
-};
-
-/**
- * Helper components for common permission patterns
- */
-export const AdminOnly = ({ children, fallback = null, redirect = false, redirectTo = '/access-denied' }) => (
-  <PermissionOnly 
-    permission={ROLE_PERMISSIONS.ADMIN_ACCESS}
-    fallback={fallback}
-    redirect={redirect}
-    redirectTo={redirectTo}
-  >
-    {children}
-  </PermissionOnly>
-);
-
-AdminOnly.propTypes = {
-  children: PropTypes.node.isRequired,
-  fallback: PropTypes.node,
-  redirect: PropTypes.bool,
-  redirectTo: PropTypes.string
-};
-
-export const StaffOrHigher = ({ children, fallback = null, redirect = false, redirectTo = '/access-denied' }) => (
-  <PermissionOnly 
-    permissions={[ROLE_PERMISSIONS.STAFF_ACCESS, ROLE_PERMISSIONS.OPERATOR_ACCESS, ROLE_PERMISSIONS.ADMIN_ACCESS]}
-    requireAll={false}
-    fallback={fallback}
-    redirect={redirect}
-    redirectTo={redirectTo}
-  >
-    {children}
-  </PermissionOnly>
-);
-
-StaffOrHigher.propTypes = {
-  children: PropTypes.node.isRequired,
-  fallback: PropTypes.node,
-  redirect: PropTypes.bool,
-  redirectTo: PropTypes.string
-};
-
-export const OperatorOrHigher = ({ children, fallback = null, redirect = false, redirectTo = '/access-denied' }) => (
-  <PermissionOnly 
-    permissions={[ROLE_PERMISSIONS.OPERATOR_ACCESS, ROLE_PERMISSIONS.ADMIN_ACCESS]}
-    requireAll={false}
-    fallback={fallback}
-    redirect={redirect}
-    redirectTo={redirectTo}
-  >
-    {children}
-  </PermissionOnly>
-);
-
-OperatorOrHigher.propTypes = {
-  children: PropTypes.node.isRequired,
-  fallback: PropTypes.node,
-  redirect: PropTypes.bool,
-  redirectTo: PropTypes.string
 };
 
 export default PermissionGuard;

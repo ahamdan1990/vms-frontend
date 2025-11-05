@@ -33,7 +33,7 @@ import {
 } from '../../../store/slices/configurationSlice';
 
 // Permissions
-import { CONFIGURATION_PERMISSIONS } from '../../../constants/permissions';
+import { SYSTEM_CONFIG_PERMISSIONS } from '../../../constants/permissions';
 
 // Components
 import Card from '../../../components/common/Card/Card';
@@ -83,11 +83,11 @@ const ConfigurationPage = () => {
   const [editingConfig, setEditingConfig] = useState(null);
 
   // Permissions
-  const canRead = hasPermission(CONFIGURATION_PERMISSIONS.READ);
-  const canReadAll = hasPermission(CONFIGURATION_PERMISSIONS.READ_ALL);
-  const canUpdate = hasPermission(CONFIGURATION_PERMISSIONS.UPDATE);
-  const canViewSensitive = hasPermission(CONFIGURATION_PERMISSIONS.VIEW_SENSITIVE);
-  const canInvalidateCache = hasPermission(CONFIGURATION_PERMISSIONS.INVALIDATE_CACHE);
+  const canRead = hasPermission(SYSTEM_CONFIG_PERMISSIONS.READ);
+  const canReadAll = hasPermission(SYSTEM_CONFIG_PERMISSIONS.READ);
+  const canUpdate = hasPermission(SYSTEM_CONFIG_PERMISSIONS.UPDATE);
+  const canViewSensitive = hasPermission(SYSTEM_CONFIG_PERMISSIONS.READ);
+  const canInvalidateCache = hasPermission(SYSTEM_CONFIG_PERMISSIONS.UPDATE);
 
   // Load configurations on mount
   useEffect(() => {
