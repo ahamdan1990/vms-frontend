@@ -216,6 +216,30 @@ export const FR_SYSTEM_PERMISSIONS = {
 };
 
 // ============================================================================
+// VISIT PURPOSE MANAGEMENT
+// ============================================================================
+
+export const VISIT_PURPOSE_PERMISSIONS = {
+  READ: 'VisitPurpose.Read',
+  READ_ALL: 'VisitPurpose.Read.All',
+  CREATE: 'VisitPurpose.Create',
+  UPDATE: 'VisitPurpose.Update',
+  DELETE: 'VisitPurpose.Delete'
+};
+
+// ============================================================================
+// LOCATION MANAGEMENT
+// ============================================================================
+
+export const LOCATION_PERMISSIONS = {
+  READ: 'Location.Read',
+  READ_ALL: 'Location.Read.All',
+  CREATE: 'Location.Create',
+  UPDATE: 'Location.Update',
+  DELETE: 'Location.Delete'
+};
+
+// ============================================================================
 // SYSTEM CONFIGURATION - SIMPLIFIED
 // ============================================================================
 
@@ -518,6 +542,8 @@ export const ALL_PERMISSIONS = {
   ...WATCHLIST_PERMISSIONS,
   ...CUSTOM_FIELD_PERMISSIONS,
   ...FR_SYSTEM_PERMISSIONS,
+  ...VISIT_PURPOSE_PERMISSIONS,
+  ...LOCATION_PERMISSIONS,
   ...SYSTEM_CONFIG_PERMISSIONS,
   ...REPORT_PERMISSIONS,
   ...AUDIT_PERMISSIONS,
@@ -593,6 +619,8 @@ export default {
   WATCHLIST_PERMISSIONS,
   CUSTOM_FIELD_PERMISSIONS,
   FR_SYSTEM_PERMISSIONS,
+  VISIT_PURPOSE_PERMISSIONS,
+  LOCATION_PERMISSIONS,
   SYSTEM_CONFIG_PERMISSIONS,
   REPORT_PERMISSIONS,
   AUDIT_PERMISSIONS,

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import permissionService from '../../services/permissionService';
 import { handleApiError } from '../../services/errorService';
+import { act } from 'react';
 
 // Initial state
 const initialState = {
@@ -115,7 +116,7 @@ const permissionsSlice = createSlice({
         state.loading = false;
         state.list = action.payload.response;
         state.filters = { ...state.filters, ...action.payload.queryParams };
-
+        
         // Extract unique categories
         const categoriesSet = new Set(action.payload.response.map(p => p.category));
         state.categories = Array.from(categoriesSet).sort();
@@ -133,9 +134,9 @@ const permissionsSlice = createSlice({
       .addCase(getPermissionsByCategory.fulfilled, (state, action) => {
         state.categoriesLoading = false;
         state.categorizedList = action.payload;
-
+        
         // Extract categories from categorized list
-        state.categories = action.payload.map(cat => cat.category).sort();
+        state.categories = action.payload.map(cat => cat.categoryName).sort();
       })
       .addCase(getPermissionsByCategory.rejected, (state, action) => {
         state.categoriesLoading = false;

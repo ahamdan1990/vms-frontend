@@ -23,6 +23,8 @@ import {
   REPORT_PERMISSIONS,
   DASHBOARD_PERMISSIONS,
   CALENDAR_PERMISSIONS,
+  VISIT_PURPOSE_PERMISSIONS,
+  LOCATION_PERMISSIONS,
   SYSTEM_CONFIG_PERMISSIONS,
   AUDIT_PERMISSIONS,
   PROFILE_PERMISSIONS,
@@ -111,7 +113,11 @@ export const usePermissions = () => {
       INVITATION_PERMISSIONS.CREATE_SINGLE_OWN,
       INVITATION_PERMISSIONS.CREATE_BULK
     ]),
-    canRead: hasPermission(INVITATION_PERMISSIONS.READ),
+    canRead: hasAnyPermission([
+      INVITATION_PERMISSIONS.READ,
+      INVITATION_PERMISSIONS.READ_OWN,
+      INVITATION_PERMISSIONS.READ_ALL
+    ]),
     canReadOwn: hasPermission(INVITATION_PERMISSIONS.READ_OWN),
     canReadAll: hasPermission(INVITATION_PERMISSIONS.READ_ALL),
     canUpdate: hasPermission(INVITATION_PERMISSIONS.UPDATE),
@@ -259,6 +265,34 @@ export const usePermissions = () => {
     canViewAnalytics: hasPermission(DASHBOARD_PERMISSIONS.VIEW_ANALYTICS)
   }), [hasPermission]);
 
+  // Visit Purpose Permissions
+  const visitPurposePermissions = useMemo(() => ({
+    canRead: hasAnyPermission([VISIT_PURPOSE_PERMISSIONS.READ, VISIT_PURPOSE_PERMISSIONS.READ_ALL]),
+    canReadAll: hasPermission(VISIT_PURPOSE_PERMISSIONS.READ_ALL),
+    canCreate: hasPermission(VISIT_PURPOSE_PERMISSIONS.CREATE),
+    canUpdate: hasPermission(VISIT_PURPOSE_PERMISSIONS.UPDATE),
+    canDelete: hasPermission(VISIT_PURPOSE_PERMISSIONS.DELETE),
+    canManage: hasAnyPermission([
+      VISIT_PURPOSE_PERMISSIONS.CREATE,
+      VISIT_PURPOSE_PERMISSIONS.UPDATE,
+      VISIT_PURPOSE_PERMISSIONS.DELETE
+    ])
+  }), [hasPermission, hasAnyPermission]);
+
+  // Location Permissions
+  const locationPermissions = useMemo(() => ({
+    canRead: hasAnyPermission([LOCATION_PERMISSIONS.READ, LOCATION_PERMISSIONS.READ_ALL]),
+    canReadAll: hasPermission(LOCATION_PERMISSIONS.READ_ALL),
+    canCreate: hasPermission(LOCATION_PERMISSIONS.CREATE),
+    canUpdate: hasPermission(LOCATION_PERMISSIONS.UPDATE),
+    canDelete: hasPermission(LOCATION_PERMISSIONS.DELETE),
+    canManage: hasAnyPermission([
+      LOCATION_PERMISSIONS.CREATE,
+      LOCATION_PERMISSIONS.UPDATE,
+      LOCATION_PERMISSIONS.DELETE
+    ])
+  }), [hasPermission, hasAnyPermission]);
+
     // System Configuration Permissions
     const systemConfigPermissions = useMemo(() => ({
       canRead: hasPermission(SYSTEM_CONFIG_PERMISSIONS.READ),
@@ -405,6 +439,8 @@ export const usePermissions = () => {
     frSystem: frSystemPermissions,
     report: reportPermissions,
     dashboard: dashboardPermissions,
+    visitPurpose: visitPurposePermissions,
+    location: locationPermissions,
     systemConfig: systemConfigPermissions,
     audit: auditPermissions,
     profile: profilePermissions,

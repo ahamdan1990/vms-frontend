@@ -15,7 +15,8 @@ import {
 import {
   getPermissionsByCategory,
   selectCategorizedPermissions,
-  selectCategoriesLoading
+  selectCategoriesLoading,
+  selectPermissionCategories
 } from '../../../../store/slices/permissionsSlice';
 import { useToast } from '../../../../hooks/useNotifications';
 import { CheckIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
@@ -38,6 +39,7 @@ const CreateRoleModal = () => {
   const loading = useSelector(selectCreateLoading);
   const categorizedPermissions = useSelector(selectCategorizedPermissions);
   const permissionsLoading = useSelector(selectCategoriesLoading);
+  const availableCategories = useSelector(selectPermissionCategories);
 
   const [currentTab, setCurrentTab] = useState('details'); // 'details' or 'permissions'
   const [selectedPermissions, setSelectedPermissions] = useState(new Set());
@@ -197,8 +199,8 @@ const CreateRoleModal = () => {
       category.permissions.length > 0
     );
 
-  // Get unique categories
-  const categories = ['all', ...new Set(categorizedPermissions.map(c => c.category))];
+  // Get categories from Redux (includes all available categories)
+  const categories = ['all', ...(availableCategories || [])];
 
   return (
     <Modal
@@ -390,8 +392,8 @@ const CreateRoleModal = () => {
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
-                  {categories.map(cat => (
-                    <option key={cat} value={cat}>
+                  {categories.map((cat, index) => (
+                    <option key={`category-${cat}-${index}`} value={cat}>
                       {cat === 'all' ? 'All Categories' : cat}
                     </option>
                   ))}
