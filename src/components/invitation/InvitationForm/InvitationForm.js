@@ -1,5 +1,5 @@
 // src/components/invitation/InvitationForm/InvitationForm.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,6 +13,9 @@ import AutocompleteInput from '../../common/AutocompleteInput/AutocompleteInput'
 import { CapacityValidator } from '../../capacity';
 import Modal from '../../common/Modal/Modal';
 import LocationForm from '../../forms/LocationForm/LocationForm';
+
+// Services
+import timeSlotsService from '../../../services/timeSlotsService';
 
 // Selectors
 import { selectVisitorsList } from '../../../store/selectors/visitorSelectors';
@@ -48,6 +51,7 @@ import { extractErrorMessage } from '../../../utils/errorUtils';
  */
 const InvitationForm = ({
   initialData = null,
+  preselectedData = null,
   onSubmit,
   onCancel,
   loading = false,
@@ -74,26 +78,35 @@ const InvitationForm = ({
     subject: '',
     scheduledStartTime: '',
     scheduledEndTime: '',
-    
+
     // Optional fields
     visitPurposeId: null,
     locationId: null,
+    timeSlotId: null, // Added for calendar integration
     type: 'Single',
     message: '',
     expectedVisitorCount: 1,
     specialInstructions: '',
-    
+
     // Requirements
     requiresApproval: true,
     requiresEscort: false,
     requiresBadge: true,
     needsParking: false,
     parkingInstructions: '',
-    
+
     // Template and submission
     templateId: null,
     submitForApproval: false
   });
+
+  // Time slot state
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const [loadingTimeSlots, setLoadingTimeSlots] = useState(false);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
+
+  // Ref to track if we've applied preselected time slot times
+  const hasAppliedPreselectedTimes = useRef(false);
 
   const [formErrors, setFormErrors] = useState({});
   const [touched, setTouched] = useState({});
@@ -116,6 +129,7 @@ const InvitationForm = ({
         scheduledEndTime: formatDateTimeForInput(initialData.scheduledEndTime),
         visitPurposeId: initialData.visitPurposeId || null,
         locationId: initialData.locationId || null,
+        timeSlotId: initialData.timeSlotId || null,
         type: initialData.type || 'Single',
         message: initialData.message || '',
         expectedVisitorCount: initialData.expectedVisitorCount || 1,
@@ -141,6 +155,52 @@ const InvitationForm = ({
       }
     }
   }, [initialData]);
+
+  // Handle preselected data from calendar navigation
+  useEffect(() => {
+    if (preselectedData && !isEdit) {
+      setFormData(prev => {
+        const updates = {};
+
+        // Set location if provided
+        if (preselectedData.locationId) {
+          updates.locationId = preselectedData.locationId;
+
+          // Find and set the selected location object
+          const location = locations.find(loc => loc.id === preselectedData.locationId);
+          if (location) {
+            setSelectedLocation(location);
+          }
+        }
+
+        // Set scheduled date/time if provided
+        if (preselectedData.scheduledDate) {
+          // Convert the date to a datetime-local format
+          const date = new Date(preselectedData.scheduledDate);
+
+          // If we have a specific time from a time slot, we'll use it
+          // Otherwise, set it to 9 AM by default
+          if (!date.getHours()) {
+            date.setHours(9, 0, 0, 0);
+          }
+
+          updates.scheduledStartTime = formatDateTimeForInput(date);
+
+          // Set end time to 1 hour later by default
+          const endDate = new Date(date);
+          endDate.setHours(endDate.getHours() + 1);
+          updates.scheduledEndTime = formatDateTimeForInput(endDate);
+        }
+
+        // Set time slot if provided
+        if (preselectedData.timeSlotId) {
+          updates.timeSlotId = preselectedData.timeSlotId;
+        }
+
+        return { ...prev, ...updates };
+      });
+    }
+  }, [preselectedData, isEdit, locations]);
 
   // Revalidate time and location fields when they change to clear errors
   useEffect(() => {
@@ -197,6 +257,68 @@ const InvitationForm = ({
       return newErrors;
     });
   }, [formData.scheduledStartTime, formData.scheduledEndTime, formData.locationId, touched.scheduledStartTime, touched.scheduledEndTime, touched.locationId]);
+
+  // Fetch available time slots when location and date change
+  useEffect(() => {
+    const fetchAvailableTimeSlots = async () => {
+      // Only fetch if we have both location and start time
+      if (!formData.locationId || !formData.scheduledStartTime) {
+        setAvailableTimeSlots([]);
+        return;
+      }
+
+      try {
+        setLoadingTimeSlots(true);
+        const date = new Date(formData.scheduledStartTime).toISOString();
+
+        const slots = await timeSlotsService.getAvailableTimeSlots({
+          date,
+          locationId: formData.locationId
+        });
+
+        setAvailableTimeSlots(slots || []);
+
+        // If editing or preselected timeSlotId exists, find and set the selected slot
+        if (formData.timeSlotId && slots) {
+          const slot = slots.find(s => s.id === formData.timeSlotId);
+          if (slot) {
+            setSelectedTimeSlot(slot);
+
+            // If this is from preselected data (not edit mode), also update the times
+            // Only do this once to avoid infinite loops
+            if (preselectedData && !isEdit && !hasAppliedPreselectedTimes.current) {
+              const currentDate = new Date(formData.scheduledStartTime);
+              const [startHours, startMinutes] = slot.startTime.split(':').map(Number);
+              const [endHours, endMinutes] = slot.endTime.split(':').map(Number);
+
+              const newStartTime = new Date(currentDate);
+              newStartTime.setHours(startHours, startMinutes, 0, 0);
+
+              const newEndTime = new Date(currentDate);
+              newEndTime.setHours(endHours, endMinutes, 0, 0);
+
+              // Update form data with time slot's times
+              setFormData(prev => ({
+                ...prev,
+                scheduledStartTime: formatDateTimeForInput(newStartTime),
+                scheduledEndTime: formatDateTimeForInput(newEndTime)
+              }));
+
+              // Mark that we've applied the times
+              hasAppliedPreselectedTimes.current = true;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch available time slots:', error);
+        setAvailableTimeSlots([]);
+      } finally {
+        setLoadingTimeSlots(false);
+      }
+    };
+
+    fetchAvailableTimeSlots();
+  }, [formData.locationId, formData.scheduledStartTime, formData.timeSlotId, preselectedData, isEdit]);
 
   // Validation functions
   const validateField = (field, value) => {
@@ -384,6 +506,36 @@ const InvitationForm = ({
   const handleVisitPurposeSelect = (visitPurpose) => {
     setSelectedVisitPurpose(visitPurpose);
     handleChange('visitPurposeId', visitPurpose?.id || null);
+  };
+
+  // Handle time slot selection
+  const handleTimeSlotSelect = (timeSlot) => {
+    setSelectedTimeSlot(timeSlot);
+    handleChange('timeSlotId', timeSlot?.id || null);
+
+    // If a time slot is selected, update start and end times based on the slot's times
+    if (timeSlot && formData.scheduledStartTime) {
+      const currentDate = new Date(formData.scheduledStartTime);
+
+      // Parse the time slot's start time (format: "HH:MM:SS")
+      const [startHours, startMinutes] = timeSlot.startTime.split(':').map(Number);
+      const [endHours, endMinutes] = timeSlot.endTime.split(':').map(Number);
+
+      // Create new date objects with the time slot's times
+      const newStartTime = new Date(currentDate);
+      newStartTime.setHours(startHours, startMinutes, 0, 0);
+
+      const newEndTime = new Date(currentDate);
+      newEndTime.setHours(endHours, endMinutes, 0, 0);
+
+      // Update the form data
+      setFormData(prev => ({
+        ...prev,
+        scheduledStartTime: formatDateTimeForInput(newStartTime),
+        scheduledEndTime: formatDateTimeForInput(newEndTime),
+        timeSlotId: timeSlot.id
+      }));
+    }
   };
 
   // Handle opening location creation modal
@@ -878,6 +1030,103 @@ const InvitationForm = ({
           )}
         </Card>
 
+        {/* Time Slot Selection */}
+        {formData.locationId && formData.scheduledStartTime && (
+          <Card className="p-6">
+            <div className="flex items-center space-x-2 mb-4">
+              <ClockIcon className="w-6 h-6 text-blue-600" />
+              <h3 className="text-lg font-medium text-gray-900">Available Time Slots</h3>
+              {loadingTimeSlots && (
+                <span className="text-sm text-gray-500">(Loading...)</span>
+              )}
+            </div>
+
+            {!loadingTimeSlots && availableTimeSlots.length === 0 && (
+              <div className="text-sm text-gray-500 p-4 bg-gray-50 rounded-md">
+                No time slots available for the selected date and location. You can still proceed without selecting a time slot.
+              </div>
+            )}
+
+            {!loadingTimeSlots && availableTimeSlots.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600 mb-3">
+                  Select a time slot for your visit (optional):
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {availableTimeSlots.map((slot) => {
+                    const isSelected = selectedTimeSlot?.id === slot.id;
+                    const availableSpots = (slot.maxVisitors || 0) - (slot.currentBookings || 0);
+                    const utilizationRate = slot.maxVisitors > 0 ? (slot.currentBookings || 0) / slot.maxVisitors : 0;
+                    const isFull = availableSpots <= 0;
+                    const isLimited = utilizationRate >= 0.8 && !isFull;
+
+                    return (
+                      <button
+                        key={slot.id}
+                        type="button"
+                        onClick={() => !isFull && handleTimeSlotSelect(isSelected ? null : slot)}
+                        disabled={isFull}
+                        className={`
+                          p-4 rounded-lg border-2 text-left transition-all
+                          ${isSelected
+                            ? 'border-blue-500 bg-blue-50'
+                            : isFull
+                            ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                            : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 cursor-pointer'
+                          }
+                        `}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="font-medium text-gray-900">
+                            {slot.name}
+                          </div>
+                          {isSelected && (
+                            <span className="px-2 py-1 text-xs font-medium bg-blue-500 text-white rounded">
+                              Selected
+                            </span>
+                          )}
+                          {isFull && !isSelected && (
+                            <span className="px-2 py-1 text-xs font-medium bg-red-500 text-white rounded">
+                              Full
+                            </span>
+                          )}
+                          {isLimited && !isSelected && !isFull && (
+                            <span className="px-2 py-1 text-xs font-medium bg-yellow-500 text-white rounded">
+                              Limited
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-600 mb-2">
+                          {timeSlotsService.formatTimeForDisplay(slot.startTime)} - {timeSlotsService.formatTimeForDisplay(slot.endTime)}
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className={`
+                            ${isFull ? 'text-red-600' : isLimited ? 'text-yellow-600' : 'text-green-600'}
+                          `}>
+                            {availableSpots} of {slot.maxVisitors} spots available
+                          </span>
+                          {slot.bufferMinutes > 0 && (
+                            <span className="text-gray-500">
+                              {slot.bufferMinutes}min buffer
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+                {selectedTimeSlot && (
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <p className="text-sm text-blue-900">
+                      <strong>Selected:</strong> {selectedTimeSlot.name} ({timeSlotsService.formatTimeForDisplay(selectedTimeSlot.startTime)} - {timeSlotsService.formatTimeForDisplay(selectedTimeSlot.endTime)})
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </Card>
+        )}
+
         {/* Capacity Validation */}
         {formData.scheduledStartTime && (
           <Card className="p-6">
@@ -1092,6 +1341,11 @@ const InvitationForm = ({
 // PropTypes validation
 InvitationForm.propTypes = {
   initialData: PropTypes.object,
+  preselectedData: PropTypes.shape({
+    timeSlotId: PropTypes.number,
+    scheduledDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+    locationId: PropTypes.number
+  }),
   onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   loading: PropTypes.bool,

@@ -205,6 +205,15 @@ export const CAPACITY_ROUTES = {
   TRENDS: '/capacity/trends'
 };
 
+// Calendar routes
+export const CALENDAR_ROUTES = {
+  BASE: '/calendar',
+  VIEW: '/calendar',
+  WEEK: '/calendar/week',
+  DAY: '/calendar/day',
+  MONTH: '/calendar/month'
+};
+
 // Profile and settings routes
 export const PROFILE_ROUTES = {
   BASE: '/profile',
@@ -814,6 +823,7 @@ export default {
   SYSTEM_ROUTES,
   ROLE_ROUTES,
   CAPACITY_ROUTES,
+  CALENDAR_ROUTES,
   PROFILE_ROUTES,
   ALERT_ROUTES,
   NOTIFICATION_ROUTES,

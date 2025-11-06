@@ -37,7 +37,8 @@ import {
   ROLE_ROUTES,
   CAPACITY_ROUTES,
   PROFILE_ROUTES,
-  NOTIFICATION_ROUTES
+  NOTIFICATION_ROUTES,
+  CALENDAR_ROUTES
 } from '../constants/routeConstants';
 
 // Permission and Role Constants
@@ -47,7 +48,8 @@ import {
   VISITOR_PERMISSIONS,
   CHECKIN_PERMISSIONS,
   SYSTEM_CONFIG_PERMISSIONS,
-  AUDIT_PERMISSIONS
+  AUDIT_PERMISSIONS,
+  CALENDAR_PERMISSIONS
 } from '../constants/permissions';
 
 import { ROLES } from '../constants/role';
@@ -114,6 +116,9 @@ const BackupPage = lazy(() => import('../pages/system/BackupPage'))
 // Time Slots and Capacity Management Pages
 const TimeSlotsListPage = lazy(() => import('../pages/time-slots/TimeSlotsListPage/TimeSlotsListPage'));
 const CapacityDashboard = lazy(() => import('../pages/capacity/CapacityDashboard/CapacityDashboard'));
+
+// Calendar Page
+const CalendarPage = lazy(() => import('../pages/calendar/CalendarPage/CalendarPage'));
 
 // Visitor Management Pages
 const VisitorsListPage = lazy(() => import('../pages/visitors/VisitorsListPage/VisitorsListPage'));
@@ -568,7 +573,7 @@ const AppRoutes = () => {
         path={SYSTEM_ROUTES.AUDIT} 
         element={
           <AuthGuard>
-            <PermissionGuard permission={AUDIT_PERMISSIONS.READ}>
+            <PermissionGuard permission={AUDIT_PERMISSIONS.READ_ALL}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <AuditPage />
@@ -587,6 +592,21 @@ const AppRoutes = () => {
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <TimeSlotsListPage />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        } 
+      />
+
+      <Route 
+        path={CALENDAR_ROUTES.BASE} 
+        element={
+          <AuthGuard>
+            <PermissionGuard permission={CALENDAR_PERMISSIONS.VIEW_ALL}>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <CalendarPage />
                 </Suspense>
               </Layout>
             </PermissionGuard>

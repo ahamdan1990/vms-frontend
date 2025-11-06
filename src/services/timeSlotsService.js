@@ -156,9 +156,9 @@ const timeSlotsService = {
     if (!data.activeDays || typeof data.activeDays !== 'string') {
       errors.push('Active days configuration is required');
     } else {
-      const validDaysPattern = /^[0-6,]*$/; // Comma-separated numbers 0-6
+      const validDaysPattern = /^[1-7,]*$/; // Comma-separated numbers 1-7
       if (!validDaysPattern.test(data.activeDays)) {
-        errors.push('Active days must be comma-separated numbers 0-6 (0=Sunday, 6=Saturday)');
+        errors.push('Active days must be comma-separated numbers 1-7 (1=Monday, 7=Sunday)');
       }
     }
 
@@ -226,24 +226,32 @@ const timeSlotsService = {
   },
 
   /**
-   * Helper to get active days as array
+   * Helper to get active days as array (backend uses 1-7: Monday-Sunday)
    */
   getActiveDaysArray(activeDaysString) {
     if (!activeDaysString) return [];
-    
+
     return activeDaysString
       .split(',')
       .map(day => parseInt(day.trim(), 10))
-      .filter(day => !isNaN(day) && day >= 0 && day <= 6);
+      .filter(day => !isNaN(day) && day >= 1 && day <= 7);
   },
 
   /**
-   * Helper to get day names from active days string
+   * Helper to get day names from active days string (1=Monday, 7=Sunday)
    */
   getActiveDayNames(activeDaysString) {
-    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayNames = {
+      1: 'Monday',
+      2: 'Tuesday',
+      3: 'Wednesday',
+      4: 'Thursday',
+      5: 'Friday',
+      6: 'Saturday',
+      7: 'Sunday'
+    };
     const activeDays = this.getActiveDaysArray(activeDaysString);
-    
+
     return activeDays.map(day => dayNames[day]).join(', ');
   },
 
@@ -252,23 +260,25 @@ const timeSlotsService = {
    */
   createActiveDaysString(daysArray) {
     if (!Array.isArray(daysArray)) return '';
-    
+
     return daysArray
-      .filter(day => Number.isInteger(day) && day >= 0 && day <= 6)
+      .filter(day => Number.isInteger(day) && day >= 1 && day <= 7)
       .sort()
       .join(',');
   },
 
   /**
    * Helper to check if time slot is active on a given date
+   * Converts JavaScript day (0-6) to backend format (1-7)
    */
   isActiveOnDate(timeSlot, date) {
     if (!timeSlot.activeDays || !date) return false;
-    
-    const dayOfWeek = new Date(date).getDay();
+
+    const jsDay = new Date(date).getDay(); // 0=Sunday, 6=Saturday
+    const backendDay = jsDay === 0 ? 7 : jsDay; // Convert to 1-7 format
     const activeDays = this.getActiveDaysArray(timeSlot.activeDays);
-    
-    return activeDays.includes(dayOfWeek);
+
+    return activeDays.includes(backendDay);
   },
 
   /**
@@ -323,8 +333,112 @@ const timeSlotsService = {
       'inactive': 'text-gray-600 bg-gray-100',
       'unknown': 'text-gray-600 bg-gray-100'
     };
-    
+
     return colorMap[status] || 'text-gray-600 bg-gray-100';
+  },
+
+  /**
+   * Books a time slot
+   * POST /api/time-slots/book
+   * Requires: Calendar.BookSlots permission
+   */
+  async bookTimeSlot(bookingData) {
+    const validation = this.validateBookingData(bookingData);
+    if (!validation.isValid) {
+      throw new Error(validation.errors.join(', '));
+    }
+
+    const response = await apiClient.post(TIME_SLOTS_ENDPOINTS.BOOK, bookingData);
+    return extractApiData(response);
+  },
+
+  /**
+   * Gets a specific booking by ID
+   * GET /api/time-slots/bookings/{id}
+   * Requires: Calendar.ViewAll permission
+   */
+  async getBookingById(id) {
+    const response = await apiClient.get(TIME_SLOTS_ENDPOINTS.BOOKING_BY_ID(id));
+    return extractApiData(response);
+  },
+
+  /**
+   * Gets all bookings for a specific time slot
+   * GET /api/time-slots/{timeSlotId}/bookings
+   * Requires: Calendar.ViewAll permission
+   */
+  async getTimeSlotBookings(timeSlotId, params = {}) {
+    const queryParams = {
+      startDate: params.startDate,
+      endDate: params.endDate
+    };
+
+    // Remove undefined values
+    Object.keys(queryParams).forEach(key => {
+      if (queryParams[key] === undefined) {
+        delete queryParams[key];
+      }
+    });
+
+    const queryString = buildQueryString(queryParams);
+    const response = await apiClient.get(`${TIME_SLOTS_ENDPOINTS.BOOKINGS_BY_SLOT(timeSlotId)}${queryString}`);
+    return extractApiData(response);
+  },
+
+  /**
+   * Cancels a time slot booking
+   * DELETE /api/time-slots/bookings/{id}
+   * Requires: Calendar.BookSlots permission
+   */
+  async cancelBooking(id, cancellationReason = null) {
+    const queryParams = cancellationReason ? { cancellationReason } : {};
+    const queryString = buildQueryString(queryParams);
+
+    const response = await apiClient.delete(`${TIME_SLOTS_ENDPOINTS.BOOKING_BY_ID(id)}${queryString}`);
+    return extractApiData(response);
+  },
+
+  /**
+   * Validates booking data for create operations
+   * Client-side validation helper
+   */
+  validateBookingData(data) {
+    const errors = [];
+
+    // Time slot ID validation
+    if (!data.timeSlotId || !Number.isInteger(data.timeSlotId) || data.timeSlotId <= 0) {
+      errors.push('Valid time slot ID is required');
+    }
+
+    // Booking date validation
+    if (!data.bookingDate) {
+      errors.push('Booking date is required');
+    } else {
+      const bookingDate = new Date(data.bookingDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (bookingDate < today) {
+        errors.push('Booking date cannot be in the past');
+      }
+    }
+
+    // Visitor count validation
+    if (data.visitorCount !== undefined && data.visitorCount !== null) {
+      if (!Number.isInteger(data.visitorCount) || data.visitorCount < 1) {
+        errors.push('Visitor count must be a positive integer');
+      }
+    }
+
+    // Notes validation
+    if (data.notes && typeof data.notes === 'string' && data.notes.length > 500) {
+      errors.push('Notes cannot exceed 500 characters');
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
   }
 };
 

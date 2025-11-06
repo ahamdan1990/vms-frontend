@@ -245,8 +245,19 @@ export const LOCATION_PERMISSIONS = {
 
 export const SYSTEM_CONFIG_PERMISSIONS = {
   READ: 'SystemConfig.Read',
-  UPDATE: 'SystemConfig.Update'
+  UPDATE: 'SystemConfig.Update',
+  MANAGE_CAPACITY: 'SystemConfig.ManageCapacity'
 };
+
+// ============================================================================
+// CALENDAR
+// ============================================================================
+
+// export const CALENDAR_PERMISSIONS = {
+//   VIEW_ALL: 'Invitation.Create',
+//   BOOK_SLOTS: 'Invitation.Create',
+//   MANAGE_BOOKINGS: 'SystemConfig.ManageCapacity'
+// };
 
 // ============================================================================
 // REPORTS - SIMPLIFIED

@@ -1,6 +1,7 @@
 // src/pages/invitations/InvitationsListPage/InvitationsListPage.js
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Services
@@ -138,6 +139,8 @@ import { extractErrorMessage } from '../../../utils/errorUtils';
  */
 const InvitationsListPage = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // Invitations data
   const invitations = useSelector(selectInvitationsList);
@@ -189,6 +192,9 @@ const InvitationsListPage = () => {
   const [emailError, setEmailError] = useState(null);
   const [emailSuccess, setEmailSuccess] = useState(false);
 
+  // Pre-selected data from calendar navigation
+  const [preselectedData, setPreselectedData] = useState(null);
+
   // Load initial data on mount
   useEffect(() => {
     const params = {
@@ -232,6 +238,24 @@ const InvitationsListPage = () => {
       dispatch(clearError());
     };
   }, [dispatch]);
+
+  // Handle navigation from calendar with pre-selected data
+  useEffect(() => {
+    if (location.state?.preselectedTimeSlotId || location.state?.preselectedDate || location.state?.preselectedLocationId) {
+      // Store the pre-selected data
+      setPreselectedData({
+        timeSlotId: location.state.preselectedTimeSlotId,
+        scheduledDate: location.state.preselectedDate,
+        locationId: location.state.preselectedLocationId
+      });
+
+      // Open the create modal
+      dispatch(showCreateModal());
+
+      // Clear the navigation state to prevent reopening the modal on re-render
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, dispatch, navigate, location.pathname]);
 
   // Action handlers
   const handleCreateInvitation = async (invitationData) => {
@@ -440,6 +464,7 @@ const InvitationsListPage = () => {
   const handleCloseCreateModal = () => {
     dispatch(hideCreateModal());
     dispatch(clearError());
+    setPreselectedData(null); // Clear pre-selected data
   };
 
   const handleCloseEditModal = () => {
@@ -1327,6 +1352,7 @@ const InvitationsListPage = () => {
           loading={createLoading}
           error={createError}
           isEdit={false}
+          preselectedData={preselectedData}
         />
       </Modal>
 

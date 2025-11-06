@@ -173,11 +173,24 @@ const LocationForm = ({
 
     // Prepare submission data
     const submissionData = {
-      ...formData,
-      displayOrder: formData.displayOrder ? parseInt(formData.displayOrder, 10) : null,
-      maxCapacity: formData.maxCapacity ? parseInt(formData.maxCapacity, 10) : null,
-      parentLocationId: formData.parentLocationId || null
+      name: formData.name,
+      code: formData.code,
+      description: formData.description || null,
+      locationType: formData.locationType,
+      floor: formData.floor || null,
+      building: formData.building || null,
+      zone: formData.zone || null,
+      parentLocationId: formData.parentLocationId || null,
+      displayOrder: formData.displayOrder ? parseInt(formData.displayOrder, 10) : 0,
+      maxCapacity: formData.maxCapacity ? parseInt(formData.maxCapacity, 10) : 0,
+      requiresEscort: formData.requiresEscort,
+      accessLevel: formData.accessLevel || null
     };
+
+    // For edit operations, include isActive
+    if (isEdit) {
+      submissionData.isActive = formData.isActive;
+    }
 
     try {
       await onSubmit(submissionData);

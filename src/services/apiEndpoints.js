@@ -235,7 +235,10 @@ export const CAPACITY_ENDPOINTS = {
 export const TIME_SLOTS_ENDPOINTS = {
   BASE: '/api/time-slots',
   BY_ID: (id) => `/api/time-slots/${id}`,
-  AVAILABLE: '/api/time-slots/available'
+  AVAILABLE: '/api/time-slots/available',
+  BOOK: '/api/time-slots/book',
+  BOOKING_BY_ID: (id) => `/api/time-slots/bookings/${id}`,
+  BOOKINGS_BY_SLOT: (timeSlotId) => `/api/time-slots/${timeSlotId}/bookings`
 };
 
 // Notification endpoints

@@ -130,7 +130,7 @@ const AuditPage = () => {
   const currentError = getCurrentError();
 
   // Permissions
-  const canRead = hasPermission(AUDIT_PERMISSIONS.READ);
+  const canRead = hasPermission(AUDIT_PERMISSIONS.READ_ALL);
   const canExport = hasPermission(AUDIT_PERMISSIONS.EXPORT);
   const canViewUserActivity = hasPermission(AUDIT_PERMISSIONS.VIEW_USER_ACTIVITY);
   const canViewSystemEvents = hasPermission(AUDIT_PERMISSIONS.VIEW_SYSTEM_EVENTS);
