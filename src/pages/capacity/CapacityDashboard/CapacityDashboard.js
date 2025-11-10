@@ -250,8 +250,8 @@ const CapacityDashboard = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Capacity Dashboard</h1>
-          <p className="text-gray-600">Real-time visitor capacity monitoring</p>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Capacity Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400">Real-time visitor capacity monitoring</p>
         </div>
         
         <div className="flex gap-3">
@@ -266,7 +266,7 @@ const CapacityDashboard = () => {
           <Button
             variant="outline"
             onClick={() => dispatch(setAutoRefresh(!autoRefresh))}
-            className={autoRefresh ? 'bg-green-50 text-green-700 border-green-200' : ''}
+            className={autoRefresh ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-700' : ''}
           >
             {autoRefresh ? 'Auto Refresh ON' : 'Auto Refresh OFF'}
           </Button>
@@ -274,7 +274,7 @@ const CapacityDashboard = () => {
       </div>
 
       {/* Controls */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white dark:bg-slate-900/70 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <Select
@@ -411,10 +411,10 @@ const CapacityDashboard = () => {
               {overviewData.map((location) => (
                 <div
                   key={location.locationId || location.id || location.locationName}
-                  className="border border-gray-200 rounded-lg p-4"
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-slate-900/60"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium text-gray-900">{location.locationName}</h3>
+                    <h3 className="font-medium text-gray-900 dark:text-white">{location.locationName}</h3>
                     <Badge
                       variant={
                         location.isAtCapacity ? 'error' :
@@ -429,20 +429,20 @@ const CapacityDashboard = () => {
                   
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Current:</span>
-                      <span className="font-medium">{location.currentOccupancy}</span>
+                      <span className="text-gray-600 dark:text-gray-400">Current:</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">{location.currentOccupancy}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Capacity:</span>
-                      <span className="font-medium">{location.maxCapacity}</span>
+                      <span className="text-gray-600 dark:text-gray-400">Capacity:</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">{location.maxCapacity}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Available:</span>
-                      <span className="font-medium text-green-600">{location.availableSlots}</span>
+                      <span className="text-gray-600 dark:text-gray-400">Available:</span>
+                      <span className="font-medium text-green-600 dark:text-green-400">{location.availableSlots}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Utilization:</span>
-                      <span className="font-medium">{location.occupancyPercentage}%</span>
+                      <span className="text-gray-600 dark:text-gray-400">Utilization:</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">{location.occupancyPercentage}%</span>
                     </div>
                   </div>
                 </div>
@@ -458,20 +458,20 @@ const CapacityDashboard = () => {
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              <span className="text-sm text-gray-600">Normal</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">Normal</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <span className="text-sm text-gray-600">Warning (80%+)</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">Warning (80%+)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <span className="text-sm text-gray-600">At Capacity</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">At Capacity</span>
             </div>
           </div>
           
           {autoRefresh && (
-            <div className="flex items-center gap-2 text-green-600">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-300">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
               <span className="text-sm">Auto-refreshing every 30s</span>
             </div>
@@ -505,25 +505,25 @@ const CapacityDashboard = () => {
           ) : statisticsData ? (
             <div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-300">
                     {statisticsData.averageOccupancy}%
                   </div>
-                  <div className="text-sm text-gray-600">Average Occupancy</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Average Occupancy</div>
                 </div>
                 
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600 dark:text-green-300">
                     {statisticsData.peakOccupancy}%
                   </div>
-                  <div className="text-sm text-gray-600">Peak Occupancy</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Peak Occupancy</div>
                 </div>
                 
-                <div className="bg-orange-50 p-4 rounded-lg">
-                  <div className="text-2xl font-bold text-orange-600">
+                <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-300">
                     {statisticsData.totalVisitors}
                   </div>
-                  <div className="text-sm text-gray-600">Total Visitors</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Total Visitors</div>
                 </div>
               </div>
               
@@ -532,9 +532,9 @@ const CapacityDashboard = () => {
                   <h3 className="text-lg font-semibold mb-4">Daily Breakdown</h3>
                   <div className="space-y-2">
                     {statisticsData.dailyStats.map((day, index) => (
-                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                        <span className="font-medium">{new Date(day.date).toLocaleDateString()}</span>
-                        <div className="flex gap-4 text-sm">
+                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-slate-900/60 rounded border border-gray-100 dark:border-gray-700">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{new Date(day.date).toLocaleDateString()}</span>
+                        <div className="flex gap-4 text-sm text-gray-700 dark:text-gray-300">
                           <span>Visitors: {day.visitors}</span>
                           <span>Peak: {day.peakOccupancy}%</span>
                           <span>Avg: {day.averageOccupancy}%</span>
@@ -583,25 +583,25 @@ const CapacityDashboard = () => {
                 
                 {trendsData.summary && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <div className="text-xl font-bold text-blue-600">
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-4 rounded-lg">
+                      <div className="text-xl font-bold text-blue-600 dark:text-blue-300">
                         {trendsData.summary.averageTrend > 0 ? '+' : ''}{trendsData.summary.averageTrend}%
                       </div>
-                      <div className="text-sm text-gray-600">Average Change</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Average Change</div>
                     </div>
                     
-                    <div className="bg-purple-50 p-4 rounded-lg">
-                      <div className="text-xl font-bold text-purple-600">
+                    <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 p-4 rounded-lg">
+                      <div className="text-xl font-bold text-purple-600 dark:text-purple-300">
                         {trendsData.summary.peakDay}
                       </div>
-                      <div className="text-sm text-gray-600">Busiest Day</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Busiest Day</div>
                     </div>
                     
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      <div className="text-xl font-bold text-green-600">
+                    <div className="bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 p-4 rounded-lg">
+                      <div className="text-xl font-bold text-green-600 dark:text-green-300">
                         {trendsData.summary.optimalTime}
                       </div>
-                      <div className="text-sm text-gray-600">Best Time</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Best Time</div>
                     </div>
                   </div>
                 )}
@@ -612,12 +612,12 @@ const CapacityDashboard = () => {
                   <h4 className="font-semibold mb-3">Daily Trends</h4>
                   <div className="space-y-2">
                     {trendsData.data.map((trend, index) => (
-                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                        <span className="font-medium">{new Date(trend.date).toLocaleDateString()}</span>
-                        <div className="flex gap-4 text-sm">
+                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-slate-900/60 rounded border border-gray-100 dark:border-gray-700">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{new Date(trend.date).toLocaleDateString()}</span>
+                        <div className="flex gap-4 text-sm text-gray-700 dark:text-gray-300">
                           <span>Avg: {trend.averageOccupancy}%</span>
                           <span>Peak: {trend.peakOccupancy}%</span>
-                          <span className={`font-medium ${trend.trend > 0 ? 'text-green-600' : trend.trend < 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                          <span className={`font-medium ${trend.trend > 0 ? 'text-green-600 dark:text-green-400' : trend.trend < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>
                             {trend.trend > 0 ? '+' : ''}{trend.trend}%
                           </span>
                         </div>

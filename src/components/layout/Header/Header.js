@@ -72,6 +72,12 @@ const Header = () => {
   const userInitials = user ? formatName(user.firstName, user.lastName, 'initials') : 'U';
   const userName = user ? formatName(user.firstName, user.lastName) : 'Unknown User';
 
+  useEffect(() => {
+    if (typeof refreshNotifications === 'function') {
+      refreshNotifications();
+    }
+  }, [refreshNotifications]);
+
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 relative z-20 transition-colors duration-200">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">

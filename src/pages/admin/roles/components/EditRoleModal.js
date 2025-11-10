@@ -251,15 +251,15 @@ const EditRoleModal = () => {
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Tab Navigation */}
-        <div className="border-b border-gray-200">
+        <div className="border-b border-gray-200 dark:border-gray-700">
           <nav className="-mb-px flex space-x-8">
             <button
               type="button"
               onClick={() => setCurrentTab('details')}
               className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                 currentTab === 'details'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-300'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-100 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               Role Details
@@ -269,8 +269,8 @@ const EditRoleModal = () => {
               onClick={() => setCurrentTab('permissions')}
               className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                 currentTab === 'permissions'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-300'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-100 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               Permissions ({selectedCount} selected)
@@ -284,18 +284,18 @@ const EditRoleModal = () => {
             <div className="space-y-6 pr-2">
               {/* System Role Warning */}
               {isSystemRole && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
                   <div className="flex">
                     <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                      <svg className="h-5 w-5 text-yellow-400 dark:text-yellow-300" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                       </svg>
                     </div>
                     <div className="ml-3">
-                      <h3 className="text-sm font-medium text-yellow-800">
+                      <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
                         System Role - Limited Editing
                       </h3>
-                      <p className="mt-1 text-sm text-yellow-700">
+                      <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-100">
                         System roles have restricted editing. You can only modify display properties (name, description, color, icon).
                       </p>
                     </div>
@@ -305,14 +305,14 @@ const EditRoleModal = () => {
 
               {/* Role Name (Read-only) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Role Name (Cannot be changed)
                 </label>
                 <input
                   type="text"
                   value={currentRole.name}
                   disabled
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                 />
               </div>
 
@@ -330,7 +330,7 @@ const EditRoleModal = () => {
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Description
                 </label>
                 <textarea
@@ -339,12 +339,14 @@ const EditRoleModal = () => {
                   onChange={handleChange}
                   rows={3}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                    errors.description ? 'border-red-500' : 'border-gray-300'
+                    errors.description
+                      ? 'border-red-500 dark:border-red-400 bg-red-50 dark:bg-red-900/20'
+                      : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
                   }`}
                   placeholder="Describe the role's purpose and responsibilities"
                 />
                 {errors.description && (
-                  <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.description}</p>
                 )}
               </div>
 
@@ -361,7 +363,7 @@ const EditRoleModal = () => {
 
               {/* Color */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Color
                 </label>
                 <div className="flex items-center gap-3">
@@ -370,7 +372,7 @@ const EditRoleModal = () => {
                     name="color"
                     value={formData.color}
                     onChange={handleChange}
-                    className="h-10 w-20 rounded border border-gray-300 cursor-pointer"
+                    className="h-10 w-20 rounded border border-gray-300 dark:border-gray-600 cursor-pointer bg-white dark:bg-gray-800"
                   />
                   <Input
                     name="color"
@@ -387,7 +389,7 @@ const EditRoleModal = () => {
                       key={color.value}
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, color: color.value }))}
-                      className="w-8 h-8 rounded border-2 border-gray-300 hover:border-gray-400 transition-colors"
+                      className="w-8 h-8 rounded border-2 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-400 transition-colors"
                       style={{ backgroundColor: color.value }}
                       title={color.name}
                     />
@@ -417,14 +419,14 @@ const EditRoleModal = () => {
                   onChange={handleChange}
                   className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                 />
-                <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+                <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700 dark:text-gray-200">
                   Active (Uncheck to deactivate this role)
                 </label>
               </div>
 
               {/* Preview */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600 mb-2">Preview:</p>
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Preview:</p>
                 <div
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium"
                   style={{ backgroundColor: formData.color }}
@@ -432,7 +434,7 @@ const EditRoleModal = () => {
                   <span className="text-xl">{formData.icon || '🛡️'}</span>
                   <span>{formData.displayName || 'Role Name'}</span>
                   {!formData.isActive && (
-                    <span className="text-xs bg-white bg-opacity-30 px-2 py-0.5 rounded">
+                    <span className="text-xs bg-white bg-opacity-30 px-2 py-0.5 rounded dark:text-white">
                       Inactive
                     </span>
                   )}
@@ -445,20 +447,20 @@ const EditRoleModal = () => {
               <div className="flex gap-3">
                 <div className="flex-1">
                   <div className="relative">
-                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
                     <input
                       type="text"
                       placeholder="Search permissions..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent"
                     />
                   </div>
                 </div>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent"
                 >
                   {categories.map((cat, index) => (
                     <option key={`category-${cat}-${index}`} value={cat}>
@@ -473,7 +475,7 @@ const EditRoleModal = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
                 </div>
               ) : filteredPermissions.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <p className="text-sm">No permissions found</p>
                   <p className="text-xs mt-1">Try adjusting your search or filter</p>
                 </div>
@@ -486,13 +488,13 @@ const EditRoleModal = () => {
                   const allSelected = selectedInCategory === categoryPermissions.length;
 
                   return (
-                    <div key={category.category} className="border border-gray-200 rounded-lg p-4">
+                    <div key={category.category} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-900/30">
                       <div className="flex items-center justify-between mb-3">
                         <div>
-                          <h4 className="text-sm font-semibold text-gray-900">
+                          <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
                             {category.category}
                           </h4>
-                          <p className="text-xs text-gray-600">
+                          <p className="text-xs text-gray-600 dark:text-gray-400">
                             {selectedInCategory} of {categoryPermissions.length} selected
                           </p>
                         </div>
@@ -530,8 +532,8 @@ const EditRoleModal = () => {
                               className={`
                                 p-3 rounded-lg border-2 text-left transition-all
                                 ${isSelected
-                                  ? 'border-primary-500 bg-primary-50'
-                                  : 'border-gray-200 bg-white hover:border-gray-300'
+                                  ? 'border-primary-500 bg-primary-50 dark:border-primary-400 dark:bg-primary-900/20'
+                                  : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-500'
                                 }
                               `}
                               whileHover={{ scale: 1.02 }}
@@ -539,17 +541,17 @@ const EditRoleModal = () => {
                             >
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
-                                  <p className="font-medium text-xs text-gray-900 truncate">
+                                  <p className="font-medium text-xs text-gray-900 dark:text-gray-100 truncate">
                                     {permission.displayName}
                                   </p>
-                                  <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">
+                                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 line-clamp-2">
                                     {permission.description}
                                   </p>
                                 </div>
                                 <div
                                   className={`
                                     w-4 h-4 rounded flex items-center justify-center flex-shrink-0
-                                    ${isSelected ? 'bg-primary-500' : 'border-2 border-gray-300'}
+                                    ${isSelected ? 'bg-primary-500' : 'border-2 border-gray-300 dark:border-gray-600'}
                                   `}
                                 >
                                   {isSelected && (
@@ -570,8 +572,8 @@ const EditRoleModal = () => {
         </div>
 
         {/* Actions */}
-        <div className="flex justify-between items-center pt-4 border-t">
-          <div className="text-sm text-gray-600">
+        <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
             {selectedCount} permission(s) selected
           </div>
           <div className="flex gap-3">

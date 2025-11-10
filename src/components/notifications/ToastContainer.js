@@ -59,15 +59,20 @@ const ToastContainer = ({
       }
     >
       <div className="flex flex-col gap-3 pointer-events-auto">
-        {/* Clear All Toasts Button */}
-        {toasts.length > 1 && (
+        {/* Clear All Toasts Button - Enhanced visibility */}
+        {toasts.length > 0 && (
           <button
-            onClick={() => dispatch(clearToasts())}
-            className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium rounded-lg shadow-lg transition-colors duration-200"
-            title="Clear all toasts"
+            onClick={() => {
+              if (toasts.length > 1 || window.confirm('Clear this notification?')) {
+                dispatch(clearToasts());
+              }
+            }}
+            className="flex items-center justify-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg shadow-lg transition-colors duration-200 border border-red-700"
+            title={toasts.length > 1 ? "Clear all notifications" : "Clear notification"}
+            aria-label={`Clear ${toasts.length} notification${toasts.length > 1 ? 's' : ''}`}
           >
             <XMarkIcon className="w-4 h-4" />
-            <span>Clear All ({toasts.length})</span>
+            <span>Clear {toasts.length > 1 ? `All (${toasts.length})` : 'Notification'}</span>
           </button>
         )}
 

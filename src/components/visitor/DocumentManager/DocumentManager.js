@@ -244,15 +244,15 @@ const DocumentManager = ({
   }, {});
 
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 ${className}`}>
+    <div className={`bg-white dark:bg-slate-900/70 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm ${className}`}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <FolderIcon className="w-6 h-6 text-blue-500" />
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Documents</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Documents</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 {documents.length} documents • {selectedDocuments.length} selected
               </p>
             </div>
@@ -263,7 +263,7 @@ const DocumentManager = ({
               onClick={() => setShowFilters(!showFilters)}
               variant="outline"
               size="sm"
-              className={showFilters ? 'bg-blue-50 text-blue-600' : ''}
+              className={showFilters ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300' : 'dark:text-gray-200'}
             >
               <FunnelIcon className="w-4 h-4 mr-1" />
               Filters
@@ -304,7 +304,7 @@ const DocumentManager = ({
                 <select
                   value={selectedType}
                   onChange={(e) => setSelectedType(e.target.value)}
-                  className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-slate-900/60 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                 >
                   <option value="">All Types</option>
                   {allowedTypes.map(type => (
@@ -317,8 +317,8 @@ const DocumentManager = ({
 
               {/* Bulk Actions */}
               {selectedDocuments.length > 0 && (
-                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                  <span className="text-sm text-blue-800">
+                <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-900/40">
+                  <span className="text-sm text-blue-800 dark:text-blue-100">
                     {selectedDocuments.length} document{selectedDocuments.length !== 1 ? 's' : ''} selected
                   </span>
                   <div className="flex space-x-2">
@@ -355,18 +355,18 @@ const DocumentManager = ({
         ) : documents.length === 0 ? (
           /* Empty State with Drag & Drop */
           <div
-            className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
+            className={`border-2 border-dashed rounded-2xl p-12 text-center transition-colors ${
               dragOver 
-                ? 'border-blue-500 bg-blue-50' 
-                : 'border-gray-300 hover:border-gray-400'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10' 
+                : 'border-gray-300 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500 bg-white dark:bg-slate-900/60'
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            <CloudArrowUpIcon className={`w-12 h-12 mx-auto mb-4 ${dragOver ? 'text-blue-500' : 'text-gray-400'}`} />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No documents uploaded</h3>
-            <p className="text-gray-600 mb-4">
+            <CloudArrowUpIcon className={`w-12 h-12 mx-auto mb-4 ${dragOver ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500'}`} />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No documents uploaded</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
               {dragOver ? 'Drop files here to upload' : 'Drag and drop files here, or click to select'}
             </p>
             <Button
@@ -376,7 +376,7 @@ const DocumentManager = ({
               <PlusIcon className="w-4 h-4 mr-2" />
               Upload Documents
             </Button>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               Supported: {allowedExtensions.join(', ')} • Max {Math.floor(maxFileSize / (1024 * 1024))}MB per file
             </p>
           </div>
@@ -395,9 +395,9 @@ const DocumentManager = ({
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
                 >
-                  <div className="bg-white rounded-lg p-8 shadow-2xl border-2 border-blue-500">
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-2xl border-2 border-blue-500">
                     <CloudArrowUpIcon className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-                    <p className="text-xl font-semibold text-blue-900 text-center">
+                    <p className="text-xl font-semibold text-blue-900 dark:text-blue-200 text-center">
                       Drop files to upload
                     </p>
                   </div>
@@ -409,7 +409,7 @@ const DocumentManager = ({
             {Object.entries(groupedDocuments).map(([type, docs]) => (
               <div key={type} className="mb-6">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-gray-700 flex items-center">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center">
                     <DocumentTextIcon className="w-4 h-4 mr-2" />
                     {type} ({docs.length})
                   </h4>
@@ -437,18 +437,18 @@ const DocumentManager = ({
 
             {/* Quick Upload Zone */}
             <div
-              className={`mt-6 border border-dashed border-gray-300 rounded-lg p-4 text-center transition-colors ${
-                dragOver ? 'border-blue-500 bg-blue-50' : 'hover:border-gray-400'
+              className={`mt-6 border border-dashed border-gray-300 dark:border-gray-600 rounded-2xl p-4 text-center transition-colors ${
+                dragOver ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10' : 'hover:border-gray-400 dark:hover:border-gray-500 bg-white dark:bg-slate-900/60'
               }`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
             >
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Drop more files here or{' '}
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="text-blue-600 hover:text-blue-700 underline"
+                  className="text-blue-600 hover:text-blue-700 underline dark:text-blue-300 dark:hover:text-blue-200"
                 >
                   click to select
                 </button>
@@ -477,7 +477,7 @@ const DocumentManager = ({
       >
         <div className="p-6">
           <div className="mb-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Review and configure your documents before uploading.
             </p>
           </div>
@@ -500,7 +500,7 @@ const DocumentManager = ({
             ))}
           </div>
 
-          <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
+          <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
             <Button
               onClick={() => setShowUploadModal(false)}
               variant="outline"
@@ -563,8 +563,8 @@ const DocumentCard = ({
   const Icon = document.documentType === 'Photo' ? PhotoIcon : DocumentTextIcon;
   
   return (
-    <div className={`relative bg-white border rounded-lg p-4 hover:shadow-md transition-shadow ${
-      selected ? 'ring-2 ring-blue-500 border-blue-500' : 'border-gray-200'
+    <div className={`relative bg-white dark:bg-slate-900/70 border rounded-xl p-4 hover:shadow-md transition-shadow ${
+      selected ? 'ring-2 ring-blue-500 border-blue-500 dark:border-blue-400' : 'border-gray-200 dark:border-gray-700'
     }`}>
       {/* Selection Checkbox */}
       <div className="absolute top-2 left-2">
@@ -572,7 +572,7 @@ const DocumentCard = ({
           type="checkbox"
           checked={selected}
           onChange={(e) => onSelect(e.target.checked)}
-          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          className="rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400"
         />
       </div>
 
@@ -593,16 +593,16 @@ const DocumentCard = ({
           </div>
         </div>
 
-        <h4 className="font-medium text-gray-900 text-sm mb-1 truncate" title={document.documentName}>
+        <h4 className="font-medium text-gray-900 dark:text-white text-sm mb-1 truncate" title={document.documentName}>
           {document.documentName}
         </h4>
         
-        <p className="text-xs text-gray-500 mb-2">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
           {document.formattedFileSize} • {formatDate(document.createdOn)}
         </p>
 
         {document.description && (
-          <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+          <p className="text-xs text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
             {document.description}
           </p>
         )}
@@ -634,7 +634,7 @@ const DocumentCard = ({
               onClick={onDelete}
               variant="ghost"
               size="xs"
-              className="text-red-600 hover:text-red-700"
+              className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
             >
               <TrashIcon className="w-3 h-3" />
             </Button>
@@ -652,20 +652,20 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
   const Icon = item.documentType === 'Photo' ? PhotoIcon : DocumentTextIcon;
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4">
+    <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-slate-900/70">
       <div className="flex items-start space-x-3">
         <Icon className="w-8 h-8 text-blue-500 flex-shrink-0 mt-1" />
         
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="font-medium text-gray-900 truncate">
+            <h4 className="font-medium text-gray-900 dark:text-white truncate">
               {item.file.name}
             </h4>
             <Button
               onClick={onRemove}
               variant="ghost"
               size="xs"
-              className="text-gray-400 hover:text-red-600 flex-shrink-0"
+              className="text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 flex-shrink-0"
             >
               <XMarkIcon className="w-4 h-4" />
             </Button>
@@ -673,7 +673,7 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
             <div>
-              <label className="block font-medium text-gray-700 mb-1">
+              <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Document Title *
               </label>
               <Input
@@ -686,13 +686,13 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
             </div>
 
             <div>
-              <label className="block font-medium text-gray-700 mb-1">
+              <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Document Type *
               </label>
               <select
                 value={item.documentType}
                 onChange={(e) => onChange({ documentType: e.target.value })}
-                className="w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-slate-900/60 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
               >
                 {allowedTypes.map(type => (
                   <option key={type} value={type}>{type}</option>
@@ -701,7 +701,7 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block font-medium text-gray-700 mb-1">
+              <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Description
               </label>
               <Input
@@ -714,7 +714,7 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
             </div>
 
             <div>
-              <label className="block font-medium text-gray-700 mb-1">
+              <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Tags
               </label>
               <Input
@@ -732,9 +732,9 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
                   type="checkbox"
                   checked={item.isSensitive}
                   onChange={(e) => onChange({ isSensitive: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
+                  className="rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 mr-2"
                 />
-                <span className="text-sm text-gray-700">Sensitive</span>
+                <span className="text-sm text-gray-700 dark:text-gray-200">Sensitive</span>
               </label>
               
               <label className="flex items-center">
@@ -742,14 +742,14 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
                   type="checkbox"
                   checked={item.isRequired}
                   onChange={(e) => onChange({ isRequired: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
+                  className="rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 mr-2"
                 />
-                <span className="text-sm text-gray-700">Required</span>
+                <span className="text-sm text-gray-700 dark:text-gray-200">Required</span>
               </label>
             </div>
           </div>
 
-          <div className="mt-2 text-xs text-gray-500">
+          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
             Size: {(item.file.size / 1024 / 1024).toFixed(1)} MB • 
             Type: {item.file.type || 'Unknown'}
           </div>

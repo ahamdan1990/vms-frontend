@@ -103,6 +103,34 @@ class NotificationService {
   }
 
   /**
+   * Delete a specific notification
+   */
+  async deleteNotification(notificationId) {
+    try {
+      const response = await apiClient.delete(
+        `${this.baseUrl}/${notificationId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      throw this.handleApiError(error);
+    }
+  }
+
+  /**
+   * Delete all notifications for the current user
+   */
+  async deleteAllNotifications() {
+    try {
+      const response = await apiClient.delete(`${this.baseUrl}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting all notifications:', error);
+      throw this.handleApiError(error);
+    }
+  }
+
+  /**
    * Get notification statistics
    */
   async getNotificationStats(fromDate = null, toDate = null) {

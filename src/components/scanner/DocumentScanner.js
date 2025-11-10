@@ -51,10 +51,10 @@ const DocumentScanner = ({
   // State
   const [isScanning, setIsScanning] = useState(false);
   const [scannedImages, setScannedImages] = useState([]);
-  const [currentScan, setCurrentScan] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState(-1);
+  const [showSettings, setShowSettings] = useState(false);
   
   // Scanner settings
   const [scanSettings, setScanSettings] = useState({
@@ -65,39 +65,12 @@ const DocumentScanner = ({
   });
 
   // Start camera for scanning
-  const startScanning = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          facingMode: 'environment' // Back camera for document scanning
-        },
-        audio: false
-      });
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-        setIsScanning(true);
-      }
-    } catch (error) {
-      console.error('Camera access error:', error);
-      
-      if (error.name === 'NotAllowedError') {
-        setError('Camera access denied. Please enable camera permissions.');
-      } else if (error.name === 'NotFoundError') {
-        setError('No camera found. Please ensure a camera is connected.');
-      } else {
-        setError('Unable to access camera for document scanning.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const startScanning = useCallback(() => {
+    if (isScanning || loading) return;
+    setError(null);
+    setShowSettings(false);
+    setIsScanning(true);
+  }, [isScanning, loading]);
 
   // Stop camera
   const stopScanning = useCallback(() => {
@@ -109,7 +82,120 @@ const DocumentScanner = ({
       videoRef.current.srcObject = null;
     }
     setIsScanning(false);
+    setShowSettings(false);
   }, []);
+
+  const waitForVideoElement = useCallback(() => {
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      const maxAttempts = 30;
+
+      const checkElement = () => {
+        if (!isScanning) {
+          reject(new Error('Scanning cancelled'));
+          return;
+        }
+
+        if (videoRef.current) {
+          resolve(videoRef.current);
+          return;
+        }
+
+        attempts += 1;
+        if (attempts > maxAttempts) {
+          reject(new Error('Video element not ready'));
+          return;
+        }
+
+        requestAnimationFrame(checkElement);
+      };
+
+      checkElement();
+    });
+  }, [isScanning]);
+
+  // Initialize camera stream once scanning UI is active
+  useEffect(() => {
+    if (!isScanning || streamRef.current) return;
+    let isCancelled = false;
+
+    const initializeStream = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        console.log('📷 Starting document scanner...');
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: 'environment'
+          },
+          audio: false
+        });
+
+        if (isCancelled) {
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+
+        console.log('✅ Camera stream obtained:', stream.active);
+
+        let videoElement;
+        try {
+          videoElement = await waitForVideoElement();
+        } catch (videoError) {
+          console.error('❌ Video element unavailable:', videoError);
+          stream.getTracks().forEach(track => track.stop());
+          if (!isCancelled) {
+            setError('Scanner preview unavailable. Please try again.');
+            setIsScanning(false);
+          }
+          return;
+        }
+
+        if (isCancelled) {
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+
+        videoElement.srcObject = stream;
+        streamRef.current = stream;
+
+        try {
+          await videoElement.play();
+          console.log('✅ Video playing');
+        } catch (playError) {
+          console.warn('Video play failed:', playError);
+        }
+
+        console.log('✅ Scanner state set to active');
+      } catch (error) {
+        if (isCancelled) return;
+
+        console.error('❌ Camera access error:', error);
+
+        if (error.name === 'NotAllowedError') {
+          setError('Camera access denied. Please enable camera permissions.');
+        } else if (error.name === 'NotFoundError') {
+          setError('No camera found. Please ensure a camera is connected.');
+        } else {
+          setError('Unable to access camera for document scanning.');
+        }
+        setIsScanning(false);
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initializeStream();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isScanning, waitForVideoElement]);
 
   // Capture document scan
   const captureDocument = useCallback(() => {
@@ -160,7 +246,6 @@ const DocumentScanner = ({
             type: documentType
           };
 
-          setCurrentScan(scanData);
           setScannedImages(prev => [...prev, scanData]);
         }
       },
@@ -266,6 +351,12 @@ const DocumentScanner = ({
     };
   }, [stopScanning, scannedImages]);
 
+  useEffect(() => {
+    if (!isScanning) {
+      setShowSettings(false);
+    }
+  }, [isScanning]);
+
   // Render scanning interface
   const renderScanningInterface = () => (
     <div className="space-y-4">
@@ -310,7 +401,7 @@ const DocumentScanner = ({
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => setCurrentScan(prev => ({ ...prev, showSettings: !prev?.showSettings }))}
+              onClick={() => setShowSettings(prev => !prev)}
               icon={<AdjustmentsHorizontalIcon className="w-4 h-4" />}
             >
               Settings
@@ -320,7 +411,7 @@ const DocumentScanner = ({
       </div>
 
       {/* Scan settings */}
-      {currentScan?.showSettings && (
+      {showSettings && (
         <Card className="p-4 bg-gray-50">
           <h4 className="font-medium text-gray-900 mb-3">Scan Settings</h4>
           <div className="space-y-3">

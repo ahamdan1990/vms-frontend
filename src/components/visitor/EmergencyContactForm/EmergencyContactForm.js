@@ -232,11 +232,11 @@ const EmergencyContactForm = ({
   const availablePriorities = getAvailablePriorities();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-900 dark:text-gray-100">
       {/* Error Display */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-sm text-red-700">
+        <div className="bg-red-50 border border-red-200 rounded-md p-4 dark:bg-red-900/30 dark:border-red-700">
+          <div className="text-sm text-red-700 dark:text-red-200">
             {Array.isArray(error) ? (
               <ul className="list-disc list-inside space-y-1">
                 {error.map((err, index) => (
@@ -252,8 +252,8 @@ const EmergencyContactForm = ({
 
       {/* Primary Warning */}
       {formErrors._primaryWarning && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-          <div className="text-sm text-yellow-700">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 dark:bg-yellow-900/30 dark:border-yellow-600">
+          <div className="text-sm text-yellow-700 dark:text-yellow-200">
             <strong>Note:</strong> {formErrors._primaryWarning}
           </div>
         </div>
@@ -262,7 +262,7 @@ const EmergencyContactForm = ({
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Contact Information</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Contact Information</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* First Name */}
@@ -292,7 +292,7 @@ const EmergencyContactForm = ({
 
           {/* Relationship */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Relationship <span className="text-red-500">*</span>
             </label>
             <select
@@ -301,9 +301,9 @@ const EmergencyContactForm = ({
               onBlur={() => handleBlur('relationship')}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                 touched.relationship && formErrors.relationship
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-gray-300'
-              }`}
+                  ? 'border-red-300 bg-red-50 dark:border-red-500 dark:bg-red-900/20'
+                  : 'border-gray-300 dark:border-gray-600 dark:bg-slate-900/60'
+              } text-gray-900 dark:text-gray-100`}
               required
             >
               <option value="">Select relationship...</option>
@@ -373,14 +373,14 @@ const EmergencyContactForm = ({
               placeholder="Street address, city, state, zip code..."
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                 touched.address && formErrors.address
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-gray-300'
-              }`}
+                  ? 'border-red-300 bg-red-50 dark:border-red-500 dark:bg-red-900/20'
+                  : 'border-gray-300 dark:border-gray-600 dark:bg-slate-900/60'
+              } text-gray-900 dark:text-gray-100`}
             />
             {touched.address && formErrors.address && (
               <p className="mt-1 text-sm text-red-600">{formErrors.address}</p>
             )}
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {formData.address.length}/200 characters
             </p>
           </div>
@@ -388,12 +388,12 @@ const EmergencyContactForm = ({
 
         {/* Priority and Settings */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Priority Settings</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Priority Settings</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Priority */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                 Contact Priority
               </label>
               <select
@@ -402,9 +402,9 @@ const EmergencyContactForm = ({
                 onBlur={() => handleBlur('priority')}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                   touched.priority && formErrors.priority
-                    ? 'border-red-300 bg-red-50'
-                    : 'border-gray-300'
-                }`}
+                    ? 'border-red-300 bg-red-50 dark:border-red-500 dark:bg-red-900/20'
+                    : 'border-gray-300 dark:border-gray-600 dark:bg-slate-900/60'
+                } text-gray-900 dark:text-gray-100`}
               >
                 <option value="">No specific priority</option>
                 {availablePriorities.map((priority) => (
@@ -416,7 +416,7 @@ const EmergencyContactForm = ({
               {touched.priority && formErrors.priority && (
                 <p className="mt-1 text-sm text-red-600">{formErrors.priority}</p>
               )}
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 Lower numbers indicate higher priority for contact during emergencies
               </p>
             </div>
@@ -429,11 +429,11 @@ const EmergencyContactForm = ({
                   id="isPrimary"
                   checked={formData.isPrimary}
                   onChange={(e) => handleChange('isPrimary', e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-900"
                 />
               </div>
               <div className="min-w-0 flex-1">
-                <label htmlFor="isPrimary" className="text-sm font-medium text-gray-900 flex items-center space-x-1">
+                <label htmlFor="isPrimary" className="text-sm font-medium text-gray-900 dark:text-white flex items-center space-x-1">
                   {formData.isPrimary ? (
                     <StarIconSolid className="w-4 h-4 text-yellow-500" />
                   ) : (
@@ -441,7 +441,7 @@ const EmergencyContactForm = ({
                   )}
                   <span>Primary Emergency Contact</span>
                 </label>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   This contact will be called first in case of emergency
                 </p>
               </div>
@@ -451,10 +451,10 @@ const EmergencyContactForm = ({
 
         {/* Notes */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Additional Information</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Additional Information</h3>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               Notes
             </label>
             <textarea
@@ -466,14 +466,14 @@ const EmergencyContactForm = ({
               placeholder="Any additional information about this contact..."
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                 touched.notes && formErrors.notes
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-gray-300'
-              }`}
+                  ? 'border-red-300 bg-red-50 dark:border-red-500 dark:bg-red-900/20'
+                  : 'border-gray-300 dark:border-gray-600 dark:bg-slate-900/60'
+              } text-gray-900 dark:text-gray-100`}
             />
             {touched.notes && formErrors.notes && (
               <p className="mt-1 text-sm text-red-600">{formErrors.notes}</p>
             )}
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {formData.notes.length}/500 characters
             </p>
           </div>
@@ -481,13 +481,13 @@ const EmergencyContactForm = ({
 
         {/* Preview */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Preview</h3>
-          <div className="bg-gray-50 p-4 rounded-md">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Preview</h3>
+          <div className="bg-gray-50 dark:bg-slate-900/60 p-4 rounded-md border border-gray-200 dark:border-gray-700">
             <div className="flex items-center space-x-2 mb-2">
               {formData.isPrimary && (
                 <StarIconSolid className="w-4 h-4 text-yellow-500" />
               )}
-              <div className="font-medium text-gray-900">
+              <div className="font-medium text-gray-900 dark:text-white">
                 {formData.firstName || 'First'} {formData.lastName || 'Last'}
               </div>
               {formData.relationship && (
@@ -501,7 +501,7 @@ const EmergencyContactForm = ({
                 </Badge>
               )}
             </div>
-            <div className="space-y-1 text-sm text-gray-600">
+            <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
               {formData.phoneNumber && (
                 <div>📞 {formData.phoneNumber}</div>
               )}
@@ -516,7 +516,7 @@ const EmergencyContactForm = ({
         </div>
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
           <Button
             type="button"
             variant="outline"

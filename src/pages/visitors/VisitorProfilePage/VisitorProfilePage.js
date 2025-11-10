@@ -434,10 +434,12 @@ const VisitorProfilePage = () => {
 
   if (!visitor) {
     return (
-      <div className="text-center py-12">
-        <ExclamationTriangleIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Visitor Not Found</h2>
-        <p className="text-gray-600 mb-6">The visitor you're looking for doesn't exist or has been removed.</p>
+      <div className="text-center py-12 text-gray-900 dark:text-gray-100">
+        <ExclamationTriangleIcon className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Visitor Not Found</h2>
+        <p className="text-gray-600 dark:text-gray-300 mb-6">
+          The visitor you're looking for doesn't exist or has been removed.
+        </p>
         <Button onClick={() => navigate('/visitors')} variant="outline">
           <ArrowLeftIcon className="w-4 h-4 mr-2" />
           Back to Visitors
@@ -461,12 +463,12 @@ const VisitorProfilePage = () => {
               Back to Visitors
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {visitor.fullName || `${visitor.firstName} ${visitor.lastName}`}
               </h1>
               <div className="flex items-center space-x-2 mt-1">
                 {getVisitorStatusBadge(visitor)}
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 dark:text-gray-400">
                   Created {formatDate(visitor.createdOn)}
                 </span>
               </div>
@@ -494,7 +496,7 @@ const VisitorProfilePage = () => {
                 variant="outline"
                 size="sm"
                 loading={statusChangeLoading}
-                className="text-yellow-600 hover:text-yellow-700 border-yellow-300 hover:border-yellow-400"
+                className="text-yellow-600 hover:text-yellow-700 border-yellow-300 hover:border-yellow-400 dark:text-yellow-300 dark:hover:text-yellow-200 dark:border-yellow-500 dark:hover:border-yellow-400"
               >
                 <StarIconOutline className="w-4 h-4 mr-2" />
                 Mark as VIP
@@ -507,7 +509,7 @@ const VisitorProfilePage = () => {
                 variant="outline"
                 size="sm"
                 loading={statusChangeLoading}
-                className="text-gray-600 hover:text-gray-700"
+                className="text-gray-600 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200"
               >
                 <StarIconSolid className="w-4 h-4 mr-2 text-yellow-500" />
                 Remove VIP
@@ -520,7 +522,7 @@ const VisitorProfilePage = () => {
                 onClick={() => setShowBlacklistModal(true)}
                 variant="outline"
                 size="sm"
-                className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400"
+                className="text-red-600 hover:text-red-700 border-red-300 hover:border-red-400 dark:text-red-400 dark:hover:text-red-300 dark:border-red-500 dark:hover:border-red-400"
               >
                 <ShieldExclamationIcon className="w-4 h-4 mr-2" />
                 Blacklist
@@ -555,7 +557,7 @@ const VisitorProfilePage = () => {
                 onClick={() => setShowDeleteModal(true)}
                 variant="outline"
                 size="sm"
-                className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+                className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 dark:text-red-400 dark:hover:text-red-300 dark:border-red-500"
               >
                 <TrashIcon className="w-4 h-4 mr-2" />
                 Delete
@@ -576,7 +578,7 @@ const VisitorProfilePage = () => {
                   <img
                     src={visitor.profilePhotoUrl}
                     alt={`${visitor.firstName} ${visitor.lastName}`}
-                    className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+                    className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-slate-700 shadow-lg"
                     onError={(e) => {
                       e.target.style.display = 'none';
                       e.target.nextSibling.style.display = 'flex';
@@ -584,9 +586,9 @@ const VisitorProfilePage = () => {
                   />
                 ) : null}
                 <div
-                  className={`w-24 h-24 rounded-full bg-gray-200 border-4 border-white shadow-lg flex items-center justify-center ${visitor.profilePhotoUrl ? 'hidden' : 'flex'}`}
+                  className={`w-24 h-24 rounded-full bg-gray-200 dark:bg-slate-700 border-4 border-white dark:border-slate-700 shadow-lg flex items-center justify-center ${visitor.profilePhotoUrl ? 'hidden' : 'flex'}`}
                 >
-                  <UserIcon className="w-8 h-8 text-gray-400" />
+                  <UserIcon className="w-8 h-8 text-gray-400 dark:text-gray-200" />
                 </div>
 
                 {/* Photo upload/remove overlay */}
@@ -595,10 +597,10 @@ const VisitorProfilePage = () => {
                     <div className="flex space-x-2">
                       <label
                         htmlFor="photo-upload"
-                        className="cursor-pointer p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
+                        className="cursor-pointer p-2 bg-white dark:bg-gray-900 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                         title="Upload photo"
                       >
-                        <PhotoIcon className="w-4 h-4 text-gray-700" />
+                        <PhotoIcon className="w-4 h-4 text-gray-700 dark:text-gray-200" />
                         <input
                           id="photo-upload"
                           type="file"
@@ -611,11 +613,11 @@ const VisitorProfilePage = () => {
                       {visitor.profilePhotoUrl && (
                         <button
                           onClick={handleRemovePhoto}
-                          className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
+                          className="p-2 bg-white dark:bg-gray-900 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                           title="Remove photo"
                           disabled={photoUploading}
                         >
-                          <TrashIcon className="w-4 h-4 text-red-600" />
+                          <TrashIcon className="w-4 h-4 text-red-600 dark:text-red-400" />
                         </button>
                       )}
                     </div>
@@ -635,37 +637,37 @@ const VisitorProfilePage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
-                    <EnvelopeIcon className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-900">{visitor.email}</span>
+                    <EnvelopeIcon className="w-4 h-4 text-gray-400 dark:text-gray-300" />
+                    <span className="text-sm text-gray-900 dark:text-gray-100">{visitor.email}</span>
                   </div>
                   {visitor.phoneNumber && (
                     <div className="flex items-center space-x-2">
-                      <PhoneIcon className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-900">{visitor.phoneNumber}</span>
+                      <PhoneIcon className="w-4 h-4 text-gray-400 dark:text-gray-300" />
+                      <span className="text-sm text-gray-900 dark:text-gray-100">{visitor.phoneNumber}</span>
                     </div>
                   )}
                   {visitor.company && (
                     <div className="flex items-center space-x-2">
-                      <BuildingOfficeIcon className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-900">{visitor.company}</span>
+                      <BuildingOfficeIcon className="w-4 h-4 text-gray-400 dark:text-gray-300" />
+                      <span className="text-sm text-gray-900 dark:text-gray-100">{visitor.company}</span>
                     </div>
                   )}
                 </div>
                 <div className="space-y-3">
                   {visitor.nationality && (
                     <div className="flex items-center space-x-2">
-                      <GlobeAltIcon className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-900">{visitor.nationality}</span>
+                      <GlobeAltIcon className="w-4 h-4 text-gray-400 dark:text-gray-300" />
+                      <span className="text-sm text-gray-900 dark:text-gray-100">{visitor.nationality}</span>
                     </div>
                   )}
                   <div className="flex items-center space-x-2">
-                    <ChartBarIcon className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-900">{visitor.visitCount} visits</span>
+                    <ChartBarIcon className="w-4 h-4 text-gray-400 dark:text-gray-300" />
+                    <span className="text-sm text-gray-900 dark:text-gray-100">{visitor.visitCount} visits</span>
                   </div>
                   {visitor.lastVisitDate && (
                     <div className="flex items-center space-x-2">
-                      <CalendarIcon className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-900">
+                      <CalendarIcon className="w-4 h-4 text-gray-400 dark:text-gray-300" />
+                      <span className="text-sm text-gray-900 dark:text-gray-100">
                         Last visit: {formatDate(visitor.lastVisitDate)}
                       </span>
                     </div>
@@ -679,7 +681,7 @@ const VisitorProfilePage = () => {
 
       {/* Navigation Tabs */}
       <div className="mb-6">
-        <nav className="flex space-x-8 border-b border-gray-200">
+        <nav className="flex space-x-8 border-b border-gray-200 dark:border-gray-700">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -688,8 +690,8 @@ const VisitorProfilePage = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-200'
+                    ? 'border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-200 dark:hover:border-gray-600'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -866,43 +868,43 @@ const VisitorProfilePage = () => {
         {/* Personal Information */}
         <Card>
           <div className="p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
               <UserIcon className="w-5 h-5" />
               <span>Personal Information</span>
             </h3>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-sm font-medium text-gray-500">First Name</span>
-                  <div className="text-sm text-gray-900">{visitor.firstName}</div>
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">First Name</span>
+                  <div className="text-sm text-gray-900 dark:text-gray-100">{visitor.firstName}</div>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-gray-500">Last Name</span>
-                  <div className="text-sm text-gray-900">{visitor.lastName}</div>
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Last Name</span>
+                  <div className="text-sm text-gray-900 dark:text-gray-100">{visitor.lastName}</div>
                 </div>
               </div>
               <div>
-                <span className="text-sm font-medium text-gray-500">Email</span>
-                <div className="text-sm text-gray-900">{visitor.email}</div>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</span>
+                <div className="text-sm text-gray-900 dark:text-gray-100">{visitor.email}</div>
               </div>
               {visitor.phoneNumber && (
                 <div>
-                  <span className="text-sm font-medium text-gray-500">Phone</span>
-                  <div className="text-sm text-gray-900">{visitor.phoneNumber}</div>
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Phone</span>
+                  <div className="text-sm text-gray-900 dark:text-gray-100">{visitor.phoneNumber}</div>
                 </div>
               )}
               {visitor.dateOfBirth && (
                 <div>
-                  <span className="text-sm font-medium text-gray-500">Date of Birth</span>
-                  <div className="text-sm text-gray-900">
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Date of Birth</span>
+                  <div className="text-sm text-gray-900 dark:text-gray-100">
                     {formatDate(visitor.dateOfBirth)} {visitor.age && `(${visitor.age} years old)`}
                   </div>
                 </div>
               )}
               {visitor.nationality && (
                 <div>
-                  <span className="text-sm font-medium text-gray-500">Nationality</span>
-                  <div className="text-sm text-gray-900">{visitor.nationality}</div>
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Nationality</span>
+                  <div className="text-sm text-gray-900 dark:text-gray-100">{visitor.nationality}</div>
                 </div>
               )}
             </div>
@@ -912,27 +914,27 @@ const VisitorProfilePage = () => {
         {/* Professional Information */}
         <Card>
           <div className="p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
               <BuildingOfficeIcon className="w-5 h-5" />
               <span>Professional Information</span>
             </h3>
             <div className="space-y-3">
               {visitor.company && (
                 <div>
-                  <span className="text-sm font-medium text-gray-500">Company</span>
-                  <div className="text-sm text-gray-900">{visitor.company}</div>
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Company</span>
+                  <div className="text-sm text-gray-900 dark:text-gray-100">{visitor.company}</div>
                 </div>
               )}
               {visitor.jobTitle && (
                 <div>
-                  <span className="text-sm font-medium text-gray-500">Job Title</span>
-                  <div className="text-sm text-gray-900">{visitor.jobTitle}</div>
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Job Title</span>
+                  <div className="text-sm text-gray-900 dark:text-gray-100">{visitor.jobTitle}</div>
                 </div>
               )}
               {visitor.securityClearance && (
                 <div>
-                  <span className="text-sm font-medium text-gray-500">Security Clearance</span>
-                  <div className="text-sm text-gray-900">{visitor.securityClearance}</div>
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Security Clearance</span>
+                  <div className="text-sm text-gray-900 dark:text-gray-100">{visitor.securityClearance}</div>
                 </div>
               )}
             </div>
@@ -943,11 +945,11 @@ const VisitorProfilePage = () => {
         {visitor.address && (
           <Card>
             <div className="p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
                 <MapPinIcon className="w-5 h-5" />
                 <span>Address</span>
               </h3>
-              <div className="text-sm text-gray-900">
+              <div className="text-sm text-gray-900 dark:text-gray-100">
                 {visitor.address.street1 && <div>{visitor.address.street1}</div>}
                 {visitor.address.street2 && <div>{visitor.address.street2}</div>}
                 <div>
@@ -965,21 +967,21 @@ const VisitorProfilePage = () => {
         {(visitor.governmentId || visitor.governmentIdType) && (
           <Card>
             <div className="p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
                 <IdentificationIcon className="w-5 h-5" />
                 <span>Government ID</span>
               </h3>
               <div className="space-y-3">
                 {visitor.governmentIdType && (
                   <div>
-                    <span className="text-sm font-medium text-gray-500">ID Type</span>
-                    <div className="text-sm text-gray-900">{visitor.governmentIdType}</div>
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">ID Type</span>
+                    <div className="text-sm text-gray-900 dark:text-gray-100">{visitor.governmentIdType}</div>
                   </div>
                 )}
                 {visitor.governmentId && (
                   <div>
-                    <span className="text-sm font-medium text-gray-500">ID Number</span>
-                    <div className="text-sm text-gray-900">{visitor.governmentId}</div>
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">ID Number</span>
+                    <div className="text-sm text-gray-900 dark:text-gray-100">{visitor.governmentId}</div>
                   </div>
                 )}
               </div>
@@ -991,18 +993,18 @@ const VisitorProfilePage = () => {
         {(visitor.dietaryRequirements || visitor.accessibilityRequirements) && (
           <Card>
             <div className="p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Special Requirements</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Special Requirements</h3>
               <div className="space-y-3">
                 {visitor.dietaryRequirements && (
                   <div>
-                    <span className="text-sm font-medium text-gray-500">Dietary Requirements</span>
-                    <div className="text-sm text-gray-900">{visitor.dietaryRequirements}</div>
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Dietary Requirements</span>
+                    <div className="text-sm text-gray-900 dark:text-gray-100">{visitor.dietaryRequirements}</div>
                   </div>
                 )}
                 {visitor.accessibilityRequirements && (
                   <div>
-                    <span className="text-sm font-medium text-gray-500">Accessibility Requirements</span>
-                    <div className="text-sm text-gray-900">{visitor.accessibilityRequirements}</div>
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Accessibility Requirements</span>
+                    <div className="text-sm text-gray-900 dark:text-gray-100">{visitor.accessibilityRequirements}</div>
                   </div>
                 )}
               </div>
@@ -1014,8 +1016,8 @@ const VisitorProfilePage = () => {
         {visitor.notes && (
           <Card className="lg:col-span-2">
             <div className="p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Notes</h3>
-              <div className="text-sm text-gray-900 whitespace-pre-wrap">{visitor.notes}</div>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Notes</h3>
+              <div className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{visitor.notes}</div>
             </div>
           </Card>
         )}
@@ -1026,18 +1028,20 @@ const VisitorProfilePage = () => {
   // Documents Tab
   function renderDocumentsTab() {
     return (
-      <DocumentManager
-        visitorId={visitor.id}
-        documents={documents}
-        loading={documentsLoading}
-        onUpload={handleUploadDocument}
-        onDelete={handleDeleteDocument}
-        onDownload={handleDownloadDocument}
-        onRefresh={loadDocuments}
-        allowedTypes={['Passport', 'National ID', 'Driver License', 'Visa', 'Work Permit', 'Health Certificate', 'Background Check', 'Photo', 'Other']}
-        maxFileSize={10 * 1024 * 1024} // 10MB
-        allowedExtensions={['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.doc', '.docx', '.bmp', '.tiff']}
-      />
+      <div className="bg-white dark:bg-slate-900/70 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-sm p-4 sm:p-6">
+        <DocumentManager
+          visitorId={visitor.id}
+          documents={documents}
+          loading={documentsLoading}
+          onUpload={handleUploadDocument}
+          onDelete={handleDeleteDocument}
+          onDownload={handleDownloadDocument}
+          onRefresh={loadDocuments}
+          allowedTypes={['Passport', 'National ID', 'Driver License', 'Visa', 'Work Permit', 'Health Certificate', 'Background Check', 'Photo', 'Other']}
+          maxFileSize={10 * 1024 * 1024} // 10MB
+          allowedExtensions={['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.doc', '.docx', '.bmp', '.tiff']}
+        />
+      </div>
     );
   }
 
@@ -1176,26 +1180,26 @@ const VisitorProfilePage = () => {
         {/* Visit Statistics */}
         <Card>
           <div className="p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
               <ChartBarIcon className="w-5 h-5" />
               <span>Visit Statistics</span>
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">{visitor.visitCount}</div>
-                <div className="text-sm text-blue-800">Total Visits</div>
+              <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-900/40">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-300">{visitor.visitCount}</div>
+                <div className="text-sm text-blue-800 dark:text-blue-100/80">Total Visits</div>
               </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">
+              <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-900/40">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-300">
                   {visitor.lastVisitDate ? formatDate(visitor.lastVisitDate) : 'Never'}
                 </div>
-                <div className="text-sm text-green-800">Last Visit</div>
+                <div className="text-sm text-green-800 dark:text-green-100/80">Last Visit</div>
               </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600">
+              <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-900/40">
+                <div className="text-2xl font-bold text-purple-600 dark:text-purple-300">
                   {formatDate(visitor.createdOn)}
                 </div>
-                <div className="text-sm text-purple-800">First Registered</div>
+                <div className="text-sm text-purple-800 dark:text-purple-100/80">First Registered</div>
               </div>
             </div>
           </div>
@@ -1204,40 +1208,40 @@ const VisitorProfilePage = () => {
         {/* Status History */}
         <Card>
           <div className="p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Status History</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Status History</h3>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800/50 rounded-lg border border-gray-100 dark:border-slate-700">
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-sm font-medium">Visitor Created</span>
                 </div>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 dark:text-gray-400">
                   {formatDateTime(visitor.createdOn)}
                 </span>
               </div>
               
               {visitor.isVip && (
-                <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-100 dark:border-yellow-900/40">
                   <div className="flex items-center space-x-2">
                     <StarIconSolid className="w-4 h-4 text-yellow-500" />
                     <span className="text-sm font-medium">Marked as VIP</span>
                   </div>
-                  <span className="text-sm text-gray-500">Status active</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Status active</span>
                 </div>
               )}
               
               {visitor.isBlacklisted && (
-                <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900/40">
                   <div className="flex items-center space-x-2">
                     <ShieldExclamationIcon className="w-4 h-4 text-red-500" />
                     <span className="text-sm font-medium">Blacklisted</span>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
                       {formatDateTime(visitor.blacklistedOn)}
                     </div>
                     {visitor.blacklistReason && (
-                      <div className="text-xs text-red-600 mt-1">
+                      <div className="text-xs text-red-600 dark:text-red-400 mt-1">
                         Reason: {visitor.blacklistReason}
                       </div>
                     )}
@@ -1251,10 +1255,10 @@ const VisitorProfilePage = () => {
         {/* Recent Activity Placeholder */}
         <Card>
           <div className="p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Recent Activity</h3>
             <div className="text-center py-8">
-              <ClipboardDocumentListIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">
+              <ClipboardDocumentListIcon className="w-12 h-12 text-gray-400 dark:text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-600 dark:text-gray-300">
                 Detailed activity logging will be available in a future update.
               </p>
             </div>

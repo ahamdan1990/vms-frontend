@@ -38,8 +38,8 @@ const MobileNavigation = ({
         onClick={toggleDropdown}
         className={classNames(
           'w-full flex items-center justify-between px-4 py-3 text-left',
-          'bg-white border border-gray-300 rounded-lg shadow-sm',
-          'hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+          'bg-white dark:bg-slate-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm',
+          'hover:bg-gray-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
           'transition-colors duration-150'
         )}
         aria-expanded={isOpen}
@@ -70,7 +70,7 @@ const MobileNavigation = ({
             transition={{ duration: 0.15 }}
             className={classNames(
               'absolute top-full left-0 right-0 mt-1 z-50',
-              'bg-white border border-gray-200 rounded-lg shadow-lg',
+              'bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg',
               'max-h-60 overflow-auto'
             )}
             role="listbox"
@@ -80,11 +80,11 @@ const MobileNavigation = ({
                 key={item.id}
                 onClick={() => handleSelect(item)}
                 className={classNames(
-                  'w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-150',
+                  'w-full px-4 py-3 text-left transition-colors duration-150',
                   'flex items-center justify-between',
                   {
-                    'bg-primary-50 text-primary-700': item.id === activeItem,
-                    'text-gray-700': item.id !== activeItem,
+                    'bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-200': item.id === activeItem,
+                    'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800/70': item.id !== activeItem,
                   },
                   'first:rounded-t-lg last:rounded-b-lg'
                 )}
@@ -96,7 +96,7 @@ const MobileNavigation = ({
                   {item.icon && (
                     <span className={classNames(
                       'flex-shrink-0',
-                      item.id === activeItem ? 'text-primary-600' : 'text-gray-400'
+                      item.id === activeItem ? 'text-primary-600 dark:text-primary-300' : 'text-gray-400 dark:text-gray-500'
                     )}>
                       {item.icon}
                     </span>
@@ -112,8 +112,8 @@ const MobileNavigation = ({
                   <span className={classNames(
                     'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
                     item.id === activeItem 
-                      ? 'bg-primary-100 text-primary-800' 
-                      : 'bg-gray-100 text-gray-700'
+                      ? 'bg-primary-100 text-primary-800 dark:bg-primary-500/20 dark:text-primary-100' 
+                      : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
                   )}>
                     {item.badge}
                   </span>
@@ -147,7 +147,7 @@ export const DesktopNavigation = ({
 }) => {
   return (
     <div className={classNames('hidden md:block', className)}>
-      <nav className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+      <nav className="flex space-x-1 bg-gray-100 dark:bg-slate-800/80 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
         {items.map((item) => (
           <button
             key={item.id}
@@ -155,8 +155,8 @@ export const DesktopNavigation = ({
             className={classNames(
               'flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150',
               {
-                'bg-white text-primary-700 shadow-sm': item.id === activeItem,
-                'text-gray-600 hover:text-gray-800 hover:bg-white/50': item.id !== activeItem,
+                'bg-white dark:bg-slate-900/70 text-primary-700 dark:text-primary-200 shadow-sm': item.id === activeItem,
+                'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-white/60 dark:hover:bg-slate-900/50': item.id !== activeItem,
               }
             )}
           >
@@ -175,8 +175,8 @@ export const DesktopNavigation = ({
               <span className={classNames(
                 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
                 item.id === activeItem
-                  ? 'bg-primary-100 text-primary-800'
-                  : 'bg-gray-200 text-gray-700'
+                  ? 'bg-primary-100 text-primary-800 dark:bg-primary-500/20 dark:text-primary-100'
+                  : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
               )}>
                 {item.badge}
               </span>

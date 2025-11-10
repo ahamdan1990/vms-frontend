@@ -137,23 +137,25 @@ const CalendarView = ({
         onClick={() => !isDisabled && handleTimeSlotClick(timeSlot, date)}
         disabled={isDisabled}
         className={`
-          w-full p-3 rounded-lg border-2 text-left transition-all
+          w-full p-4 rounded-2xl border-2 text-left transition-all shadow-sm
+          bg-white text-gray-900 dark:bg-slate-800/70 dark:text-white dark:backdrop-blur
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 dark:focus-visible:ring-offset-slate-900
           ${selectedTimeSlot?.id === timeSlot.id && isSelected(date)
-            ? 'border-blue-500 bg-blue-50'
+            ? 'border-blue-500 shadow-md dark:border-blue-400 dark:shadow-lg dark:ring-2 dark:ring-blue-400/30'
             : availability.status === 'full'
-            ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+            ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-400'
             : isPast
-            ? 'border-gray-200 bg-gray-50 opacity-40 cursor-not-allowed'
+            ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed dark:border-slate-800 dark:bg-slate-900/40 dark:opacity-50'
             : availability.status === 'warning'
-            ? 'border-yellow-300 bg-yellow-50 hover:border-yellow-400'
-            : 'border-green-300 bg-green-50 hover:border-green-400'
+            ? 'border-amber-200 bg-amber-50 hover:border-amber-300 dark:border-amber-500/70 dark:bg-amber-900/25 dark:hover:border-amber-400'
+            : 'border-green-200 bg-green-50 hover:border-green-300 dark:border-slate-700 dark:bg-slate-800/70 dark:hover:border-blue-400/60'
           }
         `}
       >
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center space-x-2">
-            <ClockIcon className="w-4 h-4 text-gray-600" />
-            <span className="text-sm font-medium text-gray-900">
+            <ClockIcon className="w-4 h-4 text-gray-600 dark:text-slate-200" />
+            <span className="text-sm font-medium text-gray-900 dark:text-white">
               {timeSlotsService.formatTimeForDisplay(timeSlot.startTime)}
             </span>
           </div>
@@ -168,20 +170,20 @@ const CalendarView = ({
           </Badge>
         </div>
 
-        <div className="text-xs text-gray-600 line-clamp-1">
+        <div className="text-xs text-gray-600 dark:text-slate-200 line-clamp-1">
           {timeSlot.name}
         </div>
 
         {timeSlot.locationName && (
-          <div className="flex items-center space-x-1 mt-1 text-xs text-gray-500">
+          <div className="flex items-center space-x-1 mt-1 text-xs text-gray-500 dark:text-slate-300/80">
             <MapPinIcon className="w-3 h-3" />
             <span className="truncate">{timeSlot.locationName}</span>
           </div>
         )}
 
-        <div className="mt-2 w-full bg-gray-200 rounded-full h-1">
+        <div className="mt-3 w-full bg-gray-200 dark:bg-slate-700 rounded-full h-1.5">
           <div
-            className={`h-1 rounded-full transition-all duration-300 ${
+            className={`h-1.5 rounded-full transition-all duration-300 ${
               availability.status === 'full' ? 'bg-red-500' :
               availability.status === 'warning' ? 'bg-yellow-500' : 'bg-green-500'
             }`}
@@ -205,25 +207,29 @@ const CalendarView = ({
             <button
               onClick={() => handleDateClick(date)}
               className={`
-                w-full p-3 rounded-lg border-2 transition-all
+                w-full p-3.5 rounded-2xl border transition-all shadow-sm bg-gray-50 text-gray-900
+                dark:bg-slate-800/80 dark:text-white
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 dark:focus-visible:ring-offset-slate-900
                 ${isToday(date)
-                  ? 'border-blue-500 bg-blue-50'
+                  ? 'border-blue-500 shadow-md dark:border-blue-400'
                   : isSelected(date)
-                  ? 'border-blue-300 bg-blue-50'
+                  ? 'border-blue-300'
                   : isPast
-                  ? 'border-gray-200 bg-gray-50 opacity-60'
-                  : 'border-gray-300 hover:border-blue-300'
+                  ? 'border-gray-200 text-gray-400 dark:border-slate-700 dark:text-slate-400'
+                  : 'border-gray-200 hover:border-blue-300 dark:border-slate-700 dark:hover:border-blue-400/70'
                 }
               `}
             >
-              <div className="text-xs text-gray-600 font-medium uppercase">
+              <div className="text-xs text-gray-600 dark:text-slate-200 font-medium uppercase tracking-wide">
                 {date.toLocaleDateString('en-US', { weekday: 'short' })}
               </div>
-              <div className={`text-2xl font-bold ${isToday(date) ? 'text-blue-600' : 'text-gray-900'}`}>
+              <div className={`text-2xl font-bold ${isToday(date) ? 'text-blue-600 dark:text-blue-300' : ''}`}>
                 {date.getDate()}
               </div>
               {isToday(date) && (
-                <div className="text-xs text-blue-600 font-medium">Today</div>
+                <div className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-400/40">
+                  Today
+                </div>
               )}
             </button>
 
@@ -234,7 +240,7 @@ const CalendarView = ({
                   <TimeSlotCard key={slot.id} timeSlot={slot} date={date} />
                 ))
               ) : (
-                <div className="text-center py-8 text-sm text-gray-400">
+                <div className="text-center py-8 text-sm text-gray-500 dark:text-slate-300 border border-dashed border-gray-200 dark:border-slate-800 rounded-xl bg-gray-50 dark:bg-slate-900/40">
                   No slots
                 </div>
               )}
@@ -252,12 +258,12 @@ const CalendarView = ({
     return (
       <div className="space-y-4">
         {/* Date Header */}
-        <div className="bg-white rounded-lg border-2 border-blue-500 p-6">
+        <div className="bg-white dark:bg-slate-900/70 rounded-2xl border-2 border-blue-200 dark:border-blue-500/60 p-6 shadow-sm">
           <div className="text-center">
-            <div className="text-sm text-gray-600 font-medium uppercase">
+            <div className="text-sm text-gray-600 dark:text-gray-300 font-medium uppercase">
               {currentDate.toLocaleDateString('en-US', { weekday: 'long' })}
             </div>
-            <div className="text-4xl font-bold text-gray-900 my-2">
+            <div className="text-4xl font-bold text-gray-900 dark:text-gray-100 my-2">
               {currentDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
             </div>
             {isToday(currentDate) && (
@@ -273,10 +279,10 @@ const CalendarView = ({
               <TimeSlotCard key={slot.id} timeSlot={slot} date={currentDate} />
             ))
           ) : (
-            <div className="col-span-full text-center py-12">
-              <ClockIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Time Slots Available</h3>
-              <p className="text-gray-600">There are no time slots configured for this date.</p>
+            <div className="col-span-full text-center py-12 border border-dashed border-gray-200 dark:border-slate-800 rounded-2xl bg-gray-50 dark:bg-slate-900/60">
+              <ClockIcon className="w-16 h-16 text-gray-300 dark:text-slate-600 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Time Slots Available</h3>
+              <p className="text-gray-600 dark:text-slate-300">There are no time slots configured for this date.</p>
             </div>
           )}
         </div>
@@ -313,7 +319,7 @@ const CalendarView = ({
             </Button>
           </div>
 
-          <div className="text-lg font-semibold text-gray-900">
+          <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             {viewMode === 'week' ? (
               <>
                 {weekDates[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDates[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -365,18 +371,18 @@ const CalendarView = ({
       )}
 
       {/* Legend */}
-      <div className="flex items-center justify-center space-x-6 text-sm">
+      <div className="flex items-center justify-center space-x-6 text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2">
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 bg-green-500 rounded"></div>
-          <span className="text-gray-600">Available</span>
+          <span>Available</span>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 bg-yellow-500 rounded"></div>
-          <span className="text-gray-600">Limited</span>
+          <span>Limited</span>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 bg-red-500 rounded"></div>
-          <span className="text-gray-600">Full</span>
+          <span>Full</span>
         </div>
       </div>
     </div>

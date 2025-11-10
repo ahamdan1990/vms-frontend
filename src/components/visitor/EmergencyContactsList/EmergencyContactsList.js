@@ -64,7 +64,8 @@ import {
   UserIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  StarIcon
+  StarIcon,
+  EyeIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
@@ -90,6 +91,7 @@ const EmergencyContactsList = ({
   // Local state
   const [bulkAction, setBulkAction] = useState('');
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
+  const [viewContact, setViewContact] = useState(null);
 
   // Permissions
   const canRead = hasPermission('EmergencyContact.Read');
@@ -221,10 +223,10 @@ const EmergencyContactsList = ({
             <StarIconSolid className="w-4 h-4 text-yellow-500" title="Primary Contact" />
           )}
           <div className="flex-1 min-w-0">
-            <div className="font-medium text-gray-900">
+            <div className="font-medium text-gray-900 dark:text-white">
               {contact.firstName} {contact.lastName}
             </div>
-            <div className="flex items-center space-x-4 text-sm text-gray-500">
+            <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-300">
               {contact.phoneNumber && (
                 <div className="flex items-center space-x-1">
                   <PhoneIcon className="w-3 h-3" />
@@ -264,9 +266,9 @@ const EmergencyContactsList = ({
           return <Badge variant="warning" size="sm">Primary</Badge>;
         }
         return priority ? (
-          <span className="text-sm text-gray-900">#{priority}</span>
+          <span className="text-sm text-gray-900 dark:text-white">#{priority}</span>
         ) : (
-          <span className="text-sm text-gray-400">-</span>
+          <span className="text-sm text-gray-400 dark:text-gray-500">-</span>
         );
       }
     },
@@ -276,6 +278,18 @@ const EmergencyContactsList = ({
       sortable: false,
       render: (value, contact) => (
         <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setViewContact(contact);
+            }}
+            className="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-300"
+          >
+            <EyeIcon className="w-4 h-4" />
+          </Button>
+
           {canUpdate && (
             <Button
               variant="ghost"
@@ -284,7 +298,7 @@ const EmergencyContactsList = ({
                 e.stopPropagation();
                 dispatch(showEditModal(contact));
               }}
-              className="text-blue-600 hover:text-blue-800"
+              className="text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
             >
               <PencilIcon className="w-4 h-4" />
             </Button>
@@ -298,7 +312,7 @@ const EmergencyContactsList = ({
                 e.stopPropagation();
                 dispatch(showDeleteModal(contact));
               }}
-              className="text-red-600 hover:text-red-800"
+              className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
             >
               <TrashIcon className="w-4 h-4" />
             </Button>
@@ -310,10 +324,10 @@ const EmergencyContactsList = ({
   if (!canRead) {
     return (
       <Card className="p-6">
-        <div className="text-center text-gray-500">
-          <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">Access Denied</h3>
-          <p className="mt-1 text-sm text-gray-500">
+        <div className="text-center text-gray-500 dark:text-gray-300">
+          <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">Access Denied</h3>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             You don't have permission to view emergency contacts.
           </p>
         </div>
@@ -327,9 +341,9 @@ const EmergencyContactsList = ({
       {showHeader && (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Emergency Contacts</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Emergency Contacts</h2>
             {visitorName && (
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 Emergency contacts for {visitorName}
               </p>
             )}
@@ -364,14 +378,14 @@ const EmergencyContactsList = ({
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <UserIcon className="w-5 h-5 text-blue-600" />
+                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                  <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-300" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Total Contacts</dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.total}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Contacts</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{stats.total}</dd>
                 </dl>
               </div>
             </div>
@@ -380,14 +394,14 @@ const EmergencyContactsList = ({
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <StarIconSolid className="w-5 h-5 text-yellow-600" />
+                <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center">
+                  <StarIconSolid className="w-5 h-5 text-yellow-600 dark:text-yellow-300" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Primary Contact</dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.primary > 0 ? 'Set' : 'Missing'}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Primary Contact</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{stats.primary > 0 ? 'Set' : 'Missing'}</dd>
                 </dl>
               </div>
             </div>
@@ -396,14 +410,14 @@ const EmergencyContactsList = ({
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <PhoneIcon className="w-5 h-5 text-green-600" />
+                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                  <PhoneIcon className="w-5 h-5 text-green-600 dark:text-green-300" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">With Phone</dt>
-                  <dd className="text-lg font-medium text-gray-900">{stats.withPhone}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">With Phone</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{stats.withPhone}</dd>
                 </dl>
               </div>
             </div>
@@ -412,14 +426,14 @@ const EmergencyContactsList = ({
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                  <div className="text-purple-600 font-bold text-sm">{stats.completionRate}%</div>
+                <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                  <div className="text-purple-600 dark:text-purple-200 font-bold text-sm">{stats.completionRate}%</div>
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">Completion</dt>
-                  <dd className="text-lg font-medium text-gray-900">
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Completion</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
                     <Badge
                       variant={stats.completionRate >= 80 ? 'success' : stats.completionRate >= 50 ? 'warning' : 'danger'}
                       size="sm"
@@ -439,7 +453,7 @@ const EmergencyContactsList = ({
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-300">
                 {selectedCount} contact{selectedCount !== 1 ? 's' : ''} selected
               </span>
               <Button
@@ -460,7 +474,7 @@ const EmergencyContactsList = ({
                     setBulkAction('delete');
                     setShowBulkConfirm(true);
                   }}
-                  className="text-red-600 border-red-300 hover:bg-red-50"
+                  className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-500 dark:hover:bg-red-500/10"
                 >
                   <TrashIcon className="w-4 h-4 mr-2" />
                   Delete Selected
@@ -523,6 +537,87 @@ const EmergencyContactsList = ({
             existingContacts={contacts}
             isEdit={true}
           />
+        )}
+      </Modal>
+
+      {/* View Modal */}
+      <Modal
+        isOpen={!!viewContact}
+        onClose={() => setViewContact(null)}
+        title="Emergency Contact Details"
+        size="lg"
+      >
+        {viewContact && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="flex items-center space-x-2">
+                  {viewContact.isPrimary && (
+                    <Badge variant="warning" size="sm">Primary</Badge>
+                  )}
+                  {viewContact.relationship && (
+                    <Badge variant="secondary" size="sm">{viewContact.relationship}</Badge>
+                  )}
+                  {viewContact.priority && (
+                    <Badge variant="info" size="sm">Priority #{viewContact.priority}</Badge>
+                  )}
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-2">
+                  {viewContact.firstName} {viewContact.lastName}
+                </h3>
+                {viewContact.notes && (
+                  <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
+                    {viewContact.notes}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                { label: 'Phone Number', value: viewContact.phoneNumber },
+                { label: 'Alternate Phone', value: viewContact.alternatePhoneNumber },
+                { label: 'Email', value: viewContact.email },
+                { label: 'Relationship', value: viewContact.relationship },
+                { label: 'Priority', value: viewContact.priority ? `#${viewContact.priority}` : 'Not set' },
+                { label: 'Primary Contact', value: viewContact.isPrimary ? 'Yes' : 'No' }
+              ].map((item, index) => (
+                <div
+                  key={index}
+                  className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-900/60"
+                >
+                  <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    {item.label}
+                  </p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mt-1 break-words">
+                    {item.value || '—'}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {viewContact.address && (
+              <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-900/60">
+                <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  Address
+                </p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">
+                  {viewContact.address}
+                </p>
+              </div>
+            )}
+
+            {viewContact.notes && (
+              <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-900/60">
+                <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  Notes
+                </p>
+                <p className="text-sm text-gray-700 dark:text-gray-200 mt-1 whitespace-pre-wrap">
+                  {viewContact.notes}
+                </p>
+              </div>
+            )}
+          </div>
         )}
       </Modal>
 

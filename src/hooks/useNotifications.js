@@ -11,7 +11,7 @@ import {
   removeNotification,
   markAllAsRead,
   clearNotifications,
-  
+
   // Helper action creators
   showSuccessToast,
   showErrorToast,
@@ -19,13 +19,15 @@ import {
   showInfoToast,
   showVisitorCheckedIn,
   showVisitorOverdue,
-  
+
   // Thunk actions
   fetchNotifications,
   markAsRead,
   addNotificationWithDesktop,
   refreshNotifications,
-  
+  deleteNotificationAsync,
+  deleteAllNotificationsAsync,
+
   // Constants
   NOTIFICATION_TYPES,
   PRIORITIES
@@ -98,19 +100,23 @@ export const useNotifications = () => {
     // Fetch notifications from API
     fetch: (params) => dispatch(fetchNotifications(params)),
     refresh: () => dispatch(refreshNotifications()),
-    
+
     // Add new notification
     add: (notificationData) => dispatch(addNotification(notificationData)),
-    
+
     // Mark as read
     markAsRead: (notificationId) => dispatch(markNotificationAsRead(notificationId)),
     markAsReadAsync: (notificationId) => dispatch(markAsRead(notificationId)),
     markAllAsRead: () => dispatch(markAllAsRead()),
-    
-    // Remove notifications
+
+    // Remove notifications (frontend only)
     remove: (notificationId) => dispatch(removeNotification(notificationId)),
     clear: () => dispatch(clearNotifications()),
-    
+
+    // Delete notifications (backend + frontend)
+    delete: (notificationId) => dispatch(deleteNotificationAsync(notificationId)),
+    deleteAll: () => dispatch(deleteAllNotificationsAsync()),
+
     // Real-time notification with desktop support
     addRealTime: (notificationData) => dispatch(addNotificationWithDesktop(notificationData))
   }, [dispatch]);
@@ -184,9 +190,13 @@ export const useNotifications = () => {
     // APIs
     toast,
     notifications: notifications_api,
+    refreshNotifications: notifications_api.refresh,
+    fetchNotifications: notifications_api.fetch,
     visitor,
     system,
     
+    connectionStatus: isSignalRConnected ? 'connected' : 'disconnected',
+
     // Constants for external use
     TYPES: NOTIFICATION_TYPES,
     PRIORITIES

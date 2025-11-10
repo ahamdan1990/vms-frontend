@@ -8,7 +8,9 @@ import {
   markNotificationAsRead,
   removeNotification,
   fetchNotificationStats,
-  clearNotifications
+  clearNotifications,
+  deleteNotificationAsync,
+  deleteAllNotificationsAsync
 } from '../../store/slices/notificationSlice';
 import { useSignalR } from '../../hooks/useSignalR';
 
@@ -129,16 +131,16 @@ const NotificationCenter = ({
     });
   }, [dispatch, notifications]);
 
-  // Clear all notifications
+  // Clear all notifications (delete from backend)
   const handleClearAll = useCallback(() => {
-    if (window.confirm('Are you sure you want to clear all notifications? This action cannot be undone.')) {
-      dispatch(clearNotifications());
+    if (window.confirm('Are you sure you want to delete all notifications? This action cannot be undone.')) {
+      dispatch(deleteAllNotificationsAsync());
     }
   }, [dispatch]);
 
-  // Remove notification
+  // Remove notification (delete from backend)
   const removeNotificationHandler = useCallback((notificationId) => {
-    dispatch(removeNotification(notificationId));
+    dispatch(deleteNotificationAsync(notificationId));
   }, [dispatch]);
 
   // Handle notification action

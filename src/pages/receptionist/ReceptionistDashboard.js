@@ -1,5 +1,5 @@
 // src/pages/receptionist/ReceptionistDashboard.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -19,6 +19,7 @@ import {
 // Services
 import visitorService from '../../services/visitorService';
 import invitationService from '../../services/invitationService';
+import dashboardService from '../../services/dashboardService';
 import visitorDocumentService from '../../services/visitorDocumentService';
 
 // Hooks
@@ -40,6 +41,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner/LoadingSpinne
 import QrCodeScanner from '../../components/checkin/QrCodeScanner/QrCodeScanner';
 import InvitationDetailsModal from '../../components/checkin/InvitationDetailsModal/InvitationDetailsModal';
 import VisitorForm from '../../components/visitor/VisitorForm/VisitorForm';
+import WalkInForm from '../../components/walkin/WalkInForm/WalkInForm';
 import CameraCapture from '../../components/camera/CameraCapture';
 import DocumentScanner from '../../components/scanner/DocumentScanner';
 import DocumentPreview from '../../components/documents/DocumentPreview';
@@ -100,7 +102,8 @@ const ReceptionistDashboard = () => {
     expectedVisitors: 0,
     checkedIn: 0,
     pendingCheckOut: 0,
-    walkIns: 0
+    walkIns: 0,
+    overdueVisitors: 0
   });
 
   // Walk-in registration state
@@ -134,6 +137,8 @@ const ReceptionistDashboard = () => {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [previewVisitorId, setPreviewVisitorId] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const overdueNotificationRef = useRef(0);
+  const lastOverdueNotificationTime = useRef(null);
 
   // Load dashboard data
   useEffect(() => {
@@ -141,115 +146,76 @@ const ReceptionistDashboard = () => {
     dispatch(getActiveInvitations());
   }, [dispatch]);
 
+  useEffect(() => {
+    const current = todayStats.overdueVisitors ?? 0;
+    const previous = overdueNotificationRef.current ?? 0;
+    const now = Date.now();
+    const fifteenMinutesInMs = 15 * 60 * 1000; // 15 minutes in milliseconds
+
+    // Check if 15 minutes have passed since the last notification
+    const canShowNotification = !lastOverdueNotificationTime.current ||
+                                 (now - lastOverdueNotificationTime.current) >= fifteenMinutesInMs;
+
+    if (current > 0 && canShowNotification) {
+      // Show notification if there are overdue visitors and 15 minutes have passed
+      toast.warning(
+        'Overdue Visitors',
+        `${current} visitor${current === 1 ? '' : 's'} have exceeded their scheduled checkout time.`,
+        { duration: 7000 }
+      );
+      lastOverdueNotificationTime.current = now;
+    } else if (current === 0 && previous > 0) {
+      // Always show the "cleared" notification when all overdue visitors check out
+      toast.success('Overdue Cleared', 'All overdue visitors have checked out.', { duration: 4000 });
+      lastOverdueNotificationTime.current = null; // Reset timer when cleared
+    }
+
+    overdueNotificationRef.current = current;
+  }, [todayStats.overdueVisitors, toast]);
+
   const loadDashboardData = async () => {
     try {
-      // Get today's invitations for stats - use UTC to avoid timezone issues
+      const metricsResponse = await dashboardService.getDashboardData();
+      const metricsData = metricsResponse?.data || metricsResponse || {};
+
       const now = new Date();
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 
-      // Create start of day in UTC (00:00:00 UTC)
-      const startOfDay = new Date(Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate(),
-        0, 0, 0, 0
-      ));
-
-      // Create end of day in UTC (23:59:59 UTC)
-      const endOfDay = new Date(Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate(),
-        23, 59, 59, 999
-      ));
-
-      console.log('📅 Loading dashboard data for date range:', {
-        startOfDay: startOfDay.toISOString(),
-        endOfDay: endOfDay.toISOString(),
-        localTime: now.toLocaleString(),
-        utcTime: now.toUTCString()
-      });
-
-      // TEMPORARY: Fetch ALL invitations INCLUDING DELETED to debug
-      const allInvitations = await invitationService.getInvitations({
-        pageSize: 100,
-        includeDeleted: true, // Include soft-deleted items
-        sortBy: 'ScheduledStartTime',
-        sortDirection: 'desc'
-      });
-
-      console.log('🔍 ALL invitations INCLUDING DELETED (for debugging):', {
-        total: allInvitations.data?.items?.length || 0,
-        invitations: (allInvitations.data?.items || []).map(inv => ({
-          id: inv.id,
-          invitationNumber: inv.invitationNumber,
-          scheduledStartTime: inv.scheduledStartTime,
-          scheduledLocalTime: new Date(inv.scheduledStartTime).toLocaleString(),
-          status: inv.status,
-          isDeleted: inv.isDeleted,
-          hostId: inv.hostId,
-          createdOn: inv.createdOn,
-          isToday: new Date(inv.scheduledStartTime) >= startOfDay && new Date(inv.scheduledStartTime) <= endOfDay
-        }))
-      });
-
-      const todayInvitations = await invitationService.getInvitations({
+      const todayInvitationsResponse = await invitationService.getInvitations({
         startDate: startOfDay.toISOString(),
         endDate: endOfDay.toISOString(),
-        pageSize: 1000 // Get all for counting
+        pageSize: 1000
       });
 
-      const items = todayInvitations.data?.items || [];
-
-      console.log('📊 Today\'s invitations received (with date filter):', {
-        total: items.length,
-        invitations: items.map(inv => ({
-          id: inv.id,
-          invitationNumber: inv.invitationNumber,
-          scheduledStartTime: inv.scheduledStartTime,
-          status: inv.status,
-          checkedInAt: inv.checkedInAt,
-          checkedOutAt: inv.checkedOutAt,
-          type: inv.type
-        }))
-      });
+      // Extract items from the response - extractApiData already unwraps the data layer
+      const todayInvitations = todayInvitationsResponse?.items || todayInvitationsResponse || [];
+      const checkedInToday = todayInvitations.filter(inv => inv.checkedInAt);
+      const pendingCheckOutToday = checkedInToday.filter(inv => !inv.checkedOutAt);
+      const walkInsToday = todayInvitations.filter(inv => (inv.type || '').toLowerCase() === 'walkin');
 
       const stats = {
-        expectedVisitors: items.length,
-        checkedIn: items.filter(inv => inv.checkedInAt).length,
-        pendingCheckOut: items.filter(inv => inv.checkedInAt && !inv.checkedOutAt).length,
-        walkIns: items.filter(inv => inv.type === 'WalkIn').length
+        expectedVisitors: todayInvitations.length,
+        checkedIn: checkedInToday.length,
+        pendingCheckOut: pendingCheckOutToday.length,
+        walkIns: walkInsToday.length,
+        overdueVisitors: metricsData.overdueVisitors ?? 0
       };
 
-      console.log('📈 Calculated stats:', stats);
-
-      setTodayStats(stats);
+      setTodayStats(prev => ({
+        ...prev,
+        ...stats
+      }));
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
     }
   };
 
-  // Calculate stats from Redux data
-  useEffect(() => {
-    if (activeInvitationsFromRedux && activeInvitationsFromRedux.length > 0) {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-      const todayCheckIns = activeInvitationsFromRedux.filter(invitation => {
-        return invitation.checkedInAt && new Date(invitation.checkedInAt) >= today;
-      }).length;
-
-      const activeVisitors = activeInvitationsFromRedux.filter(invitation => {
-        return invitation.checkedInAt && !invitation.checkedOutAt;
-      }).length;
-
-      // Update stats with real data from Redux
-      setTodayStats(prev => ({
-        ...prev,
-        checkedIn: todayCheckIns,
-        pendingCheckOut: activeVisitors
-      }));
-    }
-  }, [activeInvitationsFromRedux]);
+  // Note: We DON'T calculate stats from activeInvitationsFromRedux because:
+  // - getActiveInvitations() only returns invitations with status='Active'
+  // - It doesn't include all invitations needed for accurate stats
+  // - We need loadDashboardData() which fetches ALL today's invitations
+  // The activeInvitations from Redux is only used for the Active Visitors table
 
   // ===== SIGNALR REAL-TIME UPDATES =====
   // Subscribe to dashboard metrics updates
@@ -258,11 +224,22 @@ const ReceptionistDashboard = () => {
       console.log('📊 Dashboard event received:', eventType, data);
 
       if (eventType === 'dashboard-update') {
-        // Update stats with real-time data
-        setTodayStats(prev => ({
-          ...prev,
-          ...data
-        }));
+        // Only update if data is meaningful (not all zeros/undefined)
+        // This prevents empty SignalR events from overwriting correct stats
+        const hasValidData = data && (
+          (data.expectedVisitors && data.expectedVisitors > 0) ||
+          (data.checkedIn && data.checkedIn > 0) ||
+          (data.pendingCheckOut && data.pendingCheckOut > 0) ||
+          (data.walkIns && data.walkIns > 0) ||
+          (data.overdueVisitors !== undefined && data.overdueVisitors !== null)
+        );
+
+        if (hasValidData) {
+          setTodayStats(prev => ({
+            ...prev,
+            ...data
+          }));
+        }
       } else if (eventType === 'queue-update') {
         // Handle queue updates if needed
         console.log('Queue update:', data);
@@ -314,68 +291,156 @@ const ReceptionistDashboard = () => {
     setShowWalkInForm(false);
   };
 
-  // Handle walk-in visitor registration
-  const handleWalkInRegistration = async (visitorData) => {
+  const handleStartRegistrationWithPhoto = () => {
+    setShowWalkInForm(true);
+    setShowCameraCapture(false);
+    setWalkInError(null);
+  };
+
+  // Handle walk-in visitor registration with immediate check-in
+  const handleWalkInRegistration = async (walkInData) => {
     try {
       setWalkInLoading(true);
       setWalkInError(null);
 
-      // Include captured photo in visitor data
-      const visitorPayload = {
-        ...visitorData,
-        photo: capturedPhoto ? {
-          file: capturedPhoto.file,
-          url: capturedPhoto.url
-        } : null
-      };
+      // Step 1: Create or update visitor
+      let visitor;
+      if (walkInData.existingVisitorId) {
+        // Update existing visitor if needed
+        visitor = await visitorService.updateVisitor(
+          walkInData.existingVisitorId,
+          walkInData.visitorData
+        );
+      } else {
+        // Create new visitor
+        visitor = await visitorService.createVisitor(walkInData.visitorData);
+      }
 
-      // Create visitor
-      const visitor = await visitorService.createVisitor(visitorPayload);
-
-      // Upload photo if captured
+      // Step 2: Upload photo if captured (use profile photo endpoint)
       if (capturedPhoto) {
         try {
-          await visitorDocumentService.uploadVisitorPhoto(visitor.id, capturedPhoto.file, {
-            description: 'Walk-in visitor photo captured by receptionist',
-            isSensitive: false,
-            isRequired: false
-          });
+          await visitorService.uploadVisitorPhoto(visitor.id, capturedPhoto.file);
         } catch (photoError) {
-          console.warn('Failed to upload photo:', photoError);
+          console.warn('Failed to upload profile photo:', photoError);
           // Continue with registration even if photo upload fails
         }
       }
 
-      // Create expedited invitation for walk-in
+      // Step 2.5: Upload scanned documents if any
+      if (walkInData.scannedDocuments && walkInData.scannedDocuments.length > 0) {
+        try {
+          for (const doc of walkInData.scannedDocuments) {
+            await visitorDocumentService.uploadVisitorDocument(visitor.id, doc.file || doc.blob, {
+              description: `Walk-in ID document - ${doc.documentType || 'ID'}`,
+              documentType: doc.documentType || 'ID',
+              isSensitive: true,
+              isRequired: false
+            });
+          }
+        } catch (docError) {
+          console.warn('Failed to upload scanned documents:', docError);
+          // Continue with registration even if document upload fails
+        }
+      }
+
+      // Step 3: Create invitation with all visit details
+      const visitData = walkInData.visitData;
+      const normalizeId = (value) => {
+        if (value === null || value === undefined || value === '') return null;
+        const parsed = Number(value);
+        return Number.isNaN(parsed) ? null : parsed;
+      };
+
+      const hostId = normalizeId(visitData.hostId) ?? visitData.hostId;
+      const visitPurposeId = normalizeId(visitData.visitPurposeId);
+      const locationId = normalizeId(visitData.locationId);
+
       const invitation = await invitationService.createInvitation({
         visitorId: visitor.id,
-        subject: 'Walk-in Visit',
-        type: 'WalkIn',
+        hostId,
+        visitPurposeId: visitPurposeId || null,
+        locationId: locationId || null,
+        subject: `Walk-in Visit - ${visitData.visitPurposeName || 'General'}`,
+        type: 'walkin',  // Identify walk-ins with distinct type
+        expectedVisitorCount: 1,
         scheduledStartTime: new Date().toISOString(),
-        scheduledEndTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours from now
-        requiresApproval: false, // Walk-ins get expedited approval
-        submitForApproval: true
+        scheduledEndTime: new Date(Date.now() + visitData.duration * 60 * 1000).toISOString(),
+        requiresApproval: false, // Walk-ins bypass approval
+        submitForApproval: false,
+        notes: visitData.notes || 'Walk-in visitor - registered by receptionist'
       });
-
-      // Auto-approve for walk-ins (if user has permission)
+      
+      // Step 4: Auto-approve (receptionist has permission)
       try {
-        await invitationService.approveInvitation(invitation.id, 'Walk-in visitor - expedited approval');
+        await invitationService.approveInvitation(
+          invitation.id,
+          'Walk-in visitor - auto-approved by receptionist'
+        );
       } catch (approvalError) {
-        console.warn('Could not auto-approve walk-in, manual approval needed');
+        console.warn('Could not auto-approve walk-in:', approvalError);
+        // Continue anyway - may need manual approval
       }
+
+      // Step 5: Immediate check-in
+      let checkInResult;
+      try {
+        checkInResult = await dispatch(checkInInvitation({
+          invitationReference: invitation.invitationNumber || invitation.id.toString(),
+          notes: 'Walk-in visitor - immediate check-in by receptionist'
+        })).unwrap();
+      } catch (checkInError) {
+        console.error('Check-in failed:', checkInError);
+        // Still show success - visitor and invitation created
+        toast.warning(
+          'Check-in Requires Approval',
+          'Visitor registered successfully but requires approval before check-in.',
+          { duration: 6000 }
+        );
+      }
+
+      // Step 6: Show success message with badge printing option
+      const visitorName = `${visitor.firstName} ${visitor.lastName}`;
+
+      toast.success(
+        'Walk-in Successful',
+        `${visitorName} has been ${checkInResult ? 'checked in' : 'registered'} successfully. Host ${visitData.hostName} has been notified.`,
+        {
+          duration: 8000,
+          actions: [
+            {
+              label: 'Print Badge',
+              onClick: () => {
+                window.open(
+                  `/print/badge/${invitation.id}`,
+                  'badge-print',
+                  'width=400,height=600'
+                );
+              }
+            }
+          ]
+        }
+      );
 
       // Reset form state
       setShowWalkInForm(false);
       setShowCameraCapture(false);
       setCapturedPhoto(null);
 
-      // Refresh data
+      // Refresh dashboard data
       loadDashboardData();
       dispatch(getActiveInvitations());
 
-      return { success: true, visitor, invitation };
+      return {
+        success: true,
+        visitor,
+        invitation,
+        checkInResult,
+        badgePrintUrl: `/print/badge/${invitation.id}`
+      };
     } catch (error) {
-      setWalkInError(extractErrorMessage(error));
+      const errorMessage = extractErrorMessage(error);
+      setWalkInError(errorMessage);
+      toast.error('Walk-in Failed', errorMessage, { duration: 6000 });
       throw error;
     } finally {
       setWalkInLoading(false);
@@ -829,7 +894,7 @@ const ReceptionistDashboard = () => {
 
   // Render stats cards
   const renderStatsCards = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -877,7 +942,7 @@ const ReceptionistDashboard = () => {
               <UsersIcon className="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Check-out</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Check-out</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{todayStats.pendingCheckOut}</p>
             </div>
           </div>
@@ -897,6 +962,26 @@ const ReceptionistDashboard = () => {
             <div>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Walk-ins Today</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{todayStats.walkIns}</p>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <Card className="p-4">
+          <div className="flex items-center space-x-3">
+            <div className={`p-2 rounded-md ${todayStats.overdueVisitors > 0 ? 'bg-red-100 dark:bg-red-900/50' : 'bg-gray-100 dark:bg-gray-800'}`}>
+              <ClockIcon className={`w-6 h-6 ${todayStats.overdueVisitors > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-300'}`} />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Overdue Visitors</p>
+              <p className={`text-2xl font-bold ${todayStats.overdueVisitors > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
+                {todayStats.overdueVisitors}
+              </p>
             </div>
           </div>
         </Card>
@@ -1070,13 +1155,13 @@ const ReceptionistDashboard = () => {
             exit={{ opacity: 0, y: -20 }}
           >
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Walk-in Visitor Registration</h2>
-              
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Walk-in Visitor Registration</h2>
+
               {showCameraCapture ? (
                 <div>
                   <div className="mb-4">
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Capture Visitor Photo</h3>
-                    <p className="text-sm text-gray-600">Take a photo of the visitor for their profile</p>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Capture Visitor Photo</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Take a photo of the visitor for their profile</p>
                   </div>
                   <CameraCapture
                     onPhotoCapture={handlePhotoCapture}
@@ -1084,14 +1169,15 @@ const ReceptionistDashboard = () => {
                     maxWidth={400}
                     maxHeight={400}
                     quality={0.8}
+                    autoStart={true}
                   />
                 </div>
               ) : !showWalkInForm ? (
                 <div className="text-center py-8">
-                  <UserPlusIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-700 mb-2">Register a Walk-in Visitor</h3>
-                  <p className="text-gray-500 mb-6">Create a new visitor profile and invitation for unscheduled visitors</p>
-                  
+                  <UserPlusIcon className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">Register a Walk-in Visitor</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-6">Quick 3-step registration for unscheduled visitors</p>
+
                   {/* Walk-in registration options */}
                   <div className="space-y-4 max-w-md mx-auto">
                     {/* Start with photo capture */}
@@ -1102,7 +1188,7 @@ const ReceptionistDashboard = () => {
                     >
                       Start with Photo Capture
                     </Button>
-                    
+
                     {/* Skip photo and go to form */}
                     <Button
                       onClick={handleStartWalkInRegistration}
@@ -1110,84 +1196,59 @@ const ReceptionistDashboard = () => {
                       icon={<DocumentTextIcon className="w-5 h-5" />}
                       className="w-full"
                     >
-                      Skip Photo - Go to Registration Form
+                      Skip Photo - Start Registration
                     </Button>
                   </div>
 
                   {/* Show captured photo if available */}
                   {capturedPhoto && (
-                    <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-md">
-                      <div className="flex items-center justify-center space-x-4">
-                        <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200">
-                          <img 
-                            src={capturedPhoto.url} 
-                            alt="Captured visitor photo" 
-                            className="w-full h-full object-cover"
-                          />
+                    <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-md">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-700 ring-2 ring-white shadow">
+                            <img
+                              src={capturedPhoto.url}
+                              alt="Captured visitor photo"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="text-left">
+                            <p className="text-sm font-semibold text-green-800 dark:text-green-300">Photo captured successfully!</p>
+                            <p className="text-xs text-green-600 dark:text-green-400">Start the registration form when you are ready.</p>
+                          </div>
                         </div>
-                        <div className="text-left">
-                          <p className="text-sm font-medium text-green-800">Photo captured successfully!</p>
-                          <p className="text-xs text-green-600">Click "Start Registration" to continue</p>
+                        <div className="flex items-center space-x-3">
+                          <Button
+                            size="sm"
+                            onClick={handleStartRegistrationWithPhoto}
+                            icon={<DocumentTextIcon className="w-4 h-4" />}
+                          >
+                            Start Registration
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setCapturedPhoto(null)}
+                            icon={<XCircleIcon className="w-4 h-4" />}
+                          >
+                            Remove
+                          </Button>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setCapturedPhoto(null)}
-                          icon={<XCircleIcon className="w-4 h-4" />}
-                        >
-                          Remove
-                        </Button>
                       </div>
                     </div>
                   )}
                 </div>
               ) : (
-                <div>
-                  {/* Show captured photo summary */}
-                  {capturedPhoto && (
-                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
-                          <img 
-                            src={capturedPhoto.url} 
-                            alt="Captured visitor photo" 
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-blue-800">Visitor photo captured</p>
-                          <p className="text-xs text-blue-600">Photo will be attached to visitor profile</p>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={handleStartCameraCapture}
-                          icon={<CameraIcon className="w-4 h-4" />}
-                        >
-                          Retake
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  <VisitorForm
-                    onSubmit={handleWalkInRegistration}
-                    onCancel={() => {
-                      setShowWalkInForm(false);
-                      setCapturedPhoto(null);
-                    }}
-                    loading={walkInLoading}
-                    error={walkInError}
-                    isEdit={false}
-                    createInvitation={true}
-                    invitationDefaults={{
-                      type: 'WalkIn',
-                      subject: 'Walk-in Visit',
-                      requiresApproval: false
-                    }}
-                    initialPhoto={capturedPhoto}
-                  />
-                </div>
+                <WalkInForm
+                  onSubmit={handleWalkInRegistration}
+                  onCancel={() => {
+                    setShowWalkInForm(false);
+                    setCapturedPhoto(null);
+                  }}
+                  loading={walkInLoading}
+                  error={walkInError}
+                  initialPhoto={capturedPhoto}
+                />
               )}
             </Card>
           </motion.div>

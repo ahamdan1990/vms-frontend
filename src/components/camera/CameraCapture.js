@@ -30,12 +30,14 @@ const CameraCapture = ({
   maxWidth = 400,
   maxHeight = 400,
   quality = 0.8,
+  autoStart = false,
   className = ''
 }) => {
   // Refs
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
+  const autoStartTriggeredRef = useRef(false);
 
   // State
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -46,10 +48,14 @@ const CameraCapture = ({
 
   // Start camera stream
   const startCamera = useCallback(async () => {
+    if (isCameraActive || loading) return;
+
     try {
       setLoading(true);
       setError(null);
+      setIsCameraActive(true);
 
+      console.log('📷 Starting camera capture...');
       // Request camera permission and stream
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -60,15 +66,31 @@ const CameraCapture = ({
         audio: false
       });
 
+      console.log('✅ Camera stream obtained:', stream.active);
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
-        setIsCameraActive(true);
+
+        // Explicitly play the video
+        try {
+          await videoRef.current.play();
+          console.log('✅ Video playing');
+        } catch (playError) {
+          console.warn('Video play failed:', playError);
+        }
+
         setCameraPermission('granted');
+        console.log('✅ Camera active state set');
+      } else {
+        console.error('❌ Video ref is null');
+        stream.getTracks().forEach(track => track.stop());
+        setIsCameraActive(false);
+        setError('Camera preview unavailable. Please try again.');
       }
     } catch (error) {
-      console.error('Camera access error:', error);
-      
+      console.error('❌ Camera access error:', error);
+
       if (error.name === 'NotAllowedError') {
         setError('Camera access denied. Please enable camera permissions and try again.');
         setCameraPermission('denied');
@@ -79,10 +101,11 @@ const CameraCapture = ({
       } else {
         setError('Unable to access camera. Please check your camera settings.');
       }
+      setIsCameraActive(false);
     } finally {
       setLoading(false);
     }
-  }, [maxWidth, maxHeight]);
+  }, [isCameraActive, loading, maxWidth, maxHeight]);
 
   // Stop camera stream
   const stopCamera = useCallback(() => {
@@ -175,7 +198,7 @@ const CameraCapture = ({
         if (navigator.permissions) {
           const permission = await navigator.permissions.query({ name: 'camera' });
           setCameraPermission(permission.state);
-          
+
           permission.onchange = () => {
             setCameraPermission(permission.state);
           };
@@ -187,6 +210,23 @@ const CameraCapture = ({
 
     checkPermission();
   }, []);
+
+  // Auto-start camera if autoStart prop is true
+  useEffect(() => {
+    if (!autoStart) {
+      autoStartTriggeredRef.current = false;
+      return;
+    }
+
+    if (!autoStartTriggeredRef.current && !capturedPhoto) {
+      autoStartTriggeredRef.current = true;
+      // Add a small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        startCamera();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [autoStart, capturedPhoto, startCamera]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -200,59 +240,110 @@ const CameraCapture = ({
 
   // Render camera interface
   const renderCameraInterface = () => (
-    <div className="space-y-4">
-      {/* Video preview */}
-      <div className="relative bg-gray-900 rounded-lg overflow-hidden" style={{ aspectRatio: '4/3' }}>
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          className="w-full h-full object-cover"
-        />
-        
-        {/* Camera controls overlay */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleCancel}
-              icon={<XMarkIcon className="w-4 h-4" />}
-            >
-              Cancel
-            </Button>
-            
-            <Button
-              onClick={capturePhoto}
-              size="lg"
-              className="bg-white text-gray-900 hover:bg-gray-100 rounded-full w-16 h-16"
-              icon={<CameraIcon className="w-8 h-8" />}
-            />
-            
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={stopCamera}
-              icon={<StopIcon className="w-4 h-4" />}
-            >
-              Stop
-            </Button>
+    <div className="space-y-6">
+      <div className="grid gap-4 lg:grid-cols-5">
+        {/* Video preview */}
+        <div className="lg:col-span-3 relative bg-gray-900 rounded-2xl overflow-hidden shadow-lg" style={{ aspectRatio: '4/3' }}>
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full h-full object-cover"
+          />
+
+          {/* Gradient overlay for depth */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40 pointer-events-none" />
+
+          {/* Framing guides */}
+          <div className="pointer-events-none absolute inset-6 border border-white/50 rounded-xl" />
+          <div className="pointer-events-none absolute inset-10 border border-white/30 rounded-lg" />
+          
+          {/* Camera controls overlay */}
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+            <div className="flex items-center space-x-4 bg-black/40 backdrop-blur-md px-6 py-3 rounded-full shadow-lg">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleCancel}
+                icon={<XMarkIcon className="w-4 h-4" />}
+              >
+                Cancel
+              </Button>
+              
+              <Button
+                onClick={capturePhoto}
+                size="lg"
+                className="bg-white text-gray-900 hover:bg-gray-100 rounded-full w-16 h-16 shadow-md"
+                icon={<CameraIcon className="w-8 h-8" />}
+              />
+              
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={stopCamera}
+                icon={<StopIcon className="w-4 h-4" />}
+              >
+                Stop
+              </Button>
+            </div>
+          </div>
+
+          {/* Camera indicator */}
+          <div className="absolute top-4 right-4">
+            <div className="flex items-center space-x-2 bg-red-600 text-white px-3 py-1 rounded-full text-sm shadow">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+              <span>LIVE</span>
+            </div>
           </div>
         </div>
 
-        {/* Camera indicator */}
-        <div className="absolute top-4 right-4">
-          <div className="flex items-center space-x-2 bg-red-600 text-white px-3 py-1 rounded-full text-sm">
-            <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-            <span>LIVE</span>
+        {/* Guidance panel */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="h-full rounded-2xl border border-gray-200 bg-gray-50 p-5 shadow-sm flex flex-col">
+            <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-widest text-gray-500">
+              <span>Capture Status</span>
+              <span className="inline-flex items-center space-x-2 text-green-600">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span>Ready</span>
+              </span>
+            </div>
+
+            <div className="mt-5 space-y-3 text-sm text-gray-700 flex-1">
+              <div className="flex items-start space-x-2">
+                <CheckIcon className="w-4 h-4 text-green-600 mt-0.5" />
+                <span>Make sure the visitor is centered with eyes at the top grid line.</span>
+              </div>
+              <div className="flex items-start space-x-2">
+                <CheckIcon className="w-4 h-4 text-green-600 mt-0.5" />
+                <span>Ask the visitor to remove hats or sunglasses for the best result.</span>
+              </div>
+              <div className="flex items-start space-x-2">
+                <CheckIcon className="w-4 h-4 text-green-600 mt-0.5" />
+                <span>Keep the background simple and ensure the lighting is even.</span>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-lg bg-white p-4 text-sm text-gray-600 border border-gray-100">
+              <p className="font-medium text-gray-900 mb-2">Quick Tips</p>
+              <ul className="space-y-2">
+                <li className="flex items-center space-x-2">
+                  <PhotoIcon className="w-4 h-4 text-blue-500" />
+                  <span>Use landscape mode on tablets for wider framing.</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <PhotoIcon className="w-4 h-4 text-blue-500" />
+                  <span>Remind the visitor to look directly at the camera.</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Instructions */}
-      <div className="text-center text-sm text-gray-600">
-        <p>Position the visitor's face in the center of the frame and click the capture button</p>
+      <div className="rounded-xl bg-gray-50 border border-dashed border-gray-200 p-4 text-sm text-gray-600 text-center">
+        <p>Position the visitor so their shoulders and head are visible, then press the capture button when ready.</p>
       </div>
     </div>
   );
@@ -296,15 +387,35 @@ const CameraCapture = ({
 
   // Render initial state
   const renderInitialState = () => (
-    <div className="text-center py-12">
-      <CameraIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h3 className="text-lg font-medium text-gray-900 mb-2">Capture Visitor Photo</h3>
-      <p className="text-gray-600 mb-6">
-        Take a photo of the visitor for their profile
-      </p>
+    <div className="space-y-8">
+      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 rounded-2xl p-8 text-center text-white shadow-lg">
+        <div className="inline-flex items-center justify-center text-xs uppercase tracking-[0.3em] text-white/70 mb-4">
+          Step 1 of 2 • Capture Photo
+        </div>
+        <CameraIcon className="w-14 h-14 text-white mx-auto mb-4" />
+        <h3 className="text-2xl font-semibold mb-2">Capture Visitor Photo</h3>
+        <p className="text-white/80 max-w-2xl mx-auto">
+          Launch the camera to take a quick photo before continuing with the registration form.
+        </p>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-3 text-left">
+          <div className="bg-white/10 rounded-xl p-4 backdrop-blur">
+            <p className="text-sm font-semibold uppercase text-white/70">Lighting</p>
+            <p className="text-sm mt-2 text-white">Face a light source to avoid harsh shadows.</p>
+          </div>
+          <div className="bg-white/10 rounded-xl p-4 backdrop-blur">
+            <p className="text-sm font-semibold uppercase text-white/70">Background</p>
+            <p className="text-sm mt-2 text-white">Use a neutral background for clean results.</p>
+          </div>
+          <div className="bg-white/10 rounded-xl p-4 backdrop-blur">
+            <p className="text-sm font-semibold uppercase text-white/70">Framing</p>
+            <p className="text-sm mt-2 text-white">Keep shoulders and head fully visible.</p>
+          </div>
+        </div>
+      </div>
       
       {cameraPermission === 'denied' && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
           <div className="flex items-center space-x-2">
             <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
             <span className="text-sm text-red-700">
@@ -314,12 +425,13 @@ const CameraCapture = ({
         </div>
       )}
       
-      <div className="space-y-3">
+      <div className="text-center space-y-3">
         <Button
           onClick={startCamera}
           loading={loading}
           disabled={loading || cameraPermission === 'denied'}
           icon={<VideoCameraIcon className="w-5 h-5" />}
+          className="w-full sm:w-auto"
         >
           {loading ? 'Starting Camera...' : 'Start Camera'}
         </Button>
@@ -399,6 +511,7 @@ CameraCapture.propTypes = {
   maxWidth: PropTypes.number,
   maxHeight: PropTypes.number,
   quality: PropTypes.number,
+  autoStart: PropTypes.bool,
   className: PropTypes.string
 };
 

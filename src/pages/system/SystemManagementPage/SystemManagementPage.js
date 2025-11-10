@@ -180,7 +180,7 @@ const SystemManagementPage = () => {
       description: 'Manage global system settings and preferences',
       icon: Cog6ToothIcon,
       href: '/system/config',
-      color: 'bg-blue-100 text-blue-600',
+      color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300',
       stats: 'Last updated 2 days ago'
     },
     {
@@ -189,7 +189,7 @@ const SystemManagementPage = () => {
       description: 'Configure office locations and building settings',
       icon: MapPinIcon,
       href: '/system/locations',
-      color: 'bg-green-100 text-green-600',
+      color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-300',
       stats: `${systemStats.activeLocations} active locations`
     },
     {
@@ -198,7 +198,7 @@ const SystemManagementPage = () => {
       description: 'Define and manage visit categories and types',
       icon: DocumentTextIcon,
       href: '/system/visit-purposes',
-      color: 'bg-purple-100 text-purple-600',
+      color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300',
       stats: `${systemStats.visitPurposes} purpose types`
     },
     {
@@ -207,7 +207,7 @@ const SystemManagementPage = () => {
       description: 'Configure availability windows and scheduling',
       icon: ClockIcon,
       href: '/system/time-slots',
-      color: 'bg-orange-100 text-orange-600',
+      color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300',
       stats: `${systemStats.timeSlots} time slots configured`
     },
     {
@@ -216,7 +216,7 @@ const SystemManagementPage = () => {
       description: 'Configure alert escalation and notification rules',
       icon: ExclamationTriangleIcon,
       href: '/system/escalation-rules',
-      color: 'bg-red-100 text-red-600',
+      color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300',
       stats: 'Alert management'
     },
     {
@@ -225,7 +225,7 @@ const SystemManagementPage = () => {
       description: 'Manage user accounts, roles, and permissions',
       icon: UserGroupIcon,
       href: '/users',
-      color: 'bg-indigo-100 text-indigo-600',
+      color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300',
       stats: `${systemStats.totalUsers} total users`
     },
     {
@@ -234,7 +234,7 @@ const SystemManagementPage = () => {
       description: 'View system logs and audit trails',
       icon: ShieldCheckIcon,
       href: '/system/audit',
-      color: 'bg-gray-100 text-gray-600',
+      color: 'bg-gray-100 text-gray-600 dark:bg-gray-800/60 dark:text-gray-200',
       stats: 'Real-time monitoring'
     },
     {
@@ -243,7 +243,7 @@ const SystemManagementPage = () => {
       description: 'Manage database backups and system recovery',
       icon: CloudArrowUpIcon,
       href: '/system/backup',
-      color: 'bg-cyan-100 text-cyan-600',
+      color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-200',
       stats: `Last backup ${formatRelativeTime(systemStats.lastBackup)}`
     },
     {
@@ -252,7 +252,7 @@ const SystemManagementPage = () => {
       description: 'View system performance and usage statistics',
       icon: ChartBarIcon,
       href: '/analytics',
-      color: 'bg-yellow-100 text-yellow-600',
+      color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-300',
       stats: 'Live dashboard available'
     }
   ];
@@ -263,8 +263,8 @@ const SystemManagementPage = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">System Management</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">System Management</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Central hub for system administration and configuration
           </p>
         </div>
@@ -295,36 +295,36 @@ const SystemManagementPage = () => {
       >
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">System Health Overview</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">System Health Overview</h3>
             <div className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-green-600 font-medium">All Systems Operational</span>
+              <span className="text-sm text-green-600 dark:text-green-300 font-medium">All Systems Operational</span>
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-700">Database</span>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/60 rounded-lg border border-gray-100 dark:border-gray-700">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Database</span>
               {getHealthBadge(systemHealth.database)}
             </div>
             
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-700">Email Service</span>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/60 rounded-lg border border-gray-100 dark:border-gray-700">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Email Service</span>
               {getHealthBadge(systemHealth.emailService)}
             </div>
             
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-700">QR Generator</span>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/60 rounded-lg border border-gray-100 dark:border-gray-700">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">QR Generator</span>
               {getHealthBadge(systemHealth.qrGenerator)}
             </div>
             
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-700">Document Scanner</span>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/60 rounded-lg border border-gray-100 dark:border-gray-700">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Document Scanner</span>
               {getHealthBadge(systemHealth.documentScanner)}
             </div>
           </div>
           
-          <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
+          <div className="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
             <span>System Uptime: {systemStats.systemUptime}</span>
             <span>Last Health Check: {formatRelativeTime(systemHealth.lastHealthCheck)}</span>
           </div>
@@ -433,7 +433,7 @@ const SystemManagementPage = () => {
               >
                 <Link
                   to={module.href}
-                  className="group block p-4 rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200"
+                  className="group block p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-md transition-all duration-200 bg-white dark:bg-slate-900/60"
                 >
                   <div className="flex items-start space-x-3">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${module.color}`}>
@@ -441,13 +441,13 @@ const SystemManagementPage = () => {
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">
                         {module.title}
                       </h4>
-                      <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
                         {module.description}
                       </p>
-                      <p className="text-xs text-gray-400 mt-2">
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                         {module.stats}
                       </p>
                     </div>

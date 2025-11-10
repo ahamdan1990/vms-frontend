@@ -115,7 +115,7 @@ const RolesListPage = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:shadow-md border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md dark:hover:shadow-lg transition-shadow"
       >
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -131,7 +131,7 @@ const RolesListPage = () => {
                 )}
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {role.displayName || role.name}
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
@@ -151,11 +151,11 @@ const RolesListPage = () => {
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
               {role.description || 'No description available'}
             </p>
 
-            <div className="flex items-center gap-6 text-sm text-gray-600">
+            <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-300">
               <Tooltip content="Number of permissions assigned to this role">
                 <div className="flex items-center gap-2">
                   <KeyIcon className="w-4 h-4" />
@@ -171,7 +171,7 @@ const RolesListPage = () => {
                 </div>
               </Tooltip>
               <div className="flex items-center gap-2">
-                <span className="text-gray-500">Level:</span>
+                <span className="text-gray-500 dark:text-gray-400">Level:</span>
                 <span className="font-medium">{role.hierarchyLevel || 1}</span>
               </div>
             </div>
@@ -207,7 +207,7 @@ const RolesListPage = () => {
                   variant="outline"
                   size="sm"
                   onClick={() => handleDeleteRole(role)}
-                  className="text-red-600 hover:text-red-700 hover:border-red-600"
+                  className="text-red-600 hover:text-red-700 hover:border-red-600 dark:text-red-400 dark:hover:text-red-300 dark:hover:border-red-400"
                 >
                   <TrashIcon className="w-4 h-4 mr-1" />
                   Delete
@@ -221,12 +221,13 @@ const RolesListPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Role Management</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Role Management</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
             Manage system and custom roles with their permissions
           </p>
         </div>
@@ -247,8 +248,8 @@ const RolesListPage = () => {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Roles</p>
-              <p className="text-2xl font-bold text-gray-900">{roles.length}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Roles</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{roles.length}</p>
             </div>
             <ShieldCheckIcon className="w-12 h-12 text-blue-500 opacity-20" />
           </div>
@@ -257,8 +258,8 @@ const RolesListPage = () => {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">System Roles</p>
-              <p className="text-2xl font-bold text-gray-900">{systemRoles.length}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">System Roles</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{systemRoles.length}</p>
             </div>
             <LockClosedIcon className="w-12 h-12 text-green-500 opacity-20" />
           </div>
@@ -267,8 +268,8 @@ const RolesListPage = () => {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Custom Roles</p>
-              <p className="text-2xl font-bold text-gray-900">{customRoles.length}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Custom Roles</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{customRoles.length}</p>
             </div>
             <Cog6ToothIcon className="w-12 h-12 text-purple-500 opacity-20" />
           </div>
@@ -277,7 +278,7 @@ const RolesListPage = () => {
 
       {/* Tabs */}
       <div className="mb-6">
-        <div className="border-b border-gray-200">
+        <div className="border-b border-gray-200 dark:border-gray-700">
           <nav className="-mb-px flex space-x-8">
             {[
               { key: 'all', label: 'All Roles', count: roles.length },
@@ -290,13 +291,13 @@ const RolesListPage = () => {
                 className={`
                   py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap
                   ${activeTab === tab.key
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-300'
+                    : 'border-transparent text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 hover:border-gray-300 dark:hover:border-gray-600'
                   }
                 `}
               >
                 {tab.label}
-                <span className="ml-2 py-0.5 px-2 rounded-full text-xs bg-gray-100 text-gray-600">
+                <span className="ml-2 py-0.5 px-2 rounded-full text-xs bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
                   {tab.count}
                 </span>
               </button>
@@ -314,8 +315,8 @@ const RolesListPage = () => {
         <Card>
           <div className="text-center py-12">
             <ShieldCheckIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No roles found</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No roles found</h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {activeTab === 'custom'
                 ? 'Create a custom role to get started.'
                 : 'No roles available in this category.'}
@@ -349,6 +350,7 @@ const RolesListPage = () => {
         onClose={() => setShowDeleteModal(false)}
       />
     </div>
+  </div>
   );
 };
 

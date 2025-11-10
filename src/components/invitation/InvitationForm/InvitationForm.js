@@ -689,8 +689,8 @@ const InvitationForm = ({
     <div className="max-w-4xl mx-auto">
       {/* Error Display */}
       {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-sm text-red-700">
+        <div className="mb-6 bg-red-50 border border-red-200 dark:bg-red-900/30 dark:border-red-700 rounded-md p-4">
+          <div className="text-sm text-red-700 dark:text-red-300">
             {Array.isArray(error) ? (
               <ul className="list-disc list-inside space-y-1">
                 {error.map((err, index) => (
@@ -709,7 +709,7 @@ const InvitationForm = ({
         <Card className="p-6">
           <div className="flex items-center space-x-2 mb-6">
             <DocumentTextIcon className="w-6 h-6 text-blue-600" />
-            <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Basic Information</h3>
           </div>
 
           <div className="space-y-4">
@@ -742,12 +742,12 @@ const InvitationForm = ({
                   required
                 />
                 {touched.visitorId && formErrors.visitorId && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.visitorId}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.visitorId}</p>
                 )}
               </div>
             ) : (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Visitors <span className="text-red-500">*</span>
                 </label>
                 
@@ -766,32 +766,32 @@ const InvitationForm = ({
                 {/* Selected Visitors List */}
                 {selectedVisitors.length > 0 && (
                   <div className="space-y-2 mb-3">
-                    <p className="text-sm font-medium text-gray-700">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
                       Selected Visitors ({selectedVisitors.length})
                     </p>
-                    <div className="border border-gray-200 rounded-md max-h-40 overflow-y-auto">
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-md max-h-40 overflow-y-auto bg-white dark:bg-gray-900/30">
                       {selectedVisitors.map((visitor) => (
                         <div
                           key={visitor.id}
-                          className="flex items-center justify-between p-3 border-b border-gray-100 last:border-b-0"
+                          className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0"
                         >
                           <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                              <span className="text-sm font-medium text-blue-600">
+                              <span className="text-sm font-medium text-blue-600 dark:text-blue-300">
                                 {visitor.firstName?.[0]}{visitor.lastName?.[0]}
                               </span>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-gray-900">
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                 {visitor.firstName} {visitor.lastName}
                               </p>
-                              <p className="text-xs text-gray-500">{visitor.email}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{visitor.email}</p>
                             </div>
                           </div>
                           <button
                             type="button"
                             onClick={() => handleRemoveVisitorFromGroup(visitor.id)}
-                            className="text-red-500 hover:text-red-700 p-1"
+                            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-1"
                           >
                             <XMarkIcon className="w-4 h-4" />
                           </button>
@@ -803,7 +803,7 @@ const InvitationForm = ({
 
                 {/* Expected Visitor Count Input */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Expected Total Visitors
                   </label>
                   <Input
@@ -814,13 +814,13 @@ const InvitationForm = ({
                     className="w-full"
                     placeholder="Total number of expected visitors"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     Include visitors not yet added to the list above
                   </p>
                 </div>
 
                 {touched.visitorIds && formErrors.visitorIds && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.visitorIds}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.visitorIds}</p>
                 )}
               </div>
             )}
@@ -869,27 +869,27 @@ const InvitationForm = ({
                   </Button>
                 </div>
                 {touched.locationId && formErrors.locationId && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.locationId}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.locationId}</p>
                 )}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
-                  Invitation Type
-                </label>
-                <select
-                  value={formData.type}
-                  onChange={(e) => handleChange('type', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="Single">Single Visitor</option>
-                  <option value="Group">Group Visit</option>
-                  <option value="Recurring">Recurring Visit</option>
-                  <option value="WalkIn">Walk-in</option>
-                </select>
-              </div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Invitation Type
+              </label>
+              <select
+                value={formData.type}
+                onChange={(e) => handleChange('type', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500"
+              >
+                <option value="Single">Single Visitor</option>
+                <option value="Group">Group Visit</option>
+                <option value="Recurring">Recurring Visit</option>
+                <option value="WalkIn">Walk-in</option>
+              </select>
+            </div>
 
               <Input
                 label="Expected Visitor Count"
@@ -905,7 +905,7 @@ const InvitationForm = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Message
               </label>
               <textarea
@@ -915,16 +915,16 @@ const InvitationForm = ({
                 rows={3}
                 maxLength={1000}
                 placeholder="Additional details about the visit..."
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 ${
                   touched.message && formErrors.message
-                    ? 'border-red-300 bg-red-50'
-                    : 'border-gray-300'
+                    ? 'border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20 text-gray-900 dark:text-gray-100'
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                 }`}
               />
               {touched.message && formErrors.message && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.message}</p>
               )}
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 {formData.message.length}/1000 characters
               </p>
             </div>
@@ -935,11 +935,11 @@ const InvitationForm = ({
         <Card className="p-6">
           <div className="flex items-center space-x-2 mb-6">
             <CalendarIcon className="w-6 h-6 text-blue-600" />
-            <h3 className="text-lg font-medium text-gray-900">Schedule</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Schedule</h3>
           </div>
 
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-blue-800 dark:text-gray-600">
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-700 rounded-md">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
               📅 <strong>Date & Time Selection:</strong> Click on the date field to select a date, then click on the time portion to set the specific time for your visit.
             </p>
           </div>
@@ -958,7 +958,7 @@ const InvitationForm = ({
                 required
                 placeholder="YYYY-MM-DDTHH:MM"
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 Select both date and time for visit start
               </p>
             </div>
@@ -976,42 +976,42 @@ const InvitationForm = ({
                 required
                 placeholder="YYYY-MM-DDTHH:MM"
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 Select both date and time for visit end
               </p>
             </div>
           </div>
 
           {/* Quick Time Presets */}
-          <div className="mt-4 dark:text-gray-600">
-            <p className="text-sm font-medium text-gray-700 mb-2 ">Quick Time Presets:</p>
-            <p className="text-xs text-gray-500 mb-2">Past times will automatically use tomorrow's date</p>
+          <div className="mt-4">
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Quick Time Presets:</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Past times will automatically use tomorrow's date</p>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => setPresetTime(9, 1)}
-                className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
               >
                 9:00 AM - 10:00 AM
               </button>
               <button
                 type="button"
                 onClick={() => setPresetTime(10, 2)}
-                className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
               >
                 10:00 AM - 12:00 PM
               </button>
               <button
                 type="button"
                 onClick={() => setPresetTime(14, 1)}
-                className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
               >
                 2:00 PM - 3:00 PM
               </button>
               <button
                 type="button"
                 onClick={() => setPresetTime(15, 2)}
-                className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
               >
                 3:00 PM - 5:00 PM
               </button>
@@ -1019,10 +1019,10 @@ const InvitationForm = ({
           </div>
 
           {getVisitDuration() > 0 && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-700 rounded-md">
               <div className="flex items-center space-x-2">
                 <ClockIcon className="w-4 h-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-900">
+                <span className="text-sm font-medium text-blue-900 dark:text-blue-200">
                   Visit Duration: {getVisitDuration()} hours
                 </span>
               </div>
@@ -1035,21 +1035,21 @@ const InvitationForm = ({
           <Card className="p-6">
             <div className="flex items-center space-x-2 mb-4">
               <ClockIcon className="w-6 h-6 text-blue-600" />
-              <h3 className="text-lg font-medium text-gray-900">Available Time Slots</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Available Time Slots</h3>
               {loadingTimeSlots && (
-                <span className="text-sm text-gray-500">(Loading...)</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">(Loading...)</span>
               )}
             </div>
 
             {!loadingTimeSlots && availableTimeSlots.length === 0 && (
-              <div className="text-sm text-gray-500 p-4 bg-gray-50 rounded-md">
+              <div className="text-sm text-gray-500 dark:text-gray-400 p-4 bg-gray-50 dark:bg-slate-900/60 rounded-md">
                 No time slots available for the selected date and location. You can still proceed without selecting a time slot.
               </div>
             )}
 
             {!loadingTimeSlots && availableTimeSlots.length > 0 && (
               <div className="space-y-3">
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                   Select a time slot for your visit (optional):
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1069,17 +1069,17 @@ const InvitationForm = ({
                         className={`
                           p-4 rounded-lg border-2 text-left transition-all
                           ${isSelected
-                            ? 'border-blue-500 bg-blue-50'
+                            ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-500/10'
                             : isFull
-                            ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
-                            : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 cursor-pointer'
+                            ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-900/60 opacity-60 cursor-not-allowed'
+                            : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 cursor-pointer'
                           }
                         `}
                       >
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="font-medium text-gray-900">
-                            {slot.name}
-                          </div>
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="font-medium text-gray-900 dark:text-gray-100">
+                          {slot.name}
+                        </div>
                           {isSelected && (
                             <span className="px-2 py-1 text-xs font-medium bg-blue-500 text-white rounded">
                               Selected
@@ -1096,17 +1096,17 @@ const InvitationForm = ({
                             </span>
                           )}
                         </div>
-                        <div className="text-sm text-gray-600 mb-2">
+                        <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                           {timeSlotsService.formatTimeForDisplay(slot.startTime)} - {timeSlotsService.formatTimeForDisplay(slot.endTime)}
                         </div>
-                        <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300">
                           <span className={`
                             ${isFull ? 'text-red-600' : isLimited ? 'text-yellow-600' : 'text-green-600'}
                           `}>
                             {availableSpots} of {slot.maxVisitors} spots available
                           </span>
                           {slot.bufferMinutes > 0 && (
-                            <span className="text-gray-500">
+                            <span className="text-gray-500 dark:text-gray-400">
                               {slot.bufferMinutes}min buffer
                             </span>
                           )}
@@ -1116,8 +1116,8 @@ const InvitationForm = ({
                   })}
                 </div>
                 {selectedTimeSlot && (
-                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                    <p className="text-sm text-blue-900">
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-700 rounded-md">
+                    <p className="text-sm text-blue-900 dark:text-blue-100">
                       <strong>Selected:</strong> {selectedTimeSlot.name} ({timeSlotsService.formatTimeForDisplay(selectedTimeSlot.startTime)} - {timeSlotsService.formatTimeForDisplay(selectedTimeSlot.endTime)})
                     </p>
                   </div>
@@ -1132,7 +1132,7 @@ const InvitationForm = ({
           <Card className="p-6">
             <div className="flex items-center space-x-2 mb-4">
               <ShieldCheckIcon className="w-6 h-6 text-blue-600" />
-              <h3 className="text-lg font-medium text-gray-900">Capacity Check</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Capacity Check</h3>
             </div>
 
             <CapacityValidator
@@ -1154,7 +1154,7 @@ const InvitationForm = ({
         <Card className="p-6">
           <div className="flex items-center space-x-2 mb-6">
             <ShieldCheckIcon className="w-6 h-6 text-blue-600" />
-            <h3 className="text-lg font-medium text-gray-900">Requirements & Access</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Requirements & Access</h3>
           </div>
 
           <div className="space-y-4">
@@ -1165,11 +1165,11 @@ const InvitationForm = ({
                     type="checkbox"
                     checked={formData.requiresApproval}
                     onChange={(e) => handleChange('requiresApproval', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
                   <div>
                     <span className="text-sm font-medium text-gray-900 dark:text-white">Requires Approval</span>
-                    <p className="text-sm text-gray-500">Must be approved before visit</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Must be approved before visit</p>
                   </div>
                 </label>
 
@@ -1178,11 +1178,11 @@ const InvitationForm = ({
                     type="checkbox"
                     checked={formData.requiresEscort}
                     onChange={(e) => handleChange('requiresEscort', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
                   <div>
                     <span className="text-sm font-medium text-gray-900 dark:text-white">Requires Escort</span>
-                    <p className="text-sm text-gray-500">Visitor must be escorted at all times</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Visitor must be escorted at all times</p>
                   </div>
                 </label>
 
@@ -1191,11 +1191,11 @@ const InvitationForm = ({
                     type="checkbox"
                     checked={formData.requiresBadge}
                     onChange={(e) => handleChange('requiresBadge', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
                   <div>
                     <span className="text-sm font-medium text-gray-900 dark:text-white">Requires Badge</span>
-                    <p className="text-sm text-gray-500">Visitor badge will be printed</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Visitor badge will be printed</p>
                   </div>
                 </label>
               </div>
@@ -1206,13 +1206,13 @@ const InvitationForm = ({
                     type="checkbox"
                     checked={formData.needsParking}
                     onChange={(e) => handleChange('needsParking', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
-                  <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">Needs Parking</span>
-                    <p className="text-sm text-gray-500">Visitor requires parking space</p>
-                  </div>
-                </label>
+                    <div>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">Needs Parking</span>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Visitor requires parking space</p>
+                    </div>
+                  </label>
 
                 {isEdit && (
                   <label className="flex items-center space-x-3">
@@ -1220,13 +1220,13 @@ const InvitationForm = ({
                       type="checkbox"
                       checked={formData.submitForApproval}
                       onChange={(e) => handleChange('submitForApproval', e.target.checked)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                     />
-                    <div>
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">Submit for Approval</span>
-                      <p className="text-sm text-gray-500">Submit immediately after saving</p>
-                    </div>
-                  </label>
+                      <div>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">Submit for Approval</span>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Submit immediately after saving</p>
+                      </div>
+                    </label>
                 )}
               </div>
             </div>
@@ -1246,7 +1246,7 @@ const InvitationForm = ({
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Special Instructions
               </label>
               <textarea
@@ -1256,16 +1256,16 @@ const InvitationForm = ({
                 rows={3}
                 maxLength={500}
                 placeholder="Any special requirements or instructions for the visit..."
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 ${
                   touched.specialInstructions && formErrors.specialInstructions
-                    ? 'border-red-300 bg-red-50'
-                    : 'border-gray-300'
+                    ? 'border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20 text-gray-900 dark:text-gray-100'
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                 }`}
               />
               {touched.specialInstructions && formErrors.specialInstructions && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.specialInstructions}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.specialInstructions}</p>
               )}
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 {formData.specialInstructions.length}/500 characters
               </p>
             </div>
@@ -1274,12 +1274,12 @@ const InvitationForm = ({
 
         {/* Form Errors */}
         {formErrors.capacity && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="bg-red-50 border border-red-200 dark:bg-red-900/30 dark:border-red-700 rounded-lg p-4">
             <div className="flex items-start space-x-3">
-              <ExclamationCircleIcon className="w-5 h-5 text-red-600 mt-0.5" />
+              <ExclamationCircleIcon className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5" />
               <div>
-                <h4 className="text-sm font-medium text-red-800">Capacity Issue</h4>
-                <p className="text-sm text-red-700 mt-1">{formErrors.capacity}</p>
+                <h4 className="text-sm font-medium text-red-800 dark:text-red-200">Capacity Issue</h4>
+                <p className="text-sm text-red-700 dark:text-red-300 mt-1">{formErrors.capacity}</p>
               </div>
             </div>
           </div>
@@ -1306,7 +1306,7 @@ const InvitationForm = ({
 
         {/* Debug info for development */}
         {process.env.NODE_ENV === 'development' && Object.keys(formErrors).length > 0 && (
-          <div className="mt-4 bg-red-50 border border-red-200 rounded p-3 text-sm text-red-700">
+          <div className="mt-4 bg-red-50 border border-red-200 dark:bg-red-900/30 dark:border-red-700 rounded p-3 text-sm text-red-700 dark:text-red-300">
             <strong>Form Validation Errors ({Object.keys(formErrors).length}):</strong>
             <ul className="list-disc list-inside mt-2 space-y-1">
               {Object.entries(formErrors).map(([field, error]) => (

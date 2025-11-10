@@ -495,16 +495,16 @@ const VisitorAnalyticsDashboard = () => {
   const renderDateRangeSelector = () => (
     <div className="flex items-center justify-between mb-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Visitor Analytics</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Visitor Analytics</h1>
         {lastUpdated && (
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Last updated: {formatters.formatDateTime(lastUpdated)}
           </p>
         )}
       </div>
 
       <div className="flex items-center space-x-4">
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+        <div className="flex space-x-1 bg-gray-100 dark:bg-slate-800/80 border border-gray-200 dark:border-gray-700 p-1 rounded-lg">
           {[
             { label: '24h', value: '1d' },
             { label: '7d', value: '7d' },
@@ -517,8 +517,8 @@ const VisitorAnalyticsDashboard = () => {
               onClick={() => setDateRange(range.value)}
               className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                 dateRange === range.value
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-800'
+                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-300 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
               }`}
             >
               {range.label}
@@ -551,7 +551,7 @@ const VisitorAnalyticsDashboard = () => {
     return (
       <div className="flex items-center justify-center py-12">
         <LoadingSpinner size="lg" />
-        <span className="ml-3 text-gray-600">Loading analytics...</span>
+        <span className="ml-3 text-gray-600 dark:text-gray-300">Loading analytics...</span>
       </div>
     );
   }
@@ -561,10 +561,10 @@ const VisitorAnalyticsDashboard = () => {
       {renderDateRangeSelector()}
       
       {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+        <div className="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-md p-4">
           <div className="flex items-center space-x-2">
-            <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
-            <span className="text-sm text-red-700">{error}</span>
+            <ExclamationTriangleIcon className="w-5 h-5 text-red-600 dark:text-red-300" />
+            <span className="text-sm text-red-700 dark:text-red-200">{error}</span>
           </div>
         </div>
       )}
@@ -575,17 +575,17 @@ const VisitorAnalyticsDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* Daily Visitor Trend */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Daily Visitor Trend</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Daily Visitor Trend</h3>
           <div className="space-y-3">
             {analytics.trends.dailyVisitors.slice(-7).map(day => (
               <div key={day.date} className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-gray-600 dark:text-gray-300">
                   {formatters.formatDate(new Date(day.date))}
                 </span>
                 <div className="flex items-center space-x-3">
-                  <div className="flex-1 bg-gray-200 rounded-full h-2 w-24">
+                  <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 w-24">
                     <div 
-                      className="bg-blue-500 h-2 rounded-full"
+                      className="bg-blue-500 dark:bg-blue-400 h-2 rounded-full"
                       style={{ width: `${(day.visitors / Math.max(...analytics.trends.dailyVisitors.map(d => d.visitors))) * 100}%` }}
                     />
                   </div>
@@ -598,15 +598,15 @@ const VisitorAnalyticsDashboard = () => {
 
         {/* Popular Companies */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Companies</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Companies</h3>
           <div className="space-y-3">
             {analytics.demographics.byCompany.slice(0, 6).map((company, index) => (
               <div key={company.company} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">
-                    <span className="text-xs font-medium text-gray-600">#{index + 1}</span>
+                  <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-200">#{index + 1}</span>
                   </div>
-                  <span className="text-sm text-gray-900 truncate">{company.company}</span>
+                  <span className="text-sm text-gray-900 dark:text-gray-100 truncate">{company.company}</span>
                 </div>
                 <Badge color="green" size="sm">{company.count}</Badge>
               </div>
@@ -619,13 +619,13 @@ const VisitorAnalyticsDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Popular Hosts */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Hosts</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Hosts</h3>
           <div className="space-y-3">
             {analytics.performance.popularHosts.slice(0, 5).map(host => (
               <div key={host.name} className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{host.name}</p>
-                  <p className="text-xs text-gray-500">{host.invitations} invitations</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{host.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{host.invitations} invitations</p>
                 </div>
                 <Badge 
                   color={host.checkInRate >= 80 ? 'green' : host.checkInRate >= 60 ? 'yellow' : 'red'} 
@@ -640,13 +640,13 @@ const VisitorAnalyticsDashboard = () => {
 
         {/* Busy Locations */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Busy Locations</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Busy Locations</h3>
           <div className="space-y-3">
             {analytics.performance.busyLocations.map(location => (
               <div key={location.name} className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <MapPinIcon className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-900">{location.name}</span>
+                  <MapPinIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                  <span className="text-sm text-gray-900 dark:text-gray-100">{location.name}</span>
                 </div>
                 <Badge color="purple" size="sm">{location.visits}</Badge>
               </div>
@@ -656,13 +656,13 @@ const VisitorAnalyticsDashboard = () => {
 
         {/* Peak Times */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Peak Times</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Peak Times</h3>
           <div className="space-y-3">
             {analytics.performance.peakTimes.map(time => (
               <div key={time.hour} className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <ClockIcon className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-900">
+                  <ClockIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                  <span className="text-sm text-gray-900 dark:text-gray-100">
                     {formatters.formatTime(new Date().setHours(time.hour, 0, 0, 0))}
                   </span>
                 </div>

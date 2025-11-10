@@ -168,35 +168,38 @@ const RoleDetailsPage = () => {
 
   if (loading || permissionsLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
       </div>
     );
   }
 
   if (!role) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Card>
-          <div className="text-center py-12">
-            <ShieldCheckIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Role not found</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              The role you're looking for doesn't exist or has been deleted.
-            </p>
-            <div className="mt-6">
-              <Button onClick={() => navigate('/admin/roles')}>
-                Back to Roles
-              </Button>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4 py-8">
+          <Card>
+            <div className="text-center py-12">
+              <ShieldCheckIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">Role not found</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                The role you're looking for doesn't exist or has been deleted.
+              </p>
+              <div className="mt-6">
+                <Button onClick={() => navigate('/admin/roles')}>
+                  Back to Roles
+                </Button>
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
         <Button
@@ -221,10 +224,10 @@ const RoleDetailsPage = () => {
               )}
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {role.displayName || role.name}
               </h1>
-              <p className="text-gray-600 mt-1">{role.description}</p>
+              <p className="text-gray-600 dark:text-gray-300 mt-1">{role.description}</p>
               <div className="flex items-center gap-2 mt-2">
                 <Badge variant={role.isActive ? 'success' : 'gray'}>
                   {role.isActive ? 'Active' : 'Inactive'}
@@ -257,11 +260,11 @@ const RoleDetailsPage = () => {
                   </Button>
                 </>
               ) : (
-                <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                  <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
-                  <span className="text-sm font-medium text-blue-800">
+                  <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
                     Click on permission cards below to edit
                   </span>
                 </div>
@@ -274,22 +277,22 @@ const RoleDetailsPage = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <Card>
-          <p className="text-sm text-gray-600">Total Permissions</p>
-          <p className="text-2xl font-bold text-gray-900">
+          <p className="text-sm text-gray-600 dark:text-gray-400">Total Permissions</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {selectedPermissions.size}
           </p>
         </Card>
         <Card>
-          <p className="text-sm text-gray-600">Users with Role</p>
-          <p className="text-2xl font-bold text-gray-900">{role.userCount || 0}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Users with Role</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{role.userCount || 0}</p>
         </Card>
         <Card>
-          <p className="text-sm text-gray-600">Hierarchy Level</p>
-          <p className="text-2xl font-bold text-gray-900">{role.hierarchyLevel || 1}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Hierarchy Level</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{role.hierarchyLevel || 1}</p>
         </Card>
         <Card>
-          <p className="text-sm text-gray-600">Display Order</p>
-          <p className="text-2xl font-bold text-gray-900">{role.displayOrder || 0}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Display Order</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{role.displayOrder || 0}</p>
         </Card>
       </div>
 
@@ -298,13 +301,13 @@ const RoleDetailsPage = () => {
         <div className="flex gap-4">
           <div className="flex-1">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
                 placeholder="Search permissions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
               />
             </div>
           </div>
@@ -312,7 +315,7 @@ const RoleDetailsPage = () => {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
             >
               {categories.map((cat, index) => (
                 <option key={`category-${index}-${cat}`} value={cat}>
@@ -326,13 +329,13 @@ const RoleDetailsPage = () => {
 
       {/* System Role Warning */}
       {role.isSystemRole && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 mb-6">
           <div className="flex">
             <div className="flex-shrink-0">
-              <ShieldCheckIcon className="h-5 w-5 text-yellow-400" />
+              <ShieldCheckIcon className="h-5 w-5 text-yellow-400 dark:text-yellow-300" />
             </div>
             <div className="ml-3">
-              <p className="text-sm text-yellow-700">
+              <p className="text-sm text-yellow-700 dark:text-yellow-200">
                 This is a system role. Permissions cannot be modified directly. Only display properties can be edited.
               </p>
             </div>
@@ -353,10 +356,10 @@ const RoleDetailsPage = () => {
             <Card key={category.category}>
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {category.category}
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     {selectedCount} of {categoryPermissions.length} selected
                   </p>
                 </div>
@@ -395,33 +398,33 @@ const RoleDetailsPage = () => {
                       className={`
                         p-3 rounded-lg border-2 text-left transition-all
                         ${isSelected
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 bg-white hover:border-gray-300'
+                          ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
+                          : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-500'
                         }
                         ${isDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}
                       `}
                       whileHover={!isDisabled ? { scale: 1.02 } : {}}
                       whileTap={!isDisabled ? { scale: 0.98 } : {}}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <p className="font-medium text-sm text-gray-900">
-                            {permission.displayName}
-                          </p>
-                          <p className="text-xs text-gray-600 mt-1">
-                            {permission.description}
-                          </p>
-                        </div>
-                        <div
-                          className={`
-                            w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ml-2
-                            ${isSelected ? 'bg-blue-500' : 'border-2 border-gray-300'}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
+                              {permission.displayName}
+                            </p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                              {permission.description}
+                            </p>
+                          </div>
+                          <div
+                            className={`
+                              w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ml-2
+                            ${isSelected ? 'bg-blue-500' : 'border-2 border-gray-300 dark:border-gray-600'}
                           `}
-                        >
-                          {isSelected && (
-                            <CheckIcon className="w-4 h-4 text-white" />
-                          )}
-                        </div>
+                          >
+                            {isSelected && (
+                              <CheckIcon className="w-4 h-4 text-white" />
+                            )}
+                          </div>
                       </div>
                     </motion.button>
                   );
@@ -435,14 +438,15 @@ const RoleDetailsPage = () => {
       {filteredPermissions.length === 0 && (
         <Card>
           <div className="text-center py-12">
-            <FunnelIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No permissions found</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <FunnelIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No permissions found</h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               Try adjusting your search or filter criteria.
             </p>
           </div>
         </Card>
       )}
+      </div>
     </div>
   );
 };

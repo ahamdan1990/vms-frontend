@@ -368,7 +368,7 @@ const CheckInDashboard = () => {
 
     return (
       <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
           <UserIcon className="w-5 h-5 text-blue-600" />
         </div>
         <div>
@@ -573,7 +573,7 @@ const CheckInDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-green-100 rounded-md">
+            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-md">
               <CheckCircleIconSolid className="w-6 h-6 text-green-600" />
             </div>
             <div>
@@ -585,7 +585,7 @@ const CheckInDashboard = () => {
 
         <Card className="p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-blue-100 rounded-md">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-md">
               <UserIcon className="w-6 h-6 text-blue-600" />
             </div>
             <div>
@@ -597,7 +597,7 @@ const CheckInDashboard = () => {
 
         <Card className="p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-yellow-100 rounded-md">
+            <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-md">
               <ClockIconSolid className="w-6 h-6 text-yellow-600" />
             </div>
             <div>
@@ -609,7 +609,7 @@ const CheckInDashboard = () => {
 
         <Card className="p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-purple-100 rounded-md">
+            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-md">
               <ClockIcon className="w-6 h-6 text-purple-600" />
             </div>
             <div>
@@ -624,7 +624,7 @@ const CheckInDashboard = () => {
 
       {/* Error Display */}
       {checkInError && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div className="bg-red-50 border border-red-200 dark:bg-red-900/30 dark:border-red-700 rounded-md p-4">
           <div className="text-sm text-red-700">
             {extractErrorMessage(checkInError)}
           </div>
@@ -640,14 +640,14 @@ const CheckInDashboard = () => {
       )}
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-gray-200 dark:border-gray-700">
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => setActiveTab('scanner')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'scanner'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-300'
+                : 'border-transparent text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -659,8 +659,8 @@ const CheckInDashboard = () => {
             onClick={() => setActiveTab('manual')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'manual'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-300'
+                : 'border-transparent text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -672,8 +672,8 @@ const CheckInDashboard = () => {
             onClick={() => setActiveTab('active')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'active'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-300'
+                : 'border-transparent text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -703,15 +703,15 @@ const CheckInDashboard = () => {
                 </p>
 
                 {/* Check-in Mode Toggle */}
-                <div className="flex items-center justify-center space-x-4 mb-6 p-4 bg-gray-50 rounded-lg">
-                  <span className="text-sm font-medium text-gray-700">Check-in Mode:</span>
+                <div className="flex items-center justify-center space-x-4 mb-6 p-4 bg-gray-50 dark:bg-slate-900/60 rounded-lg border border-gray-100 dark:border-gray-700">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Check-in Mode:</span>
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => setAutoCheckInMode(false)}
                       className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                         !autoCheckInMode
                           ? 'bg-blue-600 text-white shadow-sm'
-                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                          : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-slate-800'
                       }`}
                     >
                       Manual Confirmation
@@ -721,7 +721,7 @@ const CheckInDashboard = () => {
                       className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                         autoCheckInMode
                           ? 'bg-blue-600 text-white shadow-sm'
-                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                          : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-slate-800'
                       }`}
                     >
                       Auto Check-in
@@ -729,7 +729,7 @@ const CheckInDashboard = () => {
                   </div>
                 </div>
 
-                <div className="mb-6 text-sm text-gray-600">
+                <div className="mb-6 text-sm text-gray-600 dark:text-gray-300">
                   {autoCheckInMode ? (
                     <p>
                       ✅ <strong>Auto mode:</strong> Visitors will be checked in immediately after QR scan
@@ -885,7 +885,7 @@ const CheckInDashboard = () => {
                 <UserIcon className="h-5 w-5 mr-2" />
                 Visitor Information
               </h3>
-              <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+              <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-slate-900/60 p-4 rounded-lg">
                 <div>
                   <p className="text-sm text-gray-500">Full Name</p>
                   <p className="font-medium text-gray-900">
@@ -919,7 +919,7 @@ const CheckInDashboard = () => {
                 <CalendarIcon className="h-5 w-5 mr-2" />
                 Invitation Details
               </h3>
-              <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+              <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-slate-900/60 p-4 rounded-lg">
                 <div>
                   <p className="text-sm text-gray-500">Invitation Number</p>
                   <p className="font-medium text-gray-900">

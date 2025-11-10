@@ -203,6 +203,15 @@ const UnifiedAnalyticsDashboard = () => {
   };
 
   // Render overview cards
+  const CARD_COLOR_STYLES = {
+    blue: { text: 'text-blue-600 dark:text-blue-300', bg: 'bg-blue-50 dark:bg-blue-900/30' },
+    green: { text: 'text-green-600 dark:text-green-300', bg: 'bg-green-50 dark:bg-green-900/30' },
+    purple: { text: 'text-purple-600 dark:text-purple-300', bg: 'bg-purple-50 dark:bg-purple-900/30' },
+    orange: { text: 'text-orange-600 dark:text-orange-300', bg: 'bg-orange-50 dark:bg-orange-900/30' },
+    indigo: { text: 'text-indigo-600 dark:text-indigo-300', bg: 'bg-indigo-50 dark:bg-indigo-900/30' },
+    cyan: { text: 'text-cyan-600 dark:text-cyan-300', bg: 'bg-cyan-50 dark:bg-cyan-900/30' }
+  };
+
   const renderOverviewCards = () => {
     const cards = [
       {
@@ -265,7 +274,7 @@ const UnifiedAnalyticsDashboard = () => {
             transition={{ duration: 0.4, delay: index * 0.1 }}
           >
             <Card 
-              className="p-6 hover:shadow-lg transition-all duration-300 border-l-4 border-l-primary-500"
+              className="p-6 hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-700 bg-white dark:bg-slate-900/70"
               hover={true}
             >
               <div className="flex items-start justify-between">
@@ -273,7 +282,7 @@ const UnifiedAnalyticsDashboard = () => {
                   <p className={`${TEXT_STYLES.label} mb-1 text-gray-600 dark:text-gray-400`}>
                     {card.title}
                   </p>
-                  <p className={`text-3xl font-bold mb-1 text-${card.color}-600 dark:text-${card.color}-400`}>
+                  <p className={`text-3xl font-bold mb-1 ${CARD_COLOR_STYLES[card.color].text}`}>
                     {card.value}
                   </p>
                   <p className={`${TEXT_STYLES.helpText} text-gray-500 dark:text-gray-400`}>
@@ -295,7 +304,7 @@ const UnifiedAnalyticsDashboard = () => {
                     </div>
                   )}
                 </div>
-                <div className={`p-3 bg-${card.color}-50 dark:bg-${card.color}-900/30 rounded-lg`}>
+                <div className={`p-3 rounded-lg ${CARD_COLOR_STYLES[card.color].bg}`}>
                   {card.icon}
                 </div>
               </div>
@@ -309,7 +318,7 @@ const UnifiedAnalyticsDashboard = () => {
   // Render insights section
   const renderInsights = () => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card className="p-6">
+      <Card className="p-6 border border-gray-100 dark:border-gray-700 bg-white dark:bg-slate-900/70">
         <h3 className={`${TEXT_STYLES.cardTitle} mb-4 text-gray-900 dark:text-white`}>Peak Hours</h3>
         <div className="space-y-3">
           {analytics.insights.peakHours && analytics.insights.peakHours.length > 0 ? (
@@ -334,7 +343,7 @@ const UnifiedAnalyticsDashboard = () => {
         </div>
       </Card>
 
-      <Card className="p-6">
+      <Card className="p-6 border border-gray-100 dark:border-gray-700 bg-white dark:bg-slate-900/70">
         <h3 className={`${TEXT_STYLES.cardTitle} mb-4 text-gray-900 dark:text-white`}>Popular Locations</h3>
         <div className="space-y-3">
           {analytics.insights.popularLocations && analytics.insights.popularLocations.length > 0 ? (
@@ -417,9 +426,9 @@ const UnifiedAnalyticsDashboard = () => {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4"
+            className="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-4"
           >
-            <p className="text-red-600 text-sm">{error}</p>
+            <p className="text-red-600 dark:text-red-200 text-sm">{error}</p>
           </motion.div>
         )}
 
@@ -436,7 +445,7 @@ const UnifiedAnalyticsDashboard = () => {
               {loading && !analytics.overview.totalVisitors ? (
                 <div className="flex items-center justify-center py-12">
                   <LoadingSpinner size="lg" />
-                  <span className="ml-3 text-gray-600">Loading analytics...</span>
+                  <span className="ml-3 text-gray-600 dark:text-gray-300">Loading analytics...</span>
                 </div>
               ) : (
                 <>
@@ -455,7 +464,9 @@ const UnifiedAnalyticsDashboard = () => {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <VisitorAnalyticsDashboard />
+              <Card className="p-4 sm:p-6 border border-gray-100 dark:border-gray-700 bg-white dark:bg-slate-900/70">
+                <VisitorAnalyticsDashboard />
+              </Card>
             </motion.div>
           )}
 
@@ -467,7 +478,9 @@ const UnifiedAnalyticsDashboard = () => {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <CapacityDashboard />
+              <Card className="p-4 sm:p-6 border border-gray-100 dark:border-gray-700 bg-white dark:bg-slate-900/70">
+                <CapacityDashboard />
+              </Card>
             </motion.div>
           )}
 
@@ -480,8 +493,8 @@ const UnifiedAnalyticsDashboard = () => {
               transition={{ duration: 0.3 }}
               className="space-y-6"
             >
-              <Card className="p-6">
-                <h2 className={`${TEXT_STYLES.sectionTitle} mb-6`}>AI-Powered Insights</h2>
+              <Card className="p-6 border border-gray-100 dark:border-gray-700 bg-white dark:bg-slate-900/70">
+                <h2 className={`${TEXT_STYLES.sectionTitle} mb-6 text-gray-900 dark:text-white`}>AI-Powered Insights</h2>
                 
                 <div className="space-y-4">
                   {analytics.insights.recommendations.map((recommendation, index) => (
@@ -490,12 +503,12 @@ const UnifiedAnalyticsDashboard = () => {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex items-start space-x-4 p-4 bg-blue-50 rounded-lg"
+                      className="flex items-start space-x-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-900/40"
                     >
-                      <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-1">
-                        <span className="text-xs font-medium text-blue-600">{index + 1}</span>
+                      <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center flex-shrink-0 mt-1">
+                        <span className="text-xs font-medium text-blue-600 dark:text-blue-200">{index + 1}</span>
                       </div>
-                      <p className={TEXT_STYLES.bodyText}>{recommendation}</p>
+                      <p className={`${TEXT_STYLES.bodyText} text-gray-800 dark:text-gray-100`}>{recommendation}</p>
                     </motion.div>
                   ))}
                 </div>

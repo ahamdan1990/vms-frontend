@@ -117,6 +117,32 @@ export const acknowledgeNotificationAsync = createAsyncThunk(
   }
 );
 
+// Delete a specific notification from backend
+export const deleteNotificationAsync = createAsyncThunk(
+  'notifications/deleteNotificationAsync',
+  async (notificationId, { rejectWithValue }) => {
+    try {
+      await notificationService.deleteNotification(notificationId);
+      return notificationId;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Delete all notifications from backend
+export const deleteAllNotificationsAsync = createAsyncThunk(
+  'notifications/deleteAllNotificationsAsync',
+  async (_, { rejectWithValue }) => {
+    try {
+      await notificationService.deleteAllNotifications();
+      return true;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const fetchNotificationStats = createAsyncThunk(
   'notifications/fetchNotificationStats',
   async ({ fromDate, toDate } = {}, { rejectWithValue }) => {
@@ -378,12 +404,40 @@ const notificationSlice = createSlice({
           }
           notification.acknowledgedOn = new Date().toISOString();
           notification.acknowledged = true;
-          
+
           // Update last sync time
           state.lastSyncTime = new Date().toISOString();
         }
       })
       .addCase(acknowledgeNotificationAsync.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      // Delete a specific notification
+      .addCase(deleteNotificationAsync.fulfilled, (state, action) => {
+        const notificationId = action.payload;
+        const notification = state.notifications.find(n => n.id === notificationId);
+
+        if (notification) {
+          // Decrease unread count if notification was unread
+          if (!notification.read) {
+            state.unreadCount = Math.max(0, state.unreadCount - 1);
+          }
+          // Remove from notifications list
+          state.notifications = state.notifications.filter(n => n.id !== notificationId);
+          // Update sync time
+          state.lastSyncTime = new Date().toISOString();
+        }
+      })
+      .addCase(deleteNotificationAsync.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      // Delete all notifications
+      .addCase(deleteAllNotificationsAsync.fulfilled, (state) => {
+        state.notifications = [];
+        state.unreadCount = 0;
+        state.lastSyncTime = new Date().toISOString();
+      })
+      .addCase(deleteAllNotificationsAsync.rejected, (state, action) => {
         state.error = action.payload;
       })
       // Fetch notification stats
