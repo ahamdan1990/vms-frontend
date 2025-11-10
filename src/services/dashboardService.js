@@ -3,6 +3,7 @@ import visitorService from './visitorService';
 import invitationService from './invitationService';
 import auditService from './auditService';
 import capacityService from './capacityService';
+import analyticsService from './analyticsService';
 import { DASHBOARD_ENDPOINTS } from './apiEndpoints';
 
 /**
@@ -84,74 +85,127 @@ const dashboardService = {
   },
 
   /**
-   * Get analytics data for UnifiedAnalyticsDashboard - REAL DATA VERSION
+   * Get analytics data for UnifiedAnalyticsDashboard - PRODUCTION-READY VERSION
+   * Uses comprehensive analytics API with all real-time data
    */
-  async getAnalyticsData() {
+  async getAnalyticsData(params = {}) {
     try {
-      // Set a timeout to prevent infinite hanging
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Analytics request timeout')), 30000); // 30 second timeout
-      });
+      // Use the new comprehensive analytics endpoint
+      const analytics = await analyticsService.getComprehensiveAnalytics(params);
 
-      const dataPromise = Promise.all([
-        visitorService.getVisitorStatistics(),
-        invitationService.getInvitationStatistics(),
-        this.getCapacityStatsWithFallback()
-      ]);
-
-      const [visitorStats, invitationStats, capacityStats] = await Promise.race([
-        dataPromise,
-        timeoutPromise
-      ]);
-
-      // Get today's invitations for accurate today stats
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      const todayEnd = new Date();
-      todayEnd.setHours(23, 59, 59, 999);
-
-      const todayInvitationStats = await invitationService.getInvitationStatistics({
-        startDate: todayStart.toISOString(),
-        endDate: todayEnd.toISOString()
-      });
-
-      // Calculate real capacity metrics
-      const maxCapacity = capacityStats.maxCapacity || 150;
-      const currentOccupancy = invitationStats.activeVisitors || 0;
-      
+      // Transform the data into the format expected by the dashboard
       return {
         overview: {
-          totalVisitors: visitorStats.totalVisitors || 0,
-          activeVisitors: visitorStats.activeVisitors || 0,
-          todayVisitors: todayInvitationStats.totalInvitations || 0,
-          avgVisitDuration: Math.round(invitationStats.averageVisitDuration || 45),
-          checkInRate: this.calculateCheckInRate(invitationStats),
-          currentOccupancy: currentOccupancy,
-          maxCapacity: maxCapacity,
-          utilizationRate: this.calculateUtilizationRate(currentOccupancy, maxCapacity),
-          availableSlots: Math.max(0, maxCapacity - currentOccupancy),
-          capacityStatus: this.getCapacityStatus(currentOccupancy, maxCapacity),
-          visitorTrend: this.calculateTrend(visitorStats.growthData),
-          capacityTrend: this.calculateCapacityTrend(capacityStats.trends)
+          // Real-time metrics
+          totalVisitors: analytics.visitorMetrics.totalVisitors,
+          activeVisitors: analytics.realTimeMetrics.activeVisitorsInSystem,
+          todayVisitors: analytics.realTimeMetrics.todayVisitors,
+          expectedVisitorsToday: analytics.realTimeMetrics.expectedVisitorsToday,
+          checkedInToday: analytics.realTimeMetrics.checkedInToday,
+          pendingCheckouts: analytics.realTimeMetrics.pendingCheckouts,
+          walkInsToday: analytics.realTimeMetrics.walkInsToday,
+          overdueVisitors: analytics.realTimeMetrics.overdueVisitors,
+
+          // Visitor metrics
+          avgVisitDuration: Math.round(analytics.visitorMetrics.averageVisitDurationMinutes),
+          checkInRate: Math.round(analytics.visitorMetrics.checkInRate),
+          noShowRate: Math.round(analytics.visitorMetrics.noShowRate),
+
+          // Capacity metrics
+          currentOccupancy: analytics.capacityMetrics.currentOccupancy,
+          maxCapacity: analytics.capacityMetrics.maxCapacity,
+          utilizationRate: Math.round(analytics.capacityMetrics.currentUtilization),
+          availableSlots: analytics.capacityMetrics.availableSlots,
+          capacityStatus: this.getCapacityStatusFromUtilization(analytics.capacityMetrics.currentUtilization),
+
+          // Invitation metrics
+          totalInvitations: analytics.invitationMetrics.totalInvitations,
+          pendingInvitations: analytics.invitationMetrics.pendingApproval,
+          approvedToday: analytics.invitationMetrics.approvedToday,
+          rejectedToday: analytics.invitationMetrics.rejectedToday,
+          activeToday: analytics.invitationMetrics.activeToday,
+          completedToday: analytics.invitationMetrics.completedToday,
+
+          lastUpdated: analytics.realTimeMetrics.lastUpdated
         },
+
         insights: {
-          peakHours: await this.calculateRealPeakHours(invitationStats),
-          popularLocations: await this.getPopularLocations(invitationStats),
-          recommendations: this.generateRecommendations(visitorStats, invitationStats)
+          peakHours: analytics.capacityMetrics.peakHours,
+          popularLocations: analytics.trends.popularLocations,
+          visitPurposes: analytics.trends.visitPurposeTrends,
+          recommendations: analytics.insights.recommendations,
+          recentAlerts: analytics.insights.recentAlerts,
+          todaysCheckIns: analytics.insights.todaysCheckIns
         },
-        rawData: {
-          visitorStats,
-          invitationStats
-        }
+
+        trends: {
+          dailyVisitorTrend: analytics.visitorMetrics.dailyTrend,
+          last30Days: analytics.trends.last30Days,
+          todayHourly: analytics.trends.todayHourly
+        },
+
+        capacity: {
+          locationBreakdown: analytics.capacityMetrics.locationBreakdown,
+          utilizationRate: analytics.capacityMetrics.currentUtilization,
+          peakHours: analytics.capacityMetrics.peakHours
+        },
+
+        // Include raw analytics for advanced use
+        rawAnalytics: analytics,
+
+        generatedAt: analytics.generatedAt,
+        timeZone: analytics.timeZone
       };
     } catch (error) {
       console.error('Failed to fetch analytics data:', error);
-      return {
-        overview: this.getDefaultOverview(),
-        insights: this.getDefaultInsights(),
-        error: error.message
-      };
+
+      // Try fallback to old method if comprehensive analytics fails
+      try {
+        console.warn('Falling back to legacy analytics method');
+        return await this.getAnalyticsDataLegacy();
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError);
+        return {
+          overview: this.getDefaultOverview(),
+          insights: this.getDefaultInsights(),
+          error: error.message
+        };
+      }
     }
+  },
+
+  /**
+   * Legacy analytics method (fallback)
+   */
+  async getAnalyticsDataLegacy() {
+    const [visitorStats, invitationStats, capacityStats] = await Promise.all([
+      visitorService.getVisitorStatistics(),
+      invitationService.getInvitationStatistics(),
+      this.getCapacityStatsWithFallback()
+    ]);
+
+    const maxCapacity = capacityStats.maxCapacity || 150;
+    const currentOccupancy = invitationStats.activeVisitors || 0;
+
+    return {
+      overview: {
+        totalVisitors: visitorStats.totalVisitors || 0,
+        activeVisitors: visitorStats.activeVisitors || 0,
+        todayVisitors: invitationStats.totalInvitations || 0,
+        avgVisitDuration: Math.round(invitationStats.averageVisitDuration || 45),
+        checkInRate: this.calculateCheckInRate(invitationStats),
+        currentOccupancy: currentOccupancy,
+        maxCapacity: maxCapacity,
+        utilizationRate: this.calculateUtilizationRate(currentOccupancy, maxCapacity),
+        availableSlots: Math.max(0, maxCapacity - currentOccupancy),
+        capacityStatus: this.getCapacityStatus(currentOccupancy, maxCapacity)
+      },
+      insights: {
+        peakHours: [],
+        popularLocations: [],
+        recommendations: this.generateRecommendations(visitorStats, invitationStats)
+      }
+    };
   },
 
   // Helper methods
@@ -178,6 +232,12 @@ const dashboardService = {
     const utilization = this.calculateUtilizationRate(occupancy, capacity);
     if (utilization >= 90) return 'high';
     if (utilization >= 70) return 'medium';
+    return 'normal';
+  },
+
+  getCapacityStatusFromUtilization(utilizationRate) {
+    if (utilizationRate >= 90) return 'high';
+    if (utilizationRate >= 70) return 'medium';
     return 'normal';
   },
 

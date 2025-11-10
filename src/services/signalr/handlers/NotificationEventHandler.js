@@ -21,6 +21,8 @@ class NotificationEventHandler {
       ['CapacityAlert', this.handleCapacityAlert.bind(this)],
       ['AlertAcknowledged', this.handleAlertAcknowledged.bind(this)],
       ['OperatorRegistered', this.handleOperatorRegistered.bind(this)],
+      ['VisitorDelayed', this.handleVisitorDelayed.bind(this)],
+      ['VisitorNoShow', this.handleVisitorNoShow.bind(this)],
       
       // Host Hub Events
       ['UserNotification', this.handleUserNotification.bind(this)],
@@ -41,9 +43,25 @@ class NotificationEventHandler {
       ['CriticalAlert', this.handleCriticalAlert.bind(this)],
       ['BulkNotification', this.handleBulkNotification.bind(this)],
       ['AdminRegistered', this.handleAdminRegistered.bind(this)],
+      ['DashboardMetricsUpdated', this.handleDashboardMetricsUpdated.bind(this)],
+      ['SystemHealth', this.handleSystemHealth.bind(this)],
+      ['SystemMetrics', this.handleSystemMetrics.bind(this)],
+      ['AnalyticsData', this.handleAnalyticsData.bind(this)],
+      ['BulkApprovalResult', this.handleBulkApprovalResult.bind(this)],
+
+      // Host Hub Additional Events
+      ['TodaysVisitors', this.handleTodaysVisitors.bind(this)],
+
+      // Operator Hub Additional Events
+      ['VisitorQueueUpdate', this.handleVisitorQueueUpdate.bind(this)],
+
+      // Security Hub Additional Events
+      ['EmergencyRoster', this.handleEmergencyRoster.bind(this)],
+      ['SecurityStatus', this.handleSecurityStatus.bind(this)],
 
       // Notification History Event (from Host Hub)
       ['NotificationHistory', this.handleNotificationHistory.bind(this)],
+      ['NotificationAcknowledged', this.handleNotificationAcknowledged.bind(this)],
 
       // Common Events
       ['Error', this.handleError.bind(this)]
@@ -183,6 +201,43 @@ class NotificationEventHandler {
 
   handleAlertAcknowledged(data) {
     store.dispatch(showSuccessToast('Alert Handled', 'Alert acknowledged by operator'));
+  }
+
+  handleVisitorDelayed(data) {
+    store.dispatch(addNotificationWithDesktop({
+      type: 'visitor_delayed',
+      title: 'Visitor Delayed',
+      message: `${data.VisitorName} is ${data.DelayMinutes} minutes late for their appointment`,
+      priority: 'medium',
+      persistent: true,
+      data: data,
+      actions: [
+        { label: 'View Invitation', action: 'view_invitation' },
+        { label: 'Contact Visitor', action: 'contact_visitor' }
+      ]
+    }));
+
+    // Notify subscribers for dashboard updates
+    this.notifySubscribers('visitor-delayed', data, 'operator');
+  }
+
+  handleVisitorNoShow(data) {
+    store.dispatch(addNotificationWithDesktop({
+      type: 'visitor_no_show',
+      title: 'Visitor No-Show',
+      message: `${data.VisitorName} has not arrived for their scheduled visit (${data.ScheduledTime})`,
+      priority: 'high',
+      persistent: true,
+      data: data,
+      actions: [
+        { label: 'View Invitation', action: 'view_invitation' },
+        { label: 'Mark as No-Show', action: 'mark_no_show' },
+        { label: 'Contact Visitor', action: 'contact_visitor' }
+      ]
+    }));
+
+    // Notify subscribers for dashboard updates
+    this.notifySubscribers('visitor-no-show', data, 'operator');
   }
 
   // ====== HOST HUB EVENT HANDLERS ======
@@ -339,6 +394,136 @@ class NotificationEventHandler {
       data: data,
       persistent: data.Priority === 'High' || data.Priority === 'Critical'
     }));
+  }
+
+  handleDashboardMetricsUpdated(data) {
+    console.log('Dashboard metrics updated:', {
+      timestamp: data.GeneratedAt,
+      activeVisitors: data.RealTimeMetrics?.ActiveVisitorsInSystem
+    });
+
+    // Notify subscribers for dashboard updates
+    this.notifySubscribers('dashboard-metrics-updated', data, 'admin');
+  }
+
+  handleSystemHealth(data) {
+    const isHealthy = data.Status === 'Healthy';
+
+    if (!isHealthy) {
+      store.dispatch(showWarningToast(
+        'System Health Alert',
+        data.Message || `System status: ${data.Status}`,
+        { persistent: data.Status === 'Critical' }
+      ));
+    }
+
+    // Notify subscribers for system health monitoring
+    this.notifySubscribers('system-health', data, 'admin');
+  }
+
+  handleSystemMetrics(data) {
+    console.log('System metrics received:', {
+      cpuUsage: data.CpuUsage,
+      memoryUsage: data.MemoryUsage,
+      activeConnections: data.ActiveConnections
+    });
+
+    // Notify subscribers for monitoring dashboards
+    this.notifySubscribers('system-metrics', data, 'admin');
+  }
+
+  handleAnalyticsData(data) {
+    console.log('Analytics data received');
+
+    // Notify subscribers (primarily for analytics dashboards)
+    this.notifySubscribers('analytics-data', data, 'admin');
+  }
+
+  handleBulkApprovalResult(data) {
+    const successCount = data.SuccessCount || 0;
+    const failureCount = data.FailureCount || 0;
+
+    if (failureCount > 0) {
+      store.dispatch(showWarningToast(
+        'Bulk Approval Completed',
+        `${successCount} approved, ${failureCount} failed`,
+        { duration: 6000 }
+      ));
+    } else {
+      store.dispatch(showSuccessToast(
+        'Bulk Approval Successful',
+        `${successCount} invitations approved`
+      ));
+    }
+
+    // Notify subscribers for list refreshes
+    this.notifySubscribers('bulk-approval-result', data, 'admin');
+  }
+
+  // ====== HOST HUB ADDITIONAL EVENT HANDLERS ======
+
+  handleTodaysVisitors(data) {
+    console.log('Todays visitors data received:', {
+      total: data.Total,
+      checkedIn: data.CheckedIn,
+      pending: data.Pending
+    });
+
+    // Notify subscribers for host dashboard updates
+    this.notifySubscribers('todays-visitors', data, 'host');
+  }
+
+  // ====== OPERATOR HUB ADDITIONAL EVENT HANDLERS ======
+
+  handleVisitorQueueUpdate(data) {
+    console.log('Visitor queue updated:', {
+      queueLength: data.QueueLength,
+      waitingVisitors: data.WaitingVisitors
+    });
+
+    // Notify subscribers for operator dashboard updates
+    this.notifySubscribers('visitor-queue-update', data, 'operator');
+  }
+
+  // ====== SECURITY HUB ADDITIONAL EVENT HANDLERS ======
+
+  handleEmergencyRoster(data) {
+    store.dispatch(addNotificationWithDesktop({
+      type: 'emergency_roster',
+      title: 'Emergency Roster Update',
+      message: `Emergency roster has been updated. ${data.ActiveSecurityCount || 0} security personnel active.`,
+      priority: 'high',
+      persistent: true,
+      data: data,
+      actions: [
+        { label: 'View Roster', action: 'view_emergency_roster' }
+      ]
+    }));
+
+    // Notify subscribers for security dashboard updates
+    this.notifySubscribers('emergency-roster', data, 'security');
+  }
+
+  handleSecurityStatus(data) {
+    console.log('Security status update:', {
+      status: data.Status,
+      activePersonnel: data.ActivePersonnel
+    });
+
+    // Notify subscribers for security monitoring
+    this.notifySubscribers('security-status', data, 'security');
+  }
+
+  // ====== NOTIFICATION EVENT HANDLERS ======
+
+  handleNotificationAcknowledged(data) {
+    console.log('Notification acknowledged:', {
+      notificationId: data.NotificationId,
+      acknowledgedBy: data.AcknowledgedBy
+    });
+
+    // Notify subscribers to update notification lists
+    this.notifySubscribers('notification-acknowledged', data);
   }
 
   // ====== COMMON EVENT HANDLERS ======

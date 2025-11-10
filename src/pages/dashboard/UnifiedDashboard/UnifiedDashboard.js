@@ -7,12 +7,11 @@ import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../../store/slices/uiSlice';
 
 // Import existing page components - NO CHANGES TO THESE
-import StaffDashboard from '../StaffDashboard/StaffDashboard';
 import ReceptionistDashboard from '../../receptionist/ReceptionistDashboard';
 import VisitorAnalyticsDashboard from '../../../components/analytics/VisitorAnalyticsDashboard';
 import ExcelManagementPage from '../../admin/ExcelManagementPage';
-
 import UnifiedAnalyticsDashboard from '../../analytics/UnifiedAnalyticsDashboard';
+import InvitationsListPage from '../../invitations/InvitationsListPage';
 
 // Import existing common components
 import NotificationCenter from '../../../components/notifications/NotificationCenter';
@@ -446,25 +445,25 @@ const UnifiedDashboard = () => {
   const renderActiveView = () => {
     switch (activeView) {
       case 'staff-dashboard':
-        // Use existing StaffDashboard component - NO CHANGES
-        return <StaffDashboard />;
-        
+        // Staff view - show their invitations
+        return <InvitationsListPage />;
+
       case 'overview':
         // Admin overview (similar to IntegratedVisitorManagement overview)
         return renderOverview();
-        
+
       case 'receptionist':
         // Use existing ReceptionistDashboard component - NO CHANGES
         return <ReceptionistDashboard />;
-        
+
       case 'analytics':
         // Use existing VisitorAnalyticsDashboard component - NO CHANGES
         return <UnifiedAnalyticsDashboard />;
-        
+
       case 'excel':
         // Use existing ExcelManagementPage component - NO CHANGES
         return <ExcelManagementPage />;
-        
+
       default:
         return renderOverview();
     }

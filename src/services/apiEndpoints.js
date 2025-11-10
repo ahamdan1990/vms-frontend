@@ -270,6 +270,23 @@ export const DASHBOARD_ENDPOINTS = {
   SYSTEM_HEALTH: '/health'
 };
 
+// Analytics endpoints
+export const ANALYTICS_ENDPOINTS = {
+  BASE: '/api/analytics',
+  COMPREHENSIVE: '/api/analytics/comprehensive',
+  REALTIME: '/api/analytics/realtime',
+  CAPACITY: '/api/analytics/capacity',
+  VISITORS: '/api/analytics/visitors',
+  INVITATIONS: '/api/analytics/invitations',
+  TRENDS: '/api/analytics/trends',
+  INSIGHTS: '/api/analytics/insights',
+  PEAK_HOURS: '/api/analytics/peak-hours',
+  POPULAR_LOCATIONS: '/api/analytics/popular-locations',
+  DAILY_TREND: '/api/analytics/daily-trend',
+  BROADCAST_UPDATE: '/api/analytics/broadcast-update',
+  EXPORT: '/api/analytics/export'
+};
+
 
 // Helper functions for dynamic endpoint generation
 export const buildEndpoint = (template, params = {}) => {
@@ -339,6 +356,7 @@ export const API_ENDPOINTS = {
   NOTIFICATIONS: NOTIFICATION_ENDPOINTS,
   SIGNALR: SIGNALR_ENDPOINTS,
   DASHBOARD: DASHBOARD_ENDPOINTS,
+  ANALYTICS: ANALYTICS_ENDPOINTS,
   ADMIN: ADMIN_ENDPOINTS,
   CONFIGURATION: CONFIGURATION_ENDPOINTS,
   FILES: FILE_ENDPOINTS,

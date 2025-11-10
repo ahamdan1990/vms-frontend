@@ -397,6 +397,18 @@ export const buildUrl = (baseUrl, path = '', params = {}) => {
   return queryString ? `${url}?${queryString}` : url;
 };
 
+export const buildQueryString = (params = {}) => {
+  const queryParams = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== null && value !== undefined && value !== '') {
+      queryParams.append(key, value);
+    }
+  });
+
+  const queryString = queryParams.toString();
+  return queryString ? `?${queryString}` : '';
+};
+
 export const parseQuery = (queryString) => {
   const params = new URLSearchParams(queryString);
   const result = {};

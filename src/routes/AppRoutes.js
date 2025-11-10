@@ -797,22 +797,6 @@ const AppRoutes = () => {
         } 
       />
 
-      {/* === INVITATION MANAGEMENT ROUTES === */}
-      <Route 
-        path={INVITATION_ROUTES.LIST} 
-        element={
-          <AuthGuard>
-            <PermissionGuard permission={INVITATION_PERMISSIONS.READ}>
-              <Layout>
-                <Suspense fallback={<LoadingFallback />}>
-                  <InvitationsListPage />
-                </Suspense>
-              </Layout>
-            </PermissionGuard>
-          </AuthGuard>
-        } 
-      />
-
       {/* === CHECK-IN MANAGEMENT ROUTES === */}
       <Route 
         path={CHECKIN_ROUTES.BASE} 
