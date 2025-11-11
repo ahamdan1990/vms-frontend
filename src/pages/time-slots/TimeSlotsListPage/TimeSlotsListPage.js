@@ -331,10 +331,10 @@ const TimeSlotsListPage = () => {
       sortable: true,
       render: (value, timeSlot) => (
         <div>
-          <div className="font-medium text-gray-900">{timeSlot.name}</div>
+          <div className="font-medium text-gray-900 dark:text-gray-100">{timeSlot.name}</div>
           {timeSlot.locationName && (
-            <div className="text-sm text-gray-500 flex items-center mt-1">
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
+              <svg className="w-4 h-4 mr-1 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
@@ -351,14 +351,14 @@ const TimeSlotsListPage = () => {
       render: (value, timeSlot) => (
         <div className="space-y-1">
           <div className="flex items-center space-x-1 text-sm">
-            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="font-medium">
+            <span className="font-medium text-gray-900 dark:text-gray-100">
               {timeSlotsService.formatTimeForDisplay(timeSlot.startTime)} - {timeSlotsService.formatTimeForDisplay(timeSlot.endTime)}
             </span>
           </div>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
             Duration: {timeSlotsService.calculateDuration(timeSlot.startTime, timeSlot.endTime)} min
           </div>
         </div>
@@ -376,11 +376,11 @@ const TimeSlotsListPage = () => {
             </Badge>
           </div>
           {timeSlot.bufferMinutes > 0 && (
-            <div className="text-xs text-gray-500 text-center">
+            <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
               +{timeSlot.bufferMinutes}min buffer
             </div>
           )}
-          <div className="w-full bg-gray-200 rounded-full h-1.5">
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
             <div
               className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
               style={{ width: '0%' }}
@@ -397,10 +397,10 @@ const TimeSlotsListPage = () => {
       render: (value, timeSlot) => (
         <div className="space-y-1">
           <div className="flex items-center space-x-1 text-sm">
-            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5a2.25 2.25 0 002.25-2.25m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5a2.25 2.25 0 012.25 2.25v7.5" />
             </svg>
-            <span className="text-gray-600">
+            <span className="text-gray-600 dark:text-gray-300">
               {getActiveDayNames(timeSlot.activeDays)}
             </span>
           </div>
@@ -429,7 +429,7 @@ const TimeSlotsListPage = () => {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => handleTimeSlotAction('view', timeSlot)}
-            className="text-gray-600 hover:text-gray-900 transition-colors"
+            className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
             title="View details"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -439,7 +439,7 @@ const TimeSlotsListPage = () => {
           </button>
           <button
             onClick={() => handleTimeSlotAction('availability', timeSlot)}
-            className="text-green-600 hover:text-green-900 transition-colors"
+            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 transition-colors"
             title="Check availability"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -449,7 +449,7 @@ const TimeSlotsListPage = () => {
           {canEdit && (
             <button
               onClick={() => handleTimeSlotAction('edit', timeSlot)}
-              className="text-blue-600 hover:text-blue-900 transition-colors"
+              className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
               title="Edit time slot"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -460,7 +460,7 @@ const TimeSlotsListPage = () => {
           {canDelete && (
             <button
               onClick={() => handleTimeSlotAction('delete', timeSlot)}
-              className="text-red-600 hover:text-red-900 transition-colors"
+              className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
               title="Delete time slot"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -475,22 +475,23 @@ const TimeSlotsListPage = () => {
   
   if (!canRead) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
-          <p className="text-gray-600">You don't have permission to view time slots.</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
+        <div className="text-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 max-w-md">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Access Denied</h3>
+          <p className="text-gray-600 dark:text-gray-400">You don't have permission to view time slots.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6">
+      <div className="container mx-auto px-4 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Time Slots</h1>
-          <p className="text-gray-600">Manage time slots for visitor appointments</p>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Time Slots</h1>
+          <p className="text-gray-600 dark:text-gray-400">Manage time slots for visitor appointments</p>
         </div>
         
         <div className="flex gap-3">
@@ -513,7 +514,7 @@ const TimeSlotsListPage = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 dark:bg-gray-800 border-gray-700 ">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <Input
@@ -558,9 +559,9 @@ const TimeSlotsListPage = () => {
 
       {/* Bulk Actions */}
       {selectedTimeSlots.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-blue-700">
+            <span className="text-sm text-blue-700 dark:text-blue-200">
               {selectedTimeSlots.length} time slot{selectedTimeSlots.length !== 1 ? 's' : ''} selected
             </span>
             
@@ -573,7 +574,7 @@ const TimeSlotsListPage = () => {
                     setBulkAction('delete');
                     setShowBulkConfirm(true);
                   }}
-                  className="text-red-600 hover:text-red-700"
+                  className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 >
                   Deactivate Selected
                 </Button>
@@ -592,7 +593,7 @@ const TimeSlotsListPage = () => {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 dark:bg-gray-800 border-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         {listError ? (
           <div className="p-6 text-center">
             <p className="text-red-600">Error loading time slots: {listError}</p>
@@ -724,27 +725,27 @@ const TimeSlotsListPage = () => {
           {/* Available Slots Results */}
           {availableSlotsList && availableSlotsList.length > 0 && (
             <div className="space-y-4">
-              <h4 className="font-medium text-gray-900">Available Time Slots</h4>
+              <h4 className="font-medium text-gray-900 dark:text-gray-100">Available Time Slots</h4>
               <div className="grid gap-3">
                 {availableSlotsList.map((slot) => (
                   <div
                     key={slot.id}
-                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                    className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900/40"
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        <span className="font-medium text-gray-900">{slot.name}</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{slot.name}</span>
                         {slot.locationName && (
                           <Badge variant="neutral" size="sm">{slot.locationName}</Badge>
                         )}
                       </div>
-                      <div className="text-sm text-gray-600 mt-1">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                         {timeSlotsService.formatTimeForDisplay(slot.startTime)} - {timeSlotsService.formatTimeForDisplay(slot.endTime)}
                       </div>
                     </div>
                     
                     <div className="text-right">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {slot.availableSlots} / {slot.maxVisitors} available
                       </div>
                       <Badge
@@ -762,7 +763,7 @@ const TimeSlotsListPage = () => {
 
           {availableSlotsError && (
             <div className="text-center py-4">
-              <p className="text-red-600">Error: {availableSlotsError}</p>
+              <p className="text-red-600 dark:text-red-400">Error: {availableSlotsError}</p>
             </div>
           )}
 
@@ -791,11 +792,11 @@ const TimeSlotsListPage = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <p className="mt-1 text-sm text-gray-900">{viewingTimeSlot.name}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingTimeSlot.name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
                 <div className="mt-1">
                   <Badge variant={viewingTimeSlot.isActive ? 'success' : 'secondary'} size="sm">
                     {viewingTimeSlot.isActive ? 'Active' : 'Inactive'}
@@ -806,21 +807,21 @@ const TimeSlotsListPage = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Time Range</label>
-                <p className="mt-1 text-sm text-gray-900">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Time Range</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
                   {timeSlotsService.formatTimeForDisplay(viewingTimeSlot.startTime)} - {timeSlotsService.formatTimeForDisplay(viewingTimeSlot.endTime)}
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Duration: {timeSlotsService.calculateDuration(viewingTimeSlot.startTime, viewingTimeSlot.endTime)} minutes
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Capacity</label>
-                <p className="mt-1 text-sm text-gray-900">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Capacity</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
                   {viewingTimeSlot.maxVisitors} visitors maximum
                 </p>
                 {viewingTimeSlot.bufferMinutes > 0 && (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Buffer time: {viewingTimeSlot.bufferMinutes} minutes
                   </p>
                 )}
@@ -829,26 +830,26 @@ const TimeSlotsListPage = () => {
             
             {viewingTimeSlot.locationName && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Location</label>
-                <p className="mt-1 text-sm text-gray-900">{viewingTimeSlot.locationName}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingTimeSlot.locationName}</p>
               </div>
             )}
             
             <div>
-              <label className="block text-sm font-medium text-gray-700">Active Days</label>
-              <p className="mt-1 text-sm text-gray-900">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Active Days</label>
+              <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
                 {getActiveDayNames(viewingTimeSlot.activeDays)}
               </p>
             </div>
             
             {viewingTimeSlot.displayOrder !== undefined && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Display Order</label>
-                <p className="mt-1 text-sm text-gray-900">{viewingTimeSlot.displayOrder}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Display Order</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingTimeSlot.displayOrder}</p>
               </div>
             )}
             
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -892,6 +893,7 @@ const TimeSlotsListPage = () => {
         confirmText="Confirm"
         variant="warning"
       />
+    </div>
     </div>
   );
 };

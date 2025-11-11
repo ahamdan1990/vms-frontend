@@ -21,13 +21,15 @@ const LoginForm = ({
   className = ''
 }) => {
   const { getRememberedEmail } = useAuth();
-  
+
+  const [loginMethod, setLoginMethod] = useState('standard');
   const [formData, setFormData] = useState({
     email: getRememberedEmail() || '',
+    username: '',
     password: '',
     rememberMe: Boolean(getRememberedEmail())
   });
-  
+
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,20 +62,35 @@ const LoginForm = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate form data
-    const validation = validateLoginData(formData);
-    
-    if (!validation.isValid) {
-      setErrors(validation.errors);
-      return;
+
+    // Validate based on login method
+    if (loginMethod === 'standard') {
+      const validation = validateLoginData(formData);
+
+      if (!validation.isValid) {
+        setErrors(validation.errors);
+        return;
+      }
+    } else {
+      // LDAP validation
+      if (!formData.username || !formData.password) {
+        setErrors({
+          username: !formData.username ? 'Username is required' : '',
+          password: !formData.password ? 'Password is required' : ''
+        });
+        return;
+      }
     }
 
     setIsSubmitting(true);
     setErrors({});
 
     try {
-      await onSubmit(formData);
+      const credentials = {
+        ...formData,
+        loginMethod
+      };
+      await onSubmit(credentials);
     } catch (error) {
       // Error handling is done by parent component
     } finally {
@@ -81,7 +98,9 @@ const LoginForm = ({
     }
   };
 
-  const isFormValid = formData.email && formData.password && Object.keys(errors).length === 0;
+  const isFormValid = loginMethod === 'standard'
+    ? (formData.email && formData.password && Object.keys(errors).length === 0)
+    : (formData.username && formData.password && Object.keys(errors).length === 0);
   const isLoading = loading || isSubmitting;
 
   return (
@@ -126,29 +145,92 @@ const LoginForm = ({
           </motion.div>
         )}
 
-        {/* Email Field */}
+        {/* Login Method Toggle */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.3 }}
+          className="flex gap-3"
+        >
+          <button
+            type="button"
+            onClick={() => setLoginMethod('standard')}
+            disabled={isLoading}
+            className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
+              loginMethod === 'standard'
+                ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <div className="flex items-center justify-center">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+              </svg>
+              Standard Login
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setLoginMethod('ldap')}
+            disabled={isLoading}
+            className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
+              loginMethod === 'ldap'
+                ? 'bg-blue-600 text-white shadow-md transform scale-105'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <div className="flex items-center justify-center">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+              Domain (LDAP)
+            </div>
+          </button>
+        </motion.div>
+
+        {/* Conditional Email or Username Field */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2, duration: 0.3 }}
         >
-          <Input
-            type="email"
-            name="email"
-            label="Email Address"
-            placeholder="Enter your email"
-            value={formData.email}
-            onChange={handleChange}
-            error={errors.email}
-            disabled={isLoading}
-            autoComplete="email"
-            leftIcon={
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-              </svg>
-            }
-            className="transition-all duration-200"
-          />
+          {loginMethod === 'standard' ? (
+            <Input
+              type="email"
+              name="email"
+              label="Email Address"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleChange}
+              error={errors.email}
+              disabled={isLoading}
+              autoComplete="email"
+              leftIcon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                </svg>
+              }
+              className="transition-all duration-200"
+            />
+          ) : (
+            <Input
+              type="text"
+              name="username"
+              label="Domain Username"
+              placeholder="domain\username or username"
+              value={formData.username}
+              onChange={handleChange}
+              error={errors.username}
+              disabled={isLoading}
+              autoComplete="username"
+              leftIcon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              }
+              className="transition-all duration-200"
+            />
+          )}
         </motion.div>
 
         {/* Password Field */}

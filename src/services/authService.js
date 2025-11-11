@@ -9,24 +9,52 @@ import tokenService from './tokenService';
 const authService = {
   /**
    * Authenticates user and sets secure cookies
-   * POST /api/Auth/login
+   * POST /api/Auth/login or /api/Auth/ldap-login based on loginMethod
    */
   async login(credentials) {
-    const response = await apiClient.post(AUTH_ENDPOINTS.LOGIN, {
-      email: credentials.email,
-      password: credentials.password,
-      rememberMe: credentials.rememberMe || false,
-      deviceFingerprint: credentials.deviceFingerprint || null
-    });
-    
+    const loginMethod = credentials.loginMethod || 'standard';
+    const endpoint = loginMethod === 'ldap' ? AUTH_ENDPOINTS.LDAP_LOGIN : AUTH_ENDPOINTS.LOGIN;
+
+    const payload = loginMethod === 'ldap'
+      ? {
+          username: credentials.username,
+          password: credentials.password,
+          rememberMe: credentials.rememberMe || false,
+          deviceFingerprint: credentials.deviceFingerprint || null
+        }
+      : {
+          email: credentials.email,
+          password: credentials.password,
+          rememberMe: credentials.rememberMe || false,
+          deviceFingerprint: credentials.deviceFingerprint || null
+        };
+
+    const response = await apiClient.post(endpoint, payload);
+
     const result = extractApiData(response);
-    
-    // 🔧 Store the backend's fingerprint for future use
+
+    // Store the backend's fingerprint for future use
     if (result.deviceFingerprint) {
       tokenService.setDeviceFingerprint(result.deviceFingerprint);
     }
-    
+
     return result;
+  },
+
+  /**
+   * Registers a new user account
+   * POST /api/Auth/signup
+   */
+  async signup(userData) {
+    const response = await apiClient.post(AUTH_ENDPOINTS.SIGNUP, {
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      password: userData.password,
+      confirmPassword: userData.confirmPassword
+    });
+
+    return extractApiData(response);
   },
 
   /**

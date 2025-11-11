@@ -268,7 +268,7 @@ const LocationsListPage = () => {
               dispatch(setSelectedLocations(selectedLocations.filter(id => id !== location.id)));
             }
           }}
-          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-800"
         />
       )
     },
@@ -279,15 +279,15 @@ const LocationsListPage = () => {
       render: (value, location) => (
         <div>
           <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${location.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
-            <span className="font-medium text-gray-900">{location.name}</span>
+            <div className={`w-2 h-2 rounded-full ${location.isActive ? 'bg-green-500' : 'bg-gray-400 dark:bg-gray-500'}`} />
+            <span className="font-medium text-gray-900 dark:text-gray-100">{location.name}</span>
           </div>
           {location.description && (
-            <div className="text-sm text-gray-500 mt-1">{location.description}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">{location.description}</div>
           )}
           {location.address && (
-            <div className="text-sm text-gray-500 flex items-center mt-1">
-              <MapPinIcon className="w-4 h-4 mr-1" />
+            <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
+              <MapPinIcon className="w-4 h-4 mr-1 text-gray-400 dark:text-gray-500" />
               {location.address}
             </div>
           )}
@@ -306,7 +306,7 @@ const LocationsListPage = () => {
             </Badge>
           </div>
           {location.parentLocationName && (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               Parent: {location.parentLocationName}
             </div>
           )}
@@ -320,13 +320,13 @@ const LocationsListPage = () => {
       render: (value, location) => (
         <div className="space-y-1">
           <div className="flex items-center space-x-1">
-            <UserGroupIcon className="w-4 h-4 text-gray-400" />
-            <span className="font-medium">
+            <UserGroupIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <span className="font-medium text-gray-900 dark:text-gray-100">
               {location.maxCapacity ? `${location.maxCapacity} visitors` : 'Unlimited'}
             </span>
           </div>
           {location.currentOccupancy !== undefined && (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               Current: {location.currentOccupancy}
             </div>
           )}
@@ -355,7 +355,7 @@ const LocationsListPage = () => {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => handleLocationAction('view', location)}
-            className="text-gray-600 hover:text-gray-900 transition-colors"
+            className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
             title="View details"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -386,24 +386,25 @@ const LocationsListPage = () => {
     }
   ];
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6">
+      <div className="container mx-auto px-4 space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Locations</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Locations</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Manage building locations, rooms, and capacity for visitor destinations
           </p>
         </div>
         <div className="mt-4 sm:mt-0 flex space-x-3">
           {/* View Mode Toggle */}
-          <div className="flex rounded-lg border border-gray-300 p-1">
+          <div className="flex rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-1">
             <button
               onClick={() => setViewMode('table')}
               className={`px-3 py-1 text-sm font-medium rounded ${
                 viewMode === 'table'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200'
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
             >
               Table
@@ -412,8 +413,8 @@ const LocationsListPage = () => {
               onClick={() => setViewMode('tree')}
               className={`px-3 py-1 text-sm font-medium rounded ${
                 viewMode === 'tree'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200'
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
             >
               Tree
@@ -438,8 +439,8 @@ const LocationsListPage = () => {
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <BuildingOfficeIcon className="w-5 h-5 text-blue-600" />
+                <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                  <BuildingOfficeIcon className="w-5 h-5 text-blue-600 dark:text-blue-300" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
@@ -454,8 +455,8 @@ const LocationsListPage = () => {
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircleIcon className="w-5 h-5 text-green-600" />
+                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                  <CheckCircleIcon className="w-5 h-5 text-green-600 dark:text-green-300" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
@@ -470,8 +471,8 @@ const LocationsListPage = () => {
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                  <UserGroupIcon className="w-5 h-5 text-purple-600" />
+                <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
+                  <UserGroupIcon className="w-5 h-5 text-purple-600 dark:text-purple-300" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
@@ -486,8 +487,8 @@ const LocationsListPage = () => {
           <Card className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                  <ExclamationTriangleIcon className="w-5 h-5 text-orange-600" />
+                <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
+                  <ExclamationTriangleIcon className="w-5 h-5 text-orange-600 dark:text-orange-300" />
                 </div>
               </div>
               <div className="ml-5 w-0 flex-1">
@@ -540,17 +541,17 @@ const LocationsListPage = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-4 pt-4 border-t border-gray-200"
+              className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"
             >
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Location Type
                   </label>
                   <select
                     value={filters.locationType}
                     onChange={(e) => handleFilterChange('locationType', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500"
                   >
                     <option value="">All Types</option>
                     <option value="Building">Building</option>
@@ -568,9 +569,9 @@ const LocationsListPage = () => {
                     id="includeInactive"
                     checked={filters.includeInactive}
                     onChange={(e) => handleFilterChange('includeInactive', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
-                  <label htmlFor="includeInactive" className="ml-2 block text-sm text-gray-700">
+                  <label htmlFor="includeInactive" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                     Include inactive locations
                   </label>
                 </div>
@@ -581,9 +582,9 @@ const LocationsListPage = () => {
                     id="rootOnly"
                     checked={filters.rootOnly}
                     onChange={(e) => handleFilterChange('rootOnly', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
-                  <label htmlFor="rootOnly" className="ml-2 block text-sm text-gray-700">
+                  <label htmlFor="rootOnly" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                     Root locations only
                   </label>
                 </div>
@@ -594,9 +595,9 @@ const LocationsListPage = () => {
                     id="includeChildren"
                     checked={filters.includeChildren}
                     onChange={(e) => handleFilterChange('includeChildren', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
-                  <label htmlFor="includeChildren" className="ml-2 block text-sm text-gray-700">
+                  <label htmlFor="includeChildren" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                     Include child locations
                   </label>
                 </div>
@@ -609,15 +610,15 @@ const LocationsListPage = () => {
       {/* Type-based Statistics */}
       {stats.byType && Object.keys(stats.byType).length > 0 && (
         <Card className="p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Locations by Type</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Locations by Type</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {Object.entries(stats.byType).map(([type, count]) => (
               <div key={type} className="text-center">
                 <div className="flex justify-center mb-2">
                   {getLocationTypeIcon(type)}
                 </div>
-                <div className="text-sm font-medium text-gray-900">{type}</div>
-                <div className="text-2xl font-bold text-gray-700">{count}</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{type}</div>
+                <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">{count}</div>
               </div>
             ))}
           </div>
@@ -629,7 +630,7 @@ const LocationsListPage = () => {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {selectedCount} location{selectedCount !== 1 ? 's' : ''} selected
               </span>
               <Button
@@ -650,7 +651,7 @@ const LocationsListPage = () => {
                     setBulkAction('delete');
                     setShowBulkConfirm(true);
                   }}
-                  className="text-red-600 border-red-300 hover:bg-red-50"
+                  className="text-red-600 dark:text-red-400 border-red-300 dark:border-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
                 >
                   <TrashIcon className="w-4 h-4 mr-2" />
                   Delete Selected
@@ -681,9 +682,9 @@ const LocationsListPage = () => {
           />
         ) : (
           <div className="p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Location Hierarchy</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Location Hierarchy</h3>
             {/* Tree view component would go here */}
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               Tree view coming soon...
             </div>
           </div>
@@ -704,38 +705,38 @@ const LocationsListPage = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <p className="mt-1 text-sm text-gray-900">{viewingLocation.name}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingLocation.name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Type</label>
-                <p className="mt-1 text-sm text-gray-900">{viewingLocation.locationType || 'General'}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingLocation.locationType || 'General'}</p>
               </div>
             </div>
             
             {viewingLocation.description && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
-                <p className="mt-1 text-sm text-gray-900">{viewingLocation.description}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingLocation.description}</p>
               </div>
             )}
             
             {viewingLocation.address && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Address</label>
-                <p className="mt-1 text-sm text-gray-900">{viewingLocation.address}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingLocation.address}</p>
               </div>
             )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Capacity</label>
-                <p className="mt-1 text-sm text-gray-900">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Capacity</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
                   {viewingLocation.maxCapacity ? `${viewingLocation.maxCapacity} visitors` : 'Unlimited'}
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
                 <div className="mt-1">
                   <Badge variant={viewingLocation.isActive ? 'success' : 'secondary'} size="sm">
                     {viewingLocation.isActive ? 'Active' : 'Inactive'}
@@ -746,21 +747,21 @@ const LocationsListPage = () => {
             
             {viewingLocation.parentLocationName && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Parent Location</label>
-                <p className="mt-1 text-sm text-gray-900">{viewingLocation.parentLocationName}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Parent Location</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingLocation.parentLocationName}</p>
               </div>
             )}
             
             {viewingLocation.currentOccupancy !== undefined && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Current Occupancy</label>
-                <p className="mt-1 text-sm text-gray-900">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Occupancy</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
                   {viewingLocation.currentOccupancy} / {viewingLocation.maxCapacity || '∞'} visitors
                 </p>
               </div>
             )}
             
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -851,6 +852,7 @@ const LocationsListPage = () => {
         variant="danger"
         loading={deleteLoading}
       />
+    </div>
     </div>
   );
 };

@@ -14,6 +14,8 @@ export const API_CONFIG = {
 // Authentication endpoints
 export const AUTH_ENDPOINTS = {
   LOGIN: '/api/Auth/login',
+  LDAP_LOGIN: '/api/Auth/ldap-login',
+  SIGNUP: '/api/Auth/signup',
   REFRESH: '/api/Auth/refresh',
   LOGOUT: '/api/Auth/logout',
   CHANGE_PASSWORD: '/api/Auth/change-password',
@@ -287,6 +289,23 @@ export const ANALYTICS_ENDPOINTS = {
   EXPORT: '/api/analytics/export'
 };
 
+// Company management endpoints
+export const COMPANY_ENDPOINTS = {
+  BASE: '/api/companies',
+  BY_ID: (id) => `/api/companies/${id}`,
+  SEARCH: '/api/companies/search',
+  VERIFY: (id) => `/api/companies/${id}/verify`,
+  BLACKLIST: (id) => `/api/companies/${id}/blacklist`
+};
+
+// Department management endpoints
+export const DEPARTMENT_ENDPOINTS = {
+  BASE: '/api/departments',
+  BY_ID: (id) => `/api/departments/${id}`,
+  CHILDREN: (id) => `/api/departments/${id}/children`,
+  BY_PARENT: (parentId) => `/api/departments/parent/${parentId}`,
+  HIERARCHY: '/api/departments/hierarchy'
+};
 
 // Helper functions for dynamic endpoint generation
 export const buildEndpoint = (template, params = {}) => {
@@ -362,7 +381,9 @@ export const API_ENDPOINTS = {
   FILES: FILE_ENDPOINTS,
   AUDIT: AUDIT_ENDPOINTS,
   PERMISSIONS: PERMISSION_ENDPOINTS,
-  ROLES: ROLE_ENDPOINTS
+  ROLES: ROLE_ENDPOINTS,
+  COMPANIES: COMPANY_ENDPOINTS,
+  DEPARTMENTS: DEPARTMENT_ENDPOINTS
 };
 
 export default API_ENDPOINTS;

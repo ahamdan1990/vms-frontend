@@ -469,10 +469,10 @@ const SystemManagementPage = () => {
       >
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Recent System Activity</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Recent System Activity</h3>
             <Link 
               to="/system/audit"
-              className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+              className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200 transition-colors"
             >
               View all activity →
             </Link>
@@ -481,26 +481,35 @@ const SystemManagementPage = () => {
           <div className="space-y-3">
             {recentActivity.length > 0 ? (
               recentActivity.map((activity, index) => (
-                <div key={activity.id || index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                    activity.type === 'success' ? 'bg-green-100' :
-                    activity.type === 'warning' ? 'bg-yellow-100' :
-                    activity.type === 'error' ? 'bg-red-100' : 'bg-blue-100'
-                  }`}>
-                    {activity.type === 'success' && <CheckCircleIcon className="w-4 h-4 text-green-600" />}
-                    {activity.type === 'warning' && <ExclamationTriangleIcon className="w-4 h-4 text-yellow-600" />}
-                    {activity.type === 'error' && <ExclamationTriangleIcon className="w-4 h-4 text-red-600" />}
-                    {activity.type === 'info' && <UserGroupIcon className="w-4 h-4 text-blue-600" />}
+                <div
+                  key={activity.id || index}
+                  className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 rounded-lg"
+                >
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                      activity.type === 'success'
+                        ? 'bg-green-100 dark:bg-green-900/30'
+                        : activity.type === 'warning'
+                        ? 'bg-yellow-100 dark:bg-yellow-900/30'
+                        : activity.type === 'error'
+                        ? 'bg-red-100 dark:bg-red-900/30'
+                        : 'bg-blue-100 dark:bg-blue-900/30'
+                    }`}
+                  >
+                    {activity.type === 'success' && <CheckCircleIcon className="w-4 h-4 text-green-600 dark:text-green-300" />}
+                    {activity.type === 'warning' && <ExclamationTriangleIcon className="w-4 h-4 text-yellow-600 dark:text-yellow-300" />}
+                    {activity.type === 'error' && <ExclamationTriangleIcon className="w-4 h-4 text-red-600 dark:text-red-300" />}
+                    {activity.type === 'info' && <UserGroupIcon className="w-4 h-4 text-blue-600 dark:text-blue-300" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-900 font-medium">{activity.message}</p>
-                    <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                    <p className="text-sm text-gray-900 dark:text-gray-100 font-medium">{activity.message}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{activity.time}</p>
                   </div>
                 </div>
               ))
             ) : (
               <div className="text-center py-4">
-                <p className="text-sm text-gray-500">No recent activity available</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">No recent activity available</p>
               </div>
             )}
           </div>

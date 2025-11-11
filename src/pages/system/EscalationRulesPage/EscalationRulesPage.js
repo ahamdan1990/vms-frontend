@@ -369,10 +369,10 @@ const EscalationRulesPage = () => {
             {getAlertTypeIcon(row.alertType)}
           </div>
           <div>
-            <div className="text-sm font-medium text-gray-900">
+            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
               {value}
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-gray-500 dark:text-gray-400">
               {row.alertType} - {row.alertPriority}
             </div>
           </div>
@@ -386,7 +386,7 @@ const EscalationRulesPage = () => {
       render: (value) => (
         <div className="flex items-center space-x-2">
           {getAlertTypeIcon(value)}
-          <span className="text-sm text-gray-900">{value}</span>
+          <span className="text-sm text-gray-900 dark:text-gray-100">{value}</span>
         </div>
       )
     },
@@ -404,13 +404,21 @@ const EscalationRulesPage = () => {
       key: 'targetRole',
       header: 'Target Role',
       sortable: false,
-      render: (value) => value || 'All Roles'
+      render: (value) => (
+        <span className="text-sm text-gray-900 dark:text-gray-100">
+          {value || 'All Roles'}
+        </span>
+      )
     },
     {
       key: 'escalationDelayMinutes',
       header: 'Delay',
       sortable: true,
-      render: (value) => `${value} min`
+      render: (value) => (
+        <span className="text-sm text-gray-900 dark:text-gray-100">
+          {value} min
+        </span>
+      )
     },
     {
       key: 'action',
@@ -444,51 +452,59 @@ const EscalationRulesPage = () => {
       key: 'actions',
       header: 'Actions',
       sortable: false,
-      width: '120px',
+      width: '220px',
       render: (_, row) => (
-        <div className="flex items-center space-x-1">
-          <button
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="xs"
+            variant="outline"
             onClick={() => handleViewRule(row)}
-            className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 rounded transition-colors"
-            title="View rule details"
+            icon={<EyeIcon className="w-4 h-4" />}
+            className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/60"
           >
-            <EyeIcon className="w-4 h-4" />
-          </button>
+            View
+          </Button>
 
           {canUpdate && (
-            <button
+            <Button
+              size="xs"
+              variant="outline"
               onClick={() => handleToggleRule(row)}
-              className={`p-1 rounded transition-colors ${
-                row.isEnabled
-                  ? 'text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400'
-                  : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400'
-              }`}
-              title={row.isEnabled ? 'Disable rule' : 'Enable rule'}
               disabled={updateLoading}
+              icon={<PowerIcon className="w-4 h-4" />}
+              className={`text-xs ${
+                row.isEnabled
+                  ? 'border-green-200 text-green-600 hover:bg-green-50 dark:border-green-800 dark:text-green-300 dark:hover:bg-green-900/30'
+                  : 'border-yellow-200 text-yellow-600 hover:bg-yellow-50 dark:border-yellow-800 dark:text-yellow-300 dark:hover:bg-yellow-900/30'
+              }`}
             >
-              <PowerIcon className="w-4 h-4" />
-            </button>
+              {row.isEnabled ? 'Disable' : 'Enable'}
+            </Button>
           )}
 
           {canUpdate && (
-            <button
+            <Button
+              size="xs"
+              variant="outline"
               onClick={() => handleEditRule(row)}
-              className="p-1 text-blue-600 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-400 rounded transition-colors"
-              title="Edit rule"
+              icon={<PencilIcon className="w-4 h-4" />}
+              className="border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-900/30"
             >
-              <PencilIcon className="w-4 h-4" />
-            </button>
+              Edit
+            </Button>
           )}
 
           {canDelete && (
-            <button
+            <Button
+              size="xs"
+              variant="outline"
               onClick={() => handleDeleteRule(row)}
-              className="p-1 text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-400 rounded transition-colors"
-              title="Delete rule"
               disabled={deleteLoading}
+              icon={<TrashIcon className="w-4 h-4" />}
+              className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/30"
             >
-              <TrashIcon className="w-4 h-4" />
-            </button>
+              Delete
+            </Button>
           )}
         </div>
       )
@@ -498,18 +514,19 @@ const EscalationRulesPage = () => {
   // Render loading state
   if (!canRead) {
     return (
-      <div className="p-6">
-        <div className="text-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
+        <div className="text-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 max-w-md">
           <ExclamationTriangleIconSolid className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
-          <p className="text-gray-500">You don't have permission to view escalation rules.</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Access Denied</h3>
+          <p className="text-gray-500 dark:text-gray-400">You don't have permission to view escalation rules.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6">
+      <div className="space-y-6 container mx-auto px-4">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -548,24 +565,24 @@ const EscalationRulesPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="p-4">
           <div className="flex items-center">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Cog6ToothIcon className="w-6 h-6 text-blue-600" />
+            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+              <Cog6ToothIcon className="w-6 h-6 text-blue-600 dark:text-blue-300" />
             </div>
             <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-600">Total Rules</h3>
-              <p className="text-2xl font-bold text-gray-900">{totalCount}</p>
+              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Rules</h3>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalCount}</p>
             </div>
           </div>
         </Card>
         
         <Card className="p-4">
           <div className="flex items-center">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <CheckCircleIcon className="w-6 h-6 text-green-600" />
+            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+              <CheckCircleIcon className="w-6 h-6 text-green-600 dark:text-green-300" />
             </div>
             <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-600">Active Rules</h3>
-              <p className="text-2xl font-bold text-gray-900">
+              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Rules</h3>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {escalationRules.filter(rule => rule.isEnabled).length}
               </p>
             </div>
@@ -574,12 +591,12 @@ const EscalationRulesPage = () => {
         
         <Card className="p-4">
           <div className="flex items-center">
-            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-              <ExclamationTriangleIcon className="w-6 h-6 text-red-600" />
+            <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+              <ExclamationTriangleIcon className="w-6 h-6 text-red-600 dark:text-red-300" />
             </div>
             <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-600">Critical Priority</h3>
-              <p className="text-2xl font-bold text-gray-900">
+              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Critical Priority</h3>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {escalationRules.filter(rule => 
                   rule.alertPriority === 'Critical' || rule.alertPriority === 'Emergency'
                 ).length}
@@ -590,12 +607,12 @@ const EscalationRulesPage = () => {
         
         <Card className="p-4">
           <div className="flex items-center">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <BellIcon className="w-6 h-6 text-purple-600" />
+            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+              <BellIcon className="w-6 h-6 text-purple-600 dark:text-purple-300" />
             </div>
             <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-600">Alert Types</h3>
-              <p className="text-2xl font-bold text-gray-900">
+              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Alert Types</h3>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {Object.keys(alertTypes).length}
               </p>
             </div>
@@ -708,10 +725,10 @@ const EscalationRulesPage = () => {
 
       {/* Error Display */}
       {error && (
-        <Card className="p-4 border-red-200 bg-red-50">
+        <Card className="p-4 border-red-200 dark:border-red-500 bg-red-50 dark:bg-red-900/20">
           <div className="flex items-center space-x-2">
-            <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />
-            <p className="text-sm text-red-700">{extractErrorMessage(error)}</p>
+            <ExclamationTriangleIcon className="w-5 h-5 text-red-500 dark:text-red-300" />
+            <p className="text-sm text-red-700 dark:text-red-300">{extractErrorMessage(error)}</p>
             <Button
               size="xs"
               variant="ghost"
@@ -749,7 +766,7 @@ const EscalationRulesPage = () => {
       {/* Pagination */}
       {totalCount > 0 && (
         <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 dark:text-gray-400">
             Showing {Math.min(pageIndex * pageSize + 1, totalCount)} to{' '}
             {Math.min((pageIndex + 1) * pageSize, totalCount)} of {totalCount} rules
           </div>
@@ -759,7 +776,7 @@ const EscalationRulesPage = () => {
             <button
               onClick={() => handlePageChange(1)}
               disabled={pageIndex === 0}
-              className="px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-100"
             >
               First
             </button>
@@ -767,19 +784,19 @@ const EscalationRulesPage = () => {
             <button
               onClick={() => handlePageChange(pageIndex)}
               disabled={pageIndex === 0}
-              className="px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-100"
             >
               Previous
             </button>
             
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-gray-600 dark:text-gray-300">
               Page {pageIndex + 1} of {totalPages}
             </span>
             
             <button
               onClick={() => handlePageChange(pageIndex + 2)}
               disabled={pageIndex >= totalPages - 1}
-              className="px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-100"
             >
               Next
             </button>
@@ -787,7 +804,7 @@ const EscalationRulesPage = () => {
             <button
               onClick={() => handlePageChange(totalPages)}
               disabled={pageIndex >= totalPages - 1}
-              className="px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-100"
             >
               Last
             </button>
@@ -885,6 +902,7 @@ const EscalationRulesPage = () => {
         loading={bulkLoading}
         error={bulkError}
       />
+    </div>
     </div>
   );
 };

@@ -41,12 +41,12 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-black flex items-center justify-center px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       {/* Background Pattern */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 dark:bg-blue-900 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400 dark:bg-purple-900 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-400 dark:bg-indigo-900 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
       <div className="relative w-full max-w-md">
@@ -55,7 +55,7 @@ const LoginPage = () => {
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-8"
+          className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 dark:border-gray-800 p-8 transition-colors duration-300"
         >
           {/* Company Branding */}
           <motion.div
@@ -69,10 +69,10 @@ const LoginPage = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Visitor Management System
             </h1>
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
               Secure access to your organization
             </p>
           </motion.div>
@@ -97,16 +97,27 @@ const LoginPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.5 }}
-            className="mt-8 pt-6 border-t border-gray-200"
+            className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800"
           >
-            <div className="text-center text-sm text-gray-600">
-              <p className="mb-2">Having trouble accessing your account?</p>
-              <Link
-                to="/reset-password"
-                className="text-blue-600 hover:text-blue-500 font-medium transition-colors"
-              >
-                Reset your password
-              </Link>
+            <div className="text-center text-sm text-gray-600 dark:text-gray-300 space-y-3">
+              <div>
+                <p className="mb-2">Don't have an account?</p>
+                <Link
+                  to="/signup"
+                  className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors hover:underline"
+                >
+                  Sign up for free
+                </Link>
+              </div>
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
+                <p className="mb-2">Having trouble accessing your account?</p>
+                <Link
+                  to="/reset-password"
+                  className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors hover:underline"
+                >
+                  Reset your password
+                </Link>
+              </div>
             </div>
           </motion.div>
         </motion.div>
@@ -116,14 +127,14 @@ const LoginPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.5 }}
-          className="mt-8 bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-white/20"
+          className="mt-8 bg-white/60 dark:bg-gray-900/50 backdrop-blur-sm rounded-xl p-6 border border-white/20 dark:border-gray-800"
         >
           <div className="text-center">
-            <h3 className="font-semibold text-gray-900 mb-2">Need Help?</h3>
-            <p className="text-sm text-gray-600 mb-3">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Need Help?</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
               Contact your system administrator or IT support team for assistance with login issues.
             </p>
-            <div className="flex justify-center space-x-4 text-xs text-gray-500">
+            <div className="flex justify-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
               <span className="flex items-center">
                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -145,7 +156,7 @@ const LoginPage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.5 }}
-          className="mt-6 text-center text-xs text-gray-500"
+          className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400"
         >
           <p>© 2024 Visitor Management System. All rights reserved.</p>
           <p className="mt-1">Version 1.0.0</p>
@@ -158,12 +169,12 @@ const LoginPage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
         >
-          <div className="bg-white rounded-xl p-6 shadow-xl">
+          <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-xl border border-gray-100 dark:border-gray-800">
             <div className="flex items-center space-x-3">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-              <span className="text-gray-900 font-medium">Signing you in...</span>
+              <span className="text-gray-900 dark:text-gray-100 font-medium">Signing you in...</span>
             </div>
           </div>
         </motion.div>

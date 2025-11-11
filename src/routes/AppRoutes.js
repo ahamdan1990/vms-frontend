@@ -74,6 +74,7 @@ const LoadingFallback = () => (
 
 // Authentication Pages
 const LoginPage = lazy(() => import('../pages/auth/LoginPage/LoginPage'));
+const SignupPage = lazy(() => import('../pages/auth/SignupPage/SignupPage'));
 const ForgotPasswordPage = lazy(() => import('../pages/auth/ForgotPasswordPage/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('../pages/auth/ResetPasswordPage/ResetPasswordPage'));
 const ChangePasswordPage = lazy(() => import('../pages/auth/ChangePasswordPage/ChangePasswordPage'));
@@ -108,6 +109,8 @@ const AuditPage = lazy(() => import('../pages/system/AuditPage/AuditPage'));
 //const SystemManagement = lazy(() => import('../components/system/SystemManagement/SystemManagement'));
 const VisitPurposesListPage = lazy(() => import('../pages/visit-purposes/VisitPurposesListPage/VisitPurposesListPage'));
 const LocationsListPage = lazy(() => import('../pages/locations/LocationsListPage/LocationsListPage'));
+const CompaniesListPage = lazy(() => import('../pages/companies/CompaniesListPage/CompaniesListPage'));
+const DepartmentsListPage = lazy(() => import('../pages/departments/DepartmentsListPage/DepartmentsListPage'));
 const EscalationRulesPage = lazy(() => import('../pages/system/EscalationRulesPage/EscalationRulesPage'));
 
 const SystemManagementPage = lazy(() => import('../pages/system/SystemManagementPage'))
@@ -143,23 +146,6 @@ const NotFoundPage = lazy(() => import('../pages/errors/NotFoundPage'));
 const ServerErrorPage = lazy(() => import('../pages/errors/ServerErrorPage'));
 
 /**
- * Role-based dashboard routing component
- * Now uses UnifiedDashboard for all roles - handles role logic internally
- * @component
- */
-const DashboardRouter = () => {
-  const { userRole, loading } = useAuth();
-
-  if (loading) {
-    return <LoadingFallback />;
-  }
-
-  // All roles now use the UnifiedDashboard
-  // Role-specific logic is handled within UnifiedDashboard component
-  return <UnifiedDashboard />;
-};
-
-/**
  * Main application routes component
  * Handles authentication, permissions, and component rendering
  * @component
@@ -175,18 +161,29 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* === PUBLIC ROUTES - Guest Only === */}
-      <Route 
-        path={AUTH_ROUTES.LOGIN} 
+      <Route
+        path={AUTH_ROUTES.LOGIN}
         element={
           <GuestGuard>
             <Suspense fallback={<LoadingFallback />}>
               <LoginPage />
             </Suspense>
           </GuestGuard>
-        } 
+        }
       />
-      
-      <Route 
+
+      <Route
+        path={AUTH_ROUTES.SIGNUP}
+        element={
+          <GuestGuard>
+            <Suspense fallback={<LoadingFallback />}>
+              <SignupPage />
+            </Suspense>
+          </GuestGuard>
+        }
+      />
+
+      <Route
         path={AUTH_ROUTES.FORGOT_PASSWORD} 
         element={
           <GuestGuard>
@@ -554,8 +551,8 @@ const AppRoutes = () => {
         } 
       />
 
-      <Route 
-        path={SYSTEM_ROUTES.LOCATIONS} 
+      <Route
+        path={SYSTEM_ROUTES.LOCATIONS}
         element={
           <AuthGuard>
             <PermissionGuard permission={SYSTEM_CONFIG_PERMISSIONS.READ}>
@@ -566,10 +563,40 @@ const AppRoutes = () => {
               </Layout>
             </PermissionGuard>
           </AuthGuard>
-        } 
+        }
       />
 
-      <Route 
+      <Route
+        path={SYSTEM_ROUTES.COMPANIES}
+        element={
+          <AuthGuard>
+            <PermissionGuard permission={SYSTEM_CONFIG_PERMISSIONS.READ}>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <CompaniesListPage />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        }
+      />
+
+      <Route
+        path={SYSTEM_ROUTES.DEPARTMENTS}
+        element={
+          <AuthGuard>
+            <PermissionGuard permission={SYSTEM_CONFIG_PERMISSIONS.READ}>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <DepartmentsListPage />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        }
+      />
+
+      <Route
         path={SYSTEM_ROUTES.AUDIT} 
         element={
           <AuthGuard>

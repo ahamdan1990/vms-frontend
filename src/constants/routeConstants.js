@@ -6,6 +6,7 @@
 // Public routes (no authentication required)
 export const PUBLIC_ROUTES = {
   LOGIN: '/login',
+  SIGNUP: '/signup',
   FORGOT_PASSWORD: '/forgot-password',
   RESET_PASSWORD: '/reset-password',
   ACCESS_DENIED: '/access-denied',
@@ -16,6 +17,7 @@ export const PUBLIC_ROUTES = {
 // Authentication routes
 export const AUTH_ROUTES = {
   LOGIN: '/login',
+  SIGNUP: '/signup',
   LOGOUT: '/logout',
   CHANGE_PASSWORD: '/change-password',
   FORGOT_PASSWORD: '/forgot-password',
@@ -166,6 +168,8 @@ export const SYSTEM_ROUTES = {
   TEMPLATES: '/system/templates',
   VISIT_PURPOSES: '/system/visit-purposes',
   LOCATIONS: '/system/locations',
+  COMPANIES: '/system/companies',
+  DEPARTMENTS: '/system/departments',
   TIME_SLOTS: '/system/time-slots',
   MANAGEMENT: '/system/management', // New consolidated management page
   ESCALATION_RULES: '/system/escalation-rules', // New escalation rules page
@@ -725,6 +729,7 @@ export const ROUTE_GUARDS = {
   // Routes that redirect authenticated users
   GUEST_ONLY_ROUTES: [
     PUBLIC_ROUTES.LOGIN,
+    PUBLIC_ROUTES.SIGNUP,
     AUTH_ROUTES.FORGOT_PASSWORD,
     AUTH_ROUTES.RESET_PASSWORD
   ],
