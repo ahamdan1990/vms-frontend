@@ -669,7 +669,19 @@ const DepartmentsListPage = () => {
 
 // Placeholder DepartmentForm component
 const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, loading, error }) => {
-  const [formState, setFormState] = useState(initialData || {});
+  const [formState, setFormState] = useState(initialData || {
+    name: '',
+    code: '',
+    description: '',
+    parentDepartmentId: '',
+    email: '',
+    phone: '',
+    location: '',
+    budget: '',
+    displayOrder: 0
+  });
+
+  const [activeTab, setActiveTab] = useState('basic');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -678,8 +690,19 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formState);
+    const submitData = {
+      ...formState,
+      budget: formState.budget ? parseFloat(formState.budget) : null,
+      displayOrder: formState.displayOrder ? parseInt(formState.displayOrder) : 0,
+      parentDepartmentId: formState.parentDepartmentId ? parseInt(formState.parentDepartmentId) : null
+    };
+    onSubmit(submitData);
   };
+
+  const tabs = [
+    { id: 'basic', label: 'Basic Info', icon: '🏢' },
+    { id: 'contact', label: 'Contact', icon: '📞' }
+  ];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -689,58 +712,166 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
         </div>
       )}
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Department Name *</label>
-        <input
-          type="text"
-          name="name"
-          required
-          value={formState.name || ''}
-          onChange={handleChange}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        />
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === tab.id
+                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <span className="mr-1.5">{tab.icon}</span>
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Department Code</label>
-        <input
-          type="text"
-          name="code"
-          value={formState.code || ''}
-          onChange={handleChange}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        />
+      {/* Tab Content */}
+      <div className="max-h-[60vh] overflow-y-auto px-1">
+        {/* Basic Info Tab */}
+        {activeTab === 'basic' && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Department Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  required
+                  value={formState.name || ''}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., Human Resources"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Department Code <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="code"
+                  required
+                  value={formState.code || ''}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., HR"
+                  disabled={!!initialData}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Parent Department</label>
+              <select
+                name="parentDepartmentId"
+                value={formState.parentDepartmentId || ''}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">None (Root Department)</option>
+                {parentDepartments.map(dept => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Budget</label>
+                <input
+                  type="number"
+                  name="budget"
+                  value={formState.budget || ''}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., 50000"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Display Order</label>
+                <input
+                  type="number"
+                  name="displayOrder"
+                  value={formState.displayOrder || 0}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+              <textarea
+                name="description"
+                value={formState.description || ''}
+                onChange={handleChange}
+                rows="3"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Brief description of the department..."
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Contact Info Tab */}
+        {activeTab === 'contact' && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Department Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formState.email || ''}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="department@example.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Department Phone</label>
+              <input
+                type="tel"
+                name="phone"
+                value={formState.phone || ''}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="+1 (555) 123-4567"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Location / Office</label>
+              <input
+                type="text"
+                name="location"
+                value={formState.location || ''}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="e.g., Building A, Floor 3"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Parent Department</label>
-        <select
-          name="parentDepartmentId"
-          value={formState.parentDepartmentId || ''}
-          onChange={handleChange}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="">None (Root Department)</option>
-          {parentDepartments.map(dept => (
-            <option key={dept.id} value={dept.id}>
-              {dept.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Display Order</label>
-        <input
-          type="number"
-          name="displayOrder"
-          value={formState.displayOrder || 0}
-          onChange={handleChange}
-          min="0"
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-
+      {/* Action Buttons */}
       <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
         <Button variant="outline" onClick={onCancel} type="button">
           Cancel

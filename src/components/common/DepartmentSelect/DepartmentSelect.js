@@ -26,25 +26,38 @@ const DepartmentSelect = ({
     setLoading(true);
     setLoadError(null);
     try {
+      console.log('🔍 [DepartmentSelect] Fetching departments...');
       const result = await departmentService.getDepartments({
         pageSize: 1000,
         sortBy: 'DisplayOrder',
         sortDirection: 'asc'
       });
 
+      console.log('✅ [DepartmentSelect] API returned result:', result);
+      console.log('✅ [DepartmentSelect] Result type:', typeof result, 'isArray:', Array.isArray(result));
+
       // Ensure we always set an array
       let departmentsArray = [];
       if (Array.isArray(result)) {
         departmentsArray = result;
+        console.log('✅ [DepartmentSelect] Result is array, using directly');
       } else if (result && Array.isArray(result.items)) {
         departmentsArray = result.items;
+        console.log('✅ [DepartmentSelect] Using result.items');
       } else if (result && result.data && Array.isArray(result.data)) {
         departmentsArray = result.data;
+        console.log('✅ [DepartmentSelect] Using result.data');
+      } else if (result && result.departments && Array.isArray(result.departments)) {
+        departmentsArray = result.departments;
+        console.log('✅ [DepartmentSelect] Using result.departments');
       }
 
+      console.log('✅ [DepartmentSelect] Final departments array:', departmentsArray);
+      console.log('✅ [DepartmentSelect] Departments count:', departmentsArray.length);
       setDepartments(departmentsArray);
     } catch (err) {
-      console.error('Error fetching departments:', err);
+      console.error('❌ [DepartmentSelect] Error fetching departments:', err);
+      console.error('❌ [DepartmentSelect] Error details:', err.response?.data || err.message);
       setLoadError('Failed to load departments');
       setDepartments([]);
     } finally {

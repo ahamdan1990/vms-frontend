@@ -714,6 +714,7 @@ const VisitorForm = ({
 
   // Company handler
   const handleCompanySelect = (company) => {
+
     setSelectedCompany(company);
     setFormData(prev => ({
       ...prev,
@@ -1203,14 +1204,28 @@ const VisitorForm = ({
           )}
         </div>
 
-        <CompanyAutocomplete
-          label="Company"
-          value={selectedCompany}
-          onChange={handleCompanySelect}
-          placeholder="Search for a company..."
-          error={touched.company ? formErrors.company : undefined}
-          showCreateOption={false}
-        />
+        <div className="flex items-end gap-2">
+          <div className="flex-1">
+            <CompanyAutocomplete
+              label="Company"
+              value={selectedCompany}
+              onChange={handleCompanySelect}
+              onCreateNew={handleCreateNewCompany}
+              placeholder="Search for a company..."
+              error={touched.company ? formErrors.company : undefined}
+              showCreateOption={false}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowCreateCompanyModal(true)}
+            disabled={loading}
+            className="h-[42px] px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Create new company"
+          >
+            <PlusIcon className="w-5 h-5" />
+          </button>
+        </div>
 
         <Input
           label="Job Title"
@@ -2295,7 +2310,385 @@ const VisitorForm = ({
           onClose={handleClosePreview}
         />
       )}
+
+      {/* Create Company Modal */}
+      <Modal
+        isOpen={showCreateCompanyModal}
+        onClose={() => setShowCreateCompanyModal(false)}
+        title="Create New Company"
+      >
+        <QuickCreateCompanyForm
+          onSubmit={handleCreateCompany}
+          onCancel={() => setShowCreateCompanyModal(false)}
+          loading={creatingCompany}
+        />
+      </Modal>
     </div>
+  );
+};
+
+// Quick Create Company Form Component
+const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
+  const [formState, setFormState] = useState({
+    name: '',
+    code: '',
+    website: '',
+    industry: '',
+    taxId: '',
+    contactPersonName: '',
+    email: '',
+    phoneNumber: '',
+    street1: '',
+    street2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: '',
+    employeeCount: '',
+    description: ''
+  });
+
+  const [activeTab, setActiveTab] = useState('basic');
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormState(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Convert employeeCount to number if provided
+    const submitData = {
+      ...formState,
+      employeeCount: formState.employeeCount ? parseInt(formState.employeeCount) : null
+    };
+    onSubmit(submitData);
+  };
+
+  const tabs = [
+    { id: 'basic', label: 'Basic Info', icon: '🏢' },
+    { id: 'contact', label: 'Contact', icon: '📞' },
+    { id: 'address', label: 'Address', icon: '📍' }
+  ];
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === tab.id
+                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <span className="mr-1.5">{tab.icon}</span>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div className="max-h-[60vh] overflow-y-auto px-1">
+        {/* Basic Info Tab */}
+        {activeTab === 'basic' && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="company-name" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Company Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="company-name"
+                  name="name"
+                  value={formState.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., Acme Corporation"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="company-code" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Company Code <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="company-code"
+                  name="code"
+                  value={formState.code}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., ACME"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="company-industry" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Industry
+                </label>
+                <input
+                  type="text"
+                  id="company-industry"
+                  name="industry"
+                  value={formState.industry}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., Technology"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="company-employeeCount" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Employee Count
+                </label>
+                <input
+                  type="number"
+                  id="company-employeeCount"
+                  name="employeeCount"
+                  value={formState.employeeCount}
+                  onChange={handleChange}
+                  min="1"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., 100"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="company-website" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Website
+                </label>
+                <input
+                  type="url"
+                  id="company-website"
+                  name="website"
+                  value={formState.website}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="https://example.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="company-taxId" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Tax ID / Registration Number
+                </label>
+                <input
+                  type="text"
+                  id="company-taxId"
+                  name="taxId"
+                  value={formState.taxId}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., 12-3456789"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="company-description" className="block text-sm font-medium text-gray-700 mb-1.5">
+                Description
+              </label>
+              <textarea
+                id="company-description"
+                name="description"
+                value={formState.description}
+                onChange={handleChange}
+                rows={3}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Brief description of the company..."
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Contact Info Tab */}
+        {activeTab === 'contact' && (
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="company-contactPersonName" className="block text-sm font-medium text-gray-700 mb-1.5">
+                Contact Person Name
+              </label>
+              <input
+                type="text"
+                id="company-contactPersonName"
+                name="contactPersonName"
+                value={formState.contactPersonName}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="e.g., John Doe"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="company-email" className="block text-sm font-medium text-gray-700 mb-1.5">
+                Contact Email
+              </label>
+              <input
+                type="email"
+                id="company-email"
+                name="email"
+                value={formState.email}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="contact@example.com"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="company-phoneNumber" className="block text-sm font-medium text-gray-700 mb-1.5">
+                Contact Phone
+              </label>
+              <input
+                type="tel"
+                id="company-phoneNumber"
+                name="phoneNumber"
+                value={formState.phoneNumber}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="+1 (555) 123-4567"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Address Tab */}
+        {activeTab === 'address' && (
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="company-street1" className="block text-sm font-medium text-gray-700 mb-1.5">
+                Street Address 1
+              </label>
+              <input
+                type="text"
+                id="company-street1"
+                name="street1"
+                value={formState.street1}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="e.g., 123 Main Street"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="company-street2" className="block text-sm font-medium text-gray-700 mb-1.5">
+                Street Address 2
+              </label>
+              <input
+                type="text"
+                id="company-street2"
+                name="street2"
+                value={formState.street2}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Suite, Floor, Building (optional)"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="company-city" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  City
+                </label>
+                <input
+                  type="text"
+                  id="company-city"
+                  name="city"
+                  value={formState.city}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., New York"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="company-state" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  State / Province
+                </label>
+                <input
+                  type="text"
+                  id="company-state"
+                  name="state"
+                  value={formState.state}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., NY"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="company-postalCode" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Postal Code
+                </label>
+                <input
+                  type="text"
+                  id="company-postalCode"
+                  name="postalCode"
+                  value={formState.postalCode}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., 10001"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="company-country" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Country
+                </label>
+                <input
+                  type="text"
+                  id="company-country"
+                  name="country"
+                  value={formState.country}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., United States"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={loading}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={loading || !formState.name.trim() || !formState.code.trim()}
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+        >
+          {loading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              Creating...
+            </>
+          ) : (
+            'Create Company'
+          )}
+        </button>
+      </div>
+    </form>
   );
 };
 

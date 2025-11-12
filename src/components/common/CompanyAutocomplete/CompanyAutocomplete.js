@@ -19,7 +19,7 @@ const CompanyAutocomplete = ({
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
-
+  
   // Initialize display value
   useEffect(() => {
     if (value && typeof value === 'object' && value.name) {
@@ -34,17 +34,39 @@ const CompanyAutocomplete = ({
   // Debounced search
   useEffect(() => {
     if (!searchTerm || searchTerm.length < 2) {
+      console.log('🔍 [CompanyAutocomplete] Search term too short or empty:', searchTerm);
       setCompanies([]);
       return;
     }
 
+    console.log('🔍 [CompanyAutocomplete] Starting search for:', searchTerm);
+
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
+        console.log('🔍 [CompanyAutocomplete] Calling API with searchTerm:', searchTerm);
         const results = await companyService.searchCompanies(searchTerm, 'All', 10);
-        setCompanies(results || []);
+        console.log('✅ [CompanyAutocomplete] API returned results:', results);
+
+        // Extract companies array from the result object
+        let companiesArray = [];
+        if (Array.isArray(results)) {
+          companiesArray = results;
+          console.log('✅ [CompanyAutocomplete] Result is array, using directly');
+        } else if (results && Array.isArray(results.companies)) {
+          companiesArray = results.companies;
+          console.log('✅ [CompanyAutocomplete] Using results.companies');
+        } else if (results && Array.isArray(results.data)) {
+          companiesArray = results.data;
+          console.log('✅ [CompanyAutocomplete] Using results.data');
+        }
+
+        console.log('✅ [CompanyAutocomplete] Final companies array:', companiesArray);
+        console.log('✅ [CompanyAutocomplete] Companies count:', companiesArray.length);
+        setCompanies(companiesArray);
       } catch (error) {
-        console.error('Error searching companies:', error);
+        console.error('❌ [CompanyAutocomplete] Error searching companies:', error);
+        console.error('❌ [CompanyAutocomplete] Error details:', error.response?.data || error.message);
         setCompanies([]);
       } finally {
         setLoading(false);
