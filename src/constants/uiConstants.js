@@ -17,22 +17,22 @@ export const LAYOUT_MODES = {
   COMFORTABLE: 'comfortable'
 };
 
-// Screen size breakpoints (matches CSS breakpoints)
+// Screen size breakpoints (matches Tailwind CSS defaults)
 export const SCREEN_SIZES = {
-  XS: 'xs',  // < 576px
-  SM: 'sm',  // 576px - 767px
-  MD: 'md',  // 768px - 991px
-  LG: 'lg',  // 992px - 1199px
-  XL: 'xl'   // >= 1200px
+  XS: 'xs',  // < 640px
+  SM: 'sm',  // 640px - 767px
+  MD: 'md',  // 768px - 1023px
+  LG: 'lg',  // 1024px - 1279px
+  XL: 'xl'   // >= 1280px
 };
 
-// Breakpoint values in pixels
+// Breakpoint values in pixels (mirrors tailwind.config.js screens)
 export const BREAKPOINTS = {
   XS: 0,
-  SM: 576,
+  SM: 640,
   MD: 768,
-  LG: 992,
-  XL: 1200
+  LG: 1024,
+  XL: 1280
 };
 
 // Sidebar constants

@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import visitorDocumentService from '../../../services/visitorDocumentService';
 import visitorNoteService from '../../../services/visitorNoteService';
 import visitorService from '../../../services/visitorService';
+import companyService from '../../../services/companyService';
 
 // Components
 import Button from '../../common/Button/Button';
@@ -19,12 +20,17 @@ import FileUpload from '../../common/FileUpload/FileUpload';
 import AutocompleteInput from '../../common/AutocompleteInput/AutocompleteInput';
 import ProfilePhotoUpload from '../ProfilePhotoUpload/ProfilePhotoUpload';
 import DocumentPreview from '../../documents/DocumentPreview';
+import CompanyAutocomplete from '../../common/CompanyAutocomplete/CompanyAutocomplete';
+import Modal from '../../common/Modal/Modal';
 
 // Redux
 import { getLocations } from '../../../store/slices/locationsSlice';
 import { getVisitPurposes } from '../../../store/slices/visitPurposesSlice';
 import { selectLocationsList } from '../../../store/selectors/locationSelectors';
 import { selectVisitPurposesList } from '../../../store/selectors/visitPurposeSelectors';
+
+// Hooks
+import { useToast } from '../../../hooks/useNotifications';
 
 // Utils and validation
 import { extractErrorMessage } from '../../../utils/errorUtils';
@@ -84,7 +90,8 @@ const VisitorForm = ({
     phoneNumber: '',
     phoneCountryCode: '961', // Lebanon default
     phoneType: 'Mobile',
-    company: '',
+    company: '', // Legacy field - will be replaced by companyId
+    companyId: null, // New field for foreign key
     jobTitle: '',
     
     // Photo and Documents
@@ -136,6 +143,7 @@ const VisitorForm = ({
   const [completedSteps, setCompletedSteps] = useState(new Set());
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedVisitPurpose, setSelectedVisitPurpose] = useState(null);
+  const [selectedCompany, setSelectedCompany] = useState(null);
 
   // Lebanon-specific data
   const lebaneseGovernorates = [
@@ -175,6 +183,12 @@ const VisitorForm = ({
   // Document preview state
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  // Company creation state
+  const [showCreateCompanyModal, setShowCreateCompanyModal] = useState(false);
+  const [creatingCompany, setCreatingCompany] = useState(false);
+
+  const toast = useToast();
 
   // Document preview and download handlers
   const handlePreviewDocument = (doc) => {
@@ -240,7 +254,8 @@ const VisitorForm = ({
         phoneNumber: initialData.phoneNumber || '',
         phoneCountryCode: initialData.phoneCountryCode || '961',
         phoneType: initialData.phoneType || 'Mobile',
-        company: initialData.company || '',
+        company: initialData.company || '', // Legacy field
+        companyId: initialData.companyId || null, // New foreign key field
         jobTitle: initialData.jobTitle || '',
         
         // Photo and documents
@@ -284,6 +299,16 @@ const VisitorForm = ({
       }
       if (initialData.defaultVisitPurpose) {
         setSelectedVisitPurpose(initialData.defaultVisitPurpose);
+      }
+      // Set selected company if available (either as object or construct from legacy data)
+      if (initialData.companyObject) {
+        setSelectedCompany(initialData.companyObject);
+      } else if (initialData.company && initialData.companyId) {
+        // Construct company object from legacy fields
+        setSelectedCompany({
+          id: initialData.companyId,
+          name: initialData.company
+        });
       }
       
       // Store initial state for change tracking
@@ -685,6 +710,40 @@ const VisitorForm = ({
       ...prev,
       defaultVisitPurposeId: visitPurpose?.id || null
     }));
+  };
+
+  // Company handler
+  const handleCompanySelect = (company) => {
+    setSelectedCompany(company);
+    setFormData(prev => ({
+      ...prev,
+      companyId: company?.id || null,
+      company: company?.name || '' // Update legacy field for backward compatibility
+    }));
+  };
+
+  const handleCreateNewCompany = (searchTerm) => {
+    setShowCreateCompanyModal(true);
+  };
+
+  const handleCreateCompany = async (companyData) => {
+    try {
+      setCreatingCompany(true);
+      const result = await companyService.createCompany(companyData);
+
+      toast.success('Company Created', `${companyData.name} has been created successfully.`);
+
+      // Set the newly created company
+      const newCompany = result.company || result;
+      handleCompanySelect(newCompany);
+
+      setShowCreateCompanyModal(false);
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.response?.data?.errors?.[0] || 'Failed to create company';
+      toast.error('Creation Failed', errorMessage);
+    } finally {
+      setCreatingCompany(false);
+    }
   };
 
   // Helper to set preset invitation data from visitor preferences
@@ -1144,14 +1203,13 @@ const VisitorForm = ({
           )}
         </div>
 
-        <Input
+        <CompanyAutocomplete
           label="Company"
-          type="text"
-          value={formData.company}
-          onChange={(e) => handleChange('company', e.target.value)}
-          onBlur={() => handleBlur('company')}
+          value={selectedCompany}
+          onChange={handleCompanySelect}
+          placeholder="Search for a company..."
           error={touched.company ? formErrors.company : undefined}
-          placeholder="Enter company name"
+          showCreateOption={false}
         />
 
         <Input

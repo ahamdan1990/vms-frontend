@@ -95,6 +95,7 @@ const ReceptionistDashboard = () => {
   // Redux selectors
   const activeInvitationsFromRedux = useSelector(selectActiveInvitations);
   const activeInvitationsLoading = useSelector(selectActiveInvitationsLoading);
+  const { isMobile } = useSelector(state => state.ui);
 
   // State management
   const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'walk-in', 'scanner', 'active', 'documents'
@@ -577,6 +578,21 @@ const ReceptionistDashboard = () => {
     }
   };
 
+  const handleQuickCheckIn = async (invitation) => {
+    try {
+      await dispatch(checkInInvitation({
+        invitationReference: invitation.invitationNumber || invitation.id?.toString(),
+        notes: 'Quick check-in by receptionist'
+      })).unwrap();
+
+      toast.success('Check-in Successful', 'Visitor checked in successfully');
+      loadDashboardData();
+      dispatch(getActiveInvitations());
+    } catch (error) {
+      toast.error('Check-in Failed', extractErrorMessage(error));
+    }
+  };
+
   // Handle visitor check-out
   const handleCheckOut = async (invitationId) => {
     try {
@@ -857,19 +873,7 @@ const ReceptionistDashboard = () => {
 
             {canCheckIn && (
               <button
-                onClick={async () => {
-                  try {
-                    await dispatch(checkInInvitation({
-                      invitationReference: invitation.invitationNumber || invitation.id.toString(),
-                      notes: 'Quick check-in by receptionist'
-                    })).unwrap();
-                    toast.success('Check-in Successful', 'Visitor checked in successfully');
-                    loadDashboardData();
-                    dispatch(getActiveInvitations());
-                  } catch (error) {
-                    toast.error('Check-in Failed', extractErrorMessage(error));
-                  }
-                }}
+                onClick={() => handleQuickCheckIn(invitation)}
                 className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200 transition-colors"
                 title="Check In"
               >
@@ -892,9 +896,65 @@ const ReceptionistDashboard = () => {
     }
   ];
 
+  const renderActiveVisitorCard = (invitation) => (
+    <Card key={invitation.id} className="p-4 space-y-4">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex-1 min-w-0">{formatVisitorInfo(invitation)}</div>
+          {getStatusBadge(invitation)}
+        </div>
+        <div className="space-y-3">
+          {formatVisitInfo(invitation)}
+          {formatCheckInStatus(invitation)}
+        </div>
+      </div>
+      {renderMobileActionButtons(invitation)}
+    </Card>
+  );
+
+  const renderMobileActionButtons = (invitation) => {
+    const isCheckedIn = invitation.checkedInAt && !invitation.checkedOutAt;
+    const canCheckIn = invitation.status === 'Approved' && !invitation.checkedInAt;
+
+    return (
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleToggleVisitorDetails(invitation.visitor?.id)}
+          icon={<EyeIcon className="w-4 h-4" />}
+        >
+          Details
+        </Button>
+        {canCheckIn && (
+          <Button
+            variant="success"
+            size="sm"
+            onClick={() => handleQuickCheckIn(invitation)}
+            icon={<ArrowRightOnRectangleIcon className="w-4 h-4" />}
+          >
+            Check In
+          </Button>
+        )}
+        {isCheckedIn && (
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => handleCheckOut(invitation.id)}
+            icon={<ArrowLeftOnRectangleIcon className="w-4 h-4" />}
+          >
+            Check Out
+          </Button>
+        )}
+      </div>
+    );
+  };
+
+  const showCompactActiveView = isMobile;
+
   // Render stats cards
   const renderStatsCards = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -991,8 +1051,8 @@ const ReceptionistDashboard = () => {
 
   // Render tab navigation
   const renderTabNavigation = () => (
-    <div className="border-b border-gray-200 dark:border-gray-700">
-      <nav className="-mb-px flex space-x-8">
+    <div className="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+      <nav className="-mb-px flex min-w-max space-x-4">
         {[
           { id: 'overview', label: 'Overview', icon: EyeIcon },
           { id: 'scanner', label: 'QR Scanner', icon: QrCodeIcon },
@@ -1003,7 +1063,7 @@ const ReceptionistDashboard = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`flex-shrink-0 py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               activeTab === tab.id
                 ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
@@ -1022,12 +1082,12 @@ const ReceptionistDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Receptionist Dashboard</h1>
           <p className="text-gray-600 dark:text-gray-400">Manage visitor check-ins, walk-in registrations, and daily operations</p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Button
             variant="outline"
             onClick={() => {
@@ -1267,11 +1327,19 @@ const ReceptionistDashboard = () => {
                   <LoadingSpinner size="lg" />
                 </div>
               ) : activeInvitationsFromRedux && activeInvitationsFromRedux.length > 0 ? (
-                <Table
-                  data={activeInvitationsFromRedux}
-                  columns={activeVisitorsColumns}
-                  emptyMessage="No active visitors"
-                />
+                showCompactActiveView ? (
+                  <div className="space-y-4">
+                    {activeInvitationsFromRedux.map(renderActiveVisitorCard)}
+                  </div>
+                ) : (
+                  <div className="-mx-4 sm:mx-0 overflow-x-auto">
+                    <Table
+                      data={activeInvitationsFromRedux}
+                      columns={activeVisitorsColumns}
+                      emptyMessage="No active visitors"
+                    />
+                  </div>
+                )
               ) : (
                 <div className="text-center py-12">
                   <UserIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />

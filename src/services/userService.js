@@ -38,6 +38,35 @@ const userService = {
   },
 
   /**
+   * Search hosts across local staff users and the corporate directory.
+   */
+  async searchHosts(searchTerm, options = {}) {
+    const queryString = buildQueryString({
+      searchTerm,
+      maxResults: options.limit || 10,
+      includeDirectory: options.includeDirectory ?? true
+    });
+
+    const response = await apiClient.get(`${USER_ENDPOINTS.HOST_SEARCH}${queryString}`);
+    return extractApiData(response);
+  },
+
+  /**
+   * Ensure a host exists by provisioning them from the directory when necessary.
+   */
+  async ensureHostFromDirectory(payload) {
+    const response = await apiClient.post(USER_ENDPOINTS.ENSURE_HOST, {
+      identifier: payload.identifier,
+      email: payload.email,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      role: payload.role
+    });
+
+    return extractApiData(response);
+  },
+
+  /**
    * Gets user by ID
    * GET /api/Users/{id}
    * Requires: User.Read permission

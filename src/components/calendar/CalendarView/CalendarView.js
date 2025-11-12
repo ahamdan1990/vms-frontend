@@ -196,7 +196,7 @@ const CalendarView = ({
 
   // Week View
   const renderWeekView = () => (
-    <div className="grid grid-cols-7 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
       {weekDates.map((date, index) => {
         const daySlots = getTimeSlotsForDate(date);
         const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
@@ -293,8 +293,8 @@ const CalendarView = ({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:space-x-4">
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
@@ -330,7 +330,7 @@ const CalendarView = ({
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2 md:justify-end">
           <Button
             variant={viewMode === 'week' ? 'primary' : 'outline'}
             size="sm"

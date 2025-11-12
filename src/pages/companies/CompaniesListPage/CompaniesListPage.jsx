@@ -34,13 +34,13 @@ import {
  */
 const CompaniesListPage = () => {
   // Hooks
-  const { hasPermission } = usePermissions();
+  const { isAdmin, systemConfig } = usePermissions();
 
-  // Permissions
-  const canRead = hasPermission('Administrator') || hasPermission('Manager');
-  const canCreate = hasPermission('Administrator');
-  const canUpdate = hasPermission('Administrator');
-  const canDelete = hasPermission('Administrator');
+  // Permissions - Allow admin users to manage companies
+  const canRead = isAdmin || systemConfig.canRead;
+  const canCreate = isAdmin;
+  const canUpdate = isAdmin;
+  const canDelete = isAdmin;
 
   // Local state
   const [companies, setCompanies] = useState([]);

@@ -7,6 +7,10 @@ import { usePermissions } from '../../../hooks/usePermissions';
 import { useToast } from '../../../hooks/useNotifications';
 import Input from '../../common/Input/Input';
 import Button from '../../common/Button/Button';
+import DepartmentSelect from '../../common/DepartmentSelect/DepartmentSelect';
+import Modal from '../../common/Modal/Modal';
+import departmentService from '../../../services/departmentService';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import PropTypes from 'prop-types';
 
 /**
@@ -39,7 +43,8 @@ const UserForm = ({
 
     role: user?.role || 'Staff',
     status: user?.status || 'Active',
-    department: user?.department || '',
+    department: user?.department || '', // Legacy field - will be replaced by departmentId
+    departmentId: user?.departmentId || null, // New field for foreign key
     jobTitle: user?.jobTitle || '',
     employeeId: user?.employeeId || '',
     isActive: user?.isActive !== undefined ? user.isActive : true,
@@ -69,6 +74,8 @@ const UserForm = ({
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [touchedFields, setTouchedFields] = useState(new Set());
+  const [showCreateDeptModal, setShowCreateDeptModal] = useState(false);
+  const [creatingDept, setCreatingDept] = useState(false);
 
   // Lebanon-specific data
   const lebaneseGovernorates = [
@@ -94,7 +101,8 @@ const UserForm = ({
         phoneType: user.phoneType || 'Mobile',
         role: user.role || 'Staff',
         status: user.status || 'Active',
-        department: user.department || '',
+        department: user.department || '', // Legacy field
+        departmentId: user.departmentId || null, // New foreign key field
         jobTitle: user.jobTitle || '',
         employeeId: user.employeeId || '',
         isActive: user.isActive !== undefined ? user.isActive : true,
@@ -160,7 +168,7 @@ const UserForm = ({
   const validateField = (fieldName, value) => {
     const fieldData = { [fieldName]: value };
     const validation = validateUserData(fieldData, isEditing);
-    
+
     if (validation.errors[fieldName]) {
       setErrors(prev => ({
         ...prev,
@@ -171,6 +179,27 @@ const UserForm = ({
         ...prev,
         [fieldName]: null
       }));
+    }
+  };
+
+  const handleCreateDepartment = async (deptData) => {
+    try {
+      setCreatingDept(true);
+      const result = await departmentService.createDepartment(deptData);
+
+      toast.success('Department Created', `${deptData.name} has been created successfully.`);
+
+      // Set the newly created department
+      setFormData(prev => ({
+        ...prev,
+        departmentId: result.department?.id || result.id
+      }));
+
+      setShowCreateDeptModal(false);
+    } catch (error) {
+      toast.error('Creation Failed', error.response?.data?.message || 'Failed to create department');
+    } finally {
+      setCreatingDept(false);
     }
   };
 
@@ -226,6 +255,7 @@ const UserForm = ({
                   phoneType: 'Mobile',
                   role: 'Staff',
                   department: '',
+                  departmentId: null,
                   jobTitle: '',
                   employeeId: '',
                   isActive: true,
@@ -566,17 +596,37 @@ const UserForm = ({
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4, duration: 0.3 }}
             >
-              <Input
-                type="text"
-                name="department"
-                label="Department"
-                placeholder="Enter department"
-                value={formData.department || ''}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touchedFields.has('department') ? errors.department : null}
-                disabled={isLoading}
-              />
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  <DepartmentSelect
+                    label="Department"
+                    value={formData.departmentId}
+                    onChange={(value) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        departmentId: value ? parseInt(value) : null
+                      }));
+                      setTouchedFields(prev => new Set([...prev, 'department']));
+                      if (errors.department) {
+                        setErrors(prev => ({ ...prev, department: null }));
+                      }
+                    }}
+                    placeholder="Select a department..."
+                    error={touchedFields.has('department') ? errors.department : null}
+                    disabled={isLoading}
+                    showHierarchy={true}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateDeptModal(true)}
+                  disabled={isLoading}
+                  className="h-[42px] px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Create new department"
+                >
+                  <PlusIcon className="w-5 h-5" />
+                </button>
+              </div>
             </motion.div>
 
             {/* Job Title */}
@@ -1013,7 +1063,90 @@ const UserForm = ({
           </Button>
         </motion.div>
       </form>
+
+      {/* Create Department Modal */}
+      <Modal
+        isOpen={showCreateDeptModal}
+        onClose={() => setShowCreateDeptModal(false)}
+        title="Create New Department"
+      >
+        <QuickCreateDepartmentForm
+          onSubmit={handleCreateDepartment}
+          onCancel={() => setShowCreateDeptModal(false)}
+          loading={creatingDept}
+        />
+      </Modal>
     </motion.div>
+  );
+};
+
+// Quick Create Department Form Component
+const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
+  const [formState, setFormState] = useState({ name: '', code: '', description: '' });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormState(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formState);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Department Name <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          name="name"
+          required
+          value={formState.name}
+          onChange={handleChange}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          placeholder="e.g., Human Resources"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Department Code <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          name="code"
+          required
+          value={formState.code}
+          onChange={handleChange}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          placeholder="e.g., HR"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+        <textarea
+          name="description"
+          value={formState.description}
+          onChange={handleChange}
+          rows="3"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          placeholder="Optional description"
+        />
+      </div>
+
+      <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <Button variant="secondary" onClick={onCancel} type="button" disabled={loading}>
+          Cancel
+        </Button>
+        <Button type="submit" loading={loading}>
+          Create Department
+        </Button>
+      </div>
+    </form>
   );
 };
 

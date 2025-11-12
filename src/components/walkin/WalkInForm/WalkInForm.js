@@ -49,6 +49,7 @@ import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/sol
 
 // Utils
 import { extractErrorMessage } from '../../../utils/errorUtils';
+import { useToast } from '../../../hooks/useNotifications';
 
 /**
  * Walk-In Form Component
@@ -65,6 +66,7 @@ const WalkInForm = ({
   initialPhoto = null
 }) => {
   const dispatch = useDispatch();
+  const toast = useToast();
 
   // Redux selectors
   const locations = useSelector(selectLocationsList);
@@ -115,6 +117,7 @@ const WalkInForm = ({
   const [hostSearchTerm, setHostSearchTerm] = useState('');
   const [hostSearchResults, setHostSearchResults] = useState([]);
   const [searchingHosts, setSearchingHosts] = useState(false);
+  const [provisioningHostKey, setProvisioningHostKey] = useState(null);
 
   // Document scanning state
   const [scannedDocuments, setScannedDocuments] = useState([]);
@@ -280,17 +283,15 @@ const WalkInForm = ({
       setSearchingHosts(true);
       try {
         console.log('🔍 Searching for hosts with term:', searchTerm);
-        const response = await userService.getUsers({
-          searchTerm,
-          role: 'Host',
-          pageSize: 10,
-          sortBy: 'CreatedOn',
-          sortDirection: 'desc'
+        const response = await userService.searchHosts(searchTerm, {
+          limit: 10,
+          includeDirectory: true
         });
 
         console.log('✅ Host search response:', response);
-        // Handle both response.items and response.data.items structures
-        const hosts = response.items || response.data?.items || [];
+        const hosts = Array.isArray(response)
+          ? response
+          : response?.items || response?.data?.items || [];
         console.log('📋 Found hosts:', hosts.length, hosts);
         setHostSearchResults(hosts);
       } catch (error) {
@@ -303,27 +304,69 @@ const WalkInForm = ({
     []
   );
 
-  const handleHostSearch = (searchTerm) => {
-    setHostSearchTerm(searchTerm);
-    debouncedHostSearch(searchTerm);
-  };
+  const applyHostSelection = (hostDetails) => {
+    if (!hostDetails?.id) {
+      return;
+    }
 
-  const handleSelectHost = (host) => {
+    const fullNameCandidate = hostDetails.fullName || `${hostDetails.firstName || ''} ${hostDetails.lastName || ''}`.trim();
+    const finalName = (fullNameCandidate || '').trim() || hostDetails.email || 'Selected Host';
+
     setVisitData(prev => ({
       ...prev,
-      hostId: host.id,
-      hostName: host.fullName || `${host.firstName} ${host.lastName}`
+      hostId: hostDetails.id,
+      hostName: finalName
     }));
     setHostSearchTerm('');
     setHostSearchResults([]);
 
-    // Clear validation error
     if (validationErrors.hostId) {
       setValidationErrors(prev => {
         const newErrors = { ...prev };
         delete newErrors.hostId;
         return newErrors;
       });
+    }
+  };
+
+  const handleHostSearch = (searchTerm) => {
+    setHostSearchTerm(searchTerm);
+    debouncedHostSearch(searchTerm);
+  };
+
+  const handleSelectHost = async (host) => {
+    if (!host) {
+      return;
+    }
+
+    const requiresProvisioning = !host.id || host.existsInSystem === false;
+
+    if (!requiresProvisioning) {
+      applyHostSelection(host);
+      return;
+    }
+
+    const identifier = host.directoryIdentifier || host.email;
+    if (!identifier) {
+      toast.error('Unable to add this host because no directory identifier is available.');
+      return;
+    }
+
+    try {
+      setProvisioningHostKey(identifier);
+      const ensuredHost = await userService.ensureHostFromDirectory({
+        identifier,
+        email: host.email,
+        firstName: host.firstName,
+        lastName: host.lastName
+      });
+      applyHostSelection(ensuredHost);
+      toast.success(`${ensuredHost.fullName || ensuredHost.email} is now available as a host.`);
+    } catch (error) {
+      console.error('❌ Failed to provision host:', error);
+      toast.error(extractErrorMessage(error, 'Failed to add host from directory.'));
+    } finally {
+      setProvisioningHostKey(null);
     }
   };
 
@@ -904,20 +947,60 @@ const WalkInForm = ({
             )}
             {hostSearchResults.length > 0 && (
               <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                {hostSearchResults.map((host) => (
-                  <button
-                    key={host.id}
-                    onClick={() => handleSelectHost(host)}
-                    className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
-                  >
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {host.fullName || `${host.firstName} ${host.lastName}`}
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {host.email}
-                    </p>
-                  </button>
-                ))}
+                {hostSearchResults.map((host, index) => {
+                  const hostKey = host.id ?? host.directoryIdentifier ?? host.email ?? host.fullName ?? `host-${index}`;
+                  const displayName = host.fullName || `${host.firstName || ''} ${host.lastName || ''}`.trim() || host.email || 'Unknown Host';
+                  const identifier = host.directoryIdentifier || host.email || hostKey;
+                  const isDirectory = host.source === 'directory' || host.existsInSystem === false;
+                  const isProvisioning = identifier && provisioningHostKey === identifier;
+
+                  return (
+                    <button
+                      key={hostKey}
+                      onClick={() => handleSelectHost(host)}
+                      className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
+                    >
+                      <div className="flex items-start space-x-3">
+                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                          <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {displayName}
+                            </p>
+                            <div className="flex items-center space-x-2">
+                              {isDirectory && (
+                                <Badge variant="warning" size="sm">
+                                  Directory
+                                </Badge>
+                              )}
+                              {isProvisioning ? (
+                                <LoadingSpinner size="sm" />
+                              ) : (
+                                <ArrowRightIcon className="w-4 h-4 text-gray-400" />
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {host.email || 'No email on record'}
+                          </p>
+                          {host.department && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {host.department}
+                            </p>
+                          )}
+                          {isDirectory && (
+                            <p className="text-xs text-amber-600 dark:text-amber-400">
+                              Will be auto-created from directory
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+
               </div>
             )}
           </div>

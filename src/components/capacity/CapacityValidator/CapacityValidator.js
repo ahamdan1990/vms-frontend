@@ -154,7 +154,7 @@ const CapacityValidator = ({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="flex items-center gap-2 text-sm text-blue-600"
+            className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-300"
           >
             <LoadingSpinner size="sm" />
             <span>Checking capacity...</span>
@@ -167,10 +167,10 @@ const CapacityValidator = ({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="bg-red-50 border border-red-200 rounded-lg p-3"
+            className="bg-red-50 border border-red-200 dark:bg-red-900/30 dark:border-red-700 rounded-lg p-3"
           >
             <div className="flex items-start gap-2">
-              <div className="text-red-600 text-sm">
+              <div className="text-red-600 dark:text-red-200 text-sm">
                 <p className="font-medium">Validation Error</p>
                 <ul className="mt-1 list-disc list-inside">
                   {validation.error.map((error, index) => (
@@ -191,8 +191,8 @@ const CapacityValidator = ({
             className={`
               border rounded-lg p-4
               ${isAvailable 
-                ? 'bg-green-50 border-green-200' 
-                : 'bg-red-50 border-red-200'
+                ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' 
+                : 'bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-700'
               }
             `}
           >
@@ -217,28 +217,28 @@ const CapacityValidator = ({
                 {/* Capacity Details */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                   <div>
-                    <span className="text-gray-600">
+                    <span className="text-gray-600 dark:text-gray-400">
                       {validation.result.isCurrentTime ? 'Current:' : 'Scheduled:'}
                     </span>
-                    <span className="ml-1 font-medium">
+                    <span className="ml-1 font-medium text-gray-900 dark:text-gray-100">
                       {validation.result.currentOccupancy}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Capacity:</span>
-                    <span className="ml-1 font-medium">
+                    <span className="text-gray-600 dark:text-gray-400">Capacity:</span>
+                    <span className="ml-1 font-medium text-gray-900 dark:text-gray-100">
                       {validation.result.maxCapacity}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Available:</span>
-                    <span className="ml-1 font-medium text-green-600">
+                    <span className="text-gray-600 dark:text-gray-400">Available:</span>
+                    <span className="ml-1 font-medium text-green-600 dark:text-green-400">
                       {validation.result.availableSlots}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Utilization:</span>
-                    <span className="ml-1 font-medium">
+                    <span className="text-gray-600 dark:text-gray-400">Utilization:</span>
+                    <span className="ml-1 font-medium text-gray-900 dark:text-gray-100">
                       {validation.result.occupancyPercentage}%
                     </span>
                   </div>
@@ -248,13 +248,13 @@ const CapacityValidator = ({
                 {validation.result.messages && validation.result.messages.length > 0 && (
                   <div className="mt-2">
                     {validation.result.messages.map((message, index) => (
-                      <p key={index} className="text-sm text-gray-700">
+                      <p key={index} className="text-sm text-gray-700 dark:text-gray-300">
                         {message}
                       </p>
                     ))}
-                  </div>
-                )}
-              </div>
+                 </div>
+               )}
+             </div>
 
               {/* Actions */}
               <div className="flex flex-col gap-2">

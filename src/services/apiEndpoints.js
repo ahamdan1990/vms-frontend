@@ -35,6 +35,8 @@ export const USER_ENDPOINTS = {
   PROFILE: '/api/Users/profile',
   PROFILE_PREFERENCES: '/api/Users/profile/preferences',
   PROFILE_PHOTO: '/api/Users/profile/photo',
+  HOST_SEARCH: '/api/Users/host-search',
+  ENSURE_HOST: '/api/Users/ensure-host',
   ACTIVATE: (id) => `/api/Users/${id}/activate`,
   DEACTIVATE: (id) => `/api/Users/${id}/deactivate`,
   UNLOCK: (id) => `/api/Users/${id}/unlock`,

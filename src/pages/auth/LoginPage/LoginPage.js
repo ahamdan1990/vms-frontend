@@ -6,7 +6,11 @@ import { useAuth } from '../../../hooks/useAuth';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../../store/slices/uiSlice';
 import LoginForm from '../../../components/forms/LoginForm/LoginForm';
-import { useTheme } from '../../../hooks/useTheme'; 
+import { useTheme } from '../../../hooks/useTheme';
+import { API_CONFIG } from '../../../services/apiEndpoints';
+import { getCurrentUser } from '../../../store/slices/authSlice';
+import { startTokenRefresh } from '../../../services/apiClient';
+import tokenService from '../../../services/tokenService'; 
 
 /**
  * Beautiful Login Page with animations and professional design
@@ -23,7 +27,116 @@ const LoginPage = () => {
 
   const handleLogin = async (credentials) => {
     try {
-      const result = await login(credentials);
+      // Route to correct login method
+      let result;
+
+      if (credentials.loginMethod === 'ldap') {
+        // LDAP login uses username and password
+        const ldapCredentials = {
+          username: credentials.username,
+          password: credentials.password,
+          rememberMe: credentials.rememberMe
+        };
+
+        console.log('🔐 [LDAP] Starting LDAP authentication...');
+
+        // Dispatch LDAP login command via API
+        const apiResponse = await fetch(`${API_CONFIG.BASE_URL}/api/Auth/ldap-login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(ldapCredentials)
+        });
+
+        console.log('🔐 [LDAP] API Response Status:', apiResponse.status);
+
+        const data = await apiResponse.json();
+        console.log('🔐 [LDAP] API Response Data:', data);
+
+        if (!apiResponse.ok) {
+          const errorMsg = data.message || `LDAP login failed: ${apiResponse.statusText}`;
+          console.error('❌ [LDAP] API Error:', errorMsg);
+          throw new Error(errorMsg);
+        }
+
+        // Extract auth response from nested structure
+        const authResponse = data.data?.isSuccess ? data.data : data;
+        console.log('🔐 [LDAP] Parsed Auth Response:', { isSuccess: authResponse?.isSuccess, hasUser: !!authResponse?.user });
+
+        // Store user info from LDAP response
+        const ldapUser = authResponse?.user;
+        if (ldapUser && ldapUser.theme) {
+          console.log('🎨 [LDAP] Setting theme:', ldapUser.theme);
+          setThemeMode(ldapUser.theme);
+        }
+
+        // Verify isSuccess before proceeding
+        if (!authResponse?.isSuccess) {
+          console.error('❌ [LDAP] Authentication response indicated failure');
+          throw new Error('LDAP authentication response indicated failure');
+        }
+
+        // ✅ Handle LDAP login success - set session and tokens
+        console.log('🔐 [LDAP] Handling login success - setting session...');
+        tokenService.handleLoginSuccess(authResponse);
+        tokenService.updateLastActivity();
+
+        // ✅ CRITICAL: Use backend device fingerprint for refresh token matching
+        if (authResponse?.deviceFingerprint) {
+          console.log('🔐 [LDAP] Setting backend device fingerprint:', authResponse.deviceFingerprint);
+          tokenService.setDeviceFingerprint(authResponse.deviceFingerprint);
+        }
+
+        if (credentials.rememberMe && ldapUser?.email) {
+          console.log('💾 [LDAP] Remembering email:', ldapUser.email);
+          tokenService.rememberEmail(ldapUser.email);
+        }
+
+        // ✅ Update Redux auth state with current user info
+        try {
+          console.log('🔐 [LDAP] Fetching current user to populate Redux state...');
+          const getCurrentUserResult = await dispatch(getCurrentUser());
+
+          console.log('🔐 [LDAP] getCurrentUser Result:', {
+            hasPayload: !!getCurrentUserResult.payload,
+            payloadType: getCurrentUserResult.payload ? typeof getCurrentUserResult.payload : 'null'
+          });
+
+          if (getCurrentUserResult.payload) {
+            console.log('✅ [LDAP] Redux state updated with current user');
+
+            // ✅ Start token refresh for this session
+            console.log('🔄 [LDAP] Starting token refresh service...');
+            startTokenRefresh();
+
+            console.log('✅ [LDAP] Authentication successful - navigating to dashboard');
+
+            // Navigate to dashboard
+            const from = searchParams.get('from');
+            const destination = from ? decodeURIComponent(from) : '/dashboard';
+            console.log('🚀 [LDAP] Navigating to:', destination);
+            navigate(destination, { replace: true });
+            return;
+          } else {
+            console.error('❌ [LDAP] getCurrentUser returned empty payload:', getCurrentUserResult);
+            throw new Error('Failed to load user profile - no payload returned from getCurrentUser');
+          }
+        } catch (getCurrentUserError) {
+          console.error('❌ [LDAP] Error fetching current user:', getCurrentUserError);
+          console.error('❌ [LDAP] Error details:', {
+            message: getCurrentUserError.message,
+            stack: getCurrentUserError.stack
+          });
+          throw new Error(`Failed to load user profile after LDAP login: ${getCurrentUserError.message}`);
+        }
+      } else {
+        // Standard login
+        console.log('📧 [STANDARD] Starting standard email/password authentication...');
+        result = await login(credentials);
+        console.log('📧 [STANDARD] Login result:', { hasPayload: !!result.payload, isSuccess: result.payload?.loginResponse?.isSuccess });
+      }
 
       if (result.payload?.loginResponse?.isSuccess) {
         // Get intended destination or default based on role
@@ -31,12 +144,19 @@ const LoginPage = () => {
         const from = searchParams.get('from');
         const destination = from ? decodeURIComponent(from) : '/dashboard';
 
+        console.log('🎨 [STANDARD] Setting theme:', user.theme || 'auto');
         setThemeMode(user.theme || 'auto');
+
+        console.log('🚀 [STANDARD] Navigating to:', destination);
         navigate(destination, { replace: true });
       }
     } catch (error) {
       // Error is handled by the form and Redux
-      console.error('Login failed:', error);
+      console.error('❌ [LOGIN] Login failed with error:', error);
+      console.error('❌ [LOGIN] Error details:', {
+        message: error.message,
+        stack: error.stack
+      });
     }
   };
 

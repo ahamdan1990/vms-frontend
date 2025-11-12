@@ -1003,7 +1003,7 @@ const InvitationsListPage = () => {
             />
           </div>
           
-          <div className="flex space-x-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
@@ -1183,28 +1183,28 @@ const InvitationsListPage = () => {
             transition={{ duration: 0.2 }}
           >
             <Card className="p-4 bg-blue-50 border-blue-200">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full font-semibold text-sm">
-                    {selectedInvitations.length}
-                  </div>
-                  <span className="text-sm font-medium text-gray-900">
-                    {selectedInvitations.length} invitation{selectedInvitations.length !== 1 ? 's' : ''} selected
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => dispatch(clearSelections())}
-                    className="text-gray-600 hover:text-gray-900"
-                  >
-                    Clear
-                  </Button>
-                </div>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:space-x-3">
+              <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full font-semibold text-sm">
+                {selectedInvitations.length}
+              </div>
+              <span className="text-sm font-medium text-gray-900">
+                {selectedInvitations.length} invitation{selectedInvitations.length !== 1 ? 's' : ''} selected
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => dispatch(clearSelections())}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Clear
+              </Button>
+            </div>
 
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
                     onClick={() => handleBulkAction('approve')}
                     icon={<CheckIcon className="w-4 h-4" />}
                     className="bg-white text-green-700 border-green-300 hover:bg-green-50 font-medium"
@@ -1246,28 +1246,30 @@ const InvitationsListPage = () => {
           </div>
         ) : (
           <>
-            <Table
-              data={invitations}
-              columns={columns}
-              loading={loading}
-              onRowSelectionChange={(selectedRowIds) => {
-                const selectedIds = Object.keys(selectedRowIds).filter(id => selectedRowIds[id]);
-                dispatch(setSelectedInvitations(selectedIds.map(Number)));
-              }}
-              onSort={handleSort}
-              sortBy={filters.sortBy}
-              sortDirection={filters.sortDirection}
-              emptyMessage="No invitations found"
-              hover
-              bordered
-              className="invitations-table"
-            />
+            <div className="-mx-4 sm:mx-0 overflow-x-auto">
+              <Table
+                data={invitations}
+                columns={columns}
+                loading={loading}
+                onRowSelectionChange={(selectedRowIds) => {
+                  const selectedIds = Object.keys(selectedRowIds).filter(id => selectedRowIds[id]);
+                  dispatch(setSelectedInvitations(selectedIds.map(Number)));
+                }}
+                onSort={handleSort}
+                sortBy={filters.sortBy}
+                sortDirection={filters.sortDirection}
+                emptyMessage="No invitations found"
+                hover
+                bordered
+                className="invitations-table min-w-full"
+              />
+            </div>
             
             {/* Pagination */}
             {totalInvitations > 0 && (
               <div className="px-6 py-4 border-t border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 text-sm text-gray-500">
                     <span>
                       Showing {pageRange.start} to {pageRange.end} of {pageRange.total} invitations
                     </span>

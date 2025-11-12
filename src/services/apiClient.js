@@ -327,11 +327,13 @@ export const refreshToken = async () => {
     }, REFRESH_TIMEOUT);
 
     try {
+      const fingerprint = tokenService.getDeviceFingerprint();
       if (process.env.NODE_ENV === 'development') {
         console.log(`🔄 Refreshing token (attempt ${refreshAttempts}/${MAX_REFRESH_ATTEMPTS})...`);
+        console.log(`🔄 [REFRESH] Sending device fingerprint: ${fingerprint}`);
       }
-      
-      const response = await axios.post(AUTH_ENDPOINTS.REFRESH, {deviceFingerprint: tokenService.getDeviceFingerprint()}, {
+
+      const response = await axios.post(AUTH_ENDPOINTS.REFRESH, {deviceFingerprint: fingerprint}, {
         baseURL: API_CONFIG.BASE_URL,
         withCredentials: true,
         timeout: TIMEOUT_CONFIG.SHORT

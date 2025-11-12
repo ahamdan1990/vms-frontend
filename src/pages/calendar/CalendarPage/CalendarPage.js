@@ -138,16 +138,16 @@ const CalendarPage = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
-        <div>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-3">
             <CalendarDaysIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             <span>Calendar</span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-1">View and book available time slots</p>
+          <p className="text-gray-600 dark:text-gray-300">View and book available time slots</p>
         </div>
 
-        <div className="flex space-x-3">
+        <div className="flex flex-wrap gap-3 justify-start lg:justify-end">
           {canManageSlots && (
             <Button
               variant="outline"
@@ -169,19 +169,21 @@ const CalendarPage = () => {
 
       {/* Filters */}
       <div className="bg-white dark:bg-slate-900/70 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-800 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">Filter by Location:</label>
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
+              Filter by Location:
+            </label>
             <Select
               value={selectedLocationId?.toString() || ''}
               onChange={(e) => handleLocationChange(e.target.value)}
               options={locationOptions}
-              className="w-64"
+              className="w-full sm:w-64"
             />
           </div>
 
-          <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-gray-300">
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
+            <div className="flex items-center gap-2">
               <ClockIcon className="w-5 h-5 text-gray-500 dark:text-gray-300" />
               <span>{filteredTimeSlots.length} time slots available</span>
             </div>
@@ -216,7 +218,7 @@ const CalendarPage = () => {
             <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
               <h3 className="font-medium text-gray-900 mb-3">{selectedTimeSlot.name}</h3>
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
                   <div className="text-gray-600 mb-1">Date</div>
                   <div className="font-medium text-gray-900">

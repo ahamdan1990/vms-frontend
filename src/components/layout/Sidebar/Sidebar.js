@@ -270,6 +270,16 @@ const Sidebar = () => {
           show: systemPermissions.canRead || isAdmin
         },
         {
+          name: 'Companies',
+          href: '/system/companies',
+          show: systemPermissions.canRead || isAdmin
+        },
+        {
+          name: 'Departments',
+          href: '/system/departments',
+          show: systemPermissions.canRead || isAdmin
+        },
+        {
           name: 'Time Slots',
           href: '/system/time-slots',
           show: systemPermissions.canUpdate || isAdmin

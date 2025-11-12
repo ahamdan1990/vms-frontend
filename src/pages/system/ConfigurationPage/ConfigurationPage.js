@@ -45,7 +45,8 @@ import LoadingSpinner from '../../../components/common/LoadingSpinner/LoadingSpi
 import EmptyState from '../../../components/common/EmptyState/EmptyState';
 import ConfirmDialog from '../../../components/common/ConfirmDialog/ConfirmDialog';
 import Modal from '../../../components/common/Modal/Modal';
-
+import LdapSettingsPanel from '../../../components/system/LdapSettingsPanel';
+import LdapUsersPanel from '../../../components/system/LdapUsersPanel';
 
 // Icons
 import {
@@ -77,10 +78,12 @@ const ConfigurationPage = () => {
   const pendingRestarts = useSelector(selectPendingRestarts);
   const loading = useSelector(selectConfigurationLoading);
   const errors = useSelector(selectConfigurationErrors);
+  const isLdapSelected = (selectedCategory || '').toLowerCase() === 'ldap';
 
   // Local state
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingConfig, setEditingConfig] = useState(null);
+  const [ldapTab, setLdapTab] = useState('settings');
 
   // Permissions
   const canRead = hasPermission(SYSTEM_CONFIG_PERMISSIONS.READ);
@@ -98,7 +101,9 @@ const ConfigurationPage = () => {
 
   // Get categories
   const categories = useMemo(() => {
-    return Object.keys(configurations).sort();
+    const uniqueCategories = new Set(Object.keys(configurations));
+    uniqueCategories.add('LDAP');
+    return Array.from(uniqueCategories).sort((a, b) => a.localeCompare(b));
   }, [configurations]);
 
   // Get filtered configurations
@@ -106,8 +111,14 @@ const ConfigurationPage = () => {
     let configs = configurations;
     
     // Filter by selected category
-    if (selectedCategory && configurations[selectedCategory]) {
-      configs = { [selectedCategory]: configurations[selectedCategory] };
+    if (selectedCategory) {
+      if (configurations[selectedCategory]) {
+        configs = { [selectedCategory]: configurations[selectedCategory] };
+      } else if (selectedCategory.toLowerCase() === 'ldap') {
+        configs = configurations.LDAP ? { LDAP: configurations.LDAP } : {};
+      } else {
+        configs = {};
+      }
     }
     
     // Filter by search query
@@ -309,8 +320,43 @@ const ConfigurationPage = () => {
         </Card>
       )}
 
+      {/* LDAP Configuration Panel with Tabs */}
+      {isLdapSelected && (
+        <Card className="p-6">
+          {/* Tabs */}
+          <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setLdapTab('settings')}
+                className={`${
+                  ldapTab === 'settings'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Settings
+              </button>
+              <button
+                onClick={() => setLdapTab('users')}
+                className={`${
+                  ldapTab === 'users'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Users
+              </button>
+            </nav>
+          </div>
+
+          {/* Tab Content */}
+          {ldapTab === 'settings' && <LdapSettingsPanel canEdit={canUpdate} />}
+          {ldapTab === 'users' && <LdapUsersPanel canEdit={canUpdate} />}
+        </Card>
+      )}
+
       {/* Empty State */}
-      {!loading.listLoading && Object.keys(filteredConfigurations).length === 0 && (
+      {!isLdapSelected && !loading.listLoading && Object.keys(filteredConfigurations).length === 0 && (
         <EmptyState
           icon={CogIcon}
           title="No configurations found"
@@ -319,7 +365,7 @@ const ConfigurationPage = () => {
       )}
 
       {/* Configurations List */}
-      {!loading.listLoading && Object.keys(filteredConfigurations).length > 0 && (
+      {!isLdapSelected && !loading.listLoading && Object.keys(filteredConfigurations).length > 0 && (
         <div className="space-y-6">
           {Object.keys(filteredConfigurations).map(category => (
             <ConfigurationCategory

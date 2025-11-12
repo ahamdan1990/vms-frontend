@@ -286,7 +286,7 @@ const UnifiedDashboard = () => {
           <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">Admin Tools</span>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <button
             onClick={() => setActiveView('receptionist')}
             className="group p-4 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 text-left"
@@ -404,14 +404,15 @@ const UnifiedDashboard = () => {
     const navigationItems = getNavigationItems();
 
     return (
-      <nav className="flex space-x-1" aria-label="Dashboard Navigation">
+      <div className="overflow-x-auto">
+      <nav className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-1 min-w-0" aria-label="Dashboard Navigation">
         {navigationItems.map(item => (
           <button
             key={item.id}
             onClick={() => setActiveView(item.id)}
             className={`
               group relative px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
-              flex items-center space-x-2 min-w-0 flex-1 justify-center
+              flex items-center space-x-2 min-w-0 justify-center w-full sm:flex-1
               ${activeView === item.id
                 ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 shadow-sm border border-blue-200 dark:border-blue-700'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700/50'
@@ -436,6 +437,7 @@ const UnifiedDashboard = () => {
           </button>
         ))}
       </nav>
+      </div>
     );
   };
 
