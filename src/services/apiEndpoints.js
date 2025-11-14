@@ -235,6 +235,17 @@ export const CAPACITY_ENDPOINTS = {
   TRENDS: '/api/capacity/trends'
 };
 
+// Report endpoints
+export const REPORT_ENDPOINTS = {
+  BASE: '/api/reports',
+  IN_BUILDING: '/api/reports/in-building',
+  IN_BUILDING_EXPORT: '/api/reports/in-building/export',
+  COMPREHENSIVE: '/api/reports/comprehensive',
+  COMPREHENSIVE_EXPORT: '/api/reports/comprehensive/export',
+  STATISTICS: '/api/reports/statistics',
+  STATISTICS_EXPORT: '/api/reports/statistics/export'
+};
+
 // Time Slots endpoints
 export const TIME_SLOTS_ENDPOINTS = {
   BASE: '/api/time-slots',

@@ -42,7 +42,6 @@ import {
   ExclamationTriangleIcon,
   EyeIcon,
   CalendarIcon,
-  BuildingOfficeIcon,
   UserIcon,
   MapPinIcon,
   ArrowRightOnRectangleIcon,
@@ -56,6 +55,7 @@ import {
 // Utils
 import formatters from '../../../utils/formatters';
 import { extractErrorMessage } from '../../../utils/errorUtils';
+import { createActiveVisitorColumns } from '../../../components/visitor/activeVisitorUtils';
 
 // Services
 import invitationService from '../../../services/invitationService';
@@ -348,207 +348,19 @@ const CheckInDashboard = () => {
     }
   };
 
-  // Get status badge for invitation
-  const getStatusBadge = (invitation) => {
-    if (invitation.checkedInAt && !invitation.checkedOutAt) {
-      return <Badge variant="success" size="sm">Checked In</Badge>;
-    } else if (invitation.checkedInAt && invitation.checkedOutAt) {
-      return <Badge variant="secondary" size="sm">Completed</Badge>;
-    } else if (invitation.status === 'Approved') {
-      return <Badge variant="warning" size="sm">Approved</Badge>;
-    } else {
-      return <Badge variant="info" size="sm">{invitation.status}</Badge>;
-    }
-  };
-
-  // Format visitor information
-  const formatVisitorInfo = (invitation) => {
-    const visitor = invitation.visitor;
-    if (!visitor) return 'Unknown Visitor';
-
-    return (
-      <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-          <UserIcon className="w-5 h-5 text-blue-600" />
-        </div>
-        <div>
-          <div className="font-medium text-gray-900">
-            {visitor.firstName} {visitor.lastName}
-          </div>
-          <div className="text-sm text-gray-500">{visitor.email}</div>
-          {visitor.company && (
-            <div className="text-sm text-gray-500 flex items-center space-x-1">
-              <BuildingOfficeIcon className="w-3 h-3" />
-              <span>{visitor.company}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // Format visit information
-  const formatVisitInfo = (invitation) => {
-    return (
-      <div className="space-y-1">
-        <div className="font-medium text-gray-900">{invitation.subject}</div>
-        <div className="text-sm text-gray-600 flex items-center space-x-1">
-          <CalendarIcon className="w-3 h-3" />
-          <span>{formatters.formatDateTime(invitation.scheduledStartTime)}</span>
-        </div>
-        {invitation.location && (
-          <div className="text-sm text-gray-600 flex items-center space-x-1">
-            <MapPinIcon className="w-3 h-3" />
-            <span>{invitation.location.name}</span>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Format check-in status
-  const formatCheckInStatus = (invitation) => {
-    if (invitation.checkedInAt && invitation.checkedOutAt) {
-      // Parse as UTC and calculate duration in milliseconds
-      const checkInTime = parseUtcDate(invitation.checkedInAt);
-      const checkOutTime = parseUtcDate(invitation.checkedOutAt);
-      const duration = checkOutTime.getTime() - checkInTime.getTime();
-      const hours = Math.floor(duration / (1000 * 60 * 60));
-      const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
-
-      return (
-        <div className="space-y-1">
-          <div className="text-sm text-gray-900">
-            <strong>In:</strong> {formatters.formatTime(invitation.checkedInAt)}
-          </div>
-          <div className="text-sm text-gray-900">
-            <strong>Out:</strong> {formatters.formatTime(invitation.checkedOutAt)}
-          </div>
-          <div className="text-sm text-gray-500">
-            Duration: {hours}h {minutes}m
-          </div>
-        </div>
-      );
-    } else if (invitation.checkedInAt) {
-      // Parse as UTC and calculate duration from check-in to now
-      const checkInTime = parseUtcDate(invitation.checkedInAt);
-      const now = new Date(); // Current time in user's timezone
-      const duration = now.getTime() - checkInTime.getTime();
-      const hours = Math.floor(duration / (1000 * 60 * 60));
-      const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
-
-      return (
-        <div className="space-y-1">
-          <div className="text-sm text-gray-900">
-            <strong>Checked in:</strong> {formatters.formatTime(invitation.checkedInAt)}
-          </div>
-          <div className="text-sm text-gray-500">
-            Duration: {hours}h {minutes}m
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className="text-sm text-gray-500">
-          Not checked in
-        </div>
-      );
-    }
-  };
-
-  // Table columns for active visitors
-  const columns = [
-    {
-      key: 'selection',
-      header: '',
-      width: '50px',
-      sortable: false,
-      render: (value, invitation) => (
-        <input
-          type="checkbox"
-          checked={false} // Add selection state if needed
-          onChange={() => {}} // Add selection handler if needed
-          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-        />
-      )
+  const columns = createActiveVisitorColumns({
+    onViewDetails: (invitation) => {
+      setSelectedInvitation(invitation);
+      setInvitationDetailsData(invitation);
+      setShowInvitationDetailsModal(true);
     },
-    {
-      key: 'visitor',
-      header: 'Visitor',
-      sortable: true,
-      render: (value, invitation) => formatVisitorInfo(invitation)
+    onQuickCheckIn: (invitation) => {
+      setSelectedInvitation(invitation);
+      setShowCheckInForm(true);
     },
-    {
-      key: 'visit',
-      header: 'Visit Details',
-      sortable: true,
-      render: (value, invitation) => formatVisitInfo(invitation)
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      sortable: true,
-      render: (value, invitation) => getStatusBadge(invitation)
-    },
-    {
-      key: 'checkin_status',
-      header: 'Check-in Status',
-      sortable: false,
-      render: (value, invitation) => formatCheckInStatus(invitation)
-    },
-    {
-      key: 'actions',
-      header: 'Actions',
-      width: '180px',
-      sortable: false,
-      render: (value, invitation) => {
-        const isCheckedIn = invitation.checkedInAt && !invitation.checkedOutAt;
-        const canCheckIn = invitation.status === 'Approved' && !invitation.checkedInAt;
-        
-        return (
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => {
-                setSelectedInvitation(invitation);
-                setInvitationDetailsData(invitation);
-                setShowInvitationDetailsModal(true);
-              }}
-              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-              title="View details"
-            >
-              <EyeIcon className="w-4 h-4" />
-            </button>
-            
-            {canCheckIn && (
-              <button
-                onClick={() => {
-                  setSelectedInvitation(invitation);
-                  setShowCheckInForm(true);
-                }}
-                className="text-green-600 hover:text-green-900 transition-colors"
-                title="Check In"
-              >
-                <ArrowRightOnRectangleIcon className="w-4 h-4" />
-              </button>
-            )}
-            
-            {isCheckedIn && (
-              <button
-                onClick={() => {
-                  setSelectedInvitation(invitation);
-                  handleCheckOut(invitation, 'Manual check-out');
-                }}
-                className="text-blue-600 hover:text-blue-900 transition-colors"
-                title="Check Out"
-              >
-                <ArrowLeftOnRectangleIcon className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        );
-      }
-    }
-  ];
+    onQuickCheckOut: (invitation) => handleCheckOut(invitation, 'Manual check-out'),
+    showSelection: true
+  });
 
   return (
     <div className="space-y-6">

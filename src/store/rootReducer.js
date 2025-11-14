@@ -16,6 +16,7 @@ import escalationRulesReducer from './slices/escalationRulesSlice';
 import camerasReducer from './slices/camerasSlice';
 import permissionsReducer from './slices/permissionsSlice';
 import rolesReducer from './slices/rolesSlice';
+import reportsReducer from './slices/reportsSlice';
 
 /**
  * Root reducer that combines all feature slices
@@ -39,6 +40,7 @@ const rootReducer = combineReducers({
   cameras: camerasReducer,
   permissions: permissionsReducer,
   roles: rolesReducer,
+  reports: reportsReducer,
 });
 
 /**

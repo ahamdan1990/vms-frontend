@@ -60,7 +60,7 @@ const capacityService = {
   /**
    * Gets occupancy statistics for a date range
    * GET /api/capacity/statistics
-   * Requires: Report.GenerateOwn permission
+   * Requires: Report.Generate.All permission
    */
   async getStatistics(params = {}) {
     const queryParams = {
@@ -132,7 +132,7 @@ const capacityService = {
   /**
    * Gets capacity utilization trends for monitoring
    * GET /api/capacity/trends
-   * Requires: Report.GenerateOwn permission
+   * Requires: Report.Generate.All permission
    */
   async getCapacityTrends(params = {}) {
     const queryParams = {

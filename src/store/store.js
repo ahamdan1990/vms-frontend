@@ -159,11 +159,21 @@ export const store = configureStore({
           'users/getUsers/fulfilled',
           'ui/addNotification',
           'notifications/addNotification',
+          'notifications/addToast',
           'ui/showConfirmDialog',
           'ui/showAlertDialog',
           'persist/REHYDRATE', // Ignore persistence actions
         ],
-        ignoredActionsPaths: ['meta.arg', 'payload.timestamp', 'payload.onConfirm', 'payload.onCancel'],
+        ignoredActionsPaths: [
+          'meta.arg',
+          'payload.timestamp',
+          'payload.onConfirm',
+          'payload.onCancel',
+          'payload.actions',
+          'payload.actions.0.onClick',
+          'payload.actions.1.onClick',
+          'payload.actions.2.onClick'
+        ],
         ignoredPaths: [
           'auth.user.lastLoginDate',
           'auth.user.passwordChangedDate',

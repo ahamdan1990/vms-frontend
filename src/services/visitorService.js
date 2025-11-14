@@ -277,6 +277,49 @@ const visitorService = {
   },
 
   /**
+   * Validates a photo for face detection without saving it
+   * POST /api/Visitors/validate-photo
+   * Requires: Visitor.Create or Visitor.Update permission
+   */
+  async validatePhoto(photoFile) {
+    const formData = new FormData();
+    formData.append('photo', photoFile);
+
+    const response = await apiClient.post(
+      `${VISITOR_ENDPOINTS.BASE}/validate-photo`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+    return extractApiData(response);
+  },
+
+  /**
+   * Searches for a visitor by face recognition from a photo
+   * POST /api/Visitors/search-by-photo
+   * Requires: Visitor.Read permission
+   * @returns {Promise<VisitorDto|null>} Visitor details if recognized, null otherwise
+   */
+  async searchVisitorByPhoto(photoFile) {
+    const formData = new FormData();
+    formData.append('photo', photoFile);
+
+    const response = await apiClient.post(
+      `${VISITOR_ENDPOINTS.BASE}/search-by-photo`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+    return extractApiData(response);
+  },
+
+  /**
    * Uploads visitor profile photo
    * POST /api/Visitors/{id}/photo
    * Requires: Visitor.Update permission
@@ -397,8 +440,13 @@ const visitorService = {
       // Step 2: Upload photo if provided (using new profile photo endpoint)
       if (photoFile && createdVisitor.id) {
         try {
-          await this.uploadVisitorPhoto(createdVisitor.id, photoFile);
-          console.log('Profile photo uploaded successfully');
+          const photoResult = await this.uploadVisitorPhoto(createdVisitor.id, photoFile);
+          console.log('Profile photo uploaded successfully:', photoResult);
+
+          // Add warnings to errors array if face detection issues occurred
+          if (photoResult && photoResult.warningMessage) {
+            errors.push(photoResult.warningMessage);
+          }
         } catch (photoError) {
           console.error('Profile photo upload failed:', photoError);
           errors.push(`Photo upload failed: ${photoError.message}`);

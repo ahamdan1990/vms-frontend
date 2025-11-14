@@ -190,6 +190,36 @@ const VisitorForm = ({
 
   const toast = useToast();
 
+  // Phone number validation function (matches backend validation logic)
+  const validatePhoneNumber = (phoneNumber) => {
+    if (!phoneNumber || phoneNumber.trim() === '') {
+      return null; // Empty is handled by required validation
+    }
+
+    // Remove all non-digit characters for length check
+    const digitsOnly = phoneNumber.replace(/\D/g, '');
+
+    // Phone number should have between 7 and 15 digits
+    if (digitsOnly.length < 7) {
+      return `Phone number must have at least 7 digits (currently ${digitsOnly.length})`;
+    }
+
+    if (digitsOnly.length > 15) {
+      return `Phone number must not exceed 15 digits (currently ${digitsOnly.length})`;
+    }
+
+    // Check various formats
+    const phoneRegex = /^(\+\d{1,3}[- ]?)?\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    const isInternationalFormat = phoneNumber.startsWith('+') && digitsOnly.length >= 7 && digitsOnly.length <= 14;
+    const isSimpleFormat = digitsOnly.length >= 7 && digitsOnly.length <= 15;
+
+    if (!phoneRegex.test(phoneNumber) && !isInternationalFormat && !isSimpleFormat) {
+      return 'Invalid phone number format. Use formats like: +961 71 123456, (123) 456-7890, or 71123456';
+    }
+
+    return null; // Valid
+  };
+
   // Document preview and download handlers
   const handlePreviewDocument = (doc) => {
     setSelectedDocument(doc);
@@ -886,12 +916,28 @@ const VisitorForm = ({
       }));
     }
 
-    // Clear field error
-    if (formErrors[field]) {
-      setFormErrors(prev => ({
-        ...prev,
-        [field]: undefined
-      }));
+    // Real-time validation for phone number fields
+    if (field === 'phoneNumber') {
+      const validationError = validatePhoneNumber(value);
+      if (validationError) {
+        setFormErrors(prev => ({
+          ...prev,
+          [field]: validationError
+        }));
+      } else {
+        setFormErrors(prev => ({
+          ...prev,
+          [field]: undefined
+        }));
+      }
+    } else {
+      // Clear field error for non-phone fields
+      if (formErrors[field]) {
+        setFormErrors(prev => ({
+          ...prev,
+          [field]: undefined
+        }));
+      }
     }
   };
 
@@ -936,14 +982,31 @@ const VisitorForm = ({
   const updateEmergencyContact = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      emergencyContacts: prev.emergencyContacts.map((contact, i) => 
-        i === index 
+      emergencyContacts: prev.emergencyContacts.map((contact, i) =>
+        i === index
           ? { ...contact, [field]: value }
-          : field === 'isPrimary' && value 
+          : field === 'isPrimary' && value
             ? { ...contact, isPrimary: false }
             : contact
       )
     }));
+
+    // Real-time validation for emergency contact phone numbers
+    if (field === 'phoneNumber') {
+      const validationError = validatePhoneNumber(value);
+      const errorKey = `emergencyContacts.${index}.phoneNumber`;
+      if (validationError) {
+        setFormErrors(prev => ({
+          ...prev,
+          [errorKey]: validationError
+        }));
+      } else {
+        setFormErrors(prev => ({
+          ...prev,
+          [errorKey]: undefined
+        }));
+      }
+    }
   };
 
   // Step navigation
@@ -1139,7 +1202,7 @@ const VisitorForm = ({
 
         {/* Enhanced Phone Number - Lebanon Focused */}
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
             Phone Number
           </label>
           
@@ -1149,7 +1212,7 @@ const VisitorForm = ({
               value={formData.phoneCountryCode}
               onChange={(e) => handleChange('phoneCountryCode', e.target.value)}
               onBlur={() => handleBlur('phoneCountryCode')}
-              className="w-32 px-3 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-32 px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
             >
               <option value="961">🇱🇧 +961</option>
               <option value="963">🇸🇾 +963</option>
@@ -1186,7 +1249,7 @@ const VisitorForm = ({
               value={formData.phoneType}
               onChange={(e) => handleChange('phoneType', e.target.value)}
               onBlur={() => handleBlur('phoneType')}
-              className="w-32 px-3 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-32 px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
             >
               <option value="Mobile">📱 Mobile</option>
               <option value="Landline">☎️ Landline</option>
@@ -1195,7 +1258,7 @@ const VisitorForm = ({
           </div>
           
           {touched.phoneNumber && formErrors.phoneNumber && (
-            <p className="text-red-600 text-sm mt-1 flex items-center">
+            <p className="text-red-600 dark:text-red-400 text-sm mt-1 flex items-center">
               <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
@@ -1244,9 +1307,9 @@ const VisitorForm = ({
           id="isVip"
           checked={formData.isVip}
           onChange={(e) => handleChange('isVip', e.target.checked)}
-          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          className="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900"
         />
-        <label htmlFor="isVip" className="flex items-center space-x-2 text-sm font-medium text-gray-700">
+        <label htmlFor="isVip" className="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-200">
           <StarIconSolid className="w-4 h-4 text-yellow-500" />
           <span>VIP Visitor</span>
         </label>
@@ -1379,14 +1442,14 @@ const VisitorForm = ({
   const renderPreferences = () => (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <h3 className="text-lg font-medium text-gray-900">Default Preferences</h3>
-        <p className="text-gray-600">Set default location and visit purpose for faster invitation creation</p>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Default Preferences</h3>
+        <p className="text-gray-600 dark:text-gray-300">Set default location and visit purpose for faster invitation creation</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Preferred Location */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
             Preferred Location
           </label>
           <AutocompleteInput
@@ -1398,14 +1461,14 @@ const VisitorForm = ({
             placeholder="Select default location..."
             error={touched.preferredLocationId ? formErrors.preferredLocationId : undefined}
           />
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             The location this visitor typically visits
           </p>
         </div>
 
         {/* Default Visit Purpose */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
             Default Visit Purpose
           </label>
           <AutocompleteInput
@@ -1417,18 +1480,18 @@ const VisitorForm = ({
             placeholder="Select default visit purpose..."
             error={touched.defaultVisitPurposeId ? formErrors.defaultVisitPurposeId : undefined}
           />
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             The typical reason for this visitor's visits
           </p>
         </div>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+      <div className="bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 rounded-md p-4">
         <div className="flex items-start space-x-3">
-          <ClipboardDocumentListIcon className="w-5 h-5 text-blue-600 mt-0.5" />
+          <ClipboardDocumentListIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
           <div>
-            <h4 className="text-sm font-medium text-blue-900">Why set preferences?</h4>
-            <p className="text-sm text-blue-700 mt-1">
+            <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">Why set preferences?</h4>
+            <p className="text-sm text-blue-700 dark:text-blue-200 mt-1">
               Default preferences will be automatically selected when creating invitations for this visitor, 
               making the invitation process faster and more consistent.
             </p>
@@ -1476,14 +1539,14 @@ const VisitorForm = ({
 
         {/* Lebanese Governorates */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
             Governorate
           </label>
           <select
             value={formData.address.governorate}
             onChange={(e) => handleChange('address.governorate', e.target.value)}
             onBlur={() => handleBlur('address.governorate')}
-            className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">Select Governorate</option>
             {lebaneseGovernorates.map(governorate => (
@@ -1493,7 +1556,7 @@ const VisitorForm = ({
             ))}
           </select>
           {touched['address.governorate'] && formErrors['address.governorate'] && (
-            <p className="text-red-600 text-sm mt-1">{formErrors['address.governorate']}</p>
+            <p className="text-red-600 dark:text-red-400 text-sm mt-1">{formErrors['address.governorate']}</p>
           )}
         </div>
 
@@ -1510,14 +1573,14 @@ const VisitorForm = ({
 
         {/* Enhanced Country Selector - Lebanon and Region First */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
             Country
           </label>
           <select
             value={formData.address.country}
             onChange={(e) => handleChange('address.country', e.target.value)}
             onBlur={() => handleBlur('address.country')}
-            className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="Lebanon">🇱🇧 Lebanon</option>
             <option value="">--- Middle East ---</option>
@@ -1547,19 +1610,19 @@ const VisitorForm = ({
             <option value="Other">🌍 Other</option>
           </select>
           {touched['address.country'] && formErrors['address.country'] && (
-            <p className="text-red-600 text-sm mt-1">{formErrors['address.country']}</p>
+            <p className="text-red-600 dark:text-red-400 text-sm mt-1">{formErrors['address.country']}</p>
           )}
         </div>
       </div>
 
       {/* Address Type Selector */}
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">Address Type</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">Address Type</label>
         <select
           value={formData.address.addressType}
           onChange={(e) => handleChange('address.addressType', e.target.value)}
           onBlur={() => handleBlur('address.addressType')}
-          className="w-full md:w-48 px-3 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full md:w-48 px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="Home">🏠 Home</option>
           <option value="Work">🏢 Work</option>
@@ -1584,13 +1647,13 @@ const VisitorForm = ({
         />
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
             Government ID Type
           </label>
           <select
             value={formData.governmentIdType}
             onChange={(e) => handleChange('governmentIdType', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="Passport">Passport</option>
             <option value="DriverLicense">Driver's License</option>
@@ -1620,13 +1683,13 @@ const VisitorForm = ({
         />
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
             Preferred Language
           </label>
           <select
             value={formData.language}
             onChange={(e) => handleChange('language', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="en-US">English</option>
             <option value="es-ES">Spanish</option>
@@ -1654,7 +1717,7 @@ const VisitorForm = ({
   const renderSpecialRequirements = () => (
     <div className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
           Dietary Requirements
         </label>
         <textarea
@@ -1663,12 +1726,12 @@ const VisitorForm = ({
           onBlur={() => handleBlur('dietaryRequirements')}
           rows={3}
           placeholder="Any dietary restrictions, allergies, or special meal requirements..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
           Accessibility Requirements
         </label>
         <textarea
@@ -1677,12 +1740,12 @@ const VisitorForm = ({
           onBlur={() => handleBlur('accessibilityRequirements')}
           rows={3}
           placeholder="Wheelchair access, hearing assistance, or other accessibility needs..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
           Security Clearance
         </label>
         <Input
@@ -1696,7 +1759,7 @@ const VisitorForm = ({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
           Additional Notes
         </label>
         <textarea
@@ -1705,7 +1768,7 @@ const VisitorForm = ({
           onBlur={() => handleBlur('notes')}
           rows={4}
           placeholder="Any additional information about this visitor..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
     </div>
@@ -1715,8 +1778,8 @@ const VisitorForm = ({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium text-gray-900">Emergency Contacts</h3>
-          <p className="text-gray-600">At least one emergency contact is required</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Emergency Contacts</h3>
+          <p className="text-gray-600 dark:text-gray-300">At least one emergency contact is required</p>
         </div>
         <Button
           variant="outline"
@@ -1729,7 +1792,7 @@ const VisitorForm = ({
       </div>
 
       {formErrors.emergencyContacts && (
-        <div className="text-sm text-red-600">{formErrors.emergencyContacts}</div>
+        <div className="text-sm text-red-600 dark:text-red-400">{formErrors.emergencyContacts}</div>
       )}
 
       <div className="space-y-4">
@@ -1737,7 +1800,7 @@ const VisitorForm = ({
           <Card key={index} className="p-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                   Contact {index + 1}
                 </span>
                 {contact.isPrimary && (
@@ -1749,7 +1812,7 @@ const VisitorForm = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => removeEmergencyContact(index)}
-                  className="text-red-600 hover:text-red-800"
+                  className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                   icon={<TrashIcon className="w-4 h-4" />}
                 />
               )}
@@ -1811,9 +1874,9 @@ const VisitorForm = ({
                   id={`primary-${index}`}
                   checked={contact.isPrimary}
                   onChange={(e) => updateEmergencyContact(index, 'isPrimary', e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900"
                 />
-                <label htmlFor={`primary-${index}`} className="text-sm font-medium text-gray-700">
+                <label htmlFor={`primary-${index}`} className="text-sm font-medium text-gray-700 dark:text-gray-200">
                   Primary Contact
                 </label>
               </div>
@@ -1823,10 +1886,10 @@ const VisitorForm = ({
       </div>
 
       {formData.emergencyContacts.length === 0 && (
-        <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-          <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No emergency contacts</h3>
-          <p className="mt-1 text-sm text-gray-500">
+        <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900/40">
+          <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No emergency contacts</h3>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Add at least one emergency contact for safety purposes.
           </p>
           <div className="mt-6">
@@ -1846,8 +1909,8 @@ const VisitorForm = ({
   const renderInvitationForm = () => (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-lg font-medium text-gray-900">Create Invitation (Optional)</h3>
-        <p className="text-gray-600">You can create an invitation for this visitor immediately after creating their profile</p>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Create Invitation (Optional)</h3>
+        <p className="text-gray-600 dark:text-gray-300">You can create an invitation for this visitor immediately after creating their profile</p>
       </div>
 
       {/* Enable/Disable Invitation Creation */}
@@ -1865,15 +1928,15 @@ const VisitorForm = ({
                 setTimeout(() => setInvitationPresets(), 100);
               }
             }}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900"
           />
-          <label htmlFor="createInvitation" className="text-sm font-medium text-gray-900">
+          <label htmlFor="createInvitation" className="text-sm font-medium text-gray-900 dark:text-gray-100">
             Create an invitation for this visitor
           </label>
         </div>
         
         {!createInvitation && (
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             You can always create invitations later from the visitor's profile or the invitations page.
           </p>
         )}
@@ -1890,8 +1953,8 @@ const VisitorForm = ({
           >
             <Card className="p-6">
               <div className="flex items-center space-x-2 mb-6">
-                <ClipboardDocumentListIcon className="w-6 h-6 text-blue-600" />
-                <h4 className="text-lg font-medium text-gray-900">Invitation Details</h4>
+                <ClipboardDocumentListIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100">Invitation Details</h4>
               </div>
 
               <div className="space-y-6">
@@ -1938,7 +2001,7 @@ const VisitorForm = ({
                 {/* Location & Purpose */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                       Location
                     </label>
                     <AutocompleteInput
@@ -1951,7 +2014,7 @@ const VisitorForm = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                       Visit Purpose
                     </label>
                     <AutocompleteInput
@@ -1967,39 +2030,39 @@ const VisitorForm = ({
 
                 {/* Message */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                     Message
                   </label>
                   <textarea
                     value={invitationData.message}
                     onChange={(e) => handleInvitationChange('message', e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Optional message for the visitor..."
                   />
                 </div>
 
                 {/* Requirements */}
                 <div className="space-y-3">
-                  <h5 className="text-sm font-medium text-gray-900">Requirements</h5>
+                  <h5 className="text-sm font-medium text-gray-900 dark:text-gray-100">Requirements</h5>
                   <div className="space-y-2">
                     <label className="flex items-center space-x-3">
                       <input
                         type="checkbox"
                         checked={invitationData.requiresApproval}
                         onChange={(e) => handleInvitationChange('requiresApproval', e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900"
                       />
-                      <span className="text-sm text-gray-700">Requires approval</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-200">Requires approval</span>
                     </label>
                     <label className="flex items-center space-x-3">
                       <input
                         type="checkbox"
                         checked={invitationData.requiresEscort}
                         onChange={(e) => handleInvitationChange('requiresEscort', e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900"
                       />
-                      <span className="text-sm text-gray-700">Requires escort</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-200">Requires escort</span>
                     </label>
                   </div>
                 </div>
@@ -2014,33 +2077,33 @@ const VisitorForm = ({
   const renderReview = () => (
     <div className="space-y-8">
       <div className="text-center">
-        <h3 className="text-lg font-medium text-gray-900">Review Information</h3>
-        <p className="text-gray-600">Please review all information before submitting</p>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Review Information</h3>
+        <p className="text-gray-600 dark:text-gray-300">Please review all information before submitting</p>
       </div>
 
       {/* Basic Information Review */}
       <Card className="p-6">
-        <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+        <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
           <UserIcon className="w-5 h-5" />
           <span>Basic Information</span>
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="font-medium text-gray-700">Name:</span>
-            <span className="ml-2 text-gray-900">{formData.firstName} {formData.lastName}</span>
+            <span className="font-medium text-gray-700 dark:text-gray-200">Name:</span>
+            <span className="ml-2 text-gray-900 dark:text-gray-100">{formData.firstName} {formData.lastName}</span>
             {formData.isVip && <StarIconSolid className="inline w-4 h-4 text-yellow-500 ml-2" />}
           </div>
           <div>
-            <span className="font-medium text-gray-700">Email:</span>
-            <span className="ml-2 text-gray-900">{formData.email}</span>
+            <span className="font-medium text-gray-700 dark:text-gray-200">Email:</span>
+            <span className="ml-2 text-gray-900 dark:text-gray-100">{formData.email}</span>
           </div>
           <div>
-            <span className="font-medium text-gray-700">Phone:</span>
-            <span className="ml-2 text-gray-900">{formData.phoneNumber}</span>
+            <span className="font-medium text-gray-700 dark:text-gray-200">Phone:</span>
+            <span className="ml-2 text-gray-900 dark:text-gray-100">{formData.phoneNumber}</span>
           </div>
           <div>
-            <span className="font-medium text-gray-700">Company:</span>
-            <span className="ml-2 text-gray-900">{formData.company || 'Not specified'}</span>
+            <span className="font-medium text-gray-700 dark:text-gray-200">Company:</span>
+            <span className="ml-2 text-gray-900 dark:text-gray-100">{formData.company || 'Not specified'}</span>
           </div>
         </div>
       </Card>
@@ -2048,23 +2111,23 @@ const VisitorForm = ({
       {/* Photo and Documents Review */}
       {(formData.photoFile || formData.documentFiles.length > 0) && (
         <Card className="p-6">
-          <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+          <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
             <PhotoIcon className="w-5 h-5" />
             <span>Photo & Documents</span>
           </h4>
           <div className="space-y-4">
             {formData.photoFile && (
               <div>
-                <span className="font-medium text-gray-700">Photo:</span>
-                <span className="ml-2 text-gray-900">{formData.photoFile.name}</span>
+                <span className="font-medium text-gray-700 dark:text-gray-200">Photo:</span>
+                <span className="ml-2 text-gray-900 dark:text-gray-100">{formData.photoFile.name}</span>
               </div>
             )}
             {formData.documentFiles.length > 0 && (
               <div>
-                <span className="font-medium text-gray-700">Documents:</span>
+                <span className="font-medium text-gray-700 dark:text-gray-200">Documents:</span>
                 <ul className="ml-2 mt-1 space-y-1">
                   {formData.documentFiles.map((file, index) => (
-                    <li key={index} className="text-gray-900 text-sm">• {file.name}</li>
+                    <li key={index} className="text-gray-900 dark:text-gray-100 text-sm">• {file.name}</li>
                   ))}
                 </ul>
               </div>
@@ -2076,21 +2139,21 @@ const VisitorForm = ({
       {/* Preferences Review */}
       {(selectedLocation || selectedVisitPurpose) && (
         <Card className="p-6">
-          <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+          <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
             <MapPinIcon className="w-5 h-5" />
             <span>Preferences</span>
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             {selectedLocation && (
               <div>
-                <span className="font-medium text-gray-700">Preferred Location:</span>
-                <span className="ml-2 text-gray-900">{selectedLocation.name}</span>
+                <span className="font-medium text-gray-700 dark:text-gray-200">Preferred Location:</span>
+                <span className="ml-2 text-gray-900 dark:text-gray-100">{selectedLocation.name}</span>
               </div>
             )}
             {selectedVisitPurpose && (
               <div>
-                <span className="font-medium text-gray-700">Default Visit Purpose:</span>
-                <span className="ml-2 text-gray-900">{selectedVisitPurpose.name}</span>
+                <span className="font-medium text-gray-700 dark:text-gray-200">Default Visit Purpose:</span>
+                <span className="ml-2 text-gray-900 dark:text-gray-100">{selectedVisitPurpose.name}</span>
               </div>
             )}
           </div>
@@ -2099,20 +2162,20 @@ const VisitorForm = ({
 
       {/* Emergency Contacts Review */}
       <Card className="p-6">
-        <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+        <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
           <UserGroupIcon className="w-5 h-5" />
           <span>Emergency Contacts</span>
         </h4>
         <div className="space-y-3">
           {formData.emergencyContacts.map((contact, index) => (
-            <div key={index} className="p-3 bg-gray-50 rounded-lg">
+            <div key={index} className="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-lg border border-gray-100 dark:border-gray-700">
               <div className="flex items-center space-x-2 mb-2">
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-gray-900 dark:text-gray-100">
                   {contact.firstName} {contact.lastName}
                 </span>
                 {contact.isPrimary && <Badge variant="primary" size="xs">Primary</Badge>}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600 dark:text-gray-300">
                 <div>Phone: {contact.phoneNumber}</div>
                 <div>Relationship: {contact.relationship}</div>
                 {contact.email && <div>Email: {contact.email}</div>}
@@ -2125,18 +2188,18 @@ const VisitorForm = ({
       {/* Invitation Review */}
       {createInvitation && (
         <Card className="p-6">
-          <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+          <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
             <ClipboardDocumentListIcon className="w-5 h-5" />
             <span>Invitation Details</span>
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="font-medium text-gray-700">Subject:</span>
-              <span className="ml-2 text-gray-900">{invitationData.subject || 'Not specified'}</span>
+              <span className="font-medium text-gray-700 dark:text-gray-200">Subject:</span>
+              <span className="ml-2 text-gray-900 dark:text-gray-100">{invitationData.subject || 'Not specified'}</span>
             </div>
             <div>
-              <span className="font-medium text-gray-700">Start Time:</span>
-              <span className="ml-2 text-gray-900">
+              <span className="font-medium text-gray-700 dark:text-gray-200">Start Time:</span>
+              <span className="ml-2 text-gray-900 dark:text-gray-100">
                 {invitationData.scheduledStartTime 
                   ? new Date(invitationData.scheduledStartTime).toLocaleString()
                   : 'Not specified'
@@ -2144,8 +2207,8 @@ const VisitorForm = ({
               </span>
             </div>
             <div>
-              <span className="font-medium text-gray-700">End Time:</span>
-              <span className="ml-2 text-gray-900">
+              <span className="font-medium text-gray-700 dark:text-gray-200">End Time:</span>
+              <span className="ml-2 text-gray-900 dark:text-gray-100">
                 {invitationData.scheduledEndTime 
                   ? new Date(invitationData.scheduledEndTime).toLocaleString()
                   : 'Not specified'
@@ -2153,19 +2216,19 @@ const VisitorForm = ({
               </span>
             </div>
             <div>
-              <span className="font-medium text-gray-700">Location:</span>
-              <span className="ml-2 text-gray-900">
+              <span className="font-medium text-gray-700 dark:text-gray-200">Location:</span>
+              <span className="ml-2 text-gray-900 dark:text-gray-100">
                 {locations.find(l => l.id === invitationData.locationId)?.name || 'Not specified'}
               </span>
             </div>
             <div>
-              <span className="font-medium text-gray-700">Purpose:</span>
-              <span className="ml-2 text-gray-900">
+              <span className="font-medium text-gray-700 dark:text-gray-200">Purpose:</span>
+              <span className="ml-2 text-gray-900 dark:text-gray-100">
                 {visitPurposes.find(p => p.id === invitationData.visitPurposeId)?.name || 'Not specified'}
               </span>
             </div>
             <div>
-              <span className="font-medium text-gray-700">Requirements:</span>
+              <span className="font-medium text-gray-700 dark:text-gray-200">Requirements:</span>
               <div className="ml-2 flex space-x-3">
                 {invitationData.requiresApproval && (
                   <Badge variant="warning" size="sm">Requires Approval</Badge>
@@ -2174,15 +2237,17 @@ const VisitorForm = ({
                   <Badge variant="info" size="sm">Requires Escort</Badge>
                 )}
                 {!invitationData.requiresApproval && !invitationData.requiresEscort && (
-                  <span className="text-gray-500">None</span>
+                  <span className="text-gray-500 dark:text-gray-400">None</span>
                 )}
               </div>
             </div>
           </div>
           {invitationData.message && (
             <div className="mt-4">
-              <span className="font-medium text-gray-700">Message:</span>
-              <p className="mt-1 text-gray-900 text-sm bg-gray-50 p-3 rounded-lg">{invitationData.message}</p>
+              <span className="font-medium text-gray-700 dark:text-gray-200">Message:</span>
+              <p className="mt-1 text-gray-900 dark:text-gray-100 text-sm bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 p-3 rounded-lg">
+                {invitationData.message}
+              </p>
             </div>
           )}
         </Card>

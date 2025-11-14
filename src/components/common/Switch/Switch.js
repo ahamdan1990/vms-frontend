@@ -54,12 +54,12 @@ const Switch = ({
   const sizeClasses = getSizeClasses();
 
   const switchContainerClasses = classNames(
-    'relative inline-flex flex-shrink-0 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
+    'relative inline-flex flex-shrink-0 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900',
     sizeClasses.container,
     {
-      'bg-blue-600': checked && !disabled,
-      'bg-gray-200': !checked && !disabled,
-      'bg-gray-300 cursor-not-allowed': disabled,
+      'bg-blue-600 dark:bg-blue-500': checked && !disabled,
+      'bg-gray-200 dark:bg-gray-700': !checked && !disabled,
+      'bg-gray-300 dark:bg-gray-600 cursor-not-allowed': disabled,
       'opacity-50': disabled
     }
   );
@@ -96,9 +96,9 @@ const Switch = ({
               htmlFor={switchId}
               id={`${switchId}-label`}
               className={classNames(
-                'text-sm font-medium text-gray-900 cursor-pointer',
+                'text-sm font-medium text-gray-900 dark:text-gray-100 cursor-pointer',
                 {
-                  'cursor-not-allowed text-gray-500': disabled
+                  'cursor-not-allowed text-gray-500 dark:text-gray-500': disabled
                 }
               )}
             >
@@ -110,8 +110,11 @@ const Switch = ({
             <p
               id={`${switchId}-description`}
               className={classNames(
-                'text-sm text-gray-500',
-                label ? 'mt-1' : ''
+                'text-sm text-gray-500 dark:text-gray-400',
+                label ? 'mt-1' : '',
+                {
+                  'text-gray-400 dark:text-gray-500': disabled
+                }
               )}
             >
               {description}

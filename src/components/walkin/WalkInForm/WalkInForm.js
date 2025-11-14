@@ -63,7 +63,8 @@ const WalkInForm = ({
   onCancel,
   loading = false,
   error = null,
-  initialPhoto = null
+  initialPhoto = null,
+  recognizedVisitor = null
 }) => {
   const dispatch = useDispatch();
   const toast = useToast();
@@ -72,14 +73,9 @@ const WalkInForm = ({
   const locations = useSelector(selectLocationsList);
   const visitPurposes = useSelector(selectVisitPurposesList);
 
-  // Load locations and visit purposes
-  useEffect(() => {
-    dispatch(getLocations());
-    dispatch(getVisitPurposes());
-  }, [dispatch]);
-
   // ===== FORM STATE =====
-  const [currentStep, setCurrentStep] = useState(1); // 1, 2, 3
+  // If recognizedVisitor is provided, skip step 1 (lookup) and go directly to step 2
+  const [currentStep, setCurrentStep] = useState(recognizedVisitor ? 2 : 1); // 1, 2, 3
   const [validationErrors, setValidationErrors] = useState({});
 
   // Step 1: Lookup state
@@ -87,7 +83,7 @@ const WalkInForm = ({
   const [lookupType, setLookupType] = useState('phone'); // 'phone' | 'email'
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
-  const [existingVisitor, setExistingVisitor] = useState(null);
+  const [existingVisitor, setExistingVisitor] = useState(recognizedVisitor);
   const [pendingInvitations, setPendingInvitations] = useState([]);
 
   // Step 2: Visitor data state
@@ -122,6 +118,44 @@ const WalkInForm = ({
   // Document scanning state
   const [scannedDocuments, setScannedDocuments] = useState([]);
   const [showDocumentScanner, setShowDocumentScanner] = useState(false);
+
+  // ===== EFFECTS =====
+
+  // Load locations and visit purposes
+  useEffect(() => {
+    dispatch(getLocations());
+    dispatch(getVisitPurposes());
+  }, [dispatch]);
+
+  // Pre-populate form when recognized visitor is provided
+  useEffect(() => {
+    if (recognizedVisitor) {
+      console.log('🎯 Pre-populating form with recognized visitor:', recognizedVisitor);
+
+      // Extract phone number parts
+      const phoneMatch = recognizedVisitor.phoneNumber?.match(/^\+?(\d+)(.+)$/);
+      const phoneCountryCode = phoneMatch ? phoneMatch[1] : '961';
+      const phoneNumber = phoneMatch ? phoneMatch[2].replace(/\s/g, '') : recognizedVisitor.phoneNumber;
+
+      setVisitorData({
+        firstName: recognizedVisitor.firstName || '',
+        lastName: recognizedVisitor.lastName || '',
+        phoneNumber: phoneNumber || '',
+        phoneCountryCode: phoneCountryCode,
+        email: recognizedVisitor.email || '',
+        company: recognizedVisitor.company || '',
+        jobTitle: recognizedVisitor.jobTitle || ''
+      });
+
+      // Show a helpful message (toast is a stable function reference, safe to use)
+      toast.info(
+        'Returning Visitor',
+        'Information has been pre-filled. Please verify and update if needed.',
+        { duration: 5000 }
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recognizedVisitor]); // Only depend on recognizedVisitor, not toast
 
   // ===== STEP 1: VISITOR LOOKUP =====
 
@@ -1175,7 +1209,17 @@ WalkInForm.propTypes = {
   onCancel: PropTypes.func.isRequired,
   loading: PropTypes.bool,
   error: PropTypes.string,
-  initialPhoto: PropTypes.object
+  initialPhoto: PropTypes.object,
+  recognizedVisitor: PropTypes.shape({
+    id: PropTypes.number,
+    firstName: PropTypes.string,
+    lastName: PropTypes.string,
+    fullName: PropTypes.string,
+    email: PropTypes.string,
+    phoneNumber: PropTypes.string,
+    company: PropTypes.string,
+    jobTitle: PropTypes.string
+  })
 };
 
 export default WalkInForm;

@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePermissions } from '../../../hooks/usePermissions';
+import { useToast } from '../../../hooks/useNotifications';
 
 // Redux
 import {
@@ -79,6 +80,7 @@ const VisitorProfilePage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { hasPermission } = usePermissions();
+  const toast = useToast();
   
   const [hasUnsavedEditChanges, setHasUnsavedEditChanges] = useState(false);
 
@@ -184,16 +186,82 @@ const VisitorProfilePage = () => {
 
     setPhotoUploading(true);
     try {
-      await visitorService.uploadVisitorPhoto(visitor.id, file);
+      const photoResult = await visitorService.uploadVisitorPhoto(visitor.id, file);
 
       // Reload visitor data to get updated photo URL
       await dispatch(getVisitorById(visitor.id));
+
+      // Handle face detection feedback for non-critical warnings
+      if (photoResult && photoResult.warningMessage) {
+        switch (photoResult.warningType) {
+          case 'ServiceError':
+            toast.error(
+              'Face Recognition Service Error',
+              photoResult.warningMessage,
+              { duration: 10000 }
+            );
+            break;
+          case 'PartialSuccess':
+            toast.warning(
+              'Partial Success',
+              photoResult.warningMessage,
+              { duration: 7000 }
+            );
+            break;
+          case 'ServiceUnavailable':
+            toast.info(
+              'Face Detection Unavailable',
+              photoResult.warningMessage,
+              { duration: 6000 }
+            );
+            break;
+          default:
+            if (photoResult.warningMessage) {
+              toast.warning('Photo Upload Warning', photoResult.warningMessage, { duration: 6000 });
+            }
+        }
+      } else if (photoResult && photoResult.faceDetected && photoResult.faceRecognitionEnabled) {
+        // Success case - face detected and recognition enabled
+        toast.success(
+          'Photo Uploaded Successfully',
+          'Face detected and recognition enabled for this visitor.',
+          { duration: 4000 }
+        );
+      } else {
+        // Default success message
+        toast.success('Photo Uploaded', 'Profile photo uploaded successfully.', { duration: 3000 });
+      }
 
       // Clear the file input
       event.target.value = '';
     } catch (error) {
       console.error('Failed to upload photo:', error);
-      alert(`Failed to upload photo: ${extractErrorMessage(error)}`);
+
+      // Extract error message from API response
+      const errorMessage = error.response?.data?.errors?.[0] ||
+                          error.response?.data?.message ||
+                          extractErrorMessage(error) ||
+                          'Failed to upload the profile photo.';
+
+      // Check if it's a "no face detected" error
+      if (errorMessage.toLowerCase().includes('no face detected')) {
+        // Critical error - user must upload a different photo
+        toast.error(
+          'No Face Detected',
+          'No face was detected in the uploaded image. Please upload a photo with a clearly visible face.',
+          { duration: 0 } // Don't auto-dismiss, let user read and acknowledge
+        );
+      } else {
+        // Other errors
+        toast.error(
+          'Photo Upload Failed',
+          errorMessage,
+          { duration: 6000 }
+        );
+      }
+
+      // Don't clear the file input so user knows it failed
+      // They can select a new file
     } finally {
       setPhotoUploading(false);
     }

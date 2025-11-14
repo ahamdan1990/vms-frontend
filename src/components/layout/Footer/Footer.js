@@ -9,7 +9,9 @@ import { usePermissions } from '../../../hooks/usePermissions';
  */
 const Footer = () => {
   const { isAuthenticated, userRole } = useAuth();
-  const { canManageSystem, canViewReports } = usePermissions();
+  const { navigationAccess } = usePermissions();
+  const canManageSystem = navigationAccess?.showSystem;
+  const canViewReports = navigationAccess?.showReports;
 
   const currentYear = new Date().getFullYear();
 

@@ -226,19 +226,20 @@ export const selectCanManageWalkIns = createSelector(
 
 // Reporting permission selectors
 export const selectCanViewReports = createSelector(
-  [selectPermissions],
-  (permissions) => {
-    return permissions?.some(p => 
-      p === REPORT_PERMISSIONS.VIEW ||
-      p === REPORT_PERMISSIONS.GENERATE ||
-      p === DASHBOARD_PERMISSIONS.VIEW_ANALYTICS
-    ) || false;
+  [selectPermissions, selectIsAdmin],
+  (permissions, isAdmin) => {
+    if (isAdmin) {
+      return true;
+    }
+
+    return permissions?.includes(REPORT_PERMISSIONS.GENERATE_ALL) || false;
   }
 );
 
 export const selectCanGenerateReports = createSelector(
-  [selectPermissions],
-  (permissions) => permissions?.includes(REPORT_PERMISSIONS.GENERATE) || false
+  [selectPermissions, selectIsAdmin],
+  (permissions, isAdmin) =>
+    isAdmin || permissions?.includes(REPORT_PERMISSIONS.GENERATE_ALL) || false
 );
 
 // System administration permission selectors
@@ -374,13 +375,20 @@ export const selectOperationalCapabilities = createSelector(
 // Reporting capabilities
 export const selectReportingCapabilities = createSelector(
   [selectPermissions, selectIsAdmin],
-  (permissions, isAdmin) => ({
-    canViewReports: permissions?.some(p => p.startsWith('Report.')) || isAdmin,
-    canGenerateReports: permissions?.includes(REPORT_PERMISSIONS.GENERATE) || isAdmin,
-    canScheduleReports: permissions?.includes(REPORT_PERMISSIONS.SCHEDULE) || isAdmin,
-    canExportReports: permissions?.includes(REPORT_PERMISSIONS.EXPORT) || isAdmin,
-    canManageReports: permissions?.includes(REPORT_PERMISSIONS.MANAGE) || isAdmin
-  })
+  (permissions, isAdmin) => {
+    const canGenerateAll = permissions?.includes(REPORT_PERMISSIONS.GENERATE_ALL) || isAdmin;
+    const canGenerateOwn = permissions?.includes(REPORT_PERMISSIONS.GENERATE_OWN) || isAdmin;
+    const canExport = permissions?.includes(REPORT_PERMISSIONS.EXPORT) || isAdmin;
+    const canViewHistory = permissions?.includes(REPORT_PERMISSIONS.VIEW_HISTORY) || isAdmin;
+
+    return {
+      canViewReports: canGenerateAll,
+      canGenerateReports: canGenerateAll,
+      canGenerateOwnReports: canGenerateOwn,
+      canExportReports: canExport,
+      canViewReportHistory: canViewHistory
+    };
+  }
 );
 
 // System administration capabilities

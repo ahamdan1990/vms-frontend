@@ -387,35 +387,15 @@ const CameraCapture = ({
 
   // Render initial state
   const renderInitialState = () => (
-    <div className="space-y-8">
-      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 rounded-2xl p-8 text-center text-white shadow-lg">
-        <div className="inline-flex items-center justify-center text-xs uppercase tracking-[0.3em] text-white/70 mb-4">
-          Step 1 of 2 • Capture Photo
-        </div>
-        <CameraIcon className="w-14 h-14 text-white mx-auto mb-4" />
-        <h3 className="text-2xl font-semibold mb-2">Capture Visitor Photo</h3>
-        <p className="text-white/80 max-w-2xl mx-auto">
-          Launch the camera to take a quick photo before continuing with the registration form.
-        </p>
-
-        <div className="mt-6 grid gap-4 sm:grid-cols-3 text-left">
-          <div className="bg-white/10 rounded-xl p-4 backdrop-blur">
-            <p className="text-sm font-semibold uppercase text-white/70">Lighting</p>
-            <p className="text-sm mt-2 text-white">Face a light source to avoid harsh shadows.</p>
-          </div>
-          <div className="bg-white/10 rounded-xl p-4 backdrop-blur">
-            <p className="text-sm font-semibold uppercase text-white/70">Background</p>
-            <p className="text-sm mt-2 text-white">Use a neutral background for clean results.</p>
-          </div>
-          <div className="bg-white/10 rounded-xl p-4 backdrop-blur">
-            <p className="text-sm font-semibold uppercase text-white/70">Framing</p>
-            <p className="text-sm mt-2 text-white">Keep shoulders and head fully visible.</p>
-          </div>
-        </div>
-      </div>
+    <div className="text-center py-12">
+      <CameraIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+      <h3 className="text-lg font-medium text-gray-900 mb-2">Capture Visitor Photo</h3>
+      <p className="text-gray-600 mb-6">
+        Take a photo of the visitor for their profile
+      </p>
       
       {cameraPermission === 'denied' && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+        <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
           <div className="flex items-center space-x-2">
             <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
             <span className="text-sm text-red-700">
@@ -425,13 +405,12 @@ const CameraCapture = ({
         </div>
       )}
       
-      <div className="text-center space-y-3">
+      <div className="space-y-3">
         <Button
           onClick={startCamera}
           loading={loading}
           disabled={loading || cameraPermission === 'denied'}
           icon={<VideoCameraIcon className="w-5 h-5" />}
-          className="w-full sm:w-auto"
         >
           {loading ? 'Starting Camera...' : 'Start Camera'}
         </Button>

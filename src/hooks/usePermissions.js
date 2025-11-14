@@ -249,13 +249,16 @@ export const usePermissions = () => {
 
   // Reporting Permissions
   const reportPermissions = useMemo(() => ({
-    canView: hasPermission(REPORT_PERMISSIONS.VIEW),
-    canGenerate: hasPermission(REPORT_PERMISSIONS.GENERATE),
     canGenerateOwn: hasPermission(REPORT_PERMISSIONS.GENERATE_OWN),
+    canGenerateAll: hasPermission(REPORT_PERMISSIONS.GENERATE_ALL),
     canExport: hasPermission(REPORT_PERMISSIONS.EXPORT),
-    canSchedule: hasPermission(REPORT_PERMISSIONS.SCHEDULE),
-    canManage: hasPermission(REPORT_PERMISSIONS.MANAGE)
-  }), [hasPermission]);
+    canViewHistory: hasPermission(REPORT_PERMISSIONS.VIEW_HISTORY),
+    canView: hasAnyPermission([
+      REPORT_PERMISSIONS.GENERATE_ALL,
+      REPORT_PERMISSIONS.GENERATE_OWN,
+      REPORT_PERMISSIONS.VIEW_HISTORY
+    ])
+  }), [hasPermission, hasAnyPermission]);
 
   // Dashboard Permissions
   const dashboardPermissions = useMemo(() => ({

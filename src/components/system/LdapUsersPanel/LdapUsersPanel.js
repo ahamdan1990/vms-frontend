@@ -292,7 +292,7 @@ const LdapUsersPanel = ({ canEdit }) => {
           <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4 shadow-sm">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-full">
+                <div className="flex items-center justify-center w-10 h-10 bg-blue-600 dark:bg-blue-500 rounded-full">
                   <span className="text-white font-semibold text-sm">{selectedUsers.size}</span>
                 </div>
                 <div>
@@ -346,7 +346,7 @@ const LdapUsersPanel = ({ canEdit }) => {
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-750">
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900/20 dark:to-gray-800/40">
                 <tr>
                   <th className="px-6 py-4 text-left w-12">
                     <input
@@ -354,7 +354,7 @@ const LdapUsersPanel = ({ canEdit }) => {
                       checked={selectedUsers.size === availableUsers.length && availableUsers.length > 0}
                       onChange={handleSelectAll}
                       disabled={!canEdit || availableUsers.length === 0}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
+                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2 bg-white dark:bg-gray-900 disabled:opacity-50"
                     />
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
@@ -403,7 +403,7 @@ const LdapUsersPanel = ({ canEdit }) => {
                           ? 'bg-blue-50 dark:bg-blue-900/10'
                           : index % 2 === 0
                           ? 'bg-white dark:bg-gray-900'
-                          : 'bg-gray-50/50 dark:bg-gray-850'
+                          : 'bg-gray-50/50 dark:bg-gray-900/40'
                       } hover:bg-gray-100 dark:hover:bg-gray-800 ${
                         user.isAlreadyImported ? 'opacity-75' : ''
                       }`}
@@ -414,7 +414,7 @@ const LdapUsersPanel = ({ canEdit }) => {
                           checked={selectedUsers.has(user.username)}
                           onChange={() => handleSelectUser(user.username)}
                           disabled={!canEdit || user.isAlreadyImported}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2 disabled:opacity-30 disabled:cursor-not-allowed bg-white dark:bg-gray-900"
                         />
                       </td>
                       <td className="px-6 py-4">

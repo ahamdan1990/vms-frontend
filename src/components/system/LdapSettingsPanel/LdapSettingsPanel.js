@@ -116,101 +116,109 @@ const LdapSettingsPanel = ({ canEdit }) => {
         </Button>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <Switch
-          checked={formState.enabled}
-          onChange={(value) => handleChange('enabled', value)}
-          disabled={!canEdit}
-          label="Enable LDAP"
-          description="Toggle overall LDAP/AD integration."
-        />
+      <div className="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+        <div className="grid md:grid-cols-2 gap-6">
+          <Switch
+            checked={formState.enabled}
+            onChange={(value) => handleChange('enabled', value)}
+            disabled={!canEdit}
+            label="Enable LDAP"
+            description="Toggle overall LDAP/AD integration."
+          />
 
-        <Switch
-          checked={formState.includeDirectoryUsersInHostSearch}
-          onChange={(value) => handleChange('includeDirectoryUsersInHostSearch', value)}
-          disabled={!canEdit}
-          label="Show Directory Users in Host Search"
-          description="Allow receptionists to search domain users even if they have not signed in yet."
-        />
+          <Switch
+            checked={formState.includeDirectoryUsersInHostSearch}
+            onChange={(value) => handleChange('includeDirectoryUsersInHostSearch', value)}
+            disabled={!canEdit}
+            label="Show Directory Users in Host Search"
+            description="Allow receptionists to search domain users even if they have not signed in yet."
+          />
+        </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <Input
-          label="Server"
-          value={formState.server}
-          onChange={(e) => handleChange('server', e.target.value)}
-          disabled={!canEdit}
-          required
-        />
-        <Input
-          label="Port"
-          type="number"
-          value={formState.port}
-          onChange={(e) => handleChange('port', e.target.value)}
-          disabled={!canEdit}
-          min={1}
-          max={65535}
-        />
-        <Input
-          label="Domain"
-          value={formState.domain}
-          onChange={(e) => handleChange('domain', e.target.value)}
-          disabled={!canEdit}
-        />
-        <Input
-          label="Base DN"
-          value={formState.baseDn}
-          onChange={(e) => handleChange('baseDn', e.target.value)}
-          disabled={!canEdit}
-        />
-        <Input
-          label="Service Account Username"
-          value={formState.userName}
-          onChange={(e) => handleChange('userName', e.target.value)}
-          disabled={!canEdit}
-        />
-        <Input
-          label="Service Account Password"
-          type="password"
-          placeholder={hasPassword ? 'Leave blank to keep existing password' : 'Enter password'}
-          value={formState.password}
-          onChange={(e) => handleChange('password', e.target.value)}
-          disabled={!canEdit}
-        />
+      <div className="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+        <div className="grid md:grid-cols-2 gap-6">
+          <Input
+            label="Server"
+            value={formState.server}
+            onChange={(e) => handleChange('server', e.target.value)}
+            disabled={!canEdit}
+            required
+          />
+          <Input
+            label="Port"
+            type="number"
+            value={formState.port}
+            onChange={(e) => handleChange('port', e.target.value)}
+            disabled={!canEdit}
+            min={1}
+            max={65535}
+          />
+          <Input
+            label="Domain"
+            value={formState.domain}
+            onChange={(e) => handleChange('domain', e.target.value)}
+            disabled={!canEdit}
+          />
+          <Input
+            label="Base DN"
+            value={formState.baseDn}
+            onChange={(e) => handleChange('baseDn', e.target.value)}
+            disabled={!canEdit}
+          />
+          <Input
+            label="Service Account Username"
+            value={formState.userName}
+            onChange={(e) => handleChange('userName', e.target.value)}
+            disabled={!canEdit}
+          />
+          <Input
+            label="Service Account Password"
+            type="password"
+            placeholder={hasPassword ? 'Leave blank to keep existing password' : 'Enter password'}
+            value={formState.password}
+            onChange={(e) => handleChange('password', e.target.value)}
+            disabled={!canEdit}
+          />
+        </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <Switch
-          checked={formState.autoCreateUsers}
-          onChange={(value) => handleChange('autoCreateUsers', value)}
-          disabled={!canEdit}
-          label="Auto-create Users on Login"
-          description="Automatically provision LDAP users the first time they sign in."
-        />
-        <Switch
-          checked={formState.syncProfileOnLogin}
-          onChange={(value) => handleChange('syncProfileOnLogin', value)}
-          disabled={!canEdit}
-          label="Sync Profile on Login"
-          description="Refresh LDAP attributes every time the user signs in."
-        />
+      <div className="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+        <div className="grid md:grid-cols-2 gap-6">
+          <Switch
+            checked={formState.autoCreateUsers}
+            onChange={(value) => handleChange('autoCreateUsers', value)}
+            disabled={!canEdit}
+            label="Auto-create Users on Login"
+            description="Automatically provision LDAP users the first time they sign in."
+          />
+          <Switch
+            checked={formState.syncProfileOnLogin}
+            onChange={(value) => handleChange('syncProfileOnLogin', value)}
+            disabled={!canEdit}
+            label="Sync Profile on Login"
+            description="Refresh LDAP attributes every time the user signs in."
+          />
+        </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <Select
-          label="Default Role for Imported Users"
-          value={formState.defaultImportRole}
-          onChange={(value) => handleChange('defaultImportRole', value)}
-          options={roleOptions}
-          disabled={!canEdit}
-        />
-        <Switch
-          checked={formState.allowRoleSelectionOnImport}
-          onChange={(value) => handleChange('allowRoleSelectionOnImport', value)}
-          disabled={!canEdit}
-          label="Allow Role Overrides on Import"
-          description="Permit admins to assign a different role when importing directory users."
-        />
+      <div className="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+        <div className="grid md:grid-cols-2 gap-6">
+          <Select
+            label="Default Role for Imported Users"
+            value={formState.defaultImportRole}
+            onChange={(value) => handleChange('defaultImportRole', value)}
+            options={roleOptions}
+            disabled={!canEdit}
+          />
+          <Switch
+            checked={formState.allowRoleSelectionOnImport}
+            onChange={(value) => handleChange('allowRoleSelectionOnImport', value)}
+            disabled={!canEdit}
+            label="Allow Role Overrides on Import"
+            description="Permit admins to assign a different role when importing directory users."
+          />
+        </div>
       </div>
     </div>
   );

@@ -248,13 +248,13 @@ const TimeSlotForm = ({
     <div className="space-y-6">
       {/* General Error */}
       {error && (
-        <div className="rounded-md bg-red-50 p-4">
+        <div className="rounded-md bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4">
           <div className="flex">
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
+              <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
                 {Array.isArray(error) ? 'Validation Errors' : 'Error'}
               </h3>
-              <div className="mt-2 text-sm text-red-700">
+              <div className="mt-2 text-sm text-red-700 dark:text-red-200">
                 {Array.isArray(error) ? (
                   <ul className="list-disc pl-5 space-y-1">
                     {error.map((err, index) => (
@@ -271,16 +271,16 @@ const TimeSlotForm = ({
       )}
 
       {validationErrors.general && (
-        <div className="rounded-md bg-red-50 p-4">
-          <p className="text-sm text-red-700">{validationErrors.general}</p>
+        <div className="rounded-md bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4">
+          <p className="text-sm text-red-700 dark:text-red-200">{validationErrors.general}</p>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Basic Information */}
-        <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-          <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Basic Information
@@ -305,7 +305,7 @@ const TimeSlotForm = ({
                 loading={locationsLoading}
                 error={validationErrors.locationId}
               />
-              <p className="mt-1 text-sm text-gray-500">Optional: Assign to specific location</p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Optional: Assign to specific location</p>
             </div>
           </div>
 
@@ -329,10 +329,10 @@ const TimeSlotForm = ({
             />
 
             <div className="flex flex-col">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Duration
               </label>
-              <div className="px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-sm text-gray-600">
+              <div className="px-3 py-2 bg-gray-50 dark:bg-gray-900/60 border border-gray-300 dark:border-gray-700 rounded-md text-sm text-gray-600 dark:text-gray-200">
                 {duration > 0 ? `${duration} minutes` : 'Select times'}
               </div>
             </div>
@@ -340,9 +340,9 @@ const TimeSlotForm = ({
         </div>
 
         {/* Capacity and Settings */}
-        <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-          <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             Capacity & Settings
@@ -384,27 +384,27 @@ const TimeSlotForm = ({
         </div>
 
         {/* Active Days */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-5 space-y-4">
-          <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/20 rounded-lg p-5 space-y-4 border border-blue-100 dark:border-blue-900/40">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             Active Days Schedule
           </h3>
 
-          <div className="bg-white rounded-lg p-4">
+          <div className="bg-white dark:bg-gray-950/40 border border-gray-100 dark:border-gray-800 rounded-lg p-4">
             <div className="mb-3">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Select Active Days <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                Select Active Days <span className="text-red-500 dark:text-red-400">*</span>
               </label>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Choose the days when this time slot is available
               </p>
             </div>
             
             {validationErrors.activeDays && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-sm text-red-600">{validationErrors.activeDays}</p>
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                <p className="text-sm text-red-600 dark:text-red-200">{validationErrors.activeDays}</p>
               </div>
             )}
             
@@ -420,14 +420,14 @@ const TimeSlotForm = ({
                     onClick={() => handleDayToggle(day.value)}
                     className={`
                       relative px-2 py-3 text-center font-medium rounded-lg border-2 transition-all duration-150
-                      focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-400
+                      focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-400 dark:focus:ring-blue-300
                       ${isSelected
                         ? isWeekend
-                          ? 'bg-purple-600 text-white border-purple-600 shadow-md'
-                          : 'bg-blue-600 text-white border-blue-600 shadow-md'
+                          ? 'bg-purple-600 text-white border-purple-600 dark:border-purple-500 shadow-md'
+                          : 'bg-blue-600 text-white border-blue-600 dark:border-blue-500 shadow-md'
                         : isWeekend
-                          ? 'bg-white text-purple-600 border-purple-200 hover:bg-purple-50'
-                          : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50'
+                          ? 'bg-white text-purple-600 border-purple-200 hover:bg-purple-50 dark:bg-gray-900/60 dark:text-purple-200 dark:border-purple-500/40 dark:hover:bg-purple-900/30'
+                          : 'bg-white text-blue-600 border-blue-200 hover:bg-blue-50 dark:bg-gray-900/60 dark:text-blue-200 dark:border-blue-500/40 dark:hover:bg-blue-900/30'
                       }
                     `}
                   >
@@ -448,15 +448,15 @@ const TimeSlotForm = ({
             </div>
             
             {selectedDays.length > 0 && (
-              <div className="mt-3 p-2.5 bg-green-50 border border-green-200 rounded-lg">
+              <div className="mt-3 p-2.5 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                 <div className="flex items-center space-x-2">
-                  <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <p className="text-xs font-medium text-green-800">
+                  <p className="text-xs font-medium text-green-800 dark:text-green-200">
                     {selectedDays.length} day{selectedDays.length > 1 ? 's' : ''} selected:
                   </p>
-                  <p className="text-xs text-green-700">
+                  <p className="text-xs text-green-700 dark:text-green-200">
                     {selectedDays
                       .sort((a, b) => a - b)
                       .map(day => dayOptions.find(d => d.value === day)?.short)
@@ -467,12 +467,12 @@ const TimeSlotForm = ({
             )}
             
             {selectedDays.length === 0 && (
-              <div className="mt-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg">
+              <div className="mt-3 p-2.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
                 <div className="flex items-center space-x-2">
-                  <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
-                  <p className="text-xs text-amber-800">
+                  <p className="text-xs text-amber-800 dark:text-amber-200">
                     Please select at least one day for this time slot
                   </p>
                 </div>
@@ -480,12 +480,9 @@ const TimeSlotForm = ({
             )}
           </div>
         </div>
-
-
-
         {/* Status (for edit mode) */}
         {isEdit && (
-          <div className="bg-gray-50 rounded-lg p-4">
+          <div className="bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
@@ -493,11 +490,11 @@ const TimeSlotForm = ({
                   id="isActive"
                   checked={formData.isActive}
                   onChange={(e) => handleInputChange('isActive', e.target.checked)}
-                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-all"
+                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded transition-all bg-white dark:bg-gray-900"
                 />
                 <label htmlFor="isActive" className="ml-3 block cursor-pointer">
-                  <span className="text-sm font-semibold text-gray-900">Enable Time Slot</span>
-                  <p className="text-xs text-gray-500">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Enable Time Slot</span>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Active slots are available for scheduling
                   </p>
                 </label>
@@ -510,7 +507,7 @@ const TimeSlotForm = ({
         )}
 
         {/* Form Actions */}
-        <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+        <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-800">
           <Button
             type="button"
             variant="outline"

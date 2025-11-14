@@ -20,11 +20,13 @@ import {
 import visitorService from '../../services/visitorService';
 import invitationService from '../../services/invitationService';
 import dashboardService from '../../services/dashboardService';
+import reportService from '../../services/reportService';
 import visitorDocumentService from '../../services/visitorDocumentService';
 
 // Hooks
 import { useToast } from '../../hooks/useNotifications';
 import { useSignalR } from '../../hooks/useSignalR';
+import { usePermissions } from '../../hooks/usePermissions';
 
 // SignalR Handlers
 import DashboardEventHandler from '../../services/signalr/handlers/DashboardEventHandler';
@@ -65,10 +67,7 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   ArrowDownTrayIcon,
-  UserIcon,
-  CalendarIcon,
-  BuildingOfficeIcon,
-  MapPinIcon
+  UserIcon
 } from '@heroicons/react/24/outline';
 import {
   CheckCircleIcon as CheckCircleIconSolid,
@@ -78,6 +77,13 @@ import {
 // Utils
 import formatters from '../../utils/formatters';
 import { extractErrorMessage } from '../../utils/errorUtils';
+import {
+  createActiveVisitorColumns,
+  formatVisitorInfo,
+  formatVisitInfo,
+  formatCheckInStatus,
+  getStatusBadge
+} from '../../components/visitor/activeVisitorUtils';
 
 /**
  * Receptionist Dashboard Component
@@ -91,6 +97,7 @@ const ReceptionistDashboard = () => {
   const dispatch = useDispatch();
   const toast = useToast();
   const { isConnected, host, operator, security, admin } = useSignalR();
+  const { emergency, report: reportPermissions } = usePermissions();
 
   // Redux selectors
   const activeInvitationsFromRedux = useSelector(selectActiveInvitations);
@@ -113,6 +120,7 @@ const ReceptionistDashboard = () => {
   const [walkInError, setWalkInError] = useState(null);
   const [showCameraCapture, setShowCameraCapture] = useState(false);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
+  const [recognizedVisitor, setRecognizedVisitor] = useState(null);
 
   // Document scanning state
   const [showDocumentScanner, setShowDocumentScanner] = useState(false);
@@ -121,6 +129,7 @@ const ReceptionistDashboard = () => {
 
   // Scanner state - Modal based like CheckInDashboard
   const [showScannerModal, setShowScannerModal] = useState(false);
+  const [exportingReport, setExportingReport] = useState(false);
   const [scanResult, setScanResult] = useState(null);
   const [scanError, setScanError] = useState(null);
   const [showInvitationDetailsModal, setShowInvitationDetailsModal] = useState(false);
@@ -139,6 +148,7 @@ const ReceptionistDashboard = () => {
   const [previewVisitorId, setPreviewVisitorId] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const overdueNotificationRef = useRef(0);
+  const canExportInBuildingReport = emergency?.canExport || reportPermissions?.canExport;
   const lastOverdueNotificationTime = useRef(null);
 
   // Load dashboard data
@@ -212,6 +222,27 @@ const ReceptionistDashboard = () => {
     }
   };
 
+  const handleInBuildingExport = async () => {
+    if (!canExportInBuildingReport || exportingReport) {
+      return;
+    }
+
+    setExportingReport(true);
+    try {
+      await reportService.exportInBuildingReport();
+      toast.success(
+        'Report Downloaded',
+        'The in-building report has been downloaded successfully.',
+        { duration: 5000 }
+      );
+    } catch (error) {
+      const errorMessage = extractErrorMessage(error) || 'Unable to export the report right now.';
+      toast.error('Export Failed', errorMessage, { duration: 6000 });
+    } finally {
+      setExportingReport(false);
+    }
+  };
+
   // Note: We DON'T calculate stats from activeInvitationsFromRedux because:
   // - getActiveInvitations() only returns invitations with status='Active'
   // - It doesn't include all invitations needed for accurate stats
@@ -273,9 +304,82 @@ const ReceptionistDashboard = () => {
   }, [dispatch, toast]);
 
   // Handle photo capture from camera
-  const handlePhotoCapture = (photoData) => {
-    setCapturedPhoto(photoData);
-    setShowCameraCapture(false);
+  const handlePhotoCapture = async (photoData) => {
+    try {
+      // Step 1: Validate photo for face detection before accepting
+      console.log('Validating captured photo for face detection...');
+      const validationResult = await visitorService.validatePhoto(photoData.file);
+
+      if (!validationResult.faceDetected) {
+        // Face not detected - show error and keep camera open
+        toast.error(
+          'No Face Detected',
+          'No face was detected in the captured photo. Please retake the photo with a clearly visible face.',
+          { duration: 0 } // Don't auto-dismiss
+        );
+        // Don't accept the photo, keep camera open for retry
+        return;
+      }
+
+      // Face detected successfully
+      console.log('Face detected successfully:', validationResult);
+
+      // Step 2: Check if this face belongs to a known visitor
+      console.log('Searching for visitor by face recognition...');
+      let recognizedVisitorData = null;
+
+      try {
+        recognizedVisitorData = await visitorService.searchVisitorByPhoto(photoData.file);
+
+        if (recognizedVisitorData) {
+          // Known visitor recognized!
+          console.log('Returning visitor recognized:', recognizedVisitorData);
+          toast.success(
+            'Returning Visitor Recognized!',
+            `Welcome back, ${recognizedVisitorData.fullName}! Your information has been pre-filled.`,
+            { duration: 5000 }
+          );
+          setRecognizedVisitor(recognizedVisitorData);
+        } else {
+          // New visitor
+          console.log('No matching visitor found - new visitor');
+          toast.success(
+            'Face Detected',
+            'Face detected successfully! Proceeding to registration form.',
+            { duration: 3000 }
+          );
+          setRecognizedVisitor(null);
+        }
+      } catch (searchError) {
+        // Face recognition failed or unavailable - proceed as new visitor
+        console.warn('Face recognition search failed:', searchError);
+        toast.success(
+          'Face Detected',
+          'Face detected successfully! Proceeding to registration form.',
+          { duration: 3000 }
+        );
+        setRecognizedVisitor(null);
+      }
+
+      setCapturedPhoto(photoData);
+      setShowCameraCapture(false);
+    } catch (error) {
+      console.error('Failed to validate photo:', error);
+
+      // Extract error message
+      const errorMessage = error.response?.data?.errors?.[0] ||
+                          error.response?.data?.message ||
+                          error.message ||
+                          'Failed to validate the photo.';
+
+      toast.error(
+        'Validation Failed',
+        errorMessage + ' Please try again.',
+        { duration: 6000 }
+      );
+
+      // Don't accept the photo, keep camera open for retry
+    }
   };
 
   // Handle starting walk-in registration
@@ -283,6 +387,7 @@ const ReceptionistDashboard = () => {
     setShowWalkInForm(true);
     setShowCameraCapture(false);
     setCapturedPhoto(null);
+    setRecognizedVisitor(null);
     setWalkInError(null);
   };
 
@@ -290,11 +395,13 @@ const ReceptionistDashboard = () => {
   const handleStartCameraCapture = () => {
     setShowCameraCapture(true);
     setShowWalkInForm(false);
+    setRecognizedVisitor(null);
   };
 
   const handleStartRegistrationWithPhoto = () => {
     setShowWalkInForm(true);
     setShowCameraCapture(false);
+    // Don't clear recognizedVisitor here - we need it for pre-population!
     setWalkInError(null);
   };
 
@@ -320,10 +427,62 @@ const ReceptionistDashboard = () => {
       // Step 2: Upload photo if captured (use profile photo endpoint)
       if (capturedPhoto) {
         try {
-          await visitorService.uploadVisitorPhoto(visitor.id, capturedPhoto.file);
+          const photoResult = await visitorService.uploadVisitorPhoto(visitor.id, capturedPhoto.file);
+
+          // Handle face detection feedback for non-critical warnings
+          if (photoResult && photoResult.warningMessage) {
+            switch (photoResult.warningType) {
+              case 'ServiceError':
+                toast.error(
+                  'Face Recognition Service Error',
+                  photoResult.warningMessage,
+                  { duration: 10000 }
+                );
+                break;
+              case 'PartialSuccess':
+                toast.warning(
+                  'Partial Success',
+                  photoResult.warningMessage,
+                  { duration: 7000 }
+                );
+                break;
+              case 'ServiceUnavailable':
+                toast.info(
+                  'Face Detection Unavailable',
+                  photoResult.warningMessage,
+                  { duration: 6000 }
+                );
+                break;
+              default:
+                if (photoResult.warningMessage) {
+                  toast.warning('Photo Upload Warning', photoResult.warningMessage, { duration: 6000 });
+                }
+            }
+          } else if (photoResult && photoResult.faceDetected && photoResult.faceRecognitionEnabled) {
+            // Success case - face detected and recognition enabled
+            toast.success(
+              'Photo Uploaded',
+              'Face detected successfully. Face recognition is enabled for this visitor.',
+              { duration: 4000 }
+            );
+          }
         } catch (photoError) {
-          console.warn('Failed to upload profile photo:', photoError);
-          // Continue with registration even if photo upload fails
+          console.error('Failed to upload profile photo:', photoError);
+
+          // Extract error message from API response
+          const errorMessage = photoError.response?.data?.errors?.[0] ||
+                              photoError.response?.data?.message ||
+                              photoError.message ||
+                              'Failed to upload the profile photo.';
+
+          // Note: "No face detected" errors should NOT happen here since we validate
+          // the photo before accepting it. This is just a safety net.
+          toast.error(
+            'Photo Upload Failed',
+            errorMessage + ' The visitor was created but without a photo.',
+            { duration: 8000 }
+          );
+          // Continue with registration - photo was already validated, this is likely a different error
         }
       }
 
@@ -594,10 +753,10 @@ const ReceptionistDashboard = () => {
   };
 
   // Handle visitor check-out
-  const handleCheckOut = async (invitationId) => {
+  const handleCheckOut = async (id) => {
     try {
       await dispatch(checkOutInvitation({
-        invitationId,
+        id,
         notes: 'Manual check-out by receptionist'
       })).unwrap();
 
@@ -707,194 +866,12 @@ const ReceptionistDashboard = () => {
     }
   };
 
-  // Helper function to parse UTC dates correctly
-  const parseUtcDate = (dateString) => {
-    if (!dateString) return null;
-    const dateWithZ = dateString.endsWith('Z') ? dateString : `${dateString}Z`;
-    return new Date(dateWithZ);
-  };
-
-  // Format visitor information for table
-  const formatVisitorInfo = (invitation) => {
-    const visitor = invitation.visitor;
-    if (!visitor) return 'Unknown Visitor';
-
-    return (
-      <div className="flex items-center space-x-3">
-        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-          <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-        </div>
-        <div>
-          <div className="font-medium text-gray-900 dark:text-white">
-            {visitor.firstName} {visitor.lastName}
-          </div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">{visitor.email?.value || visitor.email}</div>
-          {visitor.company && (
-            <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center space-x-1">
-              <BuildingOfficeIcon className="w-3 h-3" />
-              <span>{visitor.company}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // Format visit information for table
-  const formatVisitInfo = (invitation) => {
-    return (
-      <div className="space-y-1">
-        <div className="font-medium text-gray-900 dark:text-white">{invitation.subject || 'Walk-in Visit'}</div>
-        <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-1">
-          <CalendarIcon className="w-3 h-3" />
-          <span>{formatters.formatDateTime(invitation.scheduledStartTime)}</span>
-        </div>
-        {invitation.location && (
-          <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-1">
-            <MapPinIcon className="w-3 h-3" />
-            <span>{invitation.location.name}</span>
-          </div>
-        )}
-        {invitation.host && (
-          <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-1">
-            <UserIcon className="w-3 h-3" />
-            <span>Host: {invitation.host.fullName}</span>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Format check-in status for table
-  const formatCheckInStatus = (invitation) => {
-    if (invitation.checkedInAt && invitation.checkedOutAt) {
-      const checkInTime = parseUtcDate(invitation.checkedInAt);
-      const checkOutTime = parseUtcDate(invitation.checkedOutAt);
-      const duration = checkOutTime.getTime() - checkInTime.getTime();
-      const hours = Math.floor(duration / (1000 * 60 * 60));
-      const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
-
-      return (
-        <div className="space-y-1">
-          <div className="text-sm text-gray-900 dark:text-white">
-            <strong>In:</strong> {formatters.formatTime(invitation.checkedInAt)}
-          </div>
-          <div className="text-sm text-gray-900 dark:text-white">
-            <strong>Out:</strong> {formatters.formatTime(invitation.checkedOutAt)}
-          </div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            Duration: {hours}h {minutes}m
-          </div>
-        </div>
-      );
-    } else if (invitation.checkedInAt) {
-      const checkInTime = parseUtcDate(invitation.checkedInAt);
-      const now = new Date();
-      const duration = now.getTime() - checkInTime.getTime();
-      const hours = Math.floor(duration / (1000 * 60 * 60));
-      const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
-
-      return (
-        <div className="space-y-1">
-          <div className="text-sm text-gray-900 dark:text-white">
-            <strong>Checked in:</strong> {formatters.formatTime(invitation.checkedInAt)}
-          </div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            Duration: {hours}h {minutes}m
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          Not checked in
-        </div>
-      );
-    }
-  };
-
-  // Get status badge for invitation
-  const getStatusBadge = (invitation) => {
-    if (invitation.checkedInAt && !invitation.checkedOutAt) {
-      return <Badge variant="success" size="sm">Checked In</Badge>;
-    } else if (invitation.checkedInAt && invitation.checkedOutAt) {
-      return <Badge variant="secondary" size="sm">Completed</Badge>;
-    } else if (invitation.status === 'Approved') {
-      return <Badge variant="warning" size="sm">Approved</Badge>;
-    } else {
-      return <Badge variant="info" size="sm">{invitation.status}</Badge>;
-    }
-  };
-
-  // Table columns for active visitors
-  const activeVisitorsColumns = [
-    {
-      key: 'visitor',
-      header: 'Visitor',
-      sortable: true,
-      render: (value, invitation) => formatVisitorInfo(invitation)
-    },
-    {
-      key: 'visit',
-      header: 'Visit Details',
-      sortable: true,
-      render: (value, invitation) => formatVisitInfo(invitation)
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      sortable: true,
-      render: (value, invitation) => getStatusBadge(invitation)
-    },
-    {
-      key: 'checkin_status',
-      header: 'Check-in Status',
-      sortable: false,
-      render: (value, invitation) => formatCheckInStatus(invitation)
-    },
-    {
-      key: 'actions',
-      header: 'Actions',
-      width: '200px',
-      sortable: false,
-      render: (value, invitation) => {
-        const isCheckedIn = invitation.checkedInAt && !invitation.checkedOutAt;
-        const canCheckIn = invitation.status === 'Approved' && !invitation.checkedInAt;
-
-        return (
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => handleToggleVisitorDetails(invitation.visitor?.id)}
-              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-              title="View details"
-            >
-              <EyeIcon className="w-4 h-4" />
-            </button>
-
-            {canCheckIn && (
-              <button
-                onClick={() => handleQuickCheckIn(invitation)}
-                className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200 transition-colors"
-                title="Check In"
-              >
-                <ArrowRightOnRectangleIcon className="w-4 h-4" />
-              </button>
-            )}
-
-            {isCheckedIn && (
-              <button
-                onClick={() => handleCheckOut(invitation.id)}
-                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200 transition-colors"
-                title="Check Out"
-              >
-                <ArrowLeftOnRectangleIcon className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        );
-      }
-    }
-  ];
+  const activeVisitorsColumns = createActiveVisitorColumns({
+    onViewDetails: (invitation) => handleToggleVisitorDetails(invitation.visitor?.id),
+    onQuickCheckIn: handleQuickCheckIn,
+    onQuickCheckOut: (invitation) => handleCheckOut(invitation.id),
+    showSelection: true
+  });
 
   const renderActiveVisitorCard = (invitation) => (
     <Card key={invitation.id} className="p-4 space-y-4">
@@ -1098,6 +1075,15 @@ const ReceptionistDashboard = () => {
           >
             Refresh
           </Button>
+          {canExportInBuildingReport && (
+            <Button
+              onClick={handleInBuildingExport}
+              loading={exportingReport}
+              icon={<ArrowDownTrayIcon className="w-4 h-4" />}
+            >
+              Export Who's In Building
+            </Button>
+          )}
         </div>
       </div>
 
@@ -1304,10 +1290,12 @@ const ReceptionistDashboard = () => {
                   onCancel={() => {
                     setShowWalkInForm(false);
                     setCapturedPhoto(null);
+                    setRecognizedVisitor(null);
                   }}
                   loading={walkInLoading}
                   error={walkInError}
                   initialPhoto={capturedPhoto}
+                  recognizedVisitor={recognizedVisitor}
                 />
               )}
             </Card>

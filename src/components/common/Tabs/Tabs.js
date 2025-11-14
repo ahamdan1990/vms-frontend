@@ -45,16 +45,16 @@ const Tabs = ({
     className
   );
 
-  const tabListClasses = classNames(
-    'flex border-b border-gray-200',
+const tabListClasses = classNames(
+  'flex border-b border-gray-200 dark:border-gray-700',
     {
       'w-full': fullWidth,
       'space-x-8': !fullWidth
     }
   );
 
-  const contentClasses = classNames(
-    'tab-content mt-4',
+const contentClasses = classNames(
+  'tab-content mt-4 text-gray-900 dark:text-gray-100',
     contentClassName
   );
 
@@ -69,10 +69,10 @@ const Tabs = ({
           const tabClasses = classNames(
             'flex items-center px-1 py-4 text-sm font-medium border-b-2 transition-colors duration-200',
             {
-              'border-blue-500 text-blue-600': isActive && !isTabDisabled,
-              'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': 
+              'border-blue-500 text-blue-600 dark:text-blue-400': isActive && !isTabDisabled,
+              'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-500': 
                 !isActive && !isTabDisabled,
-              'border-transparent text-gray-400 cursor-not-allowed': isTabDisabled,
+              'border-transparent text-gray-400 dark:text-gray-600 cursor-not-allowed': isTabDisabled,
               'cursor-pointer': !isTabDisabled,
               'flex-1 justify-center': fullWidth
             }
@@ -94,7 +94,8 @@ const Tabs = ({
                 <tab.icon 
                   className={classNames(
                     'w-5 h-5',
-                    tab.label ? 'mr-2' : ''
+                    tab.label ? 'mr-2' : '',
+                    isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
                   )} 
                 />
               )}

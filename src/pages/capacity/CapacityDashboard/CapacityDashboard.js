@@ -63,7 +63,7 @@ import { formatDistanceToNow } from 'date-fns';
  */
 const CapacityDashboard = () => {
   const dispatch = useDispatch();
-  const { user: userPermissions } = usePermissions();
+  const { user: userPermissions, report: reportPermissions } = usePermissions();
 
   // Local state
   const [refreshInterval, setRefreshInterval] = useState(null);
@@ -97,7 +97,7 @@ const CapacityDashboard = () => {
 
   // Check permissions
   const canViewBasic = userPermissions.canActivate;
-  const canViewReports = userPermissions.canActivate;
+  const canViewReports = reportPermissions?.canGenerateAll || reportPermissions?.canExport;
 
   // Initialize data
   useEffect(() => {

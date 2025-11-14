@@ -608,7 +608,7 @@ export const NAVIGATION_MENU = {
       label: 'Reports',
       path: REPORT_ROUTES.LIST,
       icon: 'document-chart-bar',
-      roles: ['Staff', 'Operator', 'Administrator']
+      roles: ['Administrator']
     },
     {
       id: 'users',

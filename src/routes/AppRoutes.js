@@ -38,7 +38,8 @@ import {
   CAPACITY_ROUTES,
   PROFILE_ROUTES,
   NOTIFICATION_ROUTES,
-  CALENDAR_ROUTES
+  CALENDAR_ROUTES,
+  REPORT_ROUTES
 } from '../constants/routeConstants';
 
 // Permission and Role Constants
@@ -49,7 +50,8 @@ import {
   CHECKIN_PERMISSIONS,
   SYSTEM_CONFIG_PERMISSIONS,
   AUDIT_PERMISSIONS,
-  CALENDAR_PERMISSIONS
+  CALENDAR_PERMISSIONS,
+  REPORT_PERMISSIONS
 } from '../constants/permissions';
 
 import { ROLES } from '../constants/role';
@@ -91,6 +93,9 @@ const ReceptionistDashboard = lazy(() => import('../pages/receptionist/Reception
 const UnifiedAnalyticsDashboard = lazy(() => import('../pages/analytics/UnifiedAnalyticsDashboard'));
 const ExcelManagementPage = lazy(() => import('../pages/admin/ExcelManagementPage'));
 //const IntegratedVisitorManagement = lazy(() => import('../pages/IntegratedVisitorManagement'));
+
+// Report Pages
+const AdminReportsPage = lazy(() => import('../pages/reports/AdminReportsPage'));
 
 // Role Management Pages
 const RolesListPage = lazy(() => import('../pages/admin/roles/RolesListPage'));
@@ -626,8 +631,8 @@ const AppRoutes = () => {
         } 
       />
 
-      <Route 
-        path={CALENDAR_ROUTES.BASE} 
+      <Route
+        path={CALENDAR_ROUTES.BASE}
         element={
           <AuthGuard>
             <PermissionGuard permission={CALENDAR_PERMISSIONS.VIEW_ALL}>
@@ -638,7 +643,23 @@ const AppRoutes = () => {
               </Layout>
             </PermissionGuard>
           </AuthGuard>
-        } 
+        }
+      />
+
+      {/* === REPORTS ROUTES === */}
+      <Route
+        path={REPORT_ROUTES.LIST}
+        element={
+          <AuthGuard>
+            <PermissionGuard permission={REPORT_PERMISSIONS.GENERATE_ALL}>
+              <Layout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <AdminReportsPage />
+                </Suspense>
+              </Layout>
+            </PermissionGuard>
+          </AuthGuard>
+        }
       />
 
       <Route 
@@ -691,7 +712,7 @@ const AppRoutes = () => {
         path={CAPACITY_ROUTES.STATISTICS} 
         element={
           <AuthGuard>
-            <PermissionGuard permission="Report.GenerateOwn">
+            <PermissionGuard permission={REPORT_PERMISSIONS.GENERATE_ALL}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <CapacityDashboard />
@@ -706,7 +727,7 @@ const AppRoutes = () => {
         path={CAPACITY_ROUTES.TRENDS} 
         element={
           <AuthGuard>
-            <PermissionGuard permission="Report.GenerateOwn">
+            <PermissionGuard permission={REPORT_PERMISSIONS.GENERATE_ALL}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <CapacityDashboard />
