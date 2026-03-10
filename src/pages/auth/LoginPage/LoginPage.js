@@ -138,18 +138,19 @@ const LoginPage = () => {
         console.log('📧 [STANDARD] Login result:', { hasPayload: !!result.payload, isSuccess: result.payload?.loginResponse?.isSuccess });
       }
 
-      if (result.payload?.loginResponse?.isSuccess) {
-        // Get intended destination or default based on role
-        const user = result.payload.user;
-        const from = searchParams.get('from');
-        const destination = from ? decodeURIComponent(from) : '/dashboard';
+      // if (result.payload?.loginResponse?.isSuccess) {
+      //   // Get intended destination or default based on role
+      //   const user = result.payload.user;
+      //   console.log('The Results are .........>>:', result)
+      //   const from = searchParams.get('from');
+      //   const destination = from ? decodeURIComponent(from) : '/dashboard';
 
-        console.log('🎨 [STANDARD] Setting theme:', user.theme || 'auto');
-        setThemeMode(user.theme || 'auto');
+      //   console.log('🎨 [STANDARD] Setting theme:', user.theme || 'auto');
+      //   setThemeMode(user.theme || 'auto');
 
-        console.log('🚀 [STANDARD] Navigating to:', destination);
-        navigate(destination, { replace: true });
-      }
+      //   console.log('🚀 [STANDARD] Navigating to:', destination);
+      //   navigate(destination, { replace: true });
+      // }
     } catch (error) {
       // Error is handled by the form and Redux
       console.error('❌ [LOGIN] Login failed with error:', error);

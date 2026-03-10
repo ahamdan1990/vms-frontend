@@ -13,9 +13,11 @@ import AutocompleteInput from '../../common/AutocompleteInput/AutocompleteInput'
 import { CapacityValidator } from '../../capacity';
 import Modal from '../../common/Modal/Modal';
 import LocationForm from '../../forms/LocationForm/LocationForm';
+import VisitorForm from '../../visitor/VisitorForm/VisitorForm';
 
 // Services
 import timeSlotsService from '../../../services/timeSlotsService';
+import visitorService from '../../../services/visitorService';
 
 // Selectors
 import { selectVisitorsList } from '../../../store/selectors/visitorSelectors';
@@ -24,6 +26,7 @@ import { selectVisitPurposesList } from '../../../store/selectors/visitPurposeSe
 
 // Redux actions
 import { createLocation, getActiveLocations } from '../../../store/slices/locationsSlice';
+import { getVisitors } from '../../../store/slices/visitorsSlice';
 
 // Icons
 import {
@@ -69,6 +72,12 @@ const InvitationForm = ({
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [locationCreating, setLocationCreating] = useState(false);
   const [locationError, setLocationError] = useState(null);
+
+  // Visitor creation modal state
+  const [showVisitorModal, setShowVisitorModal] = useState(false);
+  const [visitorCreating, setVisitorCreating] = useState(false);
+  const [visitorError, setVisitorError] = useState(null);
+  const [visitorCreateTarget, setVisitorCreateTarget] = useState('single'); // 'single' | 'group'
 
   // Form state
   const [formData, setFormData] = useState({
@@ -575,6 +584,54 @@ const InvitationForm = ({
     }
   };
 
+  // Handle opening visitor creation modal
+  const handleOpenVisitorModal = (target = 'single') => {
+    setVisitorCreateTarget(target);
+    setShowVisitorModal(true);
+    setVisitorError(null);
+  };
+
+  // Handle closing visitor creation modal
+  const handleCloseVisitorModal = () => {
+    setShowVisitorModal(false);
+    setVisitorError(null);
+  };
+
+  // Handle creating a new visitor from the modal
+  const handleCreateVisitor = async (visitorData, invitationData = null, assetData = {}) => {
+    setVisitorCreating(true);
+    setVisitorError(null);
+    try {
+      const { photoFile, documentFiles } = assetData;
+      const result = await visitorService.createVisitorWithAssets(
+        visitorData,
+        photoFile,
+        documentFiles || [],
+        invitationData
+      );
+
+      const createdVisitor = result?.visitor || result;
+
+      // Refresh visitor list for autocomplete
+      await dispatch(getVisitors({ pageSize: 1000, isActive: true }));
+
+      // Auto-select the new visitor
+      if (visitorCreateTarget === 'group') {
+        handleAddVisitorToGroup(createdVisitor);
+      } else {
+        handleVisitorSelect(createdVisitor);
+      }
+
+      setShowVisitorModal(false);
+      return createdVisitor;
+    } catch (error) {
+      setVisitorError(error);
+      throw error;
+    } finally {
+      setVisitorCreating(false);
+    }
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -731,16 +788,29 @@ const InvitationForm = ({
                 <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                   Visitor <span className="text-red-500">*</span>
                 </label>
-                <AutocompleteInput
-                  options={visitors}
-                  value={selectedVisitor}
-                  onChange={handleVisitorSelect}
-                  getOptionLabel={(visitor) => `${visitor.fullName}`}
-                  getOptionDescription={(visitor) => visitor.email}
-                  placeholder="Search for a visitor..."
-                  error={touched.visitorId ? formErrors.visitorId : undefined}
-                  required
-                />
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <AutocompleteInput
+                      options={visitors}
+                      value={selectedVisitor}
+                      onChange={handleVisitorSelect}
+                      getOptionLabel={(visitor) => `${visitor.fullName}`}
+                      getOptionDescription={(visitor) => visitor.email}
+                      placeholder="Search for a visitor..."
+                      error={touched.visitorId ? formErrors.visitorId : undefined}
+                      required
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleOpenVisitorModal('single')}
+                    className="whitespace-nowrap"
+                    title="Add new visitor"
+                  >
+                    + Add
+                  </Button>
+                </div>
                 {touched.visitorId && formErrors.visitorId && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.visitorId}</p>
                 )}
@@ -753,14 +823,27 @@ const InvitationForm = ({
                 
                 {/* Add Visitor Input */}
                 <div className="mb-3">
-                  <AutocompleteInput
-                    options={visitors}
-                    value={null}
-                    onChange={handleAddVisitorToGroup}
-                    getOptionLabel={(visitor) => `${visitor.firstName} ${visitor.lastName}`}
-                    getOptionDescription={(visitor) => visitor.email}
-                    placeholder="Search and add visitors to group..."
-                  />
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <AutocompleteInput
+                        options={visitors}
+                        value={null}
+                        onChange={handleAddVisitorToGroup}
+                        getOptionLabel={(visitor) => `${visitor.firstName} ${visitor.lastName}`}
+                        getOptionDescription={(visitor) => visitor.email}
+                        placeholder="Search and add visitors to group..."
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleOpenVisitorModal('group')}
+                      className="whitespace-nowrap"
+                      title="Add new visitor"
+                    >
+                      + Add
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Selected Visitors List */}
@@ -868,9 +951,6 @@ const InvitationForm = ({
                     + Add
                   </Button>
                 </div>
-                {touched.locationId && formErrors.locationId && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.locationId}</p>
-                )}
               </div>
             </div>
 
@@ -1331,6 +1411,22 @@ const InvitationForm = ({
           onCancel={handleCloseLocationModal}
           loading={locationCreating}
           error={locationError}
+          isEdit={false}
+        />
+      </Modal>
+
+      {/* Visitor Creation Modal */}
+      <Modal
+        isOpen={showVisitorModal}
+        onClose={handleCloseVisitorModal}
+        title="Create New Visitor"
+        size="full"
+      >
+        <VisitorForm
+          onSubmit={handleCreateVisitor}
+          onCancel={handleCloseVisitorModal}
+          loading={visitorCreating}
+          error={visitorError}
           isEdit={false}
         />
       </Modal>

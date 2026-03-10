@@ -221,6 +221,36 @@ export const useAuth = () => {
     };
   }, [isAuthenticated, loading]); // Proper dependencies
 
+  // ✅ FIX #6: Periodic permission refresh to catch backend permission changes
+  // Refreshes user permissions every 5 minutes to stay in sync with backend changes
+  useEffect(() => {
+    let permissionRefreshInterval;
+
+    if (isAuthenticated && !loading) {
+      console.log('🔄 Starting periodic permission refresh (every 5 minutes)');
+
+      // Refresh permissions every 5 minutes
+      permissionRefreshInterval = setInterval(async () => {
+        if (isAuthenticated) {
+          console.log('🔄 Refreshing permissions from backend...');
+          try {
+            await dispatch(getCurrentUser());
+            console.log('✅ Permissions refreshed successfully');
+          } catch (error) {
+            console.error('❌ Failed to refresh permissions:', error);
+          }
+        }
+      }, 5 * 60 * 1000); // 5 minutes in milliseconds
+    }
+
+    return () => {
+      if (permissionRefreshInterval) {
+        console.log('⏹️ Stopping periodic permission refresh');
+        clearInterval(permissionRefreshInterval);
+      }
+    };
+  }, [isAuthenticated, loading, dispatch]); // Dependencies include dispatch for getCurrentUser
+
   // Other authentication methods remain the same...
   const updatePassword = useCallback(async (passwordData) => {
     try {

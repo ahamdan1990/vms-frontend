@@ -335,7 +335,11 @@ export const usePermissions = () => {
   const calendarPermissions = useMemo(() => ({
     canViewOwn: hasPermission(CALENDAR_PERMISSIONS.VIEW_OWN),
     canViewAll: hasPermission(CALENDAR_PERMISSIONS.VIEW_ALL),
-    canManage: hasPermission(CALENDAR_PERMISSIONS.MANAGE)
+    canManage: hasPermission(CALENDAR_PERMISSIONS.MANAGE),
+    canExport: hasPermission(CALENDAR_PERMISSIONS.EXPORT),
+    canViewAvailability: hasPermission(CALENDAR_PERMISSIONS.VIEW_AVAILABILITY),
+    canBook: hasPermission(CALENDAR_PERMISSIONS.BOOK_SLOTS),
+    canViewConflicts: hasPermission(CALENDAR_PERMISSIONS.VIEW_CONFLICTS)
   }), [hasPermission]);
 
   // Role Management Permissions

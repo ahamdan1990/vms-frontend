@@ -121,7 +121,9 @@ const UnifiedAnalyticsDashboard = () => {
       id: 'capacity',
       label: 'Capacity Monitor',
       icon: <ChartPieIcon className="w-5 h-5" />,
-      badge: `${analytics.overview.utilizationRate}%`
+      badge: `${typeof analytics.overview.utilizationRate === 'number' && !isNaN(analytics.overview.utilizationRate)
+        ? analytics.overview.utilizationRate
+        : 0}%`
     },
     {
       id: 'insights',
@@ -144,7 +146,22 @@ const UnifiedAnalyticsDashboard = () => {
     
     try {
       const analyticsData = await dashboardService.getAnalyticsData();
-      setAnalytics(analyticsData);
+
+      // Ensure trend values are valid numbers to prevent NaN display
+      const sanitizedData = {
+        ...analyticsData,
+        overview: {
+          ...analyticsData.overview,
+          visitorTrend: typeof analyticsData.overview?.visitorTrend === 'number' && !isNaN(analyticsData.overview.visitorTrend)
+            ? analyticsData.overview.visitorTrend
+            : 0,
+          capacityTrend: typeof analyticsData.overview?.capacityTrend === 'number' && !isNaN(analyticsData.overview.capacityTrend)
+            ? analyticsData.overview.capacityTrend
+            : 0
+        }
+      };
+
+      setAnalytics(sanitizedData);
       setLastUpdated(realTimeLastUpdated || new Date());
     } catch (error) {
       console.error('Failed to load analytics data:', error);
@@ -216,7 +233,9 @@ const UnifiedAnalyticsDashboard = () => {
     const cards = [
       {
         title: 'Active Visitors',
-        value: analytics.overview.activeVisitors,
+        value: typeof analytics.overview.activeVisitors === 'number' && !isNaN(analytics.overview.activeVisitors)
+          ? analytics.overview.activeVisitors
+          : 0,
         subtitle: 'Currently in building',
         icon: <UsersIcon className="w-8 h-8 text-blue-500" />,
         trend: analytics.overview.visitorTrend,
@@ -224,7 +243,9 @@ const UnifiedAnalyticsDashboard = () => {
       },
       {
         title: 'Today\'s Visitors',
-        value: analytics.overview.todayVisitors,
+        value: typeof analytics.overview.todayVisitors === 'number' && !isNaN(analytics.overview.todayVisitors)
+          ? analytics.overview.todayVisitors
+          : 0,
         subtitle: 'Checked in today',
         icon: <CalendarDaysIcon className="w-8 h-8 text-green-500" />,
         trend: 0, // Will be calculated from historical data when available
@@ -232,15 +253,19 @@ const UnifiedAnalyticsDashboard = () => {
       },
       {
         title: 'Capacity Utilization',
-        value: `${analytics.overview.utilizationRate}%`,
-        subtitle: `${analytics.overview.currentOccupancy}/${analytics.overview.maxCapacity}`,
+        value: `${typeof analytics.overview.utilizationRate === 'number' && !isNaN(analytics.overview.utilizationRate)
+          ? analytics.overview.utilizationRate
+          : 0}%`,
+        subtitle: `${analytics.overview.currentOccupancy || 0}/${analytics.overview.maxCapacity || 0}`,
         icon: <ChartPieIcon className="w-8 h-8 text-purple-500" />,
         trend: analytics.overview.capacityTrend,
         color: 'purple'
       },
       {
         title: 'Avg Visit Duration',
-        value: `${analytics.overview.avgVisitDuration}m`,
+        value: `${typeof analytics.overview.avgVisitDuration === 'number' && !isNaN(analytics.overview.avgVisitDuration)
+          ? analytics.overview.avgVisitDuration
+          : 0}m`,
         subtitle: 'Average time spent',
         icon: <ClockIcon className="w-8 h-8 text-orange-500" />,
         trend: 0, // Will be calculated from historical data when available
@@ -248,7 +273,9 @@ const UnifiedAnalyticsDashboard = () => {
       },
       {
         title: 'Check-in Rate',
-        value: `${analytics.overview.checkInRate}%`,
+        value: `${typeof analytics.overview.checkInRate === 'number' && !isNaN(analytics.overview.checkInRate)
+          ? analytics.overview.checkInRate
+          : 0}%`,
         subtitle: 'Successful check-ins',
         icon: <ArrowTrendingUpIcon className="w-8 h-8 text-indigo-500" />,
         trend: 0, // Will be calculated from historical data when available
@@ -256,7 +283,9 @@ const UnifiedAnalyticsDashboard = () => {
       },
       {
         title: 'Available Slots',
-        value: analytics.overview.availableSlots,
+        value: typeof analytics.overview.availableSlots === 'number' && !isNaN(analytics.overview.availableSlots)
+          ? analytics.overview.availableSlots
+          : 0,
         subtitle: 'Remaining capacity',
         icon: <BuildingOfficeIcon className="w-8 h-8 text-cyan-500" />,
         trend: 0,
@@ -289,7 +318,7 @@ const UnifiedAnalyticsDashboard = () => {
                     {card.subtitle}
                   </p>
 
-                  {card.trend !== 0 && (
+                  {(typeof card.trend === 'number' && !isNaN(card.trend) && card.trend !== 0) && (
                     <div className={`flex items-center mt-3 ${
                       card.trend > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                     }`}>

@@ -200,8 +200,8 @@ export const getRoleBasedRedirect = (userRole, defaultPath = '/dashboard') => {
   switch (userRole) {
     case 'Administrator':
       return '/admin/dashboard';
-    case 'Operator':
-      return '/operator/dashboard';
+    case 'Receptionist':
+      return '/receptionist';
     case 'Staff':
       return '/staff/dashboard';
     default:
