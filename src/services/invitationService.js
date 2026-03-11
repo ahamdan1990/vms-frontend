@@ -1,5 +1,6 @@
 import apiClient, { extractApiData } from './apiClient';
 import { INVITATION_ENDPOINTS, buildQueryString } from './apiEndpoints';
+import { InvitationStatus } from '../constants/invitationStatus';
 
 /**
  * Invitation management service matching the backend API endpoints exactly
@@ -131,6 +132,16 @@ const invitationService = {
    */
   async rejectInvitation(id, reason) {
     const response = await apiClient.post(INVITATION_ENDPOINTS.REJECT(id), { reason });
+    return extractApiData(response);
+  },
+
+  /**
+   * Assigns an invitation to review (Submitted → UnderReview)
+   * POST /api/invitations/{id}/assign-review
+   * Requires: admin role
+   */
+  async assignInvitationToReview(id) {
+    const response = await apiClient.post(INVITATION_ENDPOINTS.ASSIGN_REVIEW(id));
     return extractApiData(response);
   },
 
@@ -366,7 +377,7 @@ const invitationService = {
     return this.getInvitations({
       startDate: today.toISOString(),
       endDate: nextWeek.toISOString(),
-      status: 'Approved',
+      status: InvitationStatus.Approved,
       sortBy: 'ScheduledStartTime',
       sortDirection: 'asc'
     });

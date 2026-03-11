@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import invitationService from '../../services/invitationService';
 import { handleApiError } from '../../services/errorService';
+import { InvitationStatus } from '../../constants/invitationStatus';
 
 // Initial state
 const initialState = {
@@ -212,6 +213,20 @@ export const rejectInvitation = createAsyncThunk(
   async ({ id, reason }, { rejectWithValue }) => {
     try {
       const data = await invitationService.rejectInvitation(id, reason);
+      return data;
+    } catch (error) {
+      const errorMessage = handleApiError(error);
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Assign invitation to review
+export const assignInvitationToReview = createAsyncThunk(
+  'invitations/assignInvitationToReview',
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const data = await invitationService.assignInvitationToReview(id);
       return data;
     } catch (error) {
       const errorMessage = handleApiError(error);
@@ -650,7 +665,7 @@ const invitationsSlice = createSlice({
           const index = state.list.findIndex(invitation => invitation.id === id);
           if (index !== -1) {
             state.list[index].isDeleted = true;
-            state.list[index].status = 'Cancelled';
+            state.list[index].status = InvitationStatus.Cancelled;
           }
         }
         
@@ -764,7 +779,31 @@ const invitationsSlice = createSlice({
         state.approvalLoading = false;
         state.approvalError = action.payload;
       })
-      
+
+      // Assign to review
+      .addCase(assignInvitationToReview.pending, (state) => {
+        state.approvalLoading = true;
+        state.approvalError = null;
+      })
+      .addCase(assignInvitationToReview.fulfilled, (state, action) => {
+        state.approvalLoading = false;
+        const updatedInvitation = action.payload;
+        const index = state.list.findIndex(i => i.id === updatedInvitation.id);
+        if (index !== -1) {
+          state.list[index] = updatedInvitation;
+        }
+        if (state.currentInvitation?.id === updatedInvitation.id) {
+          state.currentInvitation = updatedInvitation;
+        }
+        state.approvalError = null;
+        state.lastUpdated = Date.now();
+        state.pendingApprovalsLastFetch = null;
+      })
+      .addCase(assignInvitationToReview.rejected, (state, action) => {
+        state.approvalLoading = false;
+        state.approvalError = action.payload;
+      })
+
       // Cancel invitation
       .addCase(cancelInvitation.pending, (state) => {
         state.approvalLoading = true;

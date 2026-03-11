@@ -203,6 +203,7 @@ export const INVITATION_ENDPOINTS = {
   REJECT: (id) => `/api/invitations/${id}/reject`,
   SUBMIT: (id) => `/api/invitations/${id}/submit`,
   CANCEL: (id) => `/api/invitations/${id}/cancel`,
+  ASSIGN_REVIEW: (id) => `/api/invitations/${id}/assign-review`,
   QR_CODE: (id) => `/api/invitations/${id}/qr-code`,
   QR_IMAGE: (id) => `/api/invitations/${id}/qr-code/image`, // Fixed path
   QR_DATA: (id) => `/api/invitations/${id}/qr-code/data`, // New endpoint

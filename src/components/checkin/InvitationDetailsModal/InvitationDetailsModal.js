@@ -30,6 +30,7 @@ import {
 
 // Utils
 import formatters from '../../../utils/formatters';
+import { InvitationStatus, InvitationStatusLabels } from '../../../constants/invitationStatus';
 
 /**
  * Invitation Details Modal Component
@@ -118,20 +119,19 @@ const InvitationDetailsModal = ({
   const isCheckedIn = invitation.checkedInAt && !invitation.checkedOutAt;
   const isCompleted = invitation.checkedInAt && invitation.checkedOutAt;
 
-  // Check timing issues
+  // Check timing issues (used for informational UI hints only — server enforces all rules)
   const now = new Date();
   const scheduledStart = new Date(invitation.scheduledStartTime);
   const scheduledEnd = new Date(invitation.scheduledEndTime);
   const twoHoursBeforeStart = new Date(scheduledStart.getTime() - 2 * 60 * 60 * 1000);
-  const twentyFourHoursAfterEnd = new Date(scheduledEnd.getTime() + 24 * 60 * 60 * 1000);
 
   const isTooEarly = now < twoHoursBeforeStart;
-  const isExpired = now > twentyFourHoursAfterEnd;
   const isEarlyButAllowed = now >= twoHoursBeforeStart && now < scheduledStart;
-  const isLateButAllowed = now > scheduledEnd && now <= twentyFourHoursAfterEnd;
+  const isLateButAllowed = now > scheduledEnd && invitation.status === InvitationStatus.Approved;
 
-  // Check if status is approved (case-insensitive)
-  const isApproved = invitation.status?.toLowerCase() === 'approved';
+  // Use server-provided status for all business logic decisions
+  const isExpired = invitation.isExpired || invitation.status === InvitationStatus.Expired;
+  const isApproved = invitation.status === InvitationStatus.Approved;
   const canCheckIn = !isCheckedIn && !isCompleted && !isTooEarly && !isExpired && isApproved;
 
   // Get status badge
@@ -142,13 +142,16 @@ const InvitationDetailsModal = ({
     if (isCheckedIn) {
       return <Badge color="green" size="sm">Checked In</Badge>;
     }
-    if (invitation.status?.toLowerCase() === 'approved') {
+    if (invitation.status === InvitationStatus.Approved) {
       return <Badge color="blue" size="sm">Approved</Badge>;
     }
-    if (invitation.status?.toLowerCase() === 'pending') {
-      return <Badge color="yellow" size="sm">Pending</Badge>;
+    if (invitation.status === InvitationStatus.Submitted || invitation.status === InvitationStatus.UnderReview) {
+      return <Badge color="yellow" size="sm">Pending Approval</Badge>;
     }
-    return <Badge color="gray" size="sm">{invitation.status}</Badge>;
+    if (invitation.status === InvitationStatus.Expired) {
+      return <Badge color="orange" size="sm">Expired</Badge>;
+    }
+    return <Badge color="gray" size="sm">{InvitationStatusLabels[invitation.status] ?? invitation.status}</Badge>;
   };
 
   // Handle check-in confirmation
@@ -207,9 +210,6 @@ const InvitationDetailsModal = ({
               </p>
               <p className="text-red-700 dark:text-red-300 text-sm mt-1">
                 <strong>Scheduled end time:</strong> {formatters.formatDateTime(scheduledEnd)}
-              </p>
-              <p className="text-red-700 dark:text-red-300 text-sm mt-1">
-                <strong>Expired on:</strong> {formatters.formatDateTime(twentyFourHoursAfterEnd)}
               </p>
             </div>
           </div>

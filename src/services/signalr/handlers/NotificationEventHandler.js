@@ -23,7 +23,8 @@ class NotificationEventHandler {
       ['OperatorRegistered', this.handleOperatorRegistered.bind(this)],
       ['VisitorDelayed', this.handleVisitorDelayed.bind(this)],
       ['VisitorNoShow', this.handleVisitorNoShow.bind(this)],
-      
+      ['InvitationExpired', this.handleInvitationExpired.bind(this)],
+
       // Host Hub Events
       ['UserNotification', this.handleUserNotification.bind(this)],
       ['InvitationStatusUpdate', this.handleInvitationStatusUpdate.bind(this)],
@@ -240,6 +241,21 @@ class NotificationEventHandler {
     this.notifySubscribers('visitor-no-show', data, 'operator');
   }
 
+  handleInvitationExpired(data) {
+    store.dispatch(addNotificationWithDesktop({
+      type: 'invitation_expired',
+      title: 'Invitation Expired',
+      message: data.Message || `The invitation for ${data.VisitorName} expired without check-in.`,
+      priority: 'low',
+      data: data,
+      actions: [
+        { label: 'View Invitation', action: 'view_invitation' }
+      ]
+    }));
+
+    this.notifySubscribers('invitation-expired', data, 'operator');
+  }
+
   // ====== HOST HUB EVENT HANDLERS ======
 
   handleHostRegistered(data) {
@@ -258,11 +274,23 @@ class NotificationEventHandler {
   }
 
   handleInvitationStatusUpdate(data) {
+    // Determine the type: expiration has Type='InvitationExpired', approval uses Approved flag
+    const isExpired = data.Type === 'InvitationExpired';
+    const type = isExpired ? 'invitation_expired'
+      : data.Approved ? 'invitation_approved'
+      : 'invitation_rejected';
+    const title = isExpired ? 'Invitation Expired'
+      : data.Approved ? 'Invitation Approved'
+      : 'Invitation Rejected';
+    const message = data.Message || data.Note
+      || (isExpired ? 'Your invitation has expired without check-in.'
+        : `Your invitation has been ${data.Approved ? 'approved' : 'rejected'}`);
+
     store.dispatch(addNotificationWithDesktop({
-      type: data.Approved ? 'invitation_approved' : 'invitation_rejected',
-      title: data.Approved ? 'Invitation Approved' : 'Invitation Rejected',
-      message: data.Note || `Your invitation has been ${data.Approved ? 'approved' : 'rejected'}`,
-      priority: 'medium',
+      type,
+      title,
+      message,
+      priority: isExpired ? 'low' : 'medium',
       data: data,
       actions: [
         { label: 'View Details', action: 'view_invitation' }

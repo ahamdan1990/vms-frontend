@@ -23,7 +23,8 @@ import {
   approveInvitation,
   rejectInvitation,
   cancelInvitation,
-  deleteInvitation
+  deleteInvitation,
+  assignInvitationToReview
 } from '../../../store/slices/invitationsSlice';
 
 // Selectors
@@ -48,6 +49,7 @@ import {
   selectInvitationsDeleteLoading,
   selectInvitationsPagination
 } from '../../../store/selectors/invitationSelectors';
+import { selectIsAdmin } from '../../../store/selectors/authSelectors';
 
 // Components
 import Card from '../../common/Card/Card';
@@ -93,6 +95,7 @@ import {
 // Utils
 import formatters from '../../../utils/formatters';
 import { extractErrorMessage } from '../../../utils/errorUtils';
+import { InvitationStatus, InvitationStatusLabels } from '../../../constants/invitationStatus';
 
 /**
  * Comprehensive Invitations List Component
@@ -126,6 +129,9 @@ const InvitationsList = () => {
   // Loading states
   const approvalLoading = useSelector(selectInvitationsApprovalLoading);
   const deleteLoading = useSelector(selectInvitationsDeleteLoading);
+
+  // Auth
+  const isAdmin = useSelector(selectIsAdmin);
 
   // Local state
   const [bulkAction, setBulkAction] = useState('');
@@ -212,6 +218,14 @@ const InvitationsList = () => {
     dispatch(showQrModal(invitation));
   };
 
+  const handleAssignToReview = async (invitation) => {
+    try {
+      await dispatch(assignInvitationToReview({ id: invitation.id })).unwrap();
+    } catch (err) {
+      console.error('Assign to review failed:', err);
+    }
+  };
+
   const handleBulkAction = (action) => {
     setBulkAction(action);
     setShowBulkConfirm(true);
@@ -264,27 +278,27 @@ const InvitationsList = () => {
     }
   };
 
-  // Status badge helper
+  // Status badge helper — status values from API are camelCase strings
   const getStatusBadge = (invitation) => {
     const statusConfig = {
-      Draft: { variant: 'secondary', icon: DocumentDuplicateIcon },
-      Submitted: { variant: 'info', icon: ClockIconSolid },
-      UnderReview: { variant: 'warning', icon: ExclamationTriangleIconSolid },
-      Approved: { variant: 'success', icon: CheckCircleIcon },
-      Rejected: { variant: 'danger', icon: XCircleIcon },
-      Cancelled: { variant: 'secondary', icon: XMarkIcon },
-      Expired: { variant: 'secondary', icon: ClockIcon },
-      Active: { variant: 'primary', icon: CheckIcon },
-      Completed: { variant: 'success', icon: CheckCircleIcon }
+      [InvitationStatus.Draft]: { variant: 'secondary', icon: DocumentDuplicateIcon },
+      [InvitationStatus.Submitted]: { variant: 'info', icon: ClockIconSolid },
+      [InvitationStatus.UnderReview]: { variant: 'warning', icon: ExclamationTriangleIconSolid },
+      [InvitationStatus.Approved]: { variant: 'success', icon: CheckCircleIcon },
+      [InvitationStatus.Rejected]: { variant: 'danger', icon: XCircleIcon },
+      [InvitationStatus.Cancelled]: { variant: 'secondary', icon: XMarkIcon },
+      [InvitationStatus.Expired]: { variant: 'secondary', icon: ClockIcon },
+      [InvitationStatus.Active]: { variant: 'primary', icon: CheckIcon },
+      [InvitationStatus.Completed]: { variant: 'success', icon: CheckCircleIcon },
     };
 
-    const config = statusConfig[invitation.status] || statusConfig.Draft;
+    const config = statusConfig[invitation.status] || statusConfig[InvitationStatus.Draft];
     const IconComponent = config.icon;
 
     return (
       <Badge variant={config.variant} size="sm" className="flex items-center space-x-1">
         <IconComponent className="w-3 h-3" />
-        <span>{invitation.status}</span>
+        <span>{InvitationStatusLabels[invitation.status] ?? invitation.status}</span>
       </Badge>
     );
   };
@@ -491,7 +505,19 @@ const InvitationsList = () => {
               </Tooltip>
             )}
 
-            {(invitation.status === 'Submitted' || invitation.status === 'UnderReview') && (
+            {isAdmin && invitation.status === InvitationStatus.Submitted && (
+              <Tooltip content="Assign to Review">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleAssignToReview(invitation)}
+                  disabled={approvalLoading}
+                  icon={<ClockIcon className="w-4 h-4" />}
+                />
+              </Tooltip>
+            )}
+
+            {(invitation.status === InvitationStatus.Submitted || invitation.status === InvitationStatus.UnderReview) && (
               <Tooltip content="Approve/Reject">
                 <Button
                   variant="ghost"
@@ -668,15 +694,15 @@ const InvitationsList = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">All Statuses</option>
-                    <option value="Draft">Draft</option>
-                    <option value="Submitted">Submitted</option>
-                    <option value="UnderReview">Under Review</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
-                    <option value="Cancelled">Cancelled</option>
-                    <option value="Expired">Expired</option>
-                    <option value="Active">Active</option>
-                    <option value="Completed">Completed</option>
+                    <option value={InvitationStatus.Draft}>Draft</option>
+                    <option value={InvitationStatus.Submitted}>Submitted</option>
+                    <option value={InvitationStatus.UnderReview}>Under Review</option>
+                    <option value={InvitationStatus.Approved}>Approved</option>
+                    <option value={InvitationStatus.Rejected}>Rejected</option>
+                    <option value={InvitationStatus.Cancelled}>Cancelled</option>
+                    <option value={InvitationStatus.Expired}>Expired</option>
+                    <option value={InvitationStatus.Active}>Active</option>
+                    <option value={InvitationStatus.Completed}>Completed</option>
                   </select>
                 </div>
 

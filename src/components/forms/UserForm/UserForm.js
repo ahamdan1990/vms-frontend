@@ -27,7 +27,7 @@ const UserForm = ({
   className = ''
 }) => {
 
-  const { user: userPermissions } = usePermissions();
+  const { user: userPermissions, isAdmin } = usePermissions();
   const toast = useToast();
   const isEditing = Boolean(user);
 
@@ -49,6 +49,7 @@ const UserForm = ({
     employeeId: user?.employeeId || '',
     isActive: user?.isActive !== undefined ? user.isActive : true,
     mustChangePassword: !isEditing,
+    requiresApprovalOverride: user?.requiresApprovalOverride ?? null,
 
     // User preferences with Lebanon defaults
     timeZone: user?.timeZone || 'Asia/Beirut', // Lebanon timezone
@@ -107,6 +108,7 @@ const UserForm = ({
         employeeId: user.employeeId || '',
         isActive: user.isActive !== undefined ? user.isActive : true,
         mustChangePassword: false,
+        requiresApprovalOverride: user.requiresApprovalOverride ?? null,
         timeZone: user.timeZone || 'Asia/Beirut',
         language: user.language || 'en-US',
         theme: user.theme || 'light',
@@ -1027,6 +1029,41 @@ const UserForm = ({
                     <p className="text-xs text-gray-500 dark:text-gray-400">Send welcome email with login credentials</p>
                   </div>
                 </label>
+              </motion.div>
+            )}
+
+            {/* Invitation Approval Override — admin only, relevant for Staff/Host roles */}
+            {isAdmin && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.65, duration: 0.3 }}
+              >
+                <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                  <div className="mb-2">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">Invitation Approval Override</span>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Controls whether this user's invitations require admin approval, overriding the global setting.
+                    </p>
+                  </div>
+                  <select
+                    name="requiresApprovalOverride"
+                    value={formData.requiresApprovalOverride === null ? 'null' : String(formData.requiresApprovalOverride)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormData(prev => ({
+                        ...prev,
+                        requiresApprovalOverride: val === 'null' ? null : val === 'true'
+                      }));
+                    }}
+                    disabled={isLoading}
+                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                  >
+                    <option value="null">Use global setting (default)</option>
+                    <option value="true">Always require approval</option>
+                    <option value="false">Always auto-approve (skip approval)</option>
+                  </select>
+                </div>
               </motion.div>
             )}
           </div>
