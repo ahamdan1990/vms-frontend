@@ -13,7 +13,7 @@ import AutocompleteInput from '../../common/AutocompleteInput/AutocompleteInput'
 import { CapacityValidator } from '../../capacity';
 import Modal from '../../common/Modal/Modal';
 import LocationForm from '../../forms/LocationForm/LocationForm';
-import VisitorForm from '../../visitor/VisitorForm/VisitorForm';
+import VisitorQuickCreateForm from '../../visitor/VisitorQuickCreateForm/VisitorQuickCreateForm';
 
 // Services
 import timeSlotsService from '../../../services/timeSlotsService';
@@ -26,7 +26,7 @@ import { selectVisitPurposesList } from '../../../store/selectors/visitPurposeSe
 
 // Redux actions
 import { createLocation, getActiveLocations } from '../../../store/slices/locationsSlice';
-import { getVisitors } from '../../../store/slices/visitorsSlice';
+import { getVisitors, addVisitorToList } from '../../../store/slices/visitorsSlice';
 
 // Icons
 import {
@@ -612,8 +612,9 @@ const InvitationForm = ({
 
       const createdVisitor = result?.visitor || result;
 
-      // Refresh visitor list for autocomplete
-      await dispatch(getVisitors({ pageSize: 1000, isActive: true }));
+      // Optimistically inject the new visitor into the Redux list so the
+      // autocomplete reflects it immediately without a full 1000-record reload.
+      dispatch(addVisitorToList(createdVisitor));
 
       // Auto-select the new visitor
       if (visitorCreateTarget === 'group') {
@@ -1415,19 +1416,18 @@ const InvitationForm = ({
         />
       </Modal>
 
-      {/* Visitor Creation Modal */}
+      {/* Visitor Quick-Create Modal */}
       <Modal
         isOpen={showVisitorModal}
         onClose={handleCloseVisitorModal}
-        title="Create New Visitor"
-        size="full"
+        title="Add New Visitor"
+        size="md"
       >
-        <VisitorForm
+        <VisitorQuickCreateForm
           onSubmit={handleCreateVisitor}
           onCancel={handleCloseVisitorModal}
           loading={visitorCreating}
           error={visitorError}
-          isEdit={false}
         />
       </Modal>
     </div>

@@ -72,7 +72,8 @@ const VisitorForm = ({
   loading = false,
   error = null,
   isEdit = false,
-  onFormChange = null // Callback to notify parent of form changes
+  onFormChange = null, // Callback to notify parent of form changes
+  hideInvitationStep = false
 }) => {
   
   const dispatch = useDispatch();
@@ -481,9 +482,9 @@ const VisitorForm = ({
       id: 'emergency',
       title: 'Emergency Contacts',
       icon: UserGroupIcon,
-      description: 'Emergency contact information (required)'
+      description: 'Emergency contact information (optional)'
     },
-    {
+    !hideInvitationStep && {
       id: 'invitation',
       title: 'Create Invitation',
       icon: ClipboardDocumentListIcon,
@@ -495,7 +496,7 @@ const VisitorForm = ({
       icon: CheckCircleIcon,
       description: 'Review all information before submitting'
     }
-  ];
+  ].filter(Boolean);
 
   // Enhanced validation functions
   const validateStep = (stepId) => {
@@ -555,24 +556,21 @@ const VisitorForm = ({
         break;
 
       case 'emergency':
-        if (formData.emergencyContacts.length === 0) {
-          errors.emergencyContacts = 'At least one emergency contact is required';
-        } else {
-          formData.emergencyContacts.forEach((contact, index) => {
-            if (!contact.firstName.trim()) {
-              errors[`emergencyContacts.${index}.firstName`] = 'First name is required';
-            }
-            if (!contact.lastName.trim()) {
-              errors[`emergencyContacts.${index}.lastName`] = 'Last name is required';
-            }
-            if (!contact.phoneNumber.trim()) {
-              errors[`emergencyContacts.${index}.phoneNumber`] = 'Phone number is required';
-            }
-            if (!contact.relationship.trim()) {
-              errors[`emergencyContacts.${index}.relationship`] = 'Relationship is required';
-            }
-          });
-        }
+        // Emergency contacts are optional — validate fields only if any are added
+        formData.emergencyContacts.forEach((contact, index) => {
+          if (!contact.firstName.trim()) {
+            errors[`emergencyContacts.${index}.firstName`] = 'First name is required';
+          }
+          if (!contact.lastName.trim()) {
+            errors[`emergencyContacts.${index}.lastName`] = 'Last name is required';
+          }
+          if (!contact.phoneNumber.trim()) {
+            errors[`emergencyContacts.${index}.phoneNumber`] = 'Phone number is required';
+          }
+          if (!contact.relationship.trim()) {
+            errors[`emergencyContacts.${index}.relationship`] = 'Relationship is required';
+          }
+        });
         break;
 
       case 'invitation':
@@ -1779,7 +1777,7 @@ const VisitorForm = ({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Emergency Contacts</h3>
-          <p className="text-gray-600 dark:text-gray-300">At least one emergency contact is required</p>
+          <p className="text-gray-600 dark:text-gray-300">Emergency contacts are optional</p>
         </div>
         <Button
           variant="outline"
@@ -1890,7 +1888,7 @@ const VisitorForm = ({
           <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
           <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No emergency contacts</h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Add at least one emergency contact for safety purposes.
+            You can add emergency contacts now or skip this step.
           </p>
           <div className="mt-6">
             <Button
@@ -2768,7 +2766,8 @@ VisitorForm.propTypes = {
     PropTypes.array,
     PropTypes.object
   ]),
-  isEdit: PropTypes.bool
+  isEdit: PropTypes.bool,
+  hideInvitationStep: PropTypes.bool
 };
 
 export default VisitorForm;

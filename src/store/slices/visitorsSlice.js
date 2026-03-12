@@ -489,8 +489,16 @@ const visitorsSlice = createSlice({
     // Clear current visitor
     clearCurrentVisitor: (state) => {
       state.currentVisitor = null;
+    },
+
+    // Optimistically prepend a newly created visitor to the list so autocompletes
+    // (e.g. in InvitationForm) reflect it immediately without a full reload.
+    addVisitorToList: (state, action) => {
+      state.list.unshift(action.payload);
+      state.total += 1;
     }
-  },  extraReducers: (builder) => {
+  },
+  extraReducers: (builder) => {
     // Get visitors
     builder
       .addCase(getVisitors.pending, (state) => {
@@ -887,7 +895,8 @@ export const {
   clearQuickSearch,
   clearError,
   setCurrentVisitor,
-  clearCurrentVisitor
+  clearCurrentVisitor,
+  addVisitorToList
 } = visitorsSlice.actions;
 
 // Export reducer
