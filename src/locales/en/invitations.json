@@ -1,0 +1,162 @@
+{
+  "pageTitle": "Invitations",
+  "pageSubtitle": "Manage visitor invitations and approvals",
+  "createButton": "Create Invitation",
+  "stats": {
+    "total": "Total",
+    "pending": "Pending",
+    "approved": "Approved",
+    "activeToday": "Active Today",
+    "rejected": "Rejected"
+  },
+  "search": {
+    "placeholder": "Search invitations by number, subject, visitor..."
+  },
+  "filters": {
+    "title": "Filters",
+    "clearAll": "Clear Filters",
+    "status": "Status",
+    "allStatuses": "All Statuses",
+    "type": "Type",
+    "allTypes": "All Types",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "pendingOnly": "Pending Approvals Only",
+    "activeOnly": "Active Only",
+    "expiredOnly": "Expired Only",
+    "includeDeleted": "Include Deleted"
+  },
+  "table": {
+    "columns": {
+      "invitationNumber": "Invitation #",
+      "visitor": "Visitor",
+      "schedule": "Schedule",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "emptyMessage": "No invitations found"
+  },
+  "pagination": {
+    "showing": "Showing {{start}} to {{end}} of {{total}} invitations",
+    "10perPage": "10 per page",
+    "20perPage": "20 per page",
+    "50perPage": "50 per page",
+    "100perPage": "100 per page"
+  },
+  "bulk": {
+    "selected": "{{count}} invitation selected",
+    "selected_plural": "{{count}} invitations selected",
+    "clear": "Clear",
+    "approve": "Approve",
+    "reject": "Reject",
+    "delete": "Delete"
+  },
+  "actions": {
+    "view": "View",
+    "edit": "Edit",
+    "approve": "Approve",
+    "reApprove": "Re-approve",
+    "reject": "Reject",
+    "qr": "QR",
+    "delete": "Delete"
+  },
+  "type": {
+    "single": "Single",
+    "group": "Group",
+    "recurring": "Recurring",
+    "walkIn": "Walk-in",
+    "bulk": "Bulk"
+  },
+  "tooltips": {
+    "viewDetails": "View details",
+    "editInvitation": "Edit invitation",
+    "approveInvitation": "Approve invitation",
+    "reApproveInvitation": "Re-approve invitation",
+    "rejectInvitation": "Reject invitation",
+    "viewQrCode": "View QR Code",
+    "deleteInvitation": "Delete invitation"
+  },
+  "modals": {
+    "createTitle": "Create Invitation",
+    "editTitle": "Edit Invitation",
+    "detailsTitle": "Invitation Details",
+    "approvalTitle": "Manage Approval",
+    "qrTitle": "QR Code",
+    "deleteTitle": "Delete Invitation",
+    "deleteMessage": "Are you sure you want to delete the invitation \"{{subject}}\"? This action cannot be undone.",
+    "deleteMessageGeneric": "Are you sure you want to delete this invitation?"
+  },
+  "details": {
+    "visitorInfo": "Visitor Information",
+    "hostInfo": "Host Information",
+    "schedule": "Schedule",
+    "locationPurpose": "Location & Purpose",
+    "message": "Message",
+    "requirements": "Requirements",
+    "approvalStatus": "Approval Status",
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "company": "Company",
+      "date": "Date",
+      "time": "Time",
+      "duration": "Duration",
+      "location": "Location",
+      "purpose": "Purpose",
+      "expectedVisitors": "Expected Visitors",
+      "requiresApproval": "Requires Approval",
+      "requiresEscort": "Requires Escort",
+      "requiresBadge": "Requires Badge",
+      "needsParking": "Needs Parking",
+      "specialInstructions": "Special Instructions",
+      "parkingInstructions": "Parking Instructions",
+      "comments": "Comments",
+      "reason": "Reason",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "durationHours": "{{hours}}h"
+    }
+  },
+  "approval": {
+    "approveTitle": "Approve Invitation",
+    "rejectTitle": "Reject Invitation",
+    "commentsLabel": "Approval Comments (Optional)",
+    "commentsPlaceholder": "Add any comments about the approval...",
+    "reasonLabel": "Rejection Reason",
+    "reasonPlaceholder": "Please provide a reason for rejection...",
+    "characterCount": "{{count}}/{{max}} characters",
+    "approveButton": "Approve Invitation",
+    "rejectButton": "Reject Invitation"
+  },
+  "qr": {
+    "title": "QR Code for Invitation",
+    "scanInstruction": "Scan this QR code to check in for the visit",
+    "actionsTitle": "QR Code Actions",
+    "dataTitle": "QR Code Data",
+    "dataDescription": "This code contains encrypted invitation details for secure check-in",
+    "downloadButton": "Download QR Code",
+    "emailButton": "Email to Visitor",
+    "sendingButton": "Sending...",
+    "sentSuccess": "QR code sent successfully to {{email}}!",
+    "emailError": "Email Error: {{error}}",
+    "willSendTo": "Will be sent to: {{email}}",
+    "noEmailAddress": "No email address available for this visitor"
+  },
+  "confirmBulk": {
+    "title": "{{action}} Invitations",
+    "message": "Are you sure you want to {{action}} {{count}} selected invitation?",
+    "message_plural": "Are you sure you want to {{action}} {{count}} selected invitations?"
+  },
+  "errors": {
+    "createFailed": "Failed to create invitation.",
+    "updateFailed": "Failed to update invitation.",
+    "deleteFailed": "Failed to delete invitation.",
+    "approveFailed": "Failed to approve invitation.",
+    "rejectFailed": "Failed to reject invitation.",
+    "qrFailed": "Failed to load QR code."
+  },
+  "unknownVisitor": "Unknown Visitor",
+  "unknownHost": "Unknown Host",
+  "noLocation": "No location specified"
+}

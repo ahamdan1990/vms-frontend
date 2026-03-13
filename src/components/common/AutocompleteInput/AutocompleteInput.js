@@ -149,7 +149,7 @@ const AutocompleteInput = ({
       {label && (
         <label className="block text-sm font-medium text-gray-700 mb-1">
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-red-500 ms-1">*</span>}
         </label>
       )}
       
@@ -169,12 +169,12 @@ const AutocompleteInput = ({
         />
 
         {/* Icons */}
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+        <div className="absolute inset-y-0 end-0 flex items-center pr-3">
           {clearable && searchTerm && searchTerm.length > 0 && !disabled && (
             <button
               type="button"
               onClick={handleClear}
-              className="mr-1 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+              className="me-1 p-1 text-gray-400 hover:text-gray-600 transition-colors"
             >
               <XMarkIcon className="w-4 h-4" />
             </button>

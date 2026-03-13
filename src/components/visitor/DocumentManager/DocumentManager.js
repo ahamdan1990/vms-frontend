@@ -248,7 +248,7 @@ const DocumentManager = ({
       {/* Header */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <FolderIcon className="w-6 h-6 text-blue-500" />
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Documents</h3>
@@ -258,14 +258,14 @@ const DocumentManager = ({
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Button
               onClick={() => setShowFilters(!showFilters)}
               variant="outline"
               size="sm"
               className={showFilters ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300' : 'dark:text-gray-200'}
             >
-              <FunnelIcon className="w-4 h-4 mr-1" />
+              <FunnelIcon className="w-4 h-4 me-1" />
               Filters
             </Button>
             
@@ -274,7 +274,7 @@ const DocumentManager = ({
               variant="primary"
               size="sm"
             >
-              <PlusIcon className="w-4 h-4 mr-1" />
+              <PlusIcon className="w-4 h-4 me-1" />
               Add Documents
             </Button>
           </div>
@@ -289,7 +289,7 @@ const DocumentManager = ({
               exit={{ opacity: 0, height: 0 }}
               className="mt-4 space-y-3"
             >
-              <div className="flex space-x-3">
+              <div className="flex gap-3">
                 <div className="flex-1">
                   <Input
                     type="text"
@@ -321,7 +321,7 @@ const DocumentManager = ({
                   <span className="text-sm text-blue-800 dark:text-blue-100">
                     {selectedDocuments.length} document{selectedDocuments.length !== 1 ? 's' : ''} selected
                   </span>
-                  <div className="flex space-x-2">
+                  <div className="flex gap-2">
                     <Button
                       onClick={() => setSelectedDocuments([])}
                       variant="ghost"
@@ -335,7 +335,7 @@ const DocumentManager = ({
                       size="xs"
                       className="text-red-600 border-red-200"
                     >
-                      <TrashIcon className="w-3 h-3 mr-1" />
+                      <TrashIcon className="w-3 h-3 me-1" />
                       Delete Selected
                     </Button>
                   </div>
@@ -373,7 +373,7 @@ const DocumentManager = ({
               onClick={() => fileInputRef.current?.click()}
               variant="primary"
             >
-              <PlusIcon className="w-4 h-4 mr-2" />
+              <PlusIcon className="w-4 h-4 me-2" />
               Upload Documents
             </Button>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
@@ -410,7 +410,7 @@ const DocumentManager = ({
               <div key={type} className="mb-6">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center">
-                    <DocumentTextIcon className="w-4 h-4 mr-2" />
+                    <DocumentTextIcon className="w-4 h-4 me-2" />
                     {type} ({docs.length})
                   </h4>
                 </div>
@@ -500,7 +500,7 @@ const DocumentManager = ({
             ))}
           </div>
 
-          <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
             <Button
               onClick={() => setShowUploadModal(false)}
               variant="outline"
@@ -580,7 +580,7 @@ const DocumentCard = ({
       <div className="pl-6">
         <div className="flex items-start justify-between mb-3">
           <Icon className="w-6 h-6 text-blue-500 flex-shrink-0" />
-          <div className="flex space-x-1 ml-2">
+          <div className="flex gap-1 ms-2">
             {document.isSensitive && (
               <Badge variant="warning" size="xs">Sensitive</Badge>
             )}
@@ -609,14 +609,14 @@ const DocumentCard = ({
 
         {/* Actions */}
         {showActions && (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Button
               onClick={onView}
               variant="ghost"
               size="xs"
               className="flex-1"
             >
-              <EyeIcon className="w-3 h-3 mr-1" />
+              <EyeIcon className="w-3 h-3 me-1" />
               View
             </Button>
             
@@ -626,7 +626,7 @@ const DocumentCard = ({
               size="xs"
               className="flex-1"
             >
-              <CloudArrowDownIcon className="w-3 h-3 mr-1" />
+              <CloudArrowDownIcon className="w-3 h-3 me-1" />
               Download
             </Button>
             
@@ -653,7 +653,7 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
 
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-slate-900/70">
-      <div className="flex items-start space-x-3">
+      <div className="flex items-start gap-3">
         <Icon className="w-8 h-8 text-blue-500 flex-shrink-0 mt-1" />
         
         <div className="flex-1 min-w-0">
@@ -726,13 +726,13 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
               />
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-4">
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   checked={item.isSensitive}
                   onChange={(e) => onChange({ isSensitive: e.target.checked })}
-                  className="rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 mr-2"
+                  className="rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 me-2"
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-200">Sensitive</span>
               </label>
@@ -742,7 +742,7 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
                   type="checkbox"
                   checked={item.isRequired}
                   onChange={(e) => onChange({ isRequired: e.target.checked })}
-                  className="rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 mr-2"
+                  className="rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 me-2"
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-200">Required</span>
               </label>

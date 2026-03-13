@@ -63,14 +63,14 @@ const Card = ({
 
   // Accent border styles
   const accentClasses = {
-    primary: 'border-l-4 border-l-primary-500',
-    success: 'border-l-4 border-l-green-500',
-    warning: 'border-l-4 border-l-yellow-500',
-    error: 'border-l-4 border-l-red-500',
-    info: 'border-l-4 border-l-blue-500',
-    purple: 'border-l-4 border-l-purple-500',
-    indigo: 'border-l-4 border-l-indigo-500',
-    pink: 'border-l-4 border-l-pink-500'
+    primary: 'border-s-4 border-s-primary-500',
+    success: 'border-s-4 border-s-green-500',
+    warning: 'border-s-4 border-s-yellow-500',
+    error: 'border-s-4 border-s-red-500',
+    info: 'border-s-4 border-s-blue-500',
+    purple: 'border-s-4 border-s-purple-500',
+    indigo: 'border-s-4 border-s-indigo-500',
+    pink: 'border-s-4 border-s-pink-500'
   };
 
   const cardClasses = classNames(

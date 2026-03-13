@@ -278,7 +278,7 @@ const LocationsListPage = () => {
       sortable: true,
       render: (value, location) => (
         <div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${location.isActive ? 'bg-green-500' : 'bg-gray-400 dark:bg-gray-500'}`} />
             <span className="font-medium text-gray-900 dark:text-gray-100">{location.name}</span>
           </div>
@@ -287,7 +287,7 @@ const LocationsListPage = () => {
           )}
           {location.address && (
             <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
-              <MapPinIcon className="w-4 h-4 mr-1 text-gray-400 dark:text-gray-500" />
+              <MapPinIcon className="w-4 h-4 me-1 text-gray-400 dark:text-gray-500" />
               {location.address}
             </div>
           )}
@@ -319,7 +319,7 @@ const LocationsListPage = () => {
       sortable: true,
       render: (value, location) => (
         <div className="space-y-1">
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center gap-1">
             <UserGroupIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
             <span className="font-medium text-gray-900 dark:text-gray-100">
               {location.maxCapacity ? `${location.maxCapacity} visitors` : 'Unlimited'}
@@ -352,7 +352,7 @@ const LocationsListPage = () => {
       width: '120px',
       sortable: false,
       render: (value, location) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => handleLocationAction('view', location)}
             className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
@@ -396,7 +396,7 @@ const LocationsListPage = () => {
             Manage building locations, rooms, and capacity for visitor destinations
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 flex space-x-3">
+        <div className="mt-4 sm:mt-0 flex gap-3">
           {/* View Mode Toggle */}
           <div className="flex rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-1">
             <button
@@ -443,7 +443,7 @@ const LocationsListPage = () => {
                   <BuildingOfficeIcon className="w-5 h-5 text-blue-600 dark:text-blue-300" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Total Locations</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.total}</dd>
@@ -459,7 +459,7 @@ const LocationsListPage = () => {
                   <CheckCircleIcon className="w-5 h-5 text-green-600 dark:text-green-300" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Active</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.active}</dd>
@@ -475,7 +475,7 @@ const LocationsListPage = () => {
                   <UserGroupIcon className="w-5 h-5 text-purple-600 dark:text-purple-300" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">With Capacity</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.withCapacity}</dd>
@@ -491,7 +491,7 @@ const LocationsListPage = () => {
                   <ExclamationTriangleIcon className="w-5 h-5 text-orange-600 dark:text-orange-300" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Requires Escort</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.requiresEscort}</dd>
@@ -514,7 +514,7 @@ const LocationsListPage = () => {
             />
           </div>
           
-          <div className="flex space-x-3">
+          <div className="flex gap-3">
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
@@ -571,7 +571,7 @@ const LocationsListPage = () => {
                     onChange={(e) => handleFilterChange('includeInactive', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
-                  <label htmlFor="includeInactive" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                  <label htmlFor="includeInactive" className="ms-2 block text-sm text-gray-700 dark:text-gray-300">
                     Include inactive locations
                   </label>
                 </div>
@@ -584,7 +584,7 @@ const LocationsListPage = () => {
                     onChange={(e) => handleFilterChange('rootOnly', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
-                  <label htmlFor="rootOnly" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                  <label htmlFor="rootOnly" className="ms-2 block text-sm text-gray-700 dark:text-gray-300">
                     Root locations only
                   </label>
                 </div>
@@ -597,7 +597,7 @@ const LocationsListPage = () => {
                     onChange={(e) => handleFilterChange('includeChildren', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
-                  <label htmlFor="includeChildren" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                  <label htmlFor="includeChildren" className="ms-2 block text-sm text-gray-700 dark:text-gray-300">
                     Include child locations
                   </label>
                 </div>
@@ -629,7 +629,7 @@ const LocationsListPage = () => {
       {hasSelected && (
         <Card className="p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <span className="text-sm text-gray-500 dark:text-gray-400">
                 {selectedCount} location{selectedCount !== 1 ? 's' : ''} selected
               </span>
@@ -643,7 +643,7 @@ const LocationsListPage = () => {
             </div>
             
             {canDelete && (
-              <div className="flex space-x-2">
+              <div className="flex gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -653,7 +653,7 @@ const LocationsListPage = () => {
                   }}
                   className="text-red-600 dark:text-red-400 border-red-300 dark:border-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
                 >
-                  <TrashIcon className="w-4 h-4 mr-2" />
+                  <TrashIcon className="w-4 h-4 me-2" />
                   Delete Selected
                 </Button>
               </div>
@@ -761,7 +761,7 @@ const LocationsListPage = () => {
               </div>
             )}
             
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
               <Button
                 variant="outline"
                 onClick={() => {

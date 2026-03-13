@@ -765,7 +765,7 @@ const InvitationForm = ({
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
         <Card className="p-6">
-          <div className="flex items-center space-x-2 mb-6">
+          <div className="flex items-center gap-2 mb-6">
             <DocumentTextIcon className="w-6 h-6 text-blue-600" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Basic Information</h3>
           </div>
@@ -859,7 +859,7 @@ const InvitationForm = ({
                           key={visitor.id}
                           className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0"
                         >
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                               <span className="text-sm font-medium text-blue-600 dark:text-blue-300">
                                 {visitor.firstName?.[0]}{visitor.lastName?.[0]}
@@ -1014,7 +1014,7 @@ const InvitationForm = ({
 
         {/* Schedule */}
         <Card className="p-6">
-          <div className="flex items-center space-x-2 mb-6">
+          <div className="flex items-center gap-2 mb-6">
             <CalendarIcon className="w-6 h-6 text-blue-600" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Schedule</h3>
           </div>
@@ -1101,7 +1101,7 @@ const InvitationForm = ({
 
           {getVisitDuration() > 0 && (
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-700 rounded-md">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <ClockIcon className="w-4 h-4 text-blue-600" />
                 <span className="text-sm font-medium text-blue-900 dark:text-blue-200">
                   Visit Duration: {getVisitDuration()} hours
@@ -1114,7 +1114,7 @@ const InvitationForm = ({
         {/* Time Slot Selection */}
         {formData.locationId && formData.scheduledStartTime && (
           <Card className="p-6">
-            <div className="flex items-center space-x-2 mb-4">
+            <div className="flex items-center gap-2 mb-4">
               <ClockIcon className="w-6 h-6 text-blue-600" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Available Time Slots</h3>
               {loadingTimeSlots && (
@@ -1211,7 +1211,7 @@ const InvitationForm = ({
         {/* Capacity Validation */}
         {formData.scheduledStartTime && (
           <Card className="p-6">
-            <div className="flex items-center space-x-2 mb-4">
+            <div className="flex items-center gap-2 mb-4">
               <ShieldCheckIcon className="w-6 h-6 text-blue-600" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Capacity Check</h3>
             </div>
@@ -1233,7 +1233,7 @@ const InvitationForm = ({
 
         {/* Requirements */}
         <Card className="p-6">
-          <div className="flex items-center space-x-2 mb-6">
+          <div className="flex items-center gap-2 mb-6">
             <ShieldCheckIcon className="w-6 h-6 text-blue-600" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Requirements & Access</h3>
           </div>
@@ -1241,7 +1241,7 @@ const InvitationForm = ({
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <label className="flex items-center space-x-3">
+                <label className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     checked={formData.requiresApproval}
@@ -1254,7 +1254,7 @@ const InvitationForm = ({
                   </div>
                 </label>
 
-                <label className="flex items-center space-x-3">
+                <label className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     checked={formData.requiresEscort}
@@ -1267,7 +1267,7 @@ const InvitationForm = ({
                   </div>
                 </label>
 
-                <label className="flex items-center space-x-3">
+                <label className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     checked={formData.requiresBadge}
@@ -1282,7 +1282,7 @@ const InvitationForm = ({
               </div>
 
               <div className="space-y-3">
-                <label className="flex items-center space-x-3">
+                <label className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     checked={formData.needsParking}
@@ -1296,7 +1296,7 @@ const InvitationForm = ({
                   </label>
 
                 {isEdit && (
-                  <label className="flex items-center space-x-3">
+                  <label className="flex items-center gap-3">
                     <input
                       type="checkbox"
                       checked={formData.submitForApproval}
@@ -1356,7 +1356,7 @@ const InvitationForm = ({
         {/* Form Errors */}
         {formErrors.capacity && (
           <div className="bg-red-50 border border-red-200 dark:bg-red-900/30 dark:border-red-700 rounded-lg p-4">
-            <div className="flex items-start space-x-3">
+            <div className="flex items-start gap-3">
               <ExclamationCircleIcon className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5" />
               <div>
                 <h4 className="text-sm font-medium text-red-800 dark:text-red-200">Capacity Issue</h4>
@@ -1367,7 +1367,7 @@ const InvitationForm = ({
         )}
 
         {/* Action Buttons */}
-        <div className="flex justify-end space-x-3">
+        <div className="flex justify-end gap-3">
           <Button
             type="button"
             variant="outline"

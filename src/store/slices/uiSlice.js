@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import i18n, { LANGUAGE_KEY } from '../../i18n';
 import {
   THEMES,
   LAYOUT_MODES,
@@ -11,6 +12,21 @@ import {
   DATE_TIME,
   PERFORMANCE
 } from '../../constants/uiConstants';
+
+// Helper to persist and apply language
+const applyLanguage = (lang) => {
+  try {
+    localStorage.setItem(LANGUAGE_KEY, lang);
+  } catch (_) {}
+  // Apply to DOM
+  const dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.setAttribute('dir', dir);
+  document.documentElement.setAttribute('lang', lang);
+  // Tell i18next
+  if (i18n.language !== lang) {
+    i18n.changeLanguage(lang);
+  }
+};
 
 const initialState = {
   // Sidebar state
@@ -458,6 +474,15 @@ const uiSlice = createSlice({
       state.performance.slowQueries = [];
     },
     
+    // Language
+    setLanguage: (state, action) => {
+      const lang = action.payload;
+      if (lang === 'en' || lang === 'ar') {
+        state.preferences.language = lang;
+        applyLanguage(lang);
+      }
+    },
+
     // User preferences with validation
     setPreferences: (state, action) => {
       const newPrefs = action.payload;
@@ -589,6 +614,7 @@ const uiSlice = createSlice({
 
 // Export actions
 export const {
+  setLanguage,
   toggleSidebar,
   setSidebarOpen,
   toggleSidebarCollapsed,

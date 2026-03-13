@@ -128,6 +128,9 @@ import {
 import formatters from '../../../utils/formatters';
 import { extractErrorMessage } from '../../../utils/errorUtils';
 
+// i18n
+import { useTranslation } from 'react-i18next';
+
 /**
  * Main Invitations List Page
  * Coordinates all invitation management functionality including:
@@ -141,6 +144,7 @@ const InvitationsListPage = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation('invitations');
 
   // Invitations data
   const invitations = useSelector(selectInvitationsList);
@@ -538,15 +542,15 @@ const InvitationsListPage = () => {
   // Status badge helper
   const getStatusBadge = (invitation) => {
     const statusConfig = {
-      draft: { variant: 'secondary', icon: DocumentDuplicateIcon, text: 'Draft' },
-      submitted: { variant: 'info', icon: ClockIconSolid, text: 'Submitted' },
-      underreview: { variant: 'warning', icon: ExclamationTriangleIconSolid, text: 'Under Review' },
-      approved: { variant: 'success', icon: CheckCircleIcon, text: 'Approved' },
-      rejected: { variant: 'danger', icon: XCircleIcon, text: 'Rejected' },
-      cancelled: { variant: 'secondary', icon: XMarkIcon, text: 'Cancelled' },
-      expired: { variant: 'secondary', icon: ClockIcon, text: 'Expired' },
-      active: { variant: 'primary', icon: CheckIcon, text: 'Active' },
-      completed: { variant: 'success', icon: CheckCircleIcon, text: 'Completed' }
+      draft: { variant: 'secondary', icon: DocumentDuplicateIcon, text: t('common:status.draft') },
+      submitted: { variant: 'info', icon: ClockIconSolid, text: t('common:status.submitted') },
+      underreview: { variant: 'warning', icon: ExclamationTriangleIconSolid, text: t('common:status.underReview') },
+      approved: { variant: 'success', icon: CheckCircleIcon, text: t('common:status.approved') },
+      rejected: { variant: 'danger', icon: XCircleIcon, text: t('common:status.rejected') },
+      cancelled: { variant: 'secondary', icon: XMarkIcon, text: t('common:status.cancelled') },
+      expired: { variant: 'secondary', icon: ClockIcon, text: t('common:status.expired') },
+      active: { variant: 'primary', icon: CheckIcon, text: t('common:status.active') },
+      completed: { variant: 'success', icon: CheckCircleIcon, text: t('common:status.completed') }
     };
 
     const normalizedStatus = normalizeStatus(invitation.status);
@@ -554,7 +558,7 @@ const InvitationsListPage = () => {
     const IconComponent = config.icon;
 
     return (
-      <Badge variant={config.variant} size="sm" className="flex items-center space-x-1">
+      <Badge variant={config.variant} size="sm" className="flex items-center gap-1">
         <IconComponent className="w-3 h-3" />
         <span>{config.text}</span>
       </Badge>
@@ -564,11 +568,11 @@ const InvitationsListPage = () => {
   // Type badge helper
   const getTypeBadge = (invitation) => {
     const typeConfig = {
-      Single: { variant: 'info', text: 'Single' },
-      Group: { variant: 'primary', text: 'Group' },
-      Recurring: { variant: 'warning', text: 'Recurring' },
-      WalkIn: { variant: 'secondary', text: 'Walk-in' },
-      BulkImport: { variant: 'info', text: 'Bulk' }
+      Single: { variant: 'info', text: t('type.single') },
+      Group: { variant: 'primary', text: t('type.group') },
+      Recurring: { variant: 'warning', text: t('type.recurring') },
+      WalkIn: { variant: 'secondary', text: t('type.walkIn') },
+      BulkImport: { variant: 'info', text: t('type.bulk') }
     };
 
     const config = typeConfig[invitation.type] || typeConfig.Single;
@@ -578,10 +582,10 @@ const InvitationsListPage = () => {
   // Visitor display helper
   const formatVisitorInfo = (invitation) => {
     const visitor = invitation.visitor;
-    if (!visitor) return 'Unknown Visitor';
+    if (!visitor) return t('unknownVisitor');
 
     return (
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-2">
         <UserIcon className="w-4 h-4 text-gray-400" />
         <div>
           <div className="font-medium text-gray-900">
@@ -589,7 +593,7 @@ const InvitationsListPage = () => {
           </div>
           <div className="text-sm text-gray-500">{visitor.email}</div>
           {visitor.company && (
-            <div className="text-sm text-gray-500 flex items-center space-x-1">
+            <div className="text-sm text-gray-500 flex items-center gap-1">
               <BuildingOfficeIcon className="w-3 h-3" />
               <span>{visitor.company}</span>
             </div>
@@ -602,7 +606,7 @@ const InvitationsListPage = () => {
   // Host display helper
   const formatHostInfo = (invitation) => {
     const host = invitation.host;
-    if (!host) return 'Unknown Host';
+    if (!host) return t('unknownHost');
 
     return (
       <div className="text-sm">
@@ -618,11 +622,11 @@ const InvitationsListPage = () => {
   const formatVisitTime = (invitation) => {
     return (
       <div className="text-sm">
-        <div className="flex items-center space-x-1 text-gray-900">
+        <div className="flex items-center gap-1 text-gray-900">
           <CalendarIcon className="w-4 h-4 text-gray-400" />
           <span>{formatters.formatDate(invitation.scheduledStartTime)}</span>
         </div>
-        <div className="flex items-center space-x-1 text-gray-600">
+        <div className="flex items-center gap-1 text-gray-600">
           <ClockIcon className="w-4 h-4 text-gray-400" />
           <span>{formatters.formatTime(invitation.scheduledStartTime)} - {formatters.formatTime(invitation.scheduledEndTime)}</span>
         </div>
@@ -638,7 +642,7 @@ const InvitationsListPage = () => {
   // Location display helper
   const formatLocationInfo = (invitation) => {
     const location = invitation.location;
-    if (!location) return 'No location specified';
+    if (!location) return t('noLocation');
 
     return (
       <div className="text-sm">
@@ -714,22 +718,22 @@ const InvitationsListPage = () => {
     },
     {
       key: 'invitationNumber',
-      header: 'Invitation #',
+      header: t('table.columns.invitationNumber'),
       sortable: true,
       className: 'min-w-[180px]',
       render: (value, invitation) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <span className="font-semibold text-gray-900 dark:text-white">#{invitation.invitationNumber}</span>
         </div>
       )
     },
     {
       key: 'visitor',
-      header: 'Visitor',
+      header: t('table.columns.visitor'),
       sortable: true,
       className: 'min-w-[200px]',
       render: (value, invitation) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
             <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
@@ -738,7 +742,7 @@ const InvitationsListPage = () => {
               {invitation.visitor?.firstName} {invitation.visitor?.lastName}
             </div>
             {invitation.visitor?.company && (
-              <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-1">
+              <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                 <BuildingOfficeIcon className="w-3 h-3" />
                 <span>{invitation.visitor?.company}</span>
               </div>
@@ -749,16 +753,16 @@ const InvitationsListPage = () => {
     },
     {
       key: 'schedule',
-      header: 'Schedule',
+      header: t('table.columns.schedule'),
       sortable: true,
       className: 'min-w-[180px]',
       render: (value, invitation) => (
         <div className="text-sm">
-          <div className="flex items-center space-x-1 text-gray-900 dark:text-white font-medium">
+          <div className="flex items-center gap-1 text-gray-900 dark:text-white font-medium">
             <CalendarIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
             <span>{formatters.formatDate(invitation.scheduledStartTime)}</span>
           </div>
-          <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
+          <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
             <ClockIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
             <span>{formatters.formatTime(invitation.scheduledStartTime)}</span>
           </div>
@@ -767,7 +771,7 @@ const InvitationsListPage = () => {
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('table.columns.status'),
       sortable: true,
       className: 'min-w-[140px]',
       render: (value, invitation) => (
@@ -779,32 +783,32 @@ const InvitationsListPage = () => {
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('table.columns.actions'),
       sortable: false,
       className: 'min-w-[300px]',
       render: (value, invitation) => {
         const isSelected = selectedInvitations.includes(invitation.id);
         return (
-          <div className={`flex items-center justify-end space-x-2 ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20 -mx-2 px-2 py-2 rounded' : ''}`}>
+          <div className={`flex items-center justify-end gap-2 ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20 -mx-2 px-2 py-2 rounded' : ''}`}>
             {/* View Button - Always visible */}
             <button
               onClick={() => handleInvitationAction('view', invitation)}
-              className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              title="View details"
+              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              title={t('tooltips.viewDetails')}
             >
               <EyeIcon className="w-5 h-5" />
-              <span>View</span>
+              <span>{t('actions.view')}</span>
             </button>
 
             {/* Edit Button - Conditional */}
             {invitation.canBeModified && (
               <button
                 onClick={() => handleInvitationAction('edit', invitation)}
-                className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
-                title="Edit invitation"
+                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                title={t('tooltips.editInvitation')}
               >
                 <PencilIcon className="w-5 h-5" />
-                <span>Edit</span>
+                <span>{t('actions.edit')}</span>
               </button>
             )}
 
@@ -813,22 +817,22 @@ const InvitationsListPage = () => {
               <>
                 <button
                   onClick={() => handleInvitationAction('approve', invitation)}
-                  className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-white bg-green-600 border border-green-700 rounded-md hover:bg-green-700 transition-colors shadow-sm"
-                  title={normalizeStatus(invitation.status) === 'rejected' ? 'Re-approve invitation' : 'Approve invitation'}
+                  className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-white bg-green-600 border border-green-700 rounded-md hover:bg-green-700 transition-colors shadow-sm"
+                  title={normalizeStatus(invitation.status) === 'rejected' ? t('tooltips.reApproveInvitation') : t('tooltips.approveInvitation')}
                   disabled={approvalLoading}
                 >
                   <CheckIcon className="w-5 h-5 stroke-2" />
-                  <span>{normalizeStatus(invitation.status) === 'rejected' ? 'Re-approve' : 'Approve'}</span>
+                  <span>{normalizeStatus(invitation.status) === 'rejected' ? t('actions.reApprove') : t('actions.approve')}</span>
                 </button>
                 {/* Only show reject button for pending invitations, not rejected ones */}
                 {isPendingApproval(invitation) && (
                   <button
                     onClick={() => dispatch(showApprovalModal(invitation))}
-                    className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-white bg-red-600 border border-red-700 rounded-md hover:bg-red-700 transition-colors shadow-sm"
-                    title="Reject invitation"
+                    className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-white bg-red-600 border border-red-700 rounded-md hover:bg-red-700 transition-colors shadow-sm"
+                    title={t('tooltips.rejectInvitation')}
                   >
                     <XMarkIcon className="w-5 h-5 stroke-2" />
-                    <span>Reject</span>
+                    <span>{t('actions.reject')}</span>
                   </button>
                 )}
               </>
@@ -838,11 +842,11 @@ const InvitationsListPage = () => {
             {invitation.isApproved && (
               <button
                 onClick={() => handleInvitationAction('qr', invitation)}
-                className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-300 dark:border-indigo-700 rounded-md hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
-                title="View QR Code"
+                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-300 dark:border-indigo-700 rounded-md hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors"
+                title={t('tooltips.viewQrCode')}
               >
                 <QrCodeIcon className="w-5 h-5" />
-                <span>QR</span>
+                <span>{t('actions.qr')}</span>
               </button>
             )}
 
@@ -850,8 +854,8 @@ const InvitationsListPage = () => {
             {invitation.canBeCancelled && (
               <button
                 onClick={() => handleInvitationAction('delete', invitation)}
-                className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-red-700 dark:text-red-400 bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-md hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                title="Delete invitation"
+                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-700 dark:text-red-400 bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-md hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                title={t('tooltips.deleteInvitation')}
               >
                 <TrashIcon className="w-5 h-5" />
               </button>
@@ -889,18 +893,18 @@ const InvitationsListPage = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Invitations</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{t('pageTitle')}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Manage visitor invitations and approvals
+            {t('pageSubtitle')}
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 flex space-x-3">
+        <div className="mt-4 sm:mt-0 flex gap-3">
           <Button
             onClick={() => dispatch(showCreateModal())}
             loading={createLoading}
             icon={<PlusIcon className="w-5 h-5" />}
           >
-            Create Invitation
+            {t('createButton')}
           </Button>
         </div>
       </div>
@@ -915,9 +919,9 @@ const InvitationsListPage = () => {
                   <DocumentDuplicateIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total</dt>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('stats.total')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.totalInvitations || statistics.total || 0}</dd>
                 </dl>
               </div>
@@ -931,9 +935,9 @@ const InvitationsListPage = () => {
                   <ClockIconSolid className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Pending</dt>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('stats.pending')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.pendingApprovals || statistics.pendingApproval || 0}</dd>
                 </dl>
               </div>
@@ -947,9 +951,9 @@ const InvitationsListPage = () => {
                   <CheckCircleIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Approved</dt>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('stats.approved')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.approvedInvitations || statistics.byStatus?.approved || 0}</dd>
                 </dl>
               </div>
@@ -963,9 +967,9 @@ const InvitationsListPage = () => {
                   <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Active Today</dt>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('stats.activeToday')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.activeVisitors || statistics.activeToday || 0}</dd>
                 </dl>
               </div>
@@ -979,9 +983,9 @@ const InvitationsListPage = () => {
                   <XCircleIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Rejected</dt>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('stats.rejected')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">{statistics.cancelledInvitations || statistics.byStatus?.rejected || 0}</dd>
                 </dl>
               </div>
@@ -996,7 +1000,7 @@ const InvitationsListPage = () => {
           <div className="flex-1">
             <Input
               type="text"
-              placeholder="Search invitations by number, subject, visitor..."
+              placeholder={t('search.placeholder')}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               icon={<MagnifyingGlassIcon className="w-5 h-5" />}
@@ -1009,7 +1013,7 @@ const InvitationsListPage = () => {
               onClick={() => setShowFilters(!showFilters)}
               icon={<FunnelIcon className="w-5 h-5" />}
             >
-              Filters
+              {t('filters.title')}
             </Button>
             
             {(filters.status || filters.type || filters.startDate || filters.endDate || 
@@ -1020,7 +1024,7 @@ const InvitationsListPage = () => {
                 onClick={handleResetFilters}
                 icon={<ArrowPathIcon className="w-5 h-5" />}
               >
-                Clear Filters
+                {t('filters.clearAll')}
               </Button>
             )}
           </div>
@@ -1038,47 +1042,47 @@ const InvitationsListPage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
+                    {t('filters.status')}
                   </label>
                   <select
                     value={filters.status || ''}
                     onChange={(e) => handleFilterChange('status', e.target.value || null)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">All Statuses</option>
-                    <option value="Draft">Draft</option>
-                    <option value="Submitted">Submitted</option>
-                    <option value="UnderReview">Under Review</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
-                    <option value="Cancelled">Cancelled</option>
-                    <option value="Expired">Expired</option>
-                    <option value="Active">Active</option>
-                    <option value="Completed">Completed</option>
+                    <option value="">{t('filters.allStatuses')}</option>
+                    <option value="Draft">{t('common:status.draft')}</option>
+                    <option value="Submitted">{t('common:status.submitted')}</option>
+                    <option value="UnderReview">{t('common:status.underReview')}</option>
+                    <option value="Approved">{t('common:status.approved')}</option>
+                    <option value="Rejected">{t('common:status.rejected')}</option>
+                    <option value="Cancelled">{t('common:status.cancelled')}</option>
+                    <option value="Expired">{t('common:status.expired')}</option>
+                    <option value="Active">{t('common:status.active')}</option>
+                    <option value="Completed">{t('common:status.completed')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Type
+                    {t('filters.type')}
                   </label>
                   <select
                     value={filters.type || ''}
                     onChange={(e) => handleFilterChange('type', e.target.value || null)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">All Types</option>
-                    <option value="Single">Single</option>
-                    <option value="Group">Group</option>
-                    <option value="Recurring">Recurring</option>
-                    <option value="WalkIn">Walk-in</option>
-                    <option value="BulkImport">Bulk Import</option>
+                    <option value="">{t('filters.allTypes')}</option>
+                    <option value="Single">{t('type.single')}</option>
+                    <option value="Group">{t('type.group')}</option>
+                    <option value="Recurring">{t('type.recurring')}</option>
+                    <option value="WalkIn">{t('type.walkIn')}</option>
+                    <option value="BulkImport">{t('type.bulk')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Date
+                    {t('filters.startDate')}
                   </label>
                   <Input
                     type="date"
@@ -1089,7 +1093,7 @@ const InvitationsListPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    End Date
+                    {t('filters.endDate')}
                   </label>
                   <Input
                     type="date"
@@ -1099,7 +1103,7 @@ const InvitationsListPage = () => {
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center space-x-6">
+              <div className="mt-4 flex items-center gap-6">
                 <div className="flex items-center">
                   <input
                     type="checkbox"
@@ -1108,8 +1112,8 @@ const InvitationsListPage = () => {
                     onChange={(e) => handleFilterChange('pendingApprovalsOnly', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="pendingApprovalsOnly" className="ml-2 block text-sm text-gray-700">
-                    Pending Approvals Only
+                  <label htmlFor="pendingApprovalsOnly" className="ms-2 block text-sm text-gray-700">
+                    {t('filters.pendingOnly')}
                   </label>
                 </div>
 
@@ -1121,8 +1125,8 @@ const InvitationsListPage = () => {
                     onChange={(e) => handleFilterChange('activeOnly', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="activeOnly" className="ml-2 block text-sm text-gray-700">
-                    Active Only
+                  <label htmlFor="activeOnly" className="ms-2 block text-sm text-gray-700">
+                    {t('filters.activeOnly')}
                   </label>
                 </div>
 
@@ -1134,8 +1138,8 @@ const InvitationsListPage = () => {
                     onChange={(e) => handleFilterChange('expiredOnly', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="expiredOnly" className="ml-2 block text-sm text-gray-700">
-                    Expired Only
+                  <label htmlFor="expiredOnly" className="ms-2 block text-sm text-gray-700">
+                    {t('filters.expiredOnly')}
                   </label>
                 </div>
 
@@ -1147,8 +1151,8 @@ const InvitationsListPage = () => {
                     onChange={(e) => handleFilterChange('includeDeleted', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="includeDeleted" className="ml-2 block text-sm text-gray-700">
-                    Include Deleted
+                  <label htmlFor="includeDeleted" className="ms-2 block text-sm text-gray-700">
+                    {t('filters.includeDeleted')}
                   </label>
                 </div>
               </div>
@@ -1168,7 +1172,7 @@ const InvitationsListPage = () => {
             onClick={() => dispatch(clearError())}
             className="mt-2 text-red-600"
           >
-            Dismiss
+            {t('common:buttons.dismiss')}
           </Button>
         </div>
       )}
@@ -1184,12 +1188,12 @@ const InvitationsListPage = () => {
           >
             <Card className="p-4 bg-blue-50 border-blue-200">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:space-x-3">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-3">
               <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full font-semibold text-sm">
                 {selectedInvitations.length}
               </div>
               <span className="text-sm font-medium text-gray-900">
-                {selectedInvitations.length} invitation{selectedInvitations.length !== 1 ? 's' : ''} selected
+                {t('bulk.selected', { count: selectedInvitations.length })}
               </span>
               <Button
                 variant="ghost"
@@ -1197,7 +1201,7 @@ const InvitationsListPage = () => {
                 onClick={() => dispatch(clearSelections())}
                 className="text-gray-600 hover:text-gray-900"
               >
-                Clear
+                {t('bulk.clear')}
               </Button>
             </div>
 
@@ -1209,7 +1213,7 @@ const InvitationsListPage = () => {
                     icon={<CheckIcon className="w-4 h-4" />}
                     className="bg-white text-green-700 border-green-300 hover:bg-green-50 font-medium"
                   >
-                    Approve
+                    {t('bulk.approve')}
                   </Button>
 
                   <Button
@@ -1219,7 +1223,7 @@ const InvitationsListPage = () => {
                     icon={<XMarkIcon className="w-4 h-4" />}
                     className="bg-white text-orange-700 border-orange-300 hover:bg-orange-50 font-medium"
                   >
-                    Reject
+                    {t('bulk.reject')}
                   </Button>
 
                   <Button
@@ -1229,7 +1233,7 @@ const InvitationsListPage = () => {
                     className="bg-white text-red-700 border-red-300 hover:bg-red-50 font-medium"
                     icon={<TrashIcon className="w-4 h-4" />}
                   >
-                    Delete
+                    {t('bulk.delete')}
                   </Button>
                 </div>
               </div>
@@ -1258,7 +1262,7 @@ const InvitationsListPage = () => {
                 onSort={handleSort}
                 sortBy={filters.sortBy}
                 sortDirection={filters.sortDirection}
-                emptyMessage="No invitations found"
+                emptyMessage={t('table.emptyMessage')}
                 hover
                 bordered
                 className="invitations-table min-w-full"
@@ -1269,23 +1273,23 @@ const InvitationsListPage = () => {
             {totalInvitations > 0 && (
               <div className="px-6 py-4 border-t border-gray-200">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 text-sm text-gray-500">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 text-sm text-gray-500">
                     <span>
-                      Showing {pageRange.start} to {pageRange.end} of {pageRange.total} invitations
+                      {t('pagination.showing', { start: pageRange.start, end: pageRange.end, total: pageRange.total })}
                     </span>
                     <select
                       value={pageSize}
                       onChange={(e) => handlePageSizeChange(Number(e.target.value))}
                       className="border border-gray-300 rounded px-2 py-1 text-sm"
                     >
-                      <option value={10}>10 per page</option>
-                      <option value={20}>20 per page</option>
-                      <option value={50}>50 per page</option>
-                      <option value={100}>100 per page</option>
+                      <option value={10}>{t('pagination.10perPage')}</option>
+                      <option value={20}>{t('pagination.20perPage')}</option>
+                      <option value={50}>{t('pagination.50perPage')}</option>
+                      <option value={100}>{t('pagination.100perPage')}</option>
                     </select>
                   </div>
                   
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -1293,10 +1297,10 @@ const InvitationsListPage = () => {
                       disabled={!hasPreviousPage}
                       icon={<ChevronLeftIcon className="w-4 h-4" />}
                     >
-                      Previous
+                      {t('common:buttons.previous')}
                     </Button>
                     
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center gap-1">
                       {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                         let pageNum;
                         if (totalPages <= 5) {
@@ -1332,7 +1336,7 @@ const InvitationsListPage = () => {
                       disabled={!hasNextPage}
                       icon={<ChevronRightIcon className="w-4 h-4" />}
                     >
-                      Next
+                      {t('common:buttons.next')}
                     </Button>
                   </div>
                 </div>
@@ -1345,7 +1349,7 @@ const InvitationsListPage = () => {
       <Modal
         isOpen={showCreateModalState}
         onClose={handleCloseCreateModal}
-        title="Create Invitation"
+        title={t('modals.createTitle')}
         size="full"
       >
         <InvitationForm
@@ -1362,7 +1366,7 @@ const InvitationsListPage = () => {
       <Modal
         isOpen={showEditModalState}
         onClose={handleCloseEditModal}
-        title="Edit Invitation"
+        title={t('modals.editTitle')}
         size="full"
       >
         {currentInvitation && (
@@ -1381,7 +1385,7 @@ const InvitationsListPage = () => {
       <Modal
         isOpen={showDetailsModalState}
         onClose={handleCloseDetailsModal}
-        title="Invitation Details"
+        title={t('modals.detailsTitle')}
         size="responsive"
       >
         {renderInvitationDetails()}
@@ -1391,7 +1395,7 @@ const InvitationsListPage = () => {
       <Modal
         isOpen={showApprovalModalState}
         onClose={handleCloseApprovalModal}
-        title="Manage Approval"
+        title={t('modals.approvalTitle')}
         size="md"
       >
         {renderApprovalModal()}
@@ -1401,7 +1405,7 @@ const InvitationsListPage = () => {
       <Modal
         isOpen={showQrModalState}
         onClose={handleCloseQrModal}
-        title="QR Code"
+        title={t('modals.qrTitle')}
         size="md"
       >
         {renderQrModal()}
@@ -1412,12 +1416,12 @@ const InvitationsListPage = () => {
         isOpen={showDeleteModalState}
         onClose={handleCloseDeleteModal}
         onConfirm={handleDeleteInvitation}
-        title="Delete Invitation"
-        message={currentInvitation ? 
-          `Are you sure you want to delete the invitation "${currentInvitation.subject}"? This action cannot be undone.` :
-          'Are you sure you want to delete this invitation?'
+        title={t('modals.deleteTitle')}
+        message={currentInvitation ?
+          t('modals.deleteMessage', { subject: currentInvitation.subject }) :
+          t('modals.deleteMessageGeneric')
         }
-        confirmText="Delete Invitation"
+        confirmText={t('modals.deleteTitle')}
         variant="danger"
         loading={deleteLoading}
         error={deleteError}
@@ -1432,8 +1436,8 @@ const InvitationsListPage = () => {
           setBulkAction('');
         }}
         onConfirm={handleConfirmBulkAction}
-        title={`${bulkAction.charAt(0).toUpperCase() + bulkAction.slice(1)} Invitations`}
-        message={`Are you sure you want to ${bulkAction} ${selectedInvitations.length} selected invitation${selectedInvitations.length !== 1 ? 's' : ''}?`}
+        title={t('confirmBulk.title', { action: bulkAction })}
+        message={t('confirmBulk.message', { action: bulkAction, count: selectedInvitations.length })}
         confirmText={bulkAction.charAt(0).toUpperCase() + bulkAction.slice(1)}
         variant={bulkAction === 'delete' ? 'danger' : 'primary'}
         loading={approvalLoading || deleteLoading}
@@ -1465,17 +1469,17 @@ const InvitationsListPage = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-2 lg:ml-4 shrink-0">
+            <div className="flex flex-wrap items-center gap-2 lg:ms-4 shrink-0">
               {/* Approve/Reject for pending and rejected invitations */}
               {canBeApproved(currentInvitation) && (
                 <>
                   <button
                     onClick={() => handleApproveInvitation(currentInvitation.id, normalizeStatus(currentInvitation.status) === 'rejected' ? 'Re-approved from details' : 'Approved from details')}
-                    className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-green-600 border border-green-700 rounded-lg hover:bg-green-700 transition-colors shadow-sm whitespace-nowrap"
+                    className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-green-600 border border-green-700 rounded-lg hover:bg-green-700 transition-colors shadow-sm whitespace-nowrap"
                     disabled={approvalLoading}
                   >
                     <CheckIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span className="hidden sm:inline">{normalizeStatus(currentInvitation.status) === 'rejected' ? 'Re-approve' : 'Approve'}</span>
+                    <span className="hidden sm:inline">{normalizeStatus(currentInvitation.status) === 'rejected' ? t('actions.reApprove') : t('actions.approve')}</span>
                     <span className="sm:hidden">OK</span>
                   </button>
                   {/* Only show reject button for pending invitations, not rejected ones */}
@@ -1485,10 +1489,10 @@ const InvitationsListPage = () => {
                         handleCloseDetailsModal();
                         setTimeout(() => dispatch(showApprovalModal(currentInvitation)), 100);
                       }}
-                      className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-red-600 border border-red-700 rounded-lg hover:bg-red-700 transition-colors shadow-sm whitespace-nowrap"
+                      className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-red-600 border border-red-700 rounded-lg hover:bg-red-700 transition-colors shadow-sm whitespace-nowrap"
                     >
                       <XMarkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span>Reject</span>
+                      <span>{t('actions.reject')}</span>
                     </button>
                   )}
                 </>
@@ -1501,10 +1505,10 @@ const InvitationsListPage = () => {
                     handleCloseDetailsModal();
                     setTimeout(() => handleInvitationAction('qr', currentInvitation), 100);
                   }}
-                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-indigo-700 bg-indigo-100 border border-indigo-300 rounded-lg hover:bg-indigo-200 transition-colors whitespace-nowrap"
+                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-indigo-700 bg-indigo-100 border border-indigo-300 rounded-lg hover:bg-indigo-200 transition-colors whitespace-nowrap"
                 >
                   <QrCodeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="hidden sm:inline">View QR Code</span>
+                  <span className="hidden sm:inline">{t('tooltips.viewQrCode')}</span>
                   <span className="sm:hidden">QR</span>
                 </button>
               )}
@@ -1516,10 +1520,10 @@ const InvitationsListPage = () => {
                     handleCloseDetailsModal();
                     setTimeout(() => handleInvitationAction('edit', currentInvitation), 100);
                   }}
-                  className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-blue-700 bg-blue-100 border border-blue-300 rounded-lg hover:bg-blue-200 transition-colors whitespace-nowrap"
+                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-blue-700 bg-blue-100 border border-blue-300 rounded-lg hover:bg-blue-200 transition-colors whitespace-nowrap"
                 >
                   <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span>Edit</span>
+                  <span>{t('actions.edit')}</span>
                 </button>
               )}
             </div>
@@ -1529,27 +1533,27 @@ const InvitationsListPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
           {/* Visitor Information */}
           <Card className="p-4 hover:shadow-lg transition-shadow">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
               <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                 <UserIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
-              <span>Visitor Information</span>
+              <span>{t('details.visitorInfo')}</span>
             </h4>
             <div className="space-y-2 text-sm">
               <div className="break-words">
-                <strong className="text-gray-700 dark:text-gray-300">Name:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitor?.firstName} {currentInvitation.visitor?.lastName}</span>
+                <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.name')}:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitor?.firstName} {currentInvitation.visitor?.lastName}</span>
               </div>
               <div className="break-all">
-                <strong className="text-gray-700 dark:text-gray-300">Email:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitor?.email}</span>
+                <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.email')}:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitor?.email}</span>
               </div>
               {currentInvitation.visitor?.phoneNumber && (
                 <div className="break-words">
-                  <strong className="text-gray-700 dark:text-gray-300">Phone:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitor?.phoneNumber}</span>
+                  <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.phone')}:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitor?.phoneNumber}</span>
                 </div>
               )}
               {currentInvitation.visitor?.company && (
                 <div className="break-words">
-                  <strong className="text-gray-700 dark:text-gray-300">Company:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitor?.company}</span>
+                  <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.company')}:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitor?.company}</span>
                 </div>
               )}
             </div>
@@ -1557,64 +1561,64 @@ const InvitationsListPage = () => {
 
           {/* Host Information */}
           <Card className="p-4 hover:shadow-lg transition-shadow">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
               <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
                 <UserIcon className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               </div>
-              <span>Host Information</span>
+              <span>{t('details.hostInfo')}</span>
             </h4>
             <div className="space-y-2 text-sm">
               <div className="break-words">
-                <strong className="text-gray-700 dark:text-gray-300">Name:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.host?.firstName} {currentInvitation.host?.lastName}</span>
+                <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.name')}:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.host?.firstName} {currentInvitation.host?.lastName}</span>
               </div>
               <div className="break-all">
-                <strong className="text-gray-700 dark:text-gray-300">Email:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.host?.email}</span>
+                <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.email')}:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.host?.email}</span>
               </div>
             </div>
           </Card>
 
           {/* Schedule */}
           <Card className="p-4 hover:shadow-lg transition-shadow">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
               <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
                 <CalendarIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
               </div>
-              <span>Schedule</span>
+              <span>{t('details.schedule')}</span>
             </h4>
             <div className="space-y-2 text-sm">
               <div className="break-words">
-                <strong className="text-gray-700 dark:text-gray-300">Date:</strong> <span className="text-gray-900 dark:text-white">{formatters.formatDate(currentInvitation.scheduledStartTime)}</span>
+                <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.date')}:</strong> <span className="text-gray-900 dark:text-white">{formatters.formatDate(currentInvitation.scheduledStartTime)}</span>
               </div>
               <div className="break-words">
-                <strong className="text-gray-700 dark:text-gray-300">Time:</strong> <span className="text-gray-900 dark:text-white">{formatters.formatTime(currentInvitation.scheduledStartTime)} - {formatters.formatTime(currentInvitation.scheduledEndTime)}</span>
+                <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.time')}:</strong> <span className="text-gray-900 dark:text-white">{formatters.formatTime(currentInvitation.scheduledStartTime)} - {formatters.formatTime(currentInvitation.scheduledEndTime)}</span>
               </div>
               <div>
-                <strong className="text-gray-700 dark:text-gray-300">Duration:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitDurationHours}h</span>
+                <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.duration')}:</strong> <span className="text-gray-900 dark:text-white">{t('details.fields.durationHours', { hours: currentInvitation.visitDurationHours })}</span>
               </div>
             </div>
           </Card>
 
           {/* Location & Purpose */}
           <Card className="p-4 hover:shadow-lg transition-shadow">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
               <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
                 <MapPinIcon className="w-4 h-4 text-orange-600 dark:text-orange-400" />
               </div>
-              <span>Location & Purpose</span>
+              <span>{t('details.locationPurpose')}</span>
             </h4>
             <div className="space-y-2 text-sm">
               {currentInvitation.location && (
                 <div className="break-words">
-                  <strong className="text-gray-700 dark:text-gray-300">Location:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.location.name}</span>
+                  <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.location')}:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.location.name}</span>
                 </div>
               )}
               {currentInvitation.visitPurpose && (
                 <div className="break-words">
-                  <strong className="text-gray-700 dark:text-gray-300">Purpose:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitPurpose.name}</span>
+                  <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.purpose')}:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.visitPurpose.name}</span>
                 </div>
               )}
               <div>
-                <strong className="text-gray-700 dark:text-gray-300">Expected Visitors:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.expectedVisitorCount}</span>
+                <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.expectedVisitors')}:</strong> <span className="text-gray-900 dark:text-white">{currentInvitation.expectedVisitorCount}</span>
               </div>
             </div>
           </Card>
@@ -1623,11 +1627,11 @@ const InvitationsListPage = () => {
         {/* Message */}
         {currentInvitation.message && (
           <Card className="p-4 hover:shadow-lg transition-shadow">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
               <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
                 <DocumentTextIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               </div>
-              <span>Message</span>
+              <span>{t('details.message')}</span>
             </h4>
             <p className="text-sm text-gray-700 dark:text-gray-300 break-words whitespace-pre-wrap">{currentInvitation.message}</p>
           </Card>
@@ -1635,36 +1639,36 @@ const InvitationsListPage = () => {
 
         {/* Requirements */}
         <Card className="p-4 hover:shadow-lg transition-shadow">
-          <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+          <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
             <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
               <InformationCircleIcon className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
             </div>
-            <span>Requirements</span>
+            <span>{t('details.requirements')}</span>
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-sm">
-            <div className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
+            <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
               <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresApproval ? 'bg-yellow-500 dark:bg-yellow-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
-              <span className="truncate text-gray-900 dark:text-white">Requires Approval</span>
+              <span className="truncate text-gray-900 dark:text-white">{t('details.fields.requiresApproval')}</span>
             </div>
-            <div className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
+            <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
               <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresEscort ? 'bg-red-500 dark:bg-red-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
-              <span className="truncate text-gray-900 dark:text-white">Requires Escort</span>
+              <span className="truncate text-gray-900 dark:text-white">{t('details.fields.requiresEscort')}</span>
             </div>
-            <div className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
+            <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
               <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresBadge ? 'bg-blue-500 dark:bg-blue-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
-              <span className="truncate text-gray-900 dark:text-white">Requires Badge</span>
+              <span className="truncate text-gray-900 dark:text-white">{t('details.fields.requiresBadge')}</span>
             </div>
-            <div className="flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
+            <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
               <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.needsParking ? 'bg-green-500 dark:bg-green-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
-              <span className="truncate text-gray-900 dark:text-white">Needs Parking</span>
+              <span className="truncate text-gray-900 dark:text-white">{t('details.fields.needsParking')}</span>
             </div>
           </div>
 
           {currentInvitation.specialInstructions && (
             <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <strong className="text-gray-900 dark:text-blue-200 flex items-center space-x-1 mb-2">
+              <strong className="text-gray-900 dark:text-blue-200 flex items-center gap-1 mb-2">
                 <InformationCircleIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span>Special Instructions:</span>
+                <span>{t('details.fields.specialInstructions')}:</span>
               </strong>
               <p className="text-sm text-gray-700 dark:text-gray-300 break-words whitespace-pre-wrap">{currentInvitation.specialInstructions}</p>
             </div>
@@ -1672,9 +1676,9 @@ const InvitationsListPage = () => {
 
           {currentInvitation.parkingInstructions && (
             <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <strong className="text-gray-900 dark:text-green-200 flex items-center space-x-1 mb-2">
+              <strong className="text-gray-900 dark:text-green-200 flex items-center gap-1 mb-2">
                 <MapPinIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
-                <span>Parking Instructions:</span>
+                <span>{t('details.fields.parkingInstructions')}:</span>
               </strong>
               <p className="text-sm text-gray-700 dark:text-gray-300 break-words whitespace-pre-wrap">{currentInvitation.parkingInstructions}</p>
             </div>
@@ -1684,7 +1688,7 @@ const InvitationsListPage = () => {
         {/* Approval Information */}
         {(currentInvitation.approvedOn || currentInvitation.rejectedOn) && (
           <Card className="p-4 hover:shadow-lg transition-shadow">
-            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3 flex items-center gap-2">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${currentInvitation.approvedOn ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
                 {currentInvitation.approvedOn ? (
                   <CheckCircleIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
@@ -1692,17 +1696,17 @@ const InvitationsListPage = () => {
                   <XCircleIcon className="w-4 h-4 text-red-600 dark:text-red-400" />
                 )}
               </div>
-              <span>Approval Status</span>
+              <span>{t('details.approvalStatus')}</span>
             </h4>
             <div className="space-y-3 text-sm">
               {currentInvitation.approvedOn && (
                 <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <div className="break-words">
-                    <strong className="text-gray-700 dark:text-gray-300">Approved:</strong> <span className="text-gray-900 dark:text-white">{formatters.formatDateTime(currentInvitation.approvedOn)}</span>
+                    <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.approved')}:</strong> <span className="text-gray-900 dark:text-white">{formatters.formatDateTime(currentInvitation.approvedOn)}</span>
                   </div>
                   {currentInvitation.approvalComments && (
                     <div className="mt-2 break-words">
-                      <strong className="text-gray-700 dark:text-gray-300">Comments:</strong> <p className="text-gray-900 dark:text-white mt-1 whitespace-pre-wrap">{currentInvitation.approvalComments}</p>
+                      <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.comments')}:</strong> <p className="text-gray-900 dark:text-white mt-1 whitespace-pre-wrap">{currentInvitation.approvalComments}</p>
                     </div>
                   )}
                 </div>
@@ -1710,11 +1714,11 @@ const InvitationsListPage = () => {
               {currentInvitation.rejectedOn && (
                 <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                   <div className="break-words">
-                    <strong className="text-gray-700 dark:text-gray-300">Rejected:</strong> <span className="text-gray-900 dark:text-white">{formatters.formatDateTime(currentInvitation.rejectedOn)}</span>
+                    <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.rejected')}:</strong> <span className="text-gray-900 dark:text-white">{formatters.formatDateTime(currentInvitation.rejectedOn)}</span>
                   </div>
                   {currentInvitation.rejectionReason && (
                     <div className="mt-2 break-words">
-                      <strong className="text-gray-700 dark:text-gray-300">Reason:</strong> <p className="text-gray-900 dark:text-white mt-1 whitespace-pre-wrap">{currentInvitation.rejectionReason}</p>
+                      <strong className="text-gray-700 dark:text-gray-300">{t('details.fields.reason')}:</strong> <p className="text-gray-900 dark:text-white mt-1 whitespace-pre-wrap">{currentInvitation.rejectionReason}</p>
                     </div>
                   )}
                 </div>
@@ -1731,21 +1735,21 @@ const InvitationsListPage = () => {
       <div className="space-y-4">
         <div className="text-center">
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {approvalAction === 'approve' ? 'Approve Invitation' : 'Reject Invitation'}
+            {approvalAction === 'approve' ? t('approval.approveTitle') : t('approval.rejectTitle')}
           </h3>
           <p className="text-sm text-gray-600">
             {currentInvitation?.subject} - #{currentInvitation?.invitationNumber}
           </p>
         </div>
 
-        <div className="flex justify-center space-x-3 mb-4">
+        <div className="flex justify-center gap-3 mb-4">
           <Button
             variant={approvalAction === 'approve' ? 'primary' : 'outline'}
             size="sm"
             onClick={() => setApprovalAction('approve')}
             icon={<CheckIcon className="w-4 h-4" />}
           >
-            Approve
+            {t('actions.approve')}
           </Button>
           <Button
             variant={approvalAction === 'reject' ? 'danger' : 'outline'}
@@ -1753,40 +1757,40 @@ const InvitationsListPage = () => {
             onClick={() => setApprovalAction('reject')}
             icon={<XMarkIcon className="w-4 h-4" />}
           >
-            Reject
+            {t('actions.reject')}
           </Button>
         </div>
 
         {approvalAction === 'approve' ? (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Approval Comments (Optional)
+              {t('approval.commentsLabel')}
             </label>
             <textarea
               value={approvalComments}
               onChange={(e) => setApprovalComments(e.target.value)}
               rows={3}
               maxLength={500}
-              placeholder="Add any comments about the approval..."
+              placeholder={t('approval.commentsPlaceholder')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
-            <p className="mt-1 text-sm text-gray-500">{approvalComments.length}/500 characters</p>
+            <p className="mt-1 text-sm text-gray-500">{t('approval.characterCount', { count: approvalComments.length, max: 500 })}</p>
           </div>
         ) : (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Rejection Reason <span className="text-red-500">*</span>
+              {t('approval.reasonLabel')} <span className="text-red-500">*</span>
             </label>
             <textarea
               value={approvalReason}
               onChange={(e) => setApprovalReason(e.target.value)}
               rows={3}
               maxLength={500}
-              placeholder="Please provide a reason for rejection..."
+              placeholder={t('approval.reasonPlaceholder')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             />
-            <p className="mt-1 text-sm text-gray-500">{approvalReason.length}/500 characters</p>
+            <p className="mt-1 text-sm text-gray-500">{t('approval.characterCount', { count: approvalReason.length, max: 500 })}</p>
           </div>
         )}
 
@@ -1798,13 +1802,13 @@ const InvitationsListPage = () => {
           </div>
         )}
 
-        <div className="flex justify-end space-x-3 pt-4">
+        <div className="flex justify-end gap-3 pt-4">
           <Button
             variant="outline"
             onClick={handleCloseApprovalModal}
             disabled={approvalLoading}
           >
-            Cancel
+            {t('common:buttons.cancel')}
           </Button>
           <Button
             variant={approvalAction === 'approve' ? 'primary' : 'danger'}
@@ -1813,7 +1817,7 @@ const InvitationsListPage = () => {
             disabled={approvalLoading || (approvalAction === 'reject' && !approvalReason.trim())}
             icon={approvalAction === 'approve' ? <CheckIcon className="w-4 h-4" /> : <XMarkIcon className="w-4 h-4" />}
           >
-            {approvalAction === 'approve' ? 'Approve Invitation' : 'Reject Invitation'}
+            {approvalAction === 'approve' ? t('approval.approveButton') : t('approval.rejectButton')}
           </Button>
         </div>
       </div>
@@ -1826,7 +1830,7 @@ const InvitationsListPage = () => {
       <div className="space-y-6">
         <div className="text-center">
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            QR Code for Invitation
+            {t('qr.title')}
           </h3>
           <p className="text-sm text-gray-600">
             {currentInvitation?.subject} - #{currentInvitation?.invitationNumber}
@@ -1853,7 +1857,7 @@ const InvitationsListPage = () => {
         {emailError && (
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="text-sm text-red-700">
-              Email Error: {emailError}
+              {t('qr.emailError', { error: emailError })}
             </div>
           </div>
         )}
@@ -1861,7 +1865,7 @@ const InvitationsListPage = () => {
         {emailSuccess && (
           <div className="bg-green-50 border border-green-200 rounded-md p-4">
             <div className="text-sm text-green-700">
-              QR code sent successfully to {currentInvitation?.visitor?.email}!
+              {t('qr.sentSuccess', { email: currentInvitation?.visitor?.email })}
             </div>
           </div>
         )}
@@ -1877,13 +1881,13 @@ const InvitationsListPage = () => {
                 />
               </div>
               <p className="mt-4 text-sm text-gray-600">
-                Scan this QR code to check in for the visit
+                {t('qr.scanInstruction')}
               </p>
             </div>
 
             {/* QR Code Actions */}
             <div className="border-t pt-4">
-              <h4 className="text-sm font-medium text-gray-900 mb-4">QR Code Actions</h4>
+              <h4 className="text-sm font-medium text-gray-900 mb-4">{t('qr.actionsTitle')}</h4>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Download QR Code */}
@@ -1899,7 +1903,7 @@ const InvitationsListPage = () => {
                   icon={<DocumentTextIcon className="w-4 h-4" />}
                   className="justify-center"
                 >
-                  Download QR Code
+                  {t('qr.downloadButton')}
                 </Button>
 
                 {/* Send QR Code via Email */}
@@ -1912,34 +1916,34 @@ const InvitationsListPage = () => {
                   icon={<EnvelopeIcon className="w-4 h-4" />}
                   className="justify-center"
                 >
-                  {emailSending ? 'Sending...' : 'Email to Visitor'}
+                  {emailSending ? t('qr.sendingButton') : t('qr.emailButton')}
                 </Button>
               </div>
 
               {/* Email recipient info */}
               {currentInvitation?.visitor?.email && (
                 <p className="text-xs text-gray-500 mt-2 text-center">
-                  Will be sent to: {currentInvitation.visitor.email}
+                  {t('qr.willSendTo', { email: currentInvitation.visitor.email })}
                 </p>
               )}
               
               {!currentInvitation?.visitor?.email && (
                 <p className="text-xs text-red-500 mt-2 text-center">
-                  No email address available for this visitor
+                  {t('qr.noEmailAddress')}
                 </p>
               )}
             </div>
 
             {/* QR Code Data */}
             <div className="border-t pt-4">
-              <h4 className="text-sm font-medium text-gray-900 mb-2">QR Code Data</h4>
+              <h4 className="text-sm font-medium text-gray-900 mb-2">{t('qr.dataTitle')}</h4>
               <div className="bg-gray-50 rounded-md p-3">
                 <code className="text-xs text-gray-600 break-all">
                   {qrCodeData.qrCode?.substring(0, 100)}...
                 </code>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                This code contains encrypted invitation details for secure check-in
+                {t('qr.dataDescription')}
               </p>
             </div>
           </div>

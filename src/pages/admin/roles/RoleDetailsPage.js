@@ -207,7 +207,7 @@ const RoleDetailsPage = () => {
           onClick={() => navigate('/admin/roles')}
           className="mb-4"
         >
-          <ArrowLeftIcon className="w-4 h-4 mr-2" />
+          <ArrowLeftIcon className="w-4 h-4 me-2" />
           Back to Roles
         </Button>
 
@@ -255,7 +255,7 @@ const RoleDetailsPage = () => {
                     onClick={handleSavePermissions}
                     isLoading={permissionUpdating}
                   >
-                    <CheckIcon className="w-4 h-4 mr-2" />
+                    <CheckIcon className="w-4 h-4 me-2" />
                     Save Changes
                   </Button>
                 </>
@@ -301,7 +301,7 @@ const RoleDetailsPage = () => {
         <div className="flex gap-4">
           <div className="flex-1">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+              <MagnifyingGlassIcon className="absolute start-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
                 placeholder="Search permissions..."
@@ -329,12 +329,12 @@ const RoleDetailsPage = () => {
 
       {/* System Role Warning */}
       {role.isSystemRole && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-500 p-4 mb-6">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-s-4 border-yellow-400 dark:border-yellow-500 p-4 mb-6">
           <div className="flex">
             <div className="flex-shrink-0">
               <ShieldCheckIcon className="h-5 w-5 text-yellow-400 dark:text-yellow-300" />
             </div>
-            <div className="ml-3">
+            <div className="ms-3">
               <p className="text-sm text-yellow-700 dark:text-yellow-200">
                 This is a system role. Permissions cannot be modified directly. Only display properties can be edited.
               </p>
@@ -417,7 +417,7 @@ const RoleDetailsPage = () => {
                           </div>
                           <div
                             className={`
-                              w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ml-2
+                              w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ms-2
                             ${isSelected ? 'bg-blue-500' : 'border-2 border-gray-300 dark:border-gray-600'}
                           `}
                           >

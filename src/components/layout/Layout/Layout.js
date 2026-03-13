@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import Header from '../Header/Header';
@@ -16,9 +17,10 @@ import classNames from 'classnames';
  */
 const Layout = ({ children, title, showFooter = true, className = '' }) => {
   console.log('📐 Layout component rendering...');
-  
+
   const dispatch = useDispatch();
   const location = useLocation();
+  const { t } = useTranslation(['common', 'navigation']);
   
   const { 
     sidebarOpen, 
@@ -45,23 +47,23 @@ const Layout = ({ children, title, showFooter = true, className = '' }) => {
   // Update page title based on route
   useEffect(() => {
     const routeTitles = {
-      '/dashboard': 'Dashboard',
-      '/staff/dashboard': 'Staff Dashboard',
-      '/operator/dashboard': 'Operator Dashboard', 
-      '/admin/dashboard': 'Admin Dashboard',
-      '/users': 'User Management',
-      '/invitations': 'Invitations',
-      '/visitors': 'Visitors',
-      '/checkin': 'Check-in',
-      '/reports': 'Reports',
-      '/system': 'System',
-      '/profile': 'Profile'
+      '/dashboard': t('navigation:pageTitles.dashboard'),
+      '/staff/dashboard': t('navigation:pageTitles.staffDashboard'),
+      '/operator/dashboard': t('navigation:pageTitles.operatorDashboard'),
+      '/admin/dashboard': t('navigation:pageTitles.adminDashboard'),
+      '/users': t('navigation:pageTitles.users'),
+      '/invitations': t('navigation:pageTitles.invitations'),
+      '/visitors': t('navigation:pageTitles.visitors'),
+      '/checkin': t('navigation:pageTitles.checkin'),
+      '/reports': t('navigation:pageTitles.reports'),
+      '/system': t('navigation:pageTitles.system'),
+      '/profile': t('navigation:pageTitles.profile')
     };
 
     const currentTitle = title || routeTitles[location.pathname] || 'VMS';
     dispatch(setPageTitle(currentTitle));
     document.title = `${currentTitle} - Visitor Management System`;
-  }, [location.pathname, title, dispatch]);
+  }, [location.pathname, title, dispatch, t]);
 
   // Page loading overlay
   if (globalLoading) {
@@ -69,7 +71,7 @@ const Layout = ({ children, title, showFooter = true, className = '' }) => {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading application...</p>
+          <p className="text-gray-600 dark:text-gray-400">{t('loading.app')}</p>
         </div>
       </div>
     );
@@ -92,10 +94,10 @@ const Layout = ({ children, title, showFooter = true, className = '' }) => {
       <div className={classNames(
         'flex-1 flex flex-col min-h-screen transition-all duration-300',
         {
-          // Desktop sidebar spacing
-          'lg:ml-72': sidebarOpen && !sidebarCollapsed && !isMobile,
-          'lg:ml-16': sidebarOpen && sidebarCollapsed && !isMobile,
-          'ml-0': !sidebarOpen || isMobile
+          // Desktop sidebar spacing — using logical ms-* (margin-inline-start) for RTL support
+          'lg:ms-72': sidebarOpen && !sidebarCollapsed && !isMobile,
+          'lg:ms-16': sidebarOpen && sidebarCollapsed && !isMobile,
+          'ms-0': !sidebarOpen || isMobile
         }
       )}>
         {/* Header */}
@@ -107,7 +109,7 @@ const Layout = ({ children, title, showFooter = true, className = '' }) => {
             <div className="h-full flex items-center justify-center">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
-                <p className="text-gray-600 dark:text-gray-400">Loading page...</p>
+                <p className="text-gray-600 dark:text-gray-400">{t('loading.page')}</p>
               </div>
             </div>
           ) : (

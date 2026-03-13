@@ -136,19 +136,19 @@ const SignupPage = () => {
             <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Why Sign Up?</h3>
             <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2 text-left">
               <li className="flex items-start">
-                <svg className="w-5 h-5 text-blue-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-blue-600 me-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 Manage visitor invitations seamlessly
               </li>
               <li className="flex items-start">
-                <svg className="w-5 h-5 text-blue-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-blue-600 me-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 Track visitor check-ins and check-outs
               </li>
               <li className="flex items-start">
-                <svg className="w-5 h-5 text-blue-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-blue-600 me-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 Access real-time analytics and reports
@@ -178,7 +178,7 @@ const SignupPage = () => {
           className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50"
         >
           <div className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-xl border border-white/10">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
               <span className="text-gray-900 dark:text-gray-100 font-medium">Creating your account...</span>
             </div>

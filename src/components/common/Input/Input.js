@@ -133,13 +133,13 @@ const Input = forwardRef(({
       {label && (
         <label htmlFor={inputId} className={labelClasses}>
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-red-500 ms-1">*</span>}
         </label>
       )}
       
       <div className="relative">
         {leftIcon && (
-          <div className={classNames(iconClasses, 'left-3')}>
+          <div className={classNames(iconClasses, 'start-3')}>
             {leftIcon}
           </div>
         )}
@@ -162,13 +162,13 @@ const Input = forwardRef(({
         />
         
         {rightIcon && !rightElement && !(isPassword && showPasswordToggle) && (
-          <div className={classNames(iconClasses, 'right-3')}>
+          <div className={classNames(iconClasses, 'end-3')}>
             {rightIcon}
           </div>
         )}
         
         {rightElement && !(isPassword && showPasswordToggle) && (
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+          <div className="absolute end-3 top-1/2 transform -translate-y-1/2">
             {rightElement}
           </div>
         )}
@@ -178,7 +178,7 @@ const Input = forwardRef(({
             type="button"
             className={classNames(
               iconClasses,
-              'right-3 hover:text-gray-600 dark:hover:text-gray-400 focus:outline-none transition-colors'
+              'end-3 hover:text-gray-600 dark:hover:text-gray-400 focus:outline-none transition-colors'
             )}
             onClick={togglePasswordVisibility}
             tabIndex={-1}
@@ -192,7 +192,7 @@ const Input = forwardRef(({
         <div className="mt-1.5 text-sm">
           {error && (
             <p className="text-red-600 dark:text-red-400 flex items-center">
-              <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-4 h-4 me-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
               {error}
@@ -201,7 +201,7 @@ const Input = forwardRef(({
 
           {success && !error && (
             <p className="text-green-600 dark:text-green-400 flex items-center">
-              <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-4 h-4 me-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
               {success}

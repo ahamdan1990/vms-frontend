@@ -1,4 +1,5 @@
 
+import './i18n'; // Must be first — initializes i18next and sets document dir/lang
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';

@@ -140,7 +140,7 @@ const CalendarPage = () => {
       {/* Header */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-3">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-3">
             <CalendarDaysIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             <span>Calendar</span>
           </h1>
@@ -160,7 +160,7 @@ const CalendarPage = () => {
             <Button
               onClick={() => navigate('/invitations/create')}
             >
-              <PlusCircleIcon className="w-5 h-5 mr-2" />
+              <PlusCircleIcon className="w-5 h-5 me-2" />
               Create Invitation
             </Button>
           )}
@@ -233,7 +233,7 @@ const CalendarPage = () => {
 
                 <div>
                   <div className="text-gray-600 mb-1">Time</div>
-                  <div className="font-medium text-gray-900 flex items-center space-x-1">
+                  <div className="font-medium text-gray-900 flex items-center gap-1">
                     <ClockIcon className="w-4 h-4" />
                     <span>
                       {timeSlotsService.formatTimeForDisplay(selectedTimeSlot.startTime)} - {timeSlotsService.formatTimeForDisplay(selectedTimeSlot.endTime)}
@@ -244,7 +244,7 @@ const CalendarPage = () => {
                 {selectedTimeSlot.locationName && (
                   <div>
                     <div className="text-gray-600 mb-1">Location</div>
-                    <div className="font-medium text-gray-900 flex items-center space-x-1">
+                    <div className="font-medium text-gray-900 flex items-center gap-1">
                       <MapPinIcon className="w-4 h-4" />
                       <span>{selectedTimeSlot.locationName}</span>
                     </div>
@@ -253,7 +253,7 @@ const CalendarPage = () => {
 
                 <div>
                   <div className="text-gray-600 mb-1">Capacity</div>
-                  <div className="font-medium text-gray-900 flex items-center space-x-1">
+                  <div className="font-medium text-gray-900 flex items-center gap-1">
                     <UserGroupIcon className="w-4 h-4" />
                     <span>{selectedTimeSlot.maxVisitors} visitors max</span>
                   </div>
@@ -268,7 +268,7 @@ const CalendarPage = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-end gap-3">
               <Button
                 variant="outline"
                 onClick={() => setShowBookingModal(false)}

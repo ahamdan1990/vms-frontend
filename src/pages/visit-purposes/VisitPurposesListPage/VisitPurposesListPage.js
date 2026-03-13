@@ -310,7 +310,7 @@ const VisitPurposesListPage = () => {
       width: '120px',
       sortable: false,
       render: (value, purpose) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => handlePurposeAction('view', purpose)}
             className="text-gray-600 hover:text-gray-900 transition-colors"
@@ -353,7 +353,7 @@ const VisitPurposesListPage = () => {
             Manage visit purpose categories for invitation workflows
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 flex space-x-3">
+        <div className="mt-4 sm:mt-0 flex gap-3">
           {canCreate && (
             <Button
               onClick={() => dispatch(showCreateModal())}
@@ -376,7 +376,7 @@ const VisitPurposesListPage = () => {
                   <CheckCircleIcon className="w-5 h-5 text-blue-600" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Total</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.total}</dd>
@@ -392,7 +392,7 @@ const VisitPurposesListPage = () => {
                   <CheckCircleIcon className="w-5 h-5 text-green-600" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Active</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.active}</dd>
@@ -408,7 +408,7 @@ const VisitPurposesListPage = () => {
                   <XCircleIcon className="w-5 h-5 text-gray-600" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Inactive</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.inactive}</dd>
@@ -424,7 +424,7 @@ const VisitPurposesListPage = () => {
                   <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Approval Required</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.requiresApproval}</dd>
@@ -440,7 +440,7 @@ const VisitPurposesListPage = () => {
                   <CheckCircleIcon className="w-5 h-5 text-blue-600" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">No Approval</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.noApprovalRequired}</dd>
@@ -463,7 +463,7 @@ const VisitPurposesListPage = () => {
             />
           </div>
           
-          <div className="flex space-x-3">
+          <div className="flex gap-3">
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
@@ -519,7 +519,7 @@ const VisitPurposesListPage = () => {
                     onChange={(e) => handleFilterChange('includeInactive', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="includeInactive" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                  <label htmlFor="includeInactive" className="ms-2 block text-sm text-gray-700 dark:text-gray-300">
                     Include inactive purposes
                   </label>
                 </div>
@@ -533,7 +533,7 @@ const VisitPurposesListPage = () => {
       {hasSelected && (
         <Card className="p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <span className="text-sm text-gray-500">
                 {selectedCount} purpose{selectedCount !== 1 ? 's' : ''} selected
               </span>
@@ -547,7 +547,7 @@ const VisitPurposesListPage = () => {
             </div>
             
             {canDelete && (
-              <div className="flex space-x-2">
+              <div className="flex gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -557,7 +557,7 @@ const VisitPurposesListPage = () => {
                   }}
                   className="text-red-600 border-red-300 hover:bg-red-50"
                 >
-                  <TrashIcon className="w-4 h-4 mr-2" />
+                  <TrashIcon className="w-4 h-4 me-2" />
                   Delete Selected
                 </Button>
               </div>
@@ -649,7 +649,7 @@ const VisitPurposesListPage = () => {
               </div>
             )}
             
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
               <Button
                 variant="outline"
                 onClick={() => {

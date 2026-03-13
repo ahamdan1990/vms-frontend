@@ -291,7 +291,7 @@ const NotificationDiagnostics = ({ testNotificationId = null }) => {
       {/* Test Controls */}
       <div className="mb-6">
         <h4 className="font-medium mb-2">Acknowledgment Flow Testing</h4>
-        <div className="flex space-x-4">
+        <div className="flex gap-4">
           <button
             onClick={() => testNotificationId && runAcknowledgmentFlowTest(testNotificationId)}
             disabled={!testNotificationId || isRunningTests}

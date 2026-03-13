@@ -323,13 +323,13 @@ const UnifiedAnalyticsDashboard = () => {
                       card.trend > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                     }`}>
                       {card.trend > 0 ?
-                        <ArrowTrendingUpIcon className="w-4 h-4 mr-1" /> :
-                        <ArrowTrendingDownIcon className="w-4 h-4 mr-1" />
+                        <ArrowTrendingUpIcon className="w-4 h-4 me-1" /> :
+                        <ArrowTrendingDownIcon className="w-4 h-4 me-1" />
                       }
                       <span className="text-sm font-medium">
                         {Math.abs(card.trend)}%
                       </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">vs last week</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 ms-1">vs last week</span>
                     </div>
                   )}
                 </div>
@@ -353,7 +353,7 @@ const UnifiedAnalyticsDashboard = () => {
           {analytics.insights.peakHours && analytics.insights.peakHours.length > 0 ? (
             analytics.insights.peakHours.map((hour, index) => (
               <div key={hour} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                     <span className="text-sm font-medium text-blue-600 dark:text-blue-400">#{index + 1}</span>
                   </div>
@@ -378,11 +378,11 @@ const UnifiedAnalyticsDashboard = () => {
           {analytics.insights.popularLocations && analytics.insights.popularLocations.length > 0 ? (
             analytics.insights.popularLocations.map((location, index) => (
               <div key={location} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <MapPinIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                   <span className={`${TEXT_STYLES.bodyText} text-gray-900 dark:text-gray-100`}>{location}</span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
                     <div
                       className="h-2 bg-green-500 dark:bg-green-400 rounded-full"
@@ -417,7 +417,7 @@ const UnifiedAnalyticsDashboard = () => {
             </p>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-4">
             <Button
               size="sm"
               variant="outline"
@@ -474,7 +474,7 @@ const UnifiedAnalyticsDashboard = () => {
               {loading && !analytics.overview.totalVisitors ? (
                 <div className="flex items-center justify-center py-12">
                   <LoadingSpinner size="lg" />
-                  <span className="ml-3 text-gray-600 dark:text-gray-300">Loading analytics...</span>
+                  <span className="ms-3 text-gray-600 dark:text-gray-300">Loading analytics...</span>
                 </div>
               ) : (
                 <>
@@ -532,7 +532,7 @@ const UnifiedAnalyticsDashboard = () => {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex items-start space-x-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-900/40"
+                      className="flex items-start gap-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-900/40"
                     >
                       <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center flex-shrink-0 mt-1">
                         <span className="text-xs font-medium text-blue-600 dark:text-blue-200">{index + 1}</span>

@@ -1,0 +1,93 @@
+{
+  "pageTitle": "لوحة تسجيل الدخول",
+  "pageSubtitle": "إدارة تسجيل دخول الزوار والزيارات النشطة",
+  "scanQr": "مسح رمز QR",
+  "manualCheckin": "تسجيل دخول يدوي",
+  "checkOut": "تسجيل خروج",
+  "checkIn": "تسجيل دخول",
+  "checkingIn": "جارٍ تسجيل الدخول...",
+  "refresh": "تحديث",
+  "stats": {
+    "todayCheckIns": "تسجيلات دخول اليوم",
+    "activeVisitors": "الزوار النشطون",
+    "pendingCheckOuts": "تسجيلات الخروج المعلقة",
+    "avgDuration": "متوسط المدة",
+    "checkedInToday": "سجّلوا الدخول اليوم",
+    "checkedOutToday": "سجّلوا الخروج اليوم",
+    "currentlyInside": "داخل المبنى حالياً",
+    "expectedToday": "متوقعون اليوم"
+  },
+  "tabs": {
+    "scanner": "ماسح QR",
+    "manual": "تسجيل يدوي",
+    "active": "الزوار النشطون ({{count}})"
+  },
+  "scanner": {
+    "title": "ماسح رمز QR",
+    "description": "امسح رموز QR للزوار لتسجيل دخول سريع",
+    "instruction": "وجّه الكاميرا نحو رمز QR الخاص بالزائر",
+    "openScanner": "فتح الماسح",
+    "scanning": "جارٍ المسح...",
+    "success": "تم مسح رمز QR بنجاح",
+    "error": "فشل قراءة رمز QR. يرجى المحاولة مرة أخرى.",
+    "permissionDenied": "تم رفض صلاحية الكاميرا. يرجى السماح بالوصول إلى الكاميرا.",
+    "checkInMode": "وضع تسجيل الدخول:",
+    "manualConfirmation": "تأكيد يدوي",
+    "autoCheckIn": "تسجيل تلقائي",
+    "autoModeDesc": "سيُسجَّل الزوار فور مسح رمز QR",
+    "manualModeDesc": "مراجعة تفاصيل الزائر قبل تأكيد تسجيل الدخول"
+  },
+  "manual": {
+    "title": "تسجيل دخول يدوي",
+    "description": "أدخل رقم الدعوة أو بيانات الزائر"
+  },
+  "activeVisitors": {
+    "title": "الزوار النشطون",
+    "empty": "لا يوجد زوار نشطون",
+    "emptyDesc": "سيظهر الزوار هنا عند تسجيل دخولهم."
+  },
+  "success": {
+    "title": "تم تسجيل الدخول بنجاح!",
+    "message": "تم تسجيل دخول {{name}} بنجاح.",
+    "toastTitle": "تم تسجيل الدخول بنجاح",
+    "toastMessage": "تم تسجيل دخول {{name}} بنجاح. الدعوة: {{number}}",
+    "checkedIn": "تم تسجيل دخول الزائر بنجاح.",
+    "checkedOut": "تم تسجيل خروج الزائر بنجاح.",
+    "visitorCheckedIn": "تم تسجيل دخول الزائر بنجاح",
+    "continue": "متابعة",
+    "scanAnother": "مسح آخر"
+  },
+  "details": {
+    "title": "تم تسجيل الدخول بنجاح",
+    "visitorInfo": "معلومات الزائر",
+    "invitationDetails": "تفاصيل الدعوة",
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "company": "الشركة",
+    "invitationNumber": "رقم الدعوة",
+    "purpose": "الغرض",
+    "scheduledTime": "الوقت المحدد",
+    "host": "المضيف",
+    "location": "الموقع",
+    "status": "الحالة",
+    "checkedIn": "تم تسجيل الدخول",
+    "close": "إغلاق"
+  },
+  "form": {
+    "invitationNumber": "رقم الدعوة",
+    "visitorName": "اسم الزائر",
+    "idNumber": "رقم الهوية",
+    "notes": "ملاحظات",
+    "submit": "تسجيل الدخول",
+    "cancel": "إلغاء"
+  },
+  "errors": {
+    "checkinFailed": "فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.",
+    "checkoutFailed": "فشل تسجيل الخروج. يرجى المحاولة مرة أخرى.",
+    "notFound": "الدعوة غير موجودة.",
+    "alreadyCheckedIn": "الزائر مسجّل الدخول بالفعل.",
+    "expired": "انتهت صلاحية هذه الدعوة.",
+    "dismiss": "إغلاق"
+  }
+}

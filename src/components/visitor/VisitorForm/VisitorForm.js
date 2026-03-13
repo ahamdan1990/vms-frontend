@@ -1204,7 +1204,7 @@ const VisitorForm = ({
             Phone Number
           </label>
           
-          <div className="flex space-x-2">
+          <div className="flex gap-2">
             {/* Country Code Selector - Lebanon First */}
             <select
               value={formData.phoneCountryCode}
@@ -1257,7 +1257,7 @@ const VisitorForm = ({
           
           {touched.phoneNumber && formErrors.phoneNumber && (
             <p className="text-red-600 dark:text-red-400 text-sm mt-1 flex items-center">
-              <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-4 h-4 me-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
               {formErrors.phoneNumber}
@@ -1299,7 +1299,7 @@ const VisitorForm = ({
         />
       </div>
 
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center gap-3">
         <input
           type="checkbox"
           id="isVip"
@@ -1307,7 +1307,7 @@ const VisitorForm = ({
           onChange={(e) => handleChange('isVip', e.target.checked)}
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900"
         />
-        <label htmlFor="isVip" className="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-200">
+        <label htmlFor="isVip" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200">
           <StarIconSolid className="w-4 h-4 text-yellow-500" />
           <span>VIP Visitor</span>
         </label>
@@ -1319,7 +1319,7 @@ const VisitorForm = ({
     <div className="space-y-8">
       {/* Photo Upload */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
           <PhotoIcon className="w-5 h-5" />
           <span>Visitor Photo</span>
         </h3>
@@ -1343,7 +1343,7 @@ const VisitorForm = ({
 
       {/* Document Upload */}
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center space-x-2">
+        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
           <DocumentTextIcon className="w-5 h-5" />
           <span>Identification Documents</span>
         </h3>
@@ -1353,7 +1353,7 @@ const VisitorForm = ({
           <div className="mb-6">
             <h4 className="text-sm font-medium text-gray-700 mb-3">Current Documents</h4>
             {loadingDocuments ? (
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                 <span>Loading existing documents...</span>
               </div>
@@ -1363,7 +1363,7 @@ const VisitorForm = ({
                   <div key={doc.id} className="bg-gray-50 rounded-lg p-3 border">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-2">
                           <DocumentTextIcon className="w-4 h-4 text-gray-400" />
                           <p className="text-sm font-medium text-gray-900 truncate">
                             {doc.documentName}
@@ -1378,7 +1378,7 @@ const VisitorForm = ({
                           </p>
                         )}
                       </div>
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center gap-1">
                         {doc.isSensitive && (
                           <Badge variant="warning" size="xs">Sensitive</Badge>
                         )}
@@ -1388,17 +1388,17 @@ const VisitorForm = ({
                       </div>
                     </div>
                     {/* Action Buttons */}
-                    <div className="flex items-center space-x-2 pt-2 border-t border-gray-200">
+                    <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
                       <button
                         onClick={() => handlePreviewDocument(doc)}
-                        className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
+                        className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
                       >
                         <EyeIcon className="w-3.5 h-3.5" />
                         <span>Preview</span>
                       </button>
                       <button
                         onClick={() => handleDownloadDocument(doc)}
-                        className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
+                        className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
                       >
                         <ArrowDownTrayIcon className="w-3.5 h-3.5" />
                         <span>Download</span>
@@ -1485,7 +1485,7 @@ const VisitorForm = ({
       </div>
 
       <div className="bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 rounded-md p-4">
-        <div className="flex items-start space-x-3">
+        <div className="flex items-start gap-3">
           <ClipboardDocumentListIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
           <div>
             <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">Why set preferences?</h4>
@@ -1797,7 +1797,7 @@ const VisitorForm = ({
         {formData.emergencyContacts.map((contact, index) => (
           <Card key={index} className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                   Contact {index + 1}
                 </span>
@@ -1866,7 +1866,7 @@ const VisitorForm = ({
                 placeholder="e.g., Spouse, Parent, Friend"
               />
 
-              <div className="flex items-center space-x-3 mt-6">
+              <div className="flex items-center gap-3 mt-6">
                 <input
                   type="checkbox"
                   id={`primary-${index}`}
@@ -1913,7 +1913,7 @@ const VisitorForm = ({
 
       {/* Enable/Disable Invitation Creation */}
       <Card className="p-6">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
           <input
             type="checkbox"
             id="createInvitation"
@@ -1950,7 +1950,7 @@ const VisitorForm = ({
             transition={{ duration: 0.3 }}
           >
             <Card className="p-6">
-              <div className="flex items-center space-x-2 mb-6">
+              <div className="flex items-center gap-2 mb-6">
                 <ClipboardDocumentListIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100">Invitation Details</h4>
               </div>
@@ -2044,7 +2044,7 @@ const VisitorForm = ({
                 <div className="space-y-3">
                   <h5 className="text-sm font-medium text-gray-900 dark:text-gray-100">Requirements</h5>
                   <div className="space-y-2">
-                    <label className="flex items-center space-x-3">
+                    <label className="flex items-center gap-3">
                       <input
                         type="checkbox"
                         checked={invitationData.requiresApproval}
@@ -2053,7 +2053,7 @@ const VisitorForm = ({
                       />
                       <span className="text-sm text-gray-700 dark:text-gray-200">Requires approval</span>
                     </label>
-                    <label className="flex items-center space-x-3">
+                    <label className="flex items-center gap-3">
                       <input
                         type="checkbox"
                         checked={invitationData.requiresEscort}
@@ -2081,27 +2081,27 @@ const VisitorForm = ({
 
       {/* Basic Information Review */}
       <Card className="p-6">
-        <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
+        <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
           <UserIcon className="w-5 h-5" />
           <span>Basic Information</span>
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
             <span className="font-medium text-gray-700 dark:text-gray-200">Name:</span>
-            <span className="ml-2 text-gray-900 dark:text-gray-100">{formData.firstName} {formData.lastName}</span>
-            {formData.isVip && <StarIconSolid className="inline w-4 h-4 text-yellow-500 ml-2" />}
+            <span className="ms-2 text-gray-900 dark:text-gray-100">{formData.firstName} {formData.lastName}</span>
+            {formData.isVip && <StarIconSolid className="inline w-4 h-4 text-yellow-500 ms-2" />}
           </div>
           <div>
             <span className="font-medium text-gray-700 dark:text-gray-200">Email:</span>
-            <span className="ml-2 text-gray-900 dark:text-gray-100">{formData.email}</span>
+            <span className="ms-2 text-gray-900 dark:text-gray-100">{formData.email}</span>
           </div>
           <div>
             <span className="font-medium text-gray-700 dark:text-gray-200">Phone:</span>
-            <span className="ml-2 text-gray-900 dark:text-gray-100">{formData.phoneNumber}</span>
+            <span className="ms-2 text-gray-900 dark:text-gray-100">{formData.phoneNumber}</span>
           </div>
           <div>
             <span className="font-medium text-gray-700 dark:text-gray-200">Company:</span>
-            <span className="ml-2 text-gray-900 dark:text-gray-100">{formData.company || 'Not specified'}</span>
+            <span className="ms-2 text-gray-900 dark:text-gray-100">{formData.company || 'Not specified'}</span>
           </div>
         </div>
       </Card>
@@ -2109,7 +2109,7 @@ const VisitorForm = ({
       {/* Photo and Documents Review */}
       {(formData.photoFile || formData.documentFiles.length > 0) && (
         <Card className="p-6">
-          <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
+          <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <PhotoIcon className="w-5 h-5" />
             <span>Photo & Documents</span>
           </h4>
@@ -2117,13 +2117,13 @@ const VisitorForm = ({
             {formData.photoFile && (
               <div>
                 <span className="font-medium text-gray-700 dark:text-gray-200">Photo:</span>
-                <span className="ml-2 text-gray-900 dark:text-gray-100">{formData.photoFile.name}</span>
+                <span className="ms-2 text-gray-900 dark:text-gray-100">{formData.photoFile.name}</span>
               </div>
             )}
             {formData.documentFiles.length > 0 && (
               <div>
                 <span className="font-medium text-gray-700 dark:text-gray-200">Documents:</span>
-                <ul className="ml-2 mt-1 space-y-1">
+                <ul className="ms-2 mt-1 space-y-1">
                   {formData.documentFiles.map((file, index) => (
                     <li key={index} className="text-gray-900 dark:text-gray-100 text-sm">• {file.name}</li>
                   ))}
@@ -2137,7 +2137,7 @@ const VisitorForm = ({
       {/* Preferences Review */}
       {(selectedLocation || selectedVisitPurpose) && (
         <Card className="p-6">
-          <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
+          <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <MapPinIcon className="w-5 h-5" />
             <span>Preferences</span>
           </h4>
@@ -2145,13 +2145,13 @@ const VisitorForm = ({
             {selectedLocation && (
               <div>
                 <span className="font-medium text-gray-700 dark:text-gray-200">Preferred Location:</span>
-                <span className="ml-2 text-gray-900 dark:text-gray-100">{selectedLocation.name}</span>
+                <span className="ms-2 text-gray-900 dark:text-gray-100">{selectedLocation.name}</span>
               </div>
             )}
             {selectedVisitPurpose && (
               <div>
                 <span className="font-medium text-gray-700 dark:text-gray-200">Default Visit Purpose:</span>
-                <span className="ml-2 text-gray-900 dark:text-gray-100">{selectedVisitPurpose.name}</span>
+                <span className="ms-2 text-gray-900 dark:text-gray-100">{selectedVisitPurpose.name}</span>
               </div>
             )}
           </div>
@@ -2160,14 +2160,14 @@ const VisitorForm = ({
 
       {/* Emergency Contacts Review */}
       <Card className="p-6">
-        <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
+        <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
           <UserGroupIcon className="w-5 h-5" />
           <span>Emergency Contacts</span>
         </h4>
         <div className="space-y-3">
           {formData.emergencyContacts.map((contact, index) => (
             <div key={index} className="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-lg border border-gray-100 dark:border-gray-700">
-              <div className="flex items-center space-x-2 mb-2">
+              <div className="flex items-center gap-2 mb-2">
                 <span className="font-medium text-gray-900 dark:text-gray-100">
                   {contact.firstName} {contact.lastName}
                 </span>
@@ -2186,18 +2186,18 @@ const VisitorForm = ({
       {/* Invitation Review */}
       {createInvitation && (
         <Card className="p-6">
-          <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
+          <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <ClipboardDocumentListIcon className="w-5 h-5" />
             <span>Invitation Details</span>
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <span className="font-medium text-gray-700 dark:text-gray-200">Subject:</span>
-              <span className="ml-2 text-gray-900 dark:text-gray-100">{invitationData.subject || 'Not specified'}</span>
+              <span className="ms-2 text-gray-900 dark:text-gray-100">{invitationData.subject || 'Not specified'}</span>
             </div>
             <div>
               <span className="font-medium text-gray-700 dark:text-gray-200">Start Time:</span>
-              <span className="ml-2 text-gray-900 dark:text-gray-100">
+              <span className="ms-2 text-gray-900 dark:text-gray-100">
                 {invitationData.scheduledStartTime 
                   ? new Date(invitationData.scheduledStartTime).toLocaleString()
                   : 'Not specified'
@@ -2206,7 +2206,7 @@ const VisitorForm = ({
             </div>
             <div>
               <span className="font-medium text-gray-700 dark:text-gray-200">End Time:</span>
-              <span className="ml-2 text-gray-900 dark:text-gray-100">
+              <span className="ms-2 text-gray-900 dark:text-gray-100">
                 {invitationData.scheduledEndTime 
                   ? new Date(invitationData.scheduledEndTime).toLocaleString()
                   : 'Not specified'
@@ -2215,19 +2215,19 @@ const VisitorForm = ({
             </div>
             <div>
               <span className="font-medium text-gray-700 dark:text-gray-200">Location:</span>
-              <span className="ml-2 text-gray-900 dark:text-gray-100">
+              <span className="ms-2 text-gray-900 dark:text-gray-100">
                 {locations.find(l => l.id === invitationData.locationId)?.name || 'Not specified'}
               </span>
             </div>
             <div>
               <span className="font-medium text-gray-700 dark:text-gray-200">Purpose:</span>
-              <span className="ml-2 text-gray-900 dark:text-gray-100">
+              <span className="ms-2 text-gray-900 dark:text-gray-100">
                 {visitPurposes.find(p => p.id === invitationData.visitPurposeId)?.name || 'Not specified'}
               </span>
             </div>
             <div>
               <span className="font-medium text-gray-700 dark:text-gray-200">Requirements:</span>
-              <div className="ml-2 flex space-x-3">
+              <div className="ms-2 flex gap-3">
                 {invitationData.requiresApproval && (
                   <Badge variant="warning" size="sm">Requires Approval</Badge>
                 )}
@@ -2339,7 +2339,7 @@ const VisitorForm = ({
           {currentStep === 0 ? 'Cancel' : 'Previous'}
         </Button>
 
-        <div className="flex space-x-3">
+        <div className="flex gap-3">
           {currentStep < steps.length - 1 ? (
             <Button
               onClick={goToNextStep}
@@ -2449,7 +2449,7 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <span className="mr-1.5">{tab.icon}</span>
+            <span className="me-1.5">{tab.icon}</span>
             {tab.label}
           </button>
         ))}
@@ -2743,7 +2743,7 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
         >
           {loading ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white me-2"></div>
               Creating...
             </>
           ) : (

@@ -138,7 +138,7 @@ const Button = ({
   const LoadingSpinner = () => (
     <svg 
       className={classNames(
-        'animate-spin mr-2', 
+        'animate-spin me-2',
         iconSizeClasses[size]
       )} 
       fill="none" 
@@ -167,8 +167,8 @@ const Button = ({
       icon.props.className, // keep passed classes
       iconSizeClasses[size],
       {
-        'mr-2': iconPosition === 'left' && children,
-        'ml-2': iconPosition === 'right' && children
+        'me-2': iconPosition === 'left' && children,
+        'ms-2': iconPosition === 'right' && children
       }
     ),
     'aria-hidden': 'true'

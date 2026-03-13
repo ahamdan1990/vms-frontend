@@ -133,7 +133,7 @@ const ExcelManagementPage = () => {
             <div key={item.id} className="border rounded-lg p-4 hover:bg-gray-50">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
+                  <div className="flex items-center gap-2 mb-2">
                     <Badge color={item.status === 'success' ? 'green' : 'red'}>
                       {item.status === 'success' ? 'Success' : 'Error'}
                     </Badge>
@@ -158,7 +158,7 @@ const ExcelManagementPage = () => {
                   )}
                 </div>
                 
-                <div className="ml-4">
+                <div className="ms-4">
                   {item.status === 'success' && (
                     <CheckCircleIcon className="w-5 h-5 text-green-500" />
                   )}
@@ -177,7 +177,7 @@ const ExcelManagementPage = () => {
   // Render usage instructions
   const renderUsageInstructions = () => (
     <Card className="p-6 bg-blue-50 border-blue-200">
-      <div className="flex items-start space-x-3">
+      <div className="flex items-start gap-3">
         <InformationCircleIcon className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
         <div>
           <h4 className="font-medium text-blue-900 mb-3">Excel Invitation Management Guide</h4>

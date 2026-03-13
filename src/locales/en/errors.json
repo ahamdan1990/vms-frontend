@@ -1,0 +1,23 @@
+{
+  "notFound": {
+    "title": "Page Not Found",
+    "message": "The page you are looking for does not exist.",
+    "backHome": "Back to Home"
+  },
+  "accessDenied": {
+    "title": "Access Denied",
+    "message": "You do not have permission to access this page.",
+    "backHome": "Back to Home"
+  },
+  "serverError": {
+    "title": "Server Error",
+    "message": "An unexpected error occurred. Please try again later.",
+    "retry": "Try Again",
+    "backHome": "Back to Home"
+  },
+  "boundary": {
+    "title": "Something went wrong",
+    "message": "An error occurred while rendering this component.",
+    "retry": "Try Again"
+  }
+}

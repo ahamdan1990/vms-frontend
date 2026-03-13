@@ -129,7 +129,7 @@ const ConfirmModal = ({
                   </div>
 
                   {/* Text Content */}
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                  <div className="mt-3 text-center sm:mt-0 sm:ms-4 sm:text-start flex-1">
                     <h3 className="text-lg leading-6 font-medium text-gray-900">
                       {title}
                     </h3>
@@ -148,7 +148,7 @@ const ConfirmModal = ({
                     variant={getConfirmButtonVariant()}
                     loading={loading}
                     disabled={disabled}
-                    className="w-full sm:w-auto sm:ml-3"
+                    className="w-full sm:w-auto sm:ms-3"
                   >
                     {confirmText}
                   </Button>

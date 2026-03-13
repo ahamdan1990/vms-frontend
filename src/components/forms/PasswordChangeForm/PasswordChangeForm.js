@@ -221,7 +221,7 @@ const PasswordChangeForm = ({
         {title && (
           <div className="border-b border-gray-200 pb-4">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-blue-500 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               {title}
@@ -240,7 +240,7 @@ const PasswordChangeForm = ({
             className="bg-red-50 border border-red-200 rounded-lg p-4"
           >
             <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 text-red-400 me-3" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
               <span className="text-red-800 text-sm font-medium">{error}</span>
@@ -334,7 +334,7 @@ const PasswordChangeForm = ({
                       transition={{ delay: index * 0.1 }}
                       className="flex items-center"
                     >
-                      <svg className="w-3 h-3 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-gray-400 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       {item}
@@ -382,7 +382,7 @@ const PasswordChangeForm = ({
           className="bg-blue-50 border border-blue-200 rounded-lg p-4"
         >
           <div className="flex items-start">
-            <svg className="w-5 h-5 text-blue-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-500 me-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
@@ -402,7 +402,7 @@ const PasswordChangeForm = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.3 }}
-          className="flex justify-end space-x-3 pt-6 border-t border-gray-200"
+          className="flex justify-end gap-3 pt-6 border-t border-gray-200"
         >
           {onCancel && (
             <Button

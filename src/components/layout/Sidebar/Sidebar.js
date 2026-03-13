@@ -2,7 +2,9 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { motion, useReducedMotion } from 'framer-motion';
+import i18n from '../../../i18n';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { setSidebarOpen } from '../../../store/slices/uiSlice';
@@ -26,7 +28,7 @@ const NavItem = ({ item, isCollapsed = false }) => {
       // Collapsed sidebar
       'px-3 py-3 justify-center': isCollapsed,
       // Expanded sidebar
-      'px-4 py-3 space-x-3': !isCollapsed
+      'px-4 py-3': !isCollapsed
     }
   );
 
@@ -35,7 +37,7 @@ const NavItem = ({ item, isCollapsed = false }) => {
       <span className="flex-shrink-0">{item.icon}</span>
       {!isCollapsed && (
         <>
-          <span className="flex-1 truncate">{item.name}</span>
+          <span className="flex-1 truncate ms-3">{item.name}</span>
           {item.badge && (
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200">
               {item.badge}
@@ -44,9 +46,9 @@ const NavItem = ({ item, isCollapsed = false }) => {
         </>
       )}
       
-      {/* Tooltip for collapsed state */}
+      {/* Tooltip for collapsed state — position adapts to RTL via CSS logical props */}
       {isCollapsed && (
-        <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+        <div className="absolute start-full ms-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
           {item.name}
         </div>
       )}
@@ -58,6 +60,7 @@ const NavItem = ({ item, isCollapsed = false }) => {
  * FIXED SidebarContent Component
  */
 const SidebarContent = ({ navItems, bottomItems, isCollapsed }) => {
+  const { t } = useTranslation('navigation');
   return (
     <div className="flex flex-col h-full">
       {/* Logo/Brand */}
@@ -69,7 +72,7 @@ const SidebarContent = ({ navItems, bottomItems, isCollapsed }) => {
         }
       )}>
         {!isCollapsed ? (
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -93,7 +96,7 @@ const SidebarContent = ({ navItems, bottomItems, isCollapsed }) => {
           <div className="px-3 mb-4">
             <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Navigation
+                {t('sidebar.label')}
               </p>
             </div>
           </div>
@@ -106,7 +109,7 @@ const SidebarContent = ({ navItems, bottomItems, isCollapsed }) => {
               
               {/* Sub-navigation items */}
               {item.children && !isCollapsed && (
-                <div className="ml-6 mt-1 space-y-1">
+                <div className="ms-6 mt-1 space-y-1">
                   {item.children.filter(child => child.show).map((child) => (
                     <NavLink
                       key={child.name}
@@ -156,6 +159,7 @@ const SidebarContent = ({ navItems, bottomItems, isCollapsed }) => {
 const Sidebar = () => {
   const location = useLocation();
   const dispatch = useDispatch();
+  const { t } = useTranslation('navigation');
   const { userRole, isAdmin, isOperator, isStaff } = useAuth();
   const {
     user: userPermissions,
@@ -168,13 +172,13 @@ const Sidebar = () => {
     audit: auditPermissions,
     role: rolePermissions
   } = usePermissions();
-  
+
   const { sidebarOpen, sidebarCollapsed, isMobile } = useSelector(state => state.ui);
 
   // Navigation items based on user role and permissions
   const navigationItems = [
     {
-      name: 'Dashboard',
+      name: t('sidebar.dashboard'),
       href: '/dashboard',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,7 +189,7 @@ const Sidebar = () => {
       show: true
     },
     {
-      name: 'Visitors',
+      name: t('sidebar.visitors'),
       href: '/visitors',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,7 +199,7 @@ const Sidebar = () => {
       show: visitorPermissions.canRead || isOperator || isAdmin
     },
     {
-      name: 'Invitations',
+      name: t('sidebar.invitations'),
       href: '/invitations',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -205,7 +209,7 @@ const Sidebar = () => {
       show: invitationPermissions.canRead || isOperator || isAdmin
     },
     {
-      name: 'Calendar',
+      name: t('sidebar.calendar'),
       href: '/calendar',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -215,7 +219,7 @@ const Sidebar = () => {
       show: calendarPermissions.canViewOwn || isOperator || isAdmin || isStaff
     },
     {
-      name: 'Check-in',
+      name: t('sidebar.checkin'),
       href: '/checkin',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,7 +229,7 @@ const Sidebar = () => {
       show: checkinPermissions.canProcess || isOperator || isAdmin
     },
     {
-      name: 'Reports',
+      name: t('sidebar.reports'),
       href: '/reports',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,7 +239,7 @@ const Sidebar = () => {
       show: reportPermissions?.canGenerateAll || isAdmin
     },
     {
-      name: 'Users',
+      name: t('sidebar.users'),
       href: '/users',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -245,7 +249,7 @@ const Sidebar = () => {
       show: userPermissions.canRead || isAdmin
     },
     {
-      name: 'Roles',
+      name: t('sidebar.roles'),
       href: '/admin/roles',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -255,7 +259,7 @@ const Sidebar = () => {
       show: rolePermissions?.canRead || isAdmin
     },
     {
-      name: 'System',
+      name: t('sidebar.system'),
       href: '/system/management',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,47 +270,47 @@ const Sidebar = () => {
       show: systemPermissions.canRead || isAdmin,
       children: [
         {
-          name: 'Configuration',
+          name: t('system.configuration'),
           href: '/system/config',
           show: systemPermissions.canUpdate || isAdmin
         },
         {
-          name: 'Visit Purposes',
+          name: t('system.visitPurposes'),
           href: '/system/visit-purposes',
           show: systemPermissions.canRead || isAdmin
         },
         {
-          name: 'Locations',
+          name: t('system.locations'),
           href: '/system/locations',
           show: systemPermissions.canRead || isAdmin
         },
         {
-          name: 'Companies',
+          name: t('system.companies'),
           href: '/system/companies',
           show: systemPermissions.canRead || isAdmin
         },
         {
-          name: 'Departments',
+          name: t('system.departments'),
           href: '/system/departments',
           show: systemPermissions.canRead || isAdmin
         },
         {
-          name: 'Time Slots',
+          name: t('system.timeSlots'),
           href: '/system/time-slots',
           show: systemPermissions.canUpdate || isAdmin
         },
         {
-          name: 'Escalation Rules',
+          name: t('system.escalationRules'),
           href: '/system/escalation-rules',
           show: systemPermissions.canRead || isAdmin
         },
         {
-          name: 'Audit Logs',
+          name: t('system.auditLogs'),
           href: '/system/audit',
           show: auditPermissions.canRead || isAdmin
         },
         {
-          name: 'Backup',
+          name: t('system.backup'),
           href: '/system/backup',
           show: systemPermissions.canBackup || isAdmin
         }
@@ -316,7 +320,7 @@ const Sidebar = () => {
 
   const bottomNavigationItems = [
     {
-      name: 'Profile',
+      name: t('sidebar.profile'),
       href: '/profile',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -326,7 +330,7 @@ const Sidebar = () => {
       show: true
     },
     {
-      name: 'Help',
+      name: t('sidebar.help'),
       href: '/help',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -340,23 +344,16 @@ const Sidebar = () => {
   const visibleNavItems = navigationItems.filter(item => item.show);
   const visibleBottomItems = bottomNavigationItems.filter(item => item.show);
 
-  // Animation variants
+  // RTL-aware animation: slide from start (left in LTR, right in RTL)
+  const isRtl = i18n.dir() === 'rtl';
   const sidebarVariants = {
-    open: { 
+    open: {
       x: 0,
-      transition: { 
-        type: 'spring',
-        stiffness: 300,
-        damping: 30
-      }
+      transition: { type: 'spring', stiffness: 300, damping: 30 }
     },
-    closed: { 
-      x: '-100%',
-      transition: { 
-        type: 'spring',
-        stiffness: 300,
-        damping: 30
-      }
+    closed: {
+      x: isRtl ? '100%' : '-100%',
+      transition: { type: 'spring', stiffness: 300, damping: 30 }
     }
   };
 
@@ -374,7 +371,7 @@ const Sidebar = () => {
           animate="open"
           initial="closed"
           exit="closed"
-          className="fixed left-0 top-0 z-50 h-full w-72 bg-white dark:bg-gray-800 shadow-strong border-r border-gray-200 dark:border-gray-700 lg:hidden"
+          className="fixed start-0 top-0 z-50 h-full w-72 bg-white dark:bg-gray-800 shadow-strong border-e border-gray-200 dark:border-gray-700 lg:hidden"
         >
           <SidebarContent 
             navItems={visibleNavItems}
@@ -390,7 +387,7 @@ const Sidebar = () => {
   if (!isMobile && sidebarOpen) {
     return (
       <aside className={classNames(
-        'fixed left-0 top-0 z-30 h-full bg-white dark:bg-gray-800 shadow-strong border-r border-gray-200 dark:border-gray-700 transform transition-all duration-300 ease-in-out',
+        'fixed start-0 top-0 z-30 h-full bg-white dark:bg-gray-800 shadow-strong border-e border-gray-200 dark:border-gray-700 transform transition-all duration-300 ease-in-out',
         {
           'w-72': !sidebarCollapsed,
           'w-16': sidebarCollapsed

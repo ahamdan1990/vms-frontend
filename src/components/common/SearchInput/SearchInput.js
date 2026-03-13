@@ -154,12 +154,12 @@ const SearchInput = ({
   );
 
   const iconClasses = classNames(
-    'absolute left-2.5 text-gray-400 pointer-events-none',
+    'absolute start-2.5 text-gray-400 pointer-events-none',
     sizeClasses.icon
   );
 
   const clearButtonClasses = classNames(
-    'absolute right-2.5 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors duration-200',
+    'absolute end-2.5 text-gray-400 hover:text-gray-600 cursor-pointer transition-colors duration-200',
     sizeClasses.clearButton,
     {
       'hover:text-gray-300 cursor-not-allowed': disabled

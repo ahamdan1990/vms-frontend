@@ -1,0 +1,69 @@
+{
+  "pageTitle": "Dashboard",
+  "welcome": "Welcome back, {{name}}",
+  "stats": {
+    "totalVisitors": "Total Visitors",
+    "activeInvitations": "Active Invitations",
+    "pendingApprovals": "Pending Approvals",
+    "todayVisits": "Today's Visits",
+    "checkedInNow": "Currently Checked In",
+    "upcomingVisits": "Upcoming Visits",
+    "todayVisitors": "Today's Visitors",
+    "activeVisitors": "Active Now",
+    "currentlyOnSite": "Currently on-site",
+    "realTimeData": "Real-time data",
+    "awaitingApproval": "Awaiting approval",
+    "alerts": "Alerts",
+    "requireAttention": "Require attention"
+  },
+  "tabs": {
+    "myDashboard": "My Dashboard",
+    "myDashboardDesc": "Your invitations and visitors",
+    "overview": "Overview",
+    "overviewDesc": "System overview and quick actions",
+    "receptionist": "Receptionist",
+    "receptionistDesc": "Check-ins, walk-ins, and daily operations",
+    "analytics": "Analytics",
+    "analyticsDesc": "Visitor insights and reporting",
+    "excel": "Excel Management",
+    "excelDesc": "Template downloads and bulk imports"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "adminTools": "Admin Tools",
+    "createInvitation": "Create Invitation",
+    "checkIn": "Check In Visitor",
+    "addVisitor": "Add Visitor",
+    "viewReports": "View Reports",
+    "receptionist": "Receptionist",
+    "receptionistDesc": "Visitor operations",
+    "analytics": "Analytics",
+    "analyticsDesc": "Insights & reports",
+    "excel": "Excel Management",
+    "excelDesc": "Import & export",
+    "system": "System",
+    "systemDesc": "Configuration"
+  },
+  "systemHealth": {
+    "title": "System Health",
+    "allOperational": "All Systems Operational",
+    "database": "Database Connection",
+    "email": "Email Service",
+    "qrCode": "QR Code Generator",
+    "scanner": "Document Scanner",
+    "healthy": "Healthy",
+    "operational": "Operational",
+    "active": "Active",
+    "limited": "Limited"
+  },
+  "widgets": {
+    "recentActivity": "Recent Activity",
+    "upcomingInvitations": "Upcoming Invitations",
+    "pendingApprovals": "Pending Approvals",
+    "visitorStats": "Visitor Statistics",
+    "quickActions": "Quick Actions"
+  },
+  "noActivity": "No recent activity",
+  "noInvitations": "No upcoming invitations",
+  "noPending": "No pending approvals"
+}

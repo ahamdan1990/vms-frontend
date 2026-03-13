@@ -357,7 +357,7 @@ const UserForm = ({
             className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
           >
             <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-400 dark:text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 text-red-400 dark:text-red-500 me-3" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
               <span className="text-red-800 dark:text-red-300 text-sm font-medium">{error || errors.global}</span>
@@ -368,7 +368,7 @@ const UserForm = ({
         {/* Personal Information Section */}
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
           <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-            <svg className="w-5 h-5 text-blue-500 dark:text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-500 dark:text-blue-400 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
             Personal Information
@@ -455,7 +455,7 @@ const UserForm = ({
                 Phone Number
               </label>
               
-              <div className="flex space-x-2">
+              <div className="flex gap-2">
                 {/* Country Code Selector - Lebanon First */}
                 <select
                   name="phoneCountryCode"
@@ -519,7 +519,7 @@ const UserForm = ({
               
               {touchedFields.has('phoneNumber') && errors.phoneNumber && (
                 <p className="text-red-600 text-sm mt-1 flex items-center">
-                  <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 me-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                   {errors.phoneNumber}
@@ -532,7 +532,7 @@ const UserForm = ({
         {/* Work Information Section */}
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
           <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-            <svg className="w-5 h-5 text-green-500 dark:text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-green-500 dark:text-green-400 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
             </svg>
             Work Information
@@ -564,7 +564,7 @@ const UserForm = ({
               </select>
               {touchedFields.has('role') && errors.role && (
                 <p className="text-red-600 text-sm mt-1 flex items-center">
-                  <svg className="w-4 h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 me-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                   </svg>
                   {errors.role}
@@ -677,7 +677,7 @@ const UserForm = ({
         {/* Enhanced Address Section - Lebanon Specific */}
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
           <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-            <svg className="w-5 h-5 text-orange-500 dark:text-orange-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-orange-500 dark:text-orange-400 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -826,7 +826,7 @@ const UserForm = ({
 
           {/* Optional: Coordinates for precise location */}
           <div className="mt-4">
-            <label className="flex items-center space-x-2 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 name="enableCoordinates"
@@ -873,7 +873,7 @@ const UserForm = ({
         {/* User Preferences Section - Lebanon Localized */}
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
           <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-            <svg className="w-5 h-5 text-indigo-500 dark:text-indigo-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-indigo-500 dark:text-indigo-400 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
             </svg>
             User Preferences
@@ -954,7 +954,7 @@ const UserForm = ({
         {/* Account Settings Section */}
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
           <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-            <svg className="w-5 h-5 text-purple-500 dark:text-purple-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-purple-500 dark:text-purple-400 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -968,7 +968,7 @@ const UserForm = ({
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5, duration: 0.3 }}
             >
-              <label className="flex items-center space-x-3 cursor-pointer">
+              <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   name="isActive"
@@ -991,7 +991,7 @@ const UserForm = ({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.55, duration: 0.3 }}
               >
-                <label className="flex items-center space-x-3 cursor-pointer">
+                <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     name="mustChangePassword"
@@ -1015,7 +1015,7 @@ const UserForm = ({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.6, duration: 0.3 }}
               >
-                <label className="flex items-center space-x-3 cursor-pointer">
+                <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     name="sendWelcomeEmail"
@@ -1074,7 +1074,7 @@ const UserForm = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.3 }}
-          className="flex justify-end space-x-3 pt-6 border-t border-gray-200"
+          className="flex justify-end gap-3 pt-6 border-t border-gray-200"
         >
           <Button
             type="button"
@@ -1168,7 +1168,7 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
             }`}
           >
-            <span className="mr-1.5">{tab.icon}</span>
+            <span className="me-1.5">{tab.icon}</span>
             {tab.label}
           </button>
         ))}
@@ -1309,7 +1309,7 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
         <Button variant="secondary" onClick={onCancel} type="button" disabled={loading}>
           Cancel
         </Button>

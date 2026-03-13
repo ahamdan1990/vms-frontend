@@ -156,7 +156,7 @@ const CheckInForm = ({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Search Mode Selector */}
-      <div className="flex items-center justify-center space-x-4">
+      <div className="flex items-center justify-center gap-4">
         <Button
           variant={searchMode === 'invitation' ? 'primary' : 'outline'}
           size="sm"
@@ -178,7 +178,7 @@ const CheckInForm = ({
       {/* Invitation Number Search */}
       {searchMode === 'invitation' && (
         <div className="space-y-4">
-          <div className="flex space-x-2">
+          <div className="flex gap-2">
             <Input
               label="Invitation Number"
               type="text"
@@ -227,7 +227,7 @@ const CheckInForm = ({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-2">
                           <span className="font-medium text-gray-900">
                             {visitor?.firstName} {visitor?.lastName}
                           </span>
@@ -238,7 +238,7 @@ const CheckInForm = ({
                           #{invitation.invitationNumber} • {formatters.formatDateTime(invitation.scheduledStartTime)}
                         </div>
                         {visitor?.company && (
-                          <div className="text-sm text-gray-500 flex items-center space-x-1">
+                          <div className="text-sm text-gray-500 flex items-center gap-1">
                             <BuildingOfficeIcon className="w-3 h-3" />
                             <span>{visitor.company}</span>
                           </div>
@@ -265,7 +265,7 @@ const CheckInForm = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Visitor Information */}
               <div>
-                <h5 className="text-sm font-medium text-gray-700 mb-2 flex items-center space-x-1">
+                <h5 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
                   <UserIcon className="w-4 h-4" />
                   <span>Visitor</span>
                 </h5>
@@ -282,18 +282,18 @@ const CheckInForm = ({
 
               {/* Visit Information */}
               <div>
-                <h5 className="text-sm font-medium text-gray-700 mb-2 flex items-center space-x-1">
+                <h5 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
                   <CalendarIcon className="w-4 h-4" />
                   <span>Visit Details</span>
                 </h5>
                 <div className="space-y-1 text-sm">
                   <div><strong>{selectedInvitation.subject}</strong></div>
-                  <div className="text-gray-600 flex items-center space-x-1">
+                  <div className="text-gray-600 flex items-center gap-1">
                     <ClockIcon className="w-3 h-3" />
                     <span>{formatters.formatDateTime(selectedInvitation.scheduledStartTime)}</span>
                   </div>
                   {selectedInvitation.location && (
-                    <div className="text-gray-600 flex items-center space-x-1">
+                    <div className="text-gray-600 flex items-center gap-1">
                       <MapPinIcon className="w-3 h-3" />
                       <span>{selectedInvitation.location.name}</span>
                     </div>

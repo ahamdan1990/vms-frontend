@@ -52,7 +52,7 @@ const LoadingSpinner = ({
   const containerClasses = classNames(
     {
       'flex items-center justify-center': centered && !inline,
-      'flex items-center space-x-2': inline || text,
+      'flex items-center gap-2': inline || text,
       'fixed inset-0 bg-white bg-opacity-75 z-50 flex items-center justify-center': overlay,
       'min-h-screen': centered && !overlay && !inline
     },
@@ -148,7 +148,7 @@ export const LoadingDots = ({
   );
 
   return (
-    <div className={classNames('flex items-center space-x-1', className)}>
+    <div className={classNames('flex items-center gap-1', className)}>
       <div className={dotClasses} style={{ animationDelay: '0ms' }} />
       <div className={dotClasses} style={{ animationDelay: '150ms' }} />
       <div className={dotClasses} style={{ animationDelay: '300ms' }} />

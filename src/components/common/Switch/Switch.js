@@ -90,7 +90,7 @@ const Switch = ({
       </div>
 
       {(label || description) && (
-        <div className="ml-3">
+        <div className="ms-3">
           {label && (
             <label
               htmlFor={switchId}

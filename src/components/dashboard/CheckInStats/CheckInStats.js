@@ -199,7 +199,7 @@ const CheckInStats = ({
           transition={{ delay: 0.1 }}
         >
           <Card className="p-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <div className="p-2 bg-green-100 rounded-md">
                 <CheckCircleIcon className="w-6 h-6 text-green-600" />
               </div>
@@ -218,7 +218,7 @@ const CheckInStats = ({
           transition={{ delay: 0.2 }}
         >
           <Card className="p-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-100 rounded-md">
                 <UserPlusIcon className="w-6 h-6 text-blue-600" />
               </div>
@@ -237,7 +237,7 @@ const CheckInStats = ({
           transition={{ delay: 0.3 }}
         >
           <Card className="p-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <div className="p-2 bg-yellow-100 rounded-md">
                 <ClockIconSolid className="w-6 h-6 text-yellow-600" />
               </div>
@@ -256,7 +256,7 @@ const CheckInStats = ({
           transition={{ delay: 0.4 }}
         >
           <Card className="p-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <div className="p-2 bg-purple-100 rounded-md">
                 <ClockIcon className="w-6 h-6 text-purple-600" />
               </div>
@@ -276,7 +276,7 @@ const CheckInStats = ({
         {/* Recent Activity */}
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900 flex items-center space-x-2">
+            <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
               <TrendingUpIcon className="w-5 h-5" />
               <span>Recent Activity</span>
             </h3>
@@ -291,13 +291,13 @@ const CheckInStats = ({
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
                 >
                   <div className="flex-shrink-0">
                     {getActivityIcon(activity.action)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {activity.visitor?.firstName} {activity.visitor?.lastName}
                       </p>

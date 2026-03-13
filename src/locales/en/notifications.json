@@ -1,0 +1,114 @@
+{
+  "pageTitle": "Notifications",
+  "pageSubtitle": "Manage and acknowledge system notifications",
+  "header": {
+    "title": "Notifications",
+    "viewAll": "View all",
+    "noNew": "No new notifications",
+    "markAllRead": "Mark all as read",
+    "clearAll": "Clear all"
+  },
+  "priority": {
+    "critical": "critical",
+    "emergency": "emergency",
+    "high": "high",
+    "medium": "medium",
+    "low": "low",
+    "normal": "normal"
+  },
+  "types": {
+    "invitationCreated": "New invitation created",
+    "invitationApproved": "Invitation approved",
+    "invitationRejected": "Invitation rejected",
+    "visitorCheckedIn": "Visitor checked in",
+    "visitorCheckedOut": "Visitor checked out",
+    "approvalRequired": "Approval required",
+    "visitorArrival": "Visitor Arrival",
+    "visitorOverstay": "Visitor Overstay",
+    "systemAlert": "System Alert",
+    "securityAlert": "Security Alert"
+  },
+  "emptyState": "You have no notifications",
+  "readAll": "All notifications marked as read",
+  "accessDenied": "Access Denied",
+  "accessDeniedDesc": "You don't have permission to view notifications.",
+  "connected": "Connected",
+  "disconnected": "Disconnected",
+  "lastUpdated": "Last updated:",
+  "refresh": "Refresh",
+  "filters": "Filters",
+  "markAllRead_count": "Mark All Read ({{count}})",
+  "stats": {
+    "total": "Total",
+    "unread": "Unread",
+    "critical": "Critical",
+    "last24h": "Last 24h"
+  },
+  "tabs": {
+    "all": "All Notifications",
+    "unread": "Unread",
+    "acknowledged": "Acknowledged"
+  },
+  "searchPlaceholder": "Search notifications by title, message, or type...",
+  "view": "View:",
+  "viewList": "List",
+  "viewCards": "Cards",
+  "bulkActions": {
+    "selectAction": "Select action...",
+    "markAsRead": "Mark as Read",
+    "acknowledge": "Acknowledge",
+    "apply": "Apply ({{count}})",
+    "selectAll": "Select all ({{count}})",
+    "selected": "{{count}} selected",
+    "clearSelection": "Clear selection"
+  },
+  "filters_panel": {
+    "priority": "Priority",
+    "allPriorities": "All Priorities",
+    "type": "Type",
+    "allTypes": "All Types",
+    "dateRange": "Date Range",
+    "allTime": "All Time",
+    "today": "Today",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "clearFilters": "Clear Filters"
+  },
+  "card": {
+    "visitor": "Visitor:",
+    "company": "Company:",
+    "host": "Host:",
+    "location": "Location:",
+    "markAsRead": "Mark as Read",
+    "acknowledge": "Acknowledge",
+    "execute": "Execute",
+    "acknowledged": "Acknowledged",
+    "dismiss": "Dismiss"
+  },
+  "loading": "Loading notifications...",
+  "noNotifications": "No notifications found",
+  "noNotificationsSearch": "No notifications match your search criteria \"{{search}}\"",
+  "allCaughtUp": "You're all caught up! No unread notifications.",
+  "noNotificationsDisplay": "No notifications to display",
+  "clearSearch": "Clear search",
+  "bulk": {
+    "confirmTitle": "Confirm Bulk Action",
+    "confirmDesc": "Are you sure you want to {{action}} {{count}} notification(s)?",
+    "actionMarkRead": "mark as read",
+    "actionAcknowledge": "acknowledge",
+    "confirm": "Confirm",
+    "complete": "Bulk Action Complete",
+    "markedRead": "{{count}} notification(s) marked as read",
+    "acknowledgedAll": "{{count}} notification(s) acknowledged",
+    "failed": "Bulk Action Failed"
+  },
+  "toast": {
+    "refreshTitle": "Notifications Refreshed",
+    "refreshMessage": "Notification list has been updated",
+    "acknowledgedTitle": "Notification Acknowledged",
+    "acknowledgedMessage": "Notification has been acknowledged successfully",
+    "acknowledgeFailed": "Acknowledgment Failed",
+    "markAllReadTitle": "All Notifications Marked as Read",
+    "markAllReadMessage": "{{count}} notifications marked as read"
+  }
+}

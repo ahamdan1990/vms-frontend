@@ -1,0 +1,162 @@
+{
+  "pageTitle": "الدعوات",
+  "pageSubtitle": "إدارة دعوات الزوار والموافقات",
+  "createButton": "إنشاء دعوة",
+  "stats": {
+    "total": "الإجمالي",
+    "pending": "قيد الانتظار",
+    "approved": "موافق عليها",
+    "activeToday": "نشطة اليوم",
+    "rejected": "مرفوضة"
+  },
+  "search": {
+    "placeholder": "ابحث بالرقم أو الموضوع أو اسم الزائر..."
+  },
+  "filters": {
+    "title": "تصفية",
+    "clearAll": "مسح التصفية",
+    "status": "الحالة",
+    "allStatuses": "جميع الحالات",
+    "type": "النوع",
+    "allTypes": "جميع الأنواع",
+    "startDate": "تاريخ البداية",
+    "endDate": "تاريخ النهاية",
+    "pendingOnly": "المعلقة فقط",
+    "activeOnly": "النشطة فقط",
+    "expiredOnly": "المنتهية فقط",
+    "includeDeleted": "تضمين المحذوفة"
+  },
+  "table": {
+    "columns": {
+      "invitationNumber": "رقم الدعوة",
+      "visitor": "الزائر",
+      "schedule": "الجدول",
+      "status": "الحالة",
+      "actions": "الإجراءات"
+    },
+    "emptyMessage": "لا توجد دعوات"
+  },
+  "pagination": {
+    "showing": "عرض {{start}} إلى {{end}} من {{total}} دعوة",
+    "10perPage": "10 لكل صفحة",
+    "20perPage": "20 لكل صفحة",
+    "50perPage": "50 لكل صفحة",
+    "100perPage": "100 لكل صفحة"
+  },
+  "bulk": {
+    "selected": "{{count}} دعوة محددة",
+    "selected_plural": "{{count}} دعوات محددة",
+    "clear": "مسح",
+    "approve": "موافقة",
+    "reject": "رفض",
+    "delete": "حذف"
+  },
+  "actions": {
+    "view": "عرض",
+    "edit": "تعديل",
+    "approve": "موافقة",
+    "reApprove": "إعادة موافقة",
+    "reject": "رفض",
+    "qr": "رمز QR",
+    "delete": "حذف"
+  },
+  "type": {
+    "single": "فردية",
+    "group": "جماعية",
+    "recurring": "متكررة",
+    "walkIn": "بدون موعد",
+    "bulk": "مجمّعة"
+  },
+  "tooltips": {
+    "viewDetails": "عرض التفاصيل",
+    "editInvitation": "تعديل الدعوة",
+    "approveInvitation": "الموافقة على الدعوة",
+    "reApproveInvitation": "إعادة الموافقة",
+    "rejectInvitation": "رفض الدعوة",
+    "viewQrCode": "عرض رمز QR",
+    "deleteInvitation": "حذف الدعوة"
+  },
+  "modals": {
+    "createTitle": "إنشاء دعوة",
+    "editTitle": "تعديل الدعوة",
+    "detailsTitle": "تفاصيل الدعوة",
+    "approvalTitle": "إدارة الموافقة",
+    "qrTitle": "رمز QR",
+    "deleteTitle": "حذف الدعوة",
+    "deleteMessage": "هل أنت متأكد من حذف الدعوة \"{{subject}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+    "deleteMessageGeneric": "هل أنت متأكد من حذف هذه الدعوة؟"
+  },
+  "details": {
+    "visitorInfo": "معلومات الزائر",
+    "hostInfo": "معلومات المضيف",
+    "schedule": "الجدول الزمني",
+    "locationPurpose": "الموقع والغرض",
+    "message": "الرسالة",
+    "requirements": "المتطلبات",
+    "approvalStatus": "حالة الموافقة",
+    "fields": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "company": "الشركة",
+      "date": "التاريخ",
+      "time": "الوقت",
+      "duration": "المدة",
+      "location": "الموقع",
+      "purpose": "الغرض",
+      "expectedVisitors": "عدد الزوار المتوقع",
+      "requiresApproval": "تتطلب موافقة",
+      "requiresEscort": "تتطلب مرافقة",
+      "requiresBadge": "تتطلب بطاقة",
+      "needsParking": "تتطلب موقف سيارة",
+      "specialInstructions": "تعليمات خاصة",
+      "parkingInstructions": "تعليمات الموقف",
+      "comments": "التعليقات",
+      "reason": "السبب",
+      "approved": "موافق عليه",
+      "rejected": "مرفوض",
+      "durationHours": "{{hours}} ساعة"
+    }
+  },
+  "approval": {
+    "approveTitle": "الموافقة على الدعوة",
+    "rejectTitle": "رفض الدعوة",
+    "commentsLabel": "تعليقات الموافقة (اختياري)",
+    "commentsPlaceholder": "أضف تعليقاً حول الموافقة...",
+    "reasonLabel": "سبب الرفض",
+    "reasonPlaceholder": "يرجى تحديد سبب الرفض...",
+    "characterCount": "{{count}}/{{max}} حرف",
+    "approveButton": "الموافقة على الدعوة",
+    "rejectButton": "رفض الدعوة"
+  },
+  "qr": {
+    "title": "رمز QR للدعوة",
+    "scanInstruction": "امسح رمز QR لتسجيل الدخول للزيارة",
+    "actionsTitle": "إجراءات رمز QR",
+    "dataTitle": "بيانات رمز QR",
+    "dataDescription": "يحتوي هذا الرمز على تفاصيل الدعوة المشفرة لتسجيل دخول آمن",
+    "downloadButton": "تنزيل رمز QR",
+    "emailButton": "إرسال للزائر",
+    "sendingButton": "جارٍ الإرسال...",
+    "sentSuccess": "تم إرسال رمز QR بنجاح إلى {{email}}!",
+    "emailError": "خطأ في البريد الإلكتروني: {{error}}",
+    "willSendTo": "سيُرسل إلى: {{email}}",
+    "noEmailAddress": "لا يوجد بريد إلكتروني لهذا الزائر"
+  },
+  "confirmBulk": {
+    "title": "{{action}} الدعوات",
+    "message": "هل أنت متأكد من {{action}} {{count}} دعوة محددة؟",
+    "message_plural": "هل أنت متأكد من {{action}} {{count}} دعوات محددة؟"
+  },
+  "errors": {
+    "createFailed": "فشل إنشاء الدعوة.",
+    "updateFailed": "فشل تحديث الدعوة.",
+    "deleteFailed": "فشل حذف الدعوة.",
+    "approveFailed": "فشل الموافقة على الدعوة.",
+    "rejectFailed": "فشل رفض الدعوة.",
+    "qrFailed": "فشل تحميل رمز QR."
+  },
+  "unknownVisitor": "زائر غير معروف",
+  "unknownHost": "مضيف غير معروف",
+  "noLocation": "لم يُحدَّد موقع"
+}

@@ -1,0 +1,26 @@
+{
+  "pageTitle": "Reports",
+  "pageSubtitle": "Generate and view system reports",
+  "generateButton": "Generate Report",
+  "exportButton": "Export",
+  "dateRange": "Date Range",
+  "reportType": "Report Type",
+  "types": {
+    "visitorReport": "Visitor Report",
+    "invitationReport": "Invitation Report",
+    "checkinReport": "Check-in Report",
+    "auditReport": "Audit Report",
+    "capacityReport": "Capacity Report"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "visitTrends": "Visit Trends",
+    "peakHours": "Peak Hours",
+    "topVisitors": "Top Visitors",
+    "topHosts": "Top Hosts",
+    "byDepartment": "By Department",
+    "byLocation": "By Location",
+    "byPurpose": "By Purpose"
+  },
+  "emptyMessage": "No report data available for the selected period."
+}

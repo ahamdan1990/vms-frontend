@@ -91,7 +91,7 @@ const MobileNavigation = ({
                 role="option"
                 aria-selected={item.id === activeItem}
               >
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   {/* Icon if provided */}
                   {item.icon && (
                     <span className={classNames(
@@ -147,13 +147,13 @@ export const DesktopNavigation = ({
 }) => {
   return (
     <div className={classNames('hidden md:block', className)}>
-      <nav className="flex space-x-1 bg-gray-100 dark:bg-slate-800/80 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
+      <nav className="flex gap-1 bg-gray-100 dark:bg-slate-800/80 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
         {items.map((item) => (
           <button
             key={item.id}
             onClick={() => onChange(item.id)}
             className={classNames(
-              'flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150',
+              'flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150',
               {
                 'bg-white dark:bg-slate-900/70 text-primary-700 dark:text-primary-200 shadow-sm': item.id === activeItem,
                 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 hover:bg-white/60 dark:hover:bg-slate-900/50': item.id !== activeItem,

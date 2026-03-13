@@ -249,7 +249,7 @@ const EscalationRuleModal = ({
             </Select>
             
             <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-start space-x-2">
+              <div className="flex items-start gap-2">
                 <InformationCircleIcon className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-blue-700">
                   Alert will be sent to all users with the selected role.
@@ -274,7 +274,7 @@ const EscalationRuleModal = ({
             />
             
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <div className="flex items-start space-x-2">
+              <div className="flex items-start gap-2">
                 <InformationCircleIcon className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-amber-700">
                   You'll need to know the specific user ID. Consider using role escalation for easier management.
@@ -340,7 +340,7 @@ const EscalationRuleModal = ({
         {/* Error Display */}
         {error && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-            <div className="flex items-start space-x-2">
+            <div className="flex items-start gap-2">
               <ExclamationTriangleIcon className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
               <p className="text-sm text-red-700">{extractErrorMessage(error)}</p>
             </div>
@@ -439,7 +439,7 @@ const EscalationRuleModal = ({
 
             {formData.action && (
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-start space-x-2">
+                <div className="flex items-start gap-2">
                   {getActionIcon(formData.action)}
                   <div>
                     <p className="text-sm font-medium text-blue-900">{mergedEscalationActions[formData.action]}</p>
@@ -498,7 +498,7 @@ const EscalationRuleModal = ({
                 />
 
                 <div className="flex items-center">
-                  <label className="flex items-center space-x-2 cursor-pointer">
+                  <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.isEnabled}
@@ -533,7 +533,7 @@ const EscalationRuleModal = ({
         </Card>
 
         {/* Form Actions */}
-        <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+        <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-200">
           <Button
             type="button"
             variant="outline"

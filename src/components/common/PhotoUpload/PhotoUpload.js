@@ -117,7 +117,7 @@ const PhotoUpload = ({
   return (
     <div className={`space-y-3 ${className}`}>
       {/* Photo Display/Upload Area */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center gap-4">
         {/* Photo Preview or Upload Area */}
         <div
           className={`relative ${config.wrapper} rounded-full border-2 border-dashed ${
@@ -223,7 +223,7 @@ const PhotoUpload = ({
           animate={{ opacity: 1, y: 0 }}
           className="bg-red-50 border border-red-200 rounded-md p-3"
         >
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <ExclamationTriangleIcon className="w-4 h-4 text-red-500" />
             <span className="text-sm text-red-700">{uploadError}</span>
           </div>

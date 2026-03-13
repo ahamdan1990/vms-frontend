@@ -220,25 +220,25 @@ const CapacityValidator = ({
                     <span className="text-gray-600 dark:text-gray-400">
                       {validation.result.isCurrentTime ? 'Current:' : 'Scheduled:'}
                     </span>
-                    <span className="ml-1 font-medium text-gray-900 dark:text-gray-100">
+                    <span className="ms-1 font-medium text-gray-900 dark:text-gray-100">
                       {validation.result.currentOccupancy}
                     </span>
                   </div>
                   <div>
                     <span className="text-gray-600 dark:text-gray-400">Capacity:</span>
-                    <span className="ml-1 font-medium text-gray-900 dark:text-gray-100">
+                    <span className="ms-1 font-medium text-gray-900 dark:text-gray-100">
                       {validation.result.maxCapacity}
                     </span>
                   </div>
                   <div>
                     <span className="text-gray-600 dark:text-gray-400">Available:</span>
-                    <span className="ml-1 font-medium text-green-600 dark:text-green-400">
+                    <span className="ms-1 font-medium text-green-600 dark:text-green-400">
                       {validation.result.availableSlots}
                     </span>
                   </div>
                   <div>
                     <span className="text-gray-600 dark:text-gray-400">Utilization:</span>
-                    <span className="ml-1 font-medium text-gray-900 dark:text-gray-100">
+                    <span className="ms-1 font-medium text-gray-900 dark:text-gray-100">
                       {validation.result.occupancyPercentage}%
                     </span>
                   </div>

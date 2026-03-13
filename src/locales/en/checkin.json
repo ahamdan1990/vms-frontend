@@ -1,0 +1,93 @@
+{
+  "pageTitle": "Check-in Dashboard",
+  "pageSubtitle": "Manage visitor check-ins and active visits",
+  "scanQr": "Scan QR Code",
+  "manualCheckin": "Manual Check-in",
+  "checkOut": "Check Out",
+  "checkIn": "Check In",
+  "checkingIn": "Checking in...",
+  "refresh": "Refresh",
+  "stats": {
+    "todayCheckIns": "Today's Check-ins",
+    "activeVisitors": "Active Visitors",
+    "pendingCheckOuts": "Pending Check-outs",
+    "avgDuration": "Avg Duration",
+    "checkedInToday": "Checked In Today",
+    "checkedOutToday": "Checked Out Today",
+    "currentlyInside": "Currently Inside",
+    "expectedToday": "Expected Today"
+  },
+  "tabs": {
+    "scanner": "QR Scanner",
+    "manual": "Manual Check-in",
+    "active": "Active Visitors ({{count}})"
+  },
+  "scanner": {
+    "title": "QR Code Scanner",
+    "description": "Scan visitor QR codes for quick check-in",
+    "instruction": "Point the camera at the visitor's QR code",
+    "openScanner": "Open QR Scanner",
+    "scanning": "Scanning...",
+    "success": "QR code scanned successfully",
+    "error": "Failed to read QR code. Please try again.",
+    "permissionDenied": "Camera permission denied. Please allow camera access.",
+    "checkInMode": "Check-in Mode:",
+    "manualConfirmation": "Manual Confirmation",
+    "autoCheckIn": "Auto Check-in",
+    "autoModeDesc": "Visitors will be checked in immediately after QR scan",
+    "manualModeDesc": "Review visitor details before confirming check-in"
+  },
+  "manual": {
+    "title": "Manual Check-in",
+    "description": "Enter invitation number or visitor details"
+  },
+  "activeVisitors": {
+    "title": "Active Visitors",
+    "empty": "No active visitors",
+    "emptyDesc": "Visitors will appear here when they check in."
+  },
+  "success": {
+    "title": "Check-in Successful!",
+    "message": "{{name}} has been checked in successfully.",
+    "toastTitle": "Check-in Successful",
+    "toastMessage": "{{name}} has been checked in successfully. Invitation: {{number}}",
+    "checkedIn": "Visitor checked in successfully.",
+    "checkedOut": "Visitor checked out successfully.",
+    "visitorCheckedIn": "Visitor Checked In Successfully",
+    "continue": "Continue",
+    "scanAnother": "Scan Another"
+  },
+  "details": {
+    "title": "Check-in Successful",
+    "visitorInfo": "Visitor Information",
+    "invitationDetails": "Invitation Details",
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "company": "Company",
+    "invitationNumber": "Invitation Number",
+    "purpose": "Purpose",
+    "scheduledTime": "Scheduled Time",
+    "host": "Host",
+    "location": "Location",
+    "status": "Status",
+    "checkedIn": "Checked In",
+    "close": "Close"
+  },
+  "form": {
+    "invitationNumber": "Invitation Number",
+    "visitorName": "Visitor Name",
+    "idNumber": "ID Number",
+    "notes": "Notes",
+    "submit": "Check In",
+    "cancel": "Cancel"
+  },
+  "errors": {
+    "checkinFailed": "Check-in failed. Please try again.",
+    "checkoutFailed": "Check-out failed. Please try again.",
+    "notFound": "Invitation not found.",
+    "alreadyCheckedIn": "Visitor is already checked in.",
+    "expired": "This invitation has expired.",
+    "dismiss": "Dismiss"
+  }
+}

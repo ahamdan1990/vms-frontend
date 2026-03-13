@@ -76,7 +76,7 @@ const AlternativesModal = ({
         {loading && (
           <div className="flex justify-center py-8">
             <LoadingSpinner size="lg" />
-            <span className="ml-3 text-gray-600">Finding alternative time slots...</span>
+            <span className="ms-3 text-gray-600">Finding alternative time slots...</span>
           </div>
         )}
 
@@ -189,7 +189,7 @@ const AlternativesModal = ({
                     </div>
 
                     {/* Select Button */}
-                    <div className="ml-4">
+                    <div className="ms-4">
                       <Button
                         size="sm"
                         onClick={() => onSelectAlternative && onSelectAlternative(alternative)}

@@ -1,0 +1,200 @@
+{
+  "pageTitle": "الزوار",
+  "pageSubtitle": "إدارة سجلات الزوار وحالة الشرف وقوائم الحظر",
+  "createButton": "إضافة زائر",
+  "advancedSearch": "بحث متقدم",
+  "backToList": "العودة إلى الزوار",
+  "vipBadge": "شرف",
+  "vipVisitorTitle": "زائر شرف",
+  "jobTitleAt": "{{jobTitle}} في {{company}}",
+  "search": {
+    "placeholder": "ابحث بالاسم أو البريد الإلكتروني أو الشركة..."
+  },
+  "stats": {
+    "total": "إجمالي الزوار",
+    "active": "نشط",
+    "vip": "زوار الشرف",
+    "blacklisted": "محظورون"
+  },
+  "filters": {
+    "title": "الفلاتر",
+    "clearAll": "مسح الفلاتر",
+    "vipStatus": "حالة الشرف",
+    "blacklistStatus": "حالة الحظر",
+    "nationality": "الجنسية",
+    "securityClearance": "تصريح أمني",
+    "allVisitors": "جميع الزوار",
+    "vipOnly": "الشرف فقط",
+    "nonVipOnly": "غير الشرف فقط",
+    "blacklistedOnly": "المحظورون فقط",
+    "notBlacklisted": "غير محظور",
+    "filterByCompany": "تصفية حسب الشركة",
+    "filterByNationality": "تصفية حسب الجنسية",
+    "securityLevels": {
+      "all": "جميع المستويات",
+      "standard": "عادي",
+      "medium": "متوسط",
+      "high": "عالي",
+      "topSecret": "سري للغاية"
+    },
+    "includeInactive": "تضمين الزوار غير النشطين",
+    "includeDeleted": "تضمين الزوار المحذوفين"
+  },
+  "table": {
+    "columns": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "company": "الشركة",
+      "nationality": "الجنسية",
+      "status": "الحالة",
+      "lastVisit": "آخر زيارة",
+      "actions": "الإجراءات"
+    },
+    "emptyMessage": "لا يوجد زوار",
+    "emptyDescription": "حاول تعديل معايير البحث أو إضافة زائر جديد."
+  },
+  "pagination": {
+    "showing": "عرض {{start}} إلى {{end}} من {{total}} زائر",
+    "perPage": "{{count}} في الصفحة",
+    "pageOf": "الصفحة {{current}} من {{total}}"
+  },
+  "bulk": {
+    "selected": "{{count}} زائر محدد",
+    "selected_plural": "{{count}} زوار محددون",
+    "deleteTitle": "حذف الزوار المحددين",
+    "deleteMessage": "هل أنت متأكد من حذف {{count}} زائر؟ سيتم إلغاء تفعيل الزائر مع الاحتفاظ بالبيانات التاريخية.",
+    "deleteMessage_plural": "هل أنت متأكد من حذف {{count}} زوار؟ سيتم إلغاء تفعيلهم مع الاحتفاظ بالبيانات التاريخية.",
+    "deleteConfirm": "حذف المحددين",
+    "blacklistTitle": "إضافة الزوار المحددين إلى القائمة السوداء",
+    "blacklistMessage": "أنت على وشك إضافة {{count}} زائر إلى القائمة السوداء. يرجى تقديم سبب لهذا الإجراء.",
+    "blacklistMessage_plural": "أنت على وشك إضافة {{count}} زوار إلى القائمة السوداء. يرجى تقديم سبب لهذا الإجراء.",
+    "blacklistConfirm": "إضافة المحددين للقائمة السوداء",
+    "vipMessage": "هل أنت متأكد من تعيين {{count}} زائر كزائر شرف؟",
+    "vipMessage_plural": "هل أنت متأكد من تعيين {{count}} زوار كزوار شرف؟"
+  },
+  "profile": {
+    "title": "ملف الزائر",
+    "personalInfo": "المعلومات الشخصية",
+    "professionalInfo": "المعلومات المهنية",
+    "contactInfo": "معلومات الاتصال",
+    "address": "العنوان",
+    "governmentId": "الهوية الحكومية",
+    "specialReqs": "متطلبات خاصة",
+    "dietaryReqs": "متطلبات غذائية",
+    "accessibilityReqs": "متطلبات إمكانية الوصول",
+    "visitHistory": "سجل الزيارات",
+    "emergencyContacts": "جهات الاتصال الطارئة",
+    "notFound": {
+      "title": "الزائر غير موجود",
+      "message": "الزائر الذي تبحث عنه غير موجود أو تم حذفه."
+    },
+    "createdOn": "تم الإنشاء {{date}}",
+    "visitCount": "{{count}} زيارة",
+    "lastVisit": "آخر زيارة: {{date}}",
+    "uploadPhotoTitle": "رفع صورة",
+    "removePhotoTitle": "إزالة الصورة",
+    "confirmCloseUnsaved": "لديك تغييرات غير محفوظة. هل أنت متأكد من الإغلاق دون حفظ؟",
+    "tabs": {
+      "overview": "نظرة عامة",
+      "documents": "المستندات",
+      "notes": "الملاحظات",
+      "emergencyContacts": "جهات الطوارئ",
+      "activity": "النشاط"
+    }
+  },
+  "fields": {
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "company": "الشركة",
+    "nationality": "الجنسية",
+    "idNumber": "رقم الهوية",
+    "idType": "نوع الهوية",
+    "dateOfBirth": "تاريخ الميلاد",
+    "jobTitle": "المسمى الوظيفي",
+    "securityClearance": "التصريح الأمني",
+    "age": "{{age}} سنة"
+  },
+  "actions": {
+    "view": "عرض الملف",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "addNote": "إضافة ملاحظة",
+    "uploadDocument": "رفع مستند",
+    "markVip": "تعيين كشرف",
+    "removeVip": "إلغاء الشرف",
+    "blacklist": "إضافة للقائمة السوداء",
+    "removeBlacklist": "إزالة من القائمة السوداء",
+    "createInvitation": "إنشاء دعوة"
+  },
+  "modals": {
+    "createTitle": "إضافة زائر جديد",
+    "editTitle": "تعديل الزائر",
+    "deleteTitle": "حذف الزائر",
+    "deleteMessage": "هل أنت متأكد من حذف هذا الزائر؟ لا يمكن التراجع عن هذا الإجراء.",
+    "deleteVisitorMessage": "هل أنت متأكد من حذف \"{{name}}\"؟ سيتم إلغاء تفعيل الزائر مع الاحتفاظ بالبيانات التاريخية.",
+    "blacklistTitle": "إضافة إلى القائمة السوداء",
+    "blacklistReason": "سبب الحظر",
+    "blacklistReasonPlaceholder": "يرجى تقديم سبب مفصل...",
+    "blacklistWarning": "أنت على وشك إضافة {{name}} إلى القائمة السوداء. يرجى تقديم سبب لهذا الإجراء.",
+    "blacklistAboutTo": "أنت على وشك إضافة {{name}} إلى القائمة السوداء. يرجى تقديم سبب لهذا الإجراء.",
+    "confirmUnsavedCreate": "لديك معلومات زائر غير محفوظة. هل أنت متأكد من الإغلاق دون حفظ؟",
+    "confirmUnsavedEdit": "لديك تغييرات غير محفوظة على هذا الزائر. هل أنت متأكد من الإغلاق دون حفظ؟",
+    "createInvitationTitle": "إنشاء دعوة لـ {{name}}"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "blacklisted": "محظور",
+    "standard": "عادي"
+  },
+  "photo": {
+    "invalidType": "يرجى رفع ملف صورة صالح (JPG أو PNG أو GIF)",
+    "tooLarge": "يجب أن يكون حجم الملف أقل من 5 ميغابايت",
+    "confirmRemove": "هل أنت متأكد من إزالة هذه الصورة؟",
+    "removeFailed": "فشل إزالة الصورة: {{error}}",
+    "uploadFailed": "فشل رفع صورة الملف الشخصي.",
+    "serviceError": "خطأ في خدمة التعرف على الوجه",
+    "partialSuccess": "نجاح جزئي",
+    "serviceUnavailable": "خدمة الكشف عن الوجه غير متاحة",
+    "uploadWarning": "تحذير رفع الصورة",
+    "uploadedSuccessfully": "تم رفع الصورة بنجاح",
+    "faceDetected": "تم الكشف عن الوجه وتفعيل التعرف عليه لهذا الزائر.",
+    "uploaded": "تم رفع الصورة",
+    "uploadedMessage": "تم رفع صورة الملف الشخصي بنجاح.",
+    "noFaceDetected": "لم يتم الكشف عن وجه",
+    "noFaceMessage": "لم يتم الكشف عن أي وجه في الصورة المرفوعة. يرجى رفع صورة تظهر فيها الوجه بوضوح.",
+    "uploadFail": "فشل رفع الصورة"
+  },
+  "notes": {
+    "title": "ملاحظات الزائر",
+    "subtitle": "ملاحظات وملاحظات داخلية حول هذا الزائر.",
+    "addNote": "إضافة ملاحظة",
+    "noNotes": "لا توجد ملاحظات",
+    "noNotesMessage": "لم يتم إضافة أي ملاحظات لهذا الزائر بعد.",
+    "addFirstNote": "إضافة أول ملاحظة",
+    "flagged": "مُعلَّم",
+    "confidential": "سري",
+    "by": "بواسطة {{name}} في {{date}}",
+    "modified": "تم التعديل {{date}}",
+    "unknownAuthor": "غير معروف",
+    "untitledNote": "ملاحظة"
+  },
+  "activity": {
+    "visitStatistics": "إحصائيات الزيارات",
+    "totalVisits": "إجمالي الزيارات",
+    "lastVisit": "آخر زيارة",
+    "firstRegistered": "أول تسجيل",
+    "never": "أبداً",
+    "statusHistory": "سجل الحالة",
+    "visitorCreated": "تم إنشاء الزائر",
+    "markedAsVip": "تم تعيينه كزائر شرف",
+    "vipStatusActive": "الحالة نشطة",
+    "blacklisted": "محظور",
+    "blacklistReason": "السبب: {{reason}}",
+    "recentActivity": "النشاط الأخير",
+    "recentActivityPlaceholder": "سيتوفر تسجيل مفصل للنشاط في تحديث قادم."
+  }
+}

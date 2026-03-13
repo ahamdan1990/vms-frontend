@@ -309,15 +309,23 @@ const ReceptionistDashboard = () => {
       // Step 1: Validate photo for face detection before accepting
       console.log('Validating captured photo for face detection...');
       const validationResult = await visitorService.validatePhoto(photoData.file);
+      
+      if (validationResult.detectionAvailable === false) {
+        console.log('Face detection service is disabled/unavailable, skipping validation');
 
-      if (!validationResult.faceDetected) {
-        // Face not detected - show error and keep camera open
+        toast.success(
+          'Photo Accepted',
+          validationResult.message || 'Face detection is currently unavailable. Proceeding without validation.',
+          { duration: 3000 }
+        );
+
+        // Continue the flow without blocking
+      } else if (!validationResult.faceDetected) {
         toast.error(
           'No Face Detected',
-          'No face was detected in the captured photo. Please retake the photo with a clearly visible face.',
-          { duration: 0 } // Don't auto-dismiss
+          validationResult.message || 'No face was detected in the captured photo. Please retake the photo with a clearly visible face.',
+          { duration: 6000 }
         );
-        // Don't accept the photo, keep camera open for retry
         return;
       }
 
@@ -938,7 +946,7 @@ const ReceptionistDashboard = () => {
         transition={{ delay: 0.1 }}
       >
         <Card className="p-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-md">
               <ClockIconSolid className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
@@ -956,7 +964,7 @@ const ReceptionistDashboard = () => {
         transition={{ delay: 0.2 }}
       >
         <Card className="p-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <div className="p-2 bg-green-100 dark:bg-green-900 rounded-md">
               <CheckCircleIconSolid className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
@@ -974,7 +982,7 @@ const ReceptionistDashboard = () => {
         transition={{ delay: 0.3 }}
       >
         <Card className="p-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-md">
               <UsersIcon className="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
@@ -992,7 +1000,7 @@ const ReceptionistDashboard = () => {
         transition={{ delay: 0.4 }}
       >
         <Card className="p-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-md">
               <UserPlusIcon className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
@@ -1010,7 +1018,7 @@ const ReceptionistDashboard = () => {
         transition={{ delay: 0.5 }}
       >
         <Card className="p-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <div className={`p-2 rounded-md ${todayStats.overdueVisitors > 0 ? 'bg-red-100 dark:bg-red-900/50' : 'bg-gray-100 dark:bg-gray-800'}`}>
               <ClockIcon className={`w-6 h-6 ${todayStats.overdueVisitors > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-300'}`} />
             </div>
@@ -1029,7 +1037,7 @@ const ReceptionistDashboard = () => {
   // Render tab navigation
   const renderTabNavigation = () => (
     <div className="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
-      <nav className="-mb-px flex min-w-max space-x-4">
+      <nav className="-mb-px flex min-w-max gap-4">
         {[
           { id: 'overview', label: 'Overview', icon: EyeIcon },
           { id: 'scanner', label: 'QR Scanner', icon: QrCodeIcon },
@@ -1046,7 +1054,7 @@ const ReceptionistDashboard = () => {
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
             }`}
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <tab.icon className="w-4 h-4" />
               <span>{tab.label}</span>
             </div>
@@ -1155,8 +1163,8 @@ const ReceptionistDashboard = () => {
                 </p>
 
                 {/* Auto/Manual Check-in Mode Toggle */}
-                <div className="flex justify-center items-center space-x-4 mb-6">
-                  <label className="flex items-center space-x-2 cursor-pointer">
+                <div className="flex justify-center items-center gap-4 mb-6">
+                  <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={autoCheckInMode}
@@ -1250,7 +1258,7 @@ const ReceptionistDashboard = () => {
                   {capturedPhoto && (
                     <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-md">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center gap-4">
                           <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-700 ring-2 ring-white shadow">
                             <img
                               src={capturedPhoto.url}
@@ -1263,7 +1271,7 @@ const ReceptionistDashboard = () => {
                             <p className="text-xs text-green-600 dark:text-green-400">Start the registration form when you are ready.</p>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center gap-3">
                           <Button
                             size="sm"
                             onClick={handleStartRegistrationWithPhoto}
@@ -1358,7 +1366,7 @@ const ReceptionistDashboard = () => {
                         <div key={doc.id} className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center space-x-2">
+                              <div className="flex items-center gap-2">
                                 <DocumentTextIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                                   {doc.documentName}
@@ -1373,7 +1381,7 @@ const ReceptionistDashboard = () => {
                                 </p>
                               )}
                             </div>
-                            <div className="flex items-center space-x-1">
+                            <div className="flex items-center gap-1">
                               {doc.isSensitive && (
                                 <Badge variant="warning" size="xs">Sensitive</Badge>
                               )}
@@ -1382,17 +1390,17 @@ const ReceptionistDashboard = () => {
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                             <button
                               onClick={() => handlePreviewDocument(expandedVisitorId, doc)}
-                              className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
                             >
                               <EyeIcon className="w-3.5 h-3.5" />
                               <span>Preview</span>
                             </button>
                             <button
                               onClick={() => handleDownloadDocument(expandedVisitorId, doc)}
-                              className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                             >
                               <ArrowDownTrayIcon className="w-3.5 h-3.5" />
                               <span>Download</span>

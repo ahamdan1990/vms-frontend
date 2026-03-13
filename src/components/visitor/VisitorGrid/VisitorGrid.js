@@ -192,7 +192,7 @@ const VisitorGrid = ({
         <div className="flex items-center justify-between">
           {/* Bulk Selection Controls */}
           {allowBulkSelection && visitors.length > 0 && (
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-4">
               <label className="flex items-center cursor-pointer group">
                 <input
                   type="checkbox"
@@ -200,13 +200,13 @@ const VisitorGrid = ({
                   onChange={handleSelectAll}
                   className="w-5 h-5 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer transition-all duration-150 hover:border-blue-400 dark:hover:border-blue-500 checked:border-blue-600 dark:checked:border-blue-500"
                 />
-                <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors">
+                <span className="ms-3 text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors">
                   Select all ({visitors.length})
                 </span>
               </label>
 
               {selectedVisitors.length > 0 && (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <div className="h-4 w-px bg-gray-300 dark:bg-gray-600"></div>
                   <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
                     {selectedVisitors.length} selected
@@ -273,7 +273,7 @@ const VisitorGrid = ({
 const ViewModeToggle = ({ modes, activeMode, onModeChange }) => {
   return (
     <div className="flex items-center justify-end">
-      <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
+      <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
         {modes.map((mode) => {
           const Icon = mode.icon;
           return (
@@ -290,7 +290,7 @@ const ViewModeToggle = ({ modes, activeMode, onModeChange }) => {
               title={mode.description}
             >
               <Icon className="w-4 h-4" />
-              <span className="ml-1 hidden sm:inline">{mode.label.split(' ')[0]}</span>
+              <span className="ms-1 hidden sm:inline">{mode.label.split(' ')[0]}</span>
             </Button>
           );
         })}

@@ -2,14 +2,15 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { 
+import {
   updateUser,
   getUserActivity,
   clearError
 } from '../../../store/slices/usersSlice';
-import { 
+import {
   changePassword,
   getUserSessions,
   terminateSession,
@@ -39,18 +40,19 @@ import ProfilePhotoUpload from '../../../components/common/ProfilePhotoUpload/Pr
 const ProfilePage = () => {
   const dispatch = useDispatch();
   const toast = useToast();
-  const { 
-    user, 
-    userId, 
-    userName, 
-    userEmail, 
+  const { t } = useTranslation(['users', 'common']);
+  const {
+    user,
+    userId,
+    userName,
+    userEmail,
     userRole,
     loading: authLoading,
     sessions
   } = useAuth();
-  
+
   const { profile: profilePermissions } = usePermissions();
-  
+
   // Redux state
   const {
     updateLoading,
@@ -60,7 +62,7 @@ const ProfilePage = () => {
 
   // Local state for tabs
   const [activeTab, setActiveTab] = useState('profile');
-  
+
   // Enhanced profile editing state with all fields
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -72,17 +74,17 @@ const ProfilePage = () => {
     phoneNumber: '',
     phoneCountryCode: '961', // Default to Lebanon
     phoneType: 'Mobile',
-    
+
     // User preferences
     timeZone: 'Asia/Beirut',
     language: 'en-US',
     theme: 'light',
-    
+
     // Work information
     department: '',
     jobTitle: '',
     employeeId: '',
-    
+
     // Enhanced address fields
     addressType: 'Home',
     street1: '',
@@ -94,10 +96,10 @@ const ProfilePage = () => {
     country: 'Lebanon',
     latitude: '',
     longitude: '',
-    
+
     // Profile photo
     profilePhotoUrl: '',
-    
+
     // Status (required by backend)
     status: 'Active',
 
@@ -134,7 +136,7 @@ const ProfilePage = () => {
 
   // Initialize page
   useEffect(() => {
-    dispatch(setPageTitle('My Profile'));
+    dispatch(setPageTitle(t('users:profile.myProfile')));
     loadProfileData();
 
     return () => {
@@ -148,29 +150,29 @@ const ProfilePage = () => {
     try {
       setProfileLoading(true);
       const profile = await userService.getCurrentUserProfile();
-      
+
       console.log('Loaded profile data:', profile); // Debug log
-      
+
       setProfileData({
         firstName: profile.firstName || '',
         lastName: profile.lastName || '',
         email: profile.email || '',
-        
+
         // Enhanced phone fields
         phoneNumber: profile.phoneNumber || '',
         phoneCountryCode: profile.phoneCountryCode || '961',
         phoneType: profile.phoneType || 'Mobile',
-        
+
         // User preferences
         timeZone: profile.timeZone || 'Asia/Beirut',
         language: profile.language || 'en-US',
         theme: profile.theme || 'light',
-        
+
         // Work information
         department: profile.department || '',
         jobTitle: profile.jobTitle || '',
         employeeId: profile.employeeId || '',
-        
+
         // Enhanced address fields
         addressType: profile.addressType || 'Home',
         street1: profile.street1 || '',
@@ -182,10 +184,10 @@ const ProfilePage = () => {
         country: profile.country || 'Lebanon',
         latitude: profile.latitude || '',
         longitude: profile.longitude || '',
-        
+
         // Profile photo
         profilePhotoUrl: profile.profilePhotoUrl || '',
-        
+
         // Status (required by backend)
         status: profile.isActive ? 'Active' : 'Inactive',
 
@@ -193,7 +195,7 @@ const ProfilePage = () => {
         createdOn: profile.createdOn || '',
         passwordChangedDate: profile.passwordChangedDate || ""
       });
-      
+
       setPreferences({
         theme: profile.theme || 'light',
         language: profile.language || 'en-US',
@@ -201,7 +203,7 @@ const ProfilePage = () => {
       });
     } catch (error) {
       console.error('Failed to load profile:', error);
-      toast.error('Error', 'Failed to load profile data');
+      toast.error(t('common:alerts.error'), t('users:profile.notifications.loadError'));
     } finally {
       setProfileLoading(false);
     }
@@ -210,10 +212,10 @@ const ProfilePage = () => {
   // Load data based on active tab
   useEffect(() => {
     if (activeTab === 'activity') {
-      dispatch(getUserActivity({ 
-        id: userId, 
-        pageIndex: activityPage, 
-        pageSize: 20 
+      dispatch(getUserActivity({
+        id: userId,
+        pageIndex: activityPage,
+        pageSize: 20
       }));
     } else if (activeTab === 'security') {
       dispatch(getUserSessions());
@@ -224,7 +226,7 @@ const ProfilePage = () => {
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
     setProfileData(prev => ({ ...prev, [name]: value }));
-    
+
     // Clear field error when user starts typing
     if (profileErrors[name]) {
       setProfileErrors(prev => ({ ...prev, [name]: null }));
@@ -235,7 +237,7 @@ const ProfilePage = () => {
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswordData(prev => ({ ...prev, [name]: value }));
-    
+
     // Clear field error when user starts typing
     if (passwordErrors[name]) {
       setPasswordErrors(prev => ({ ...prev, [name]: null }));
@@ -251,7 +253,7 @@ const ProfilePage = () => {
   const handleSaveProfile = async () => {
     try {
       setProfileLoading(true);
-      
+
       // Prepare submission data with status field and governorate mapping
       const submissionData = {
         ...profileData,
@@ -262,32 +264,32 @@ const ProfilePage = () => {
         // Convert status to isActive boolean for backend
         isActive: profileData.status === 'Active'
       };
-      
+
       // Validate profile data
       const validation = validateUserData(submissionData, true);
       if (!validation.isValid) {
         setProfileErrors(validation.errors);
-        toast.error('Validation Error', 'Please fix the errors in the form');
+        toast.error(t('common:alerts.warning'), t('users:profile.notifications.validationError'));
         return;
       }
 
       console.log('Submitting profile data:', submissionData); // Debug log
 
       await userService.updateCurrentUserProfile(submissionData);
-      toast.success('Success', 'Profile updated successfully');
+      toast.success(t('common:alerts.success'), t('users:profile.notifications.updateSuccess'));
       setIsEditingProfile(false);
       setProfileErrors({});
-      
+
       // Reload profile data to get updated values
       await loadProfileData();
-      
+
       // Refresh auth state to update header
       dispatch(getCurrentUser());
     } catch (error) {
       console.error('Profile update failed:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to update profile';
-      toast.error('Error', errorMessage);
-      
+      const errorMessage = error.response?.data?.message || error.message || t('users:profile.notifications.updateError');
+      toast.error(t('common:alerts.error'), errorMessage);
+
       // If there are specific field errors, show them
       if (error.response?.data?.errors) {
         setProfileErrors(error.response.data.errors);
@@ -302,10 +304,10 @@ const ProfilePage = () => {
     try {
       setPreferencesLoading(true);
       await userService.updateCurrentUserPreferences(preferences);
-      toast.success('Success', 'Preferences updated successfully');
+      toast.success(t('common:alerts.success'), t('users:profile.notifications.preferencesSuccess'));
     } catch (error) {
       console.error('Preferences update failed:', error);
-      toast.error('Error', 'Failed to update preferences');
+      toast.error(t('common:alerts.error'), t('users:profile.notifications.preferencesError'));
     } finally {
       setPreferencesLoading(false);
     }
@@ -323,18 +325,18 @@ const ProfilePage = () => {
       // Upload photo
       const photoUrl = await fileUploadService.uploadProfilePhoto(file);
       console.log('Photo uploaded, returned URL:', photoUrl); // Debug log
-      toast.success('Success', 'Profile photo uploaded successfully');
-      
+      toast.success(t('common:alerts.success'), t('users:profile.notifications.photoUploadSuccess'));
+
       // Reload profile data to get updated photo URL
       await loadProfileData();
-      
+
       // Refresh auth state so header gets updated
       await dispatch(getCurrentUser());
-      
+
       return photoUrl;
     } catch (error) {
       console.error('Photo upload failed:', error);
-      toast.error('Error', error.message || 'Failed to upload profile photo');
+      toast.error(t('common:alerts.error'), error.message || t('users:profile.notifications.photoUploadError'));
       throw error;
     }
   };
@@ -343,16 +345,16 @@ const ProfilePage = () => {
   const handlePhotoRemove = async () => {
     try {
       await fileUploadService.removeProfilePhoto();
-      toast.success('Success', 'Profile photo removed successfully');
-      
+      toast.success(t('common:alerts.success'), t('users:profile.notifications.photoRemoveSuccess'));
+
       // Reload profile data to update UI
       await loadProfileData();
-      
+
       // Refresh auth state so header gets updated
       await dispatch(getCurrentUser());
     } catch (error) {
       console.error('Photo removal failed:', error);
-      toast.error('Error', 'Failed to remove profile photo');
+      toast.error(t('common:alerts.error'), t('users:profile.notifications.photoRemoveError'));
       throw error;
     }
   };
@@ -361,15 +363,15 @@ const ProfilePage = () => {
   const handleAddressChange = (fieldName, value) => {
     setProfileData(prev => {
       const newData = { ...prev, [fieldName]: value };
-      
+
       // If governorate changes, also update state for backend compatibility
       if (fieldName === 'governorate') {
         newData.state = value;
       }
-      
+
       return newData;
     });
-    
+
     // Clear field error when user starts typing
     if (profileErrors[fieldName]) {
       setProfileErrors(prev => ({ ...prev, [fieldName]: null }));
@@ -387,7 +389,7 @@ const ProfilePage = () => {
       }
 
       await dispatch(changePassword(passwordData)).unwrap();
-      toast.success('Success', 'Password changed successfully');
+      toast.success(t('common:alerts.success'), t('users:profile.notifications.passwordSuccess'));
       setIsChangingPassword(false);
       setPasswordData({
         currentPassword: '',
@@ -396,7 +398,7 @@ const ProfilePage = () => {
       });
       setPasswordErrors({});
     } catch (error) {
-      toast.error('Error', error);
+      toast.error(t('common:alerts.error'), error);
     }
   };
 
@@ -404,11 +406,11 @@ const ProfilePage = () => {
   const handleTerminateSession = async () => {
     try {
       await dispatch(terminateSession(sessionToTerminate.sessionId)).unwrap();
-      toast.success('Success', 'Session terminated successfully');
+      toast.success(t('common:alerts.success'), t('users:profile.notifications.sessionTerminated'));
       setShowTerminateModal(false);
       setSessionToTerminate(null);
     } catch (error) {
-      toast.error('Error', 'Failed to terminate session');
+      toast.error(t('common:alerts.error'), t('users:profile.notifications.sessionTerminateError'));
     }
   };
 
@@ -416,7 +418,7 @@ const ProfilePage = () => {
   const activityColumns = [
     {
       key: 'action',
-      header: 'Event',
+      header: t('users:detail.activity.event'),
       sortable: true,
       render: (action) => (
         <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
@@ -426,18 +428,18 @@ const ProfilePage = () => {
     },
     {
       key: 'description',
-      header: 'Description',
+      header: t('users:detail.activity.description'),
       sortable: false
     },
     {
       key: 'ipAddress',
-      header: 'IP Address',
+      header: t('users:detail.activity.ipAddress'),
       sortable: false,
       render: (ip) => ip || '-'
     },
     {
       key: 'timestamp',
-      header: 'Date & Time',
+      header: t('users:detail.activity.dateTime'),
       sortable: true,
       render: (timestamp) => formatDateTime(timestamp)
     }
@@ -447,30 +449,30 @@ const ProfilePage = () => {
   const sessionColumns = [
     {
       key: 'deviceInfo',
-      header: 'Device',
+      header: t('users:profile.sessions.device'),
       sortable: false,
       render: (deviceInfo, session) => (
         <div>
-          <div className="font-medium text-gray-900 dark:text-white">{deviceInfo || 'Unknown Device'}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">{session.browser || 'Unknown Browser'}</div>
+          <div className="font-medium text-gray-900 dark:text-white">{deviceInfo || t('users:profile.sessions.unknownDevice')}</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">{session.browser || t('users:profile.sessions.unknownBrowser')}</div>
         </div>
       )
     },
     {
       key: 'ipAddress',
-      header: 'IP Address',
+      header: t('users:detail.activity.ipAddress'),
       sortable: false,
       render: (ip) => ip || '-'
     },
     {
       key: 'lastActivity',
-      header: 'Last Activity',
+      header: t('users:profile.sessions.lastActivity'),
       sortable: true,
       render: (lastActivity) => formatDateTime(lastActivity)
     },
     {
       key: 'isCurrent',
-      header: 'Status',
+      header: t('common:labels.status'),
       sortable: false,
       render: (isCurrent) => (
         <span className={`px-2 py-1 text-xs font-medium rounded-full ${
@@ -478,13 +480,13 @@ const ProfilePage = () => {
             ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
             : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300'
         }`}>
-          {isCurrent ? 'Current' : 'Active'}
+          {isCurrent ? t('users:profile.sessions.current') : t('common:status.active')}
         </span>
       )
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('common:labels.actions'),
       sortable: false,
       render: (_, session) => (
         !session.isCurrent && (
@@ -496,7 +498,7 @@ const ProfilePage = () => {
               setShowTerminateModal(true);
             }}
           >
-            Terminate
+            {t('users:profile.sessions.terminate')}
           </Button>
         )
       )
@@ -505,29 +507,29 @@ const ProfilePage = () => {
 
   // Tab configuration
   const tabs = [
-    { 
-      id: 'profile', 
-      label: 'Profile', 
+    {
+      id: 'profile',
+      label: t('users:profile.tabs.profile'),
       icon: '👤',
-      description: 'Manage your personal information'
+      description: t('users:profile.tabs.profileDescription')
     },
-    { 
-      id: 'security', 
-      label: 'Security', 
+    {
+      id: 'security',
+      label: t('users:profile.tabs.security'),
       icon: '🔐',
-      description: 'Password and session management'
+      description: t('users:profile.tabs.securityDescription')
     },
-    { 
-      id: 'activity', 
-      label: 'Activity', 
+    {
+      id: 'activity',
+      label: t('users:profile.tabs.activity'),
       icon: '📊',
-      description: 'View your account activity'
+      description: t('users:profile.tabs.activityDescription')
     },
-    { 
-      id: 'preferences', 
-      label: 'Preferences', 
+    {
+      id: 'preferences',
+      label: t('users:profile.tabs.preferences'),
       icon: '⚙️',
-      description: 'Customize your experience'
+      description: t('users:profile.tabs.preferencesDescription')
     }
   ];
 
@@ -535,7 +537,7 @@ const ProfilePage = () => {
     <button
       onClick={() => onClick(tab.id)}
       className={`
-        flex items-center space-x-3 w-full px-4 py-3 text-left rounded-lg transition-all duration-200
+        flex items-center gap-3 w-full px-4 py-3 text-left rounded-lg transition-all duration-200
         ${isActive
           ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-2 border-blue-200 dark:border-blue-700 shadow-sm'
           : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 border-2 border-transparent'
@@ -568,7 +570,7 @@ const ProfilePage = () => {
           />
         ) : (
           <p className="text-gray-900 dark:text-white py-2.5 px-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-            {value || 'Not provided'}
+            {value || t('users:profile.notProvided')}
           </p>
         )}
       </div>
@@ -578,7 +580,7 @@ const ProfilePage = () => {
   if (authLoading || profileLoading || !user) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <LoadingSpinner text="Loading profile..." />
+        <LoadingSpinner text={t('users:profile.loading')} />
       </div>
     );
   }
@@ -591,14 +593,14 @@ const ProfilePage = () => {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6"
       >
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-4">
           {/* Profile Avatar */}
           <div className="relative">
             {profileData.profilePhotoUrl ? (
               <>
                 <img
                   src={profileData.profilePhotoUrl}
-                  alt="Profile"
+                  alt={t('users:profile.myProfile')}
                   className="w-16 h-16 object-cover rounded-full border-2 border-gray-200"
                   onError={(e) => {
                     console.error('Failed to load profile photo:', profileData.profilePhotoUrl);
@@ -610,7 +612,7 @@ const ProfilePage = () => {
                     e.target.nextSibling.style.display = 'none';
                   }}
                 />
-                <div 
+                <div
                   className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-xl font-bold"
                   style={{ display: 'none' }}
                 >
@@ -623,12 +625,12 @@ const ProfilePage = () => {
               </div>
             )}
           </div>
-          
+
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
               {formatName(user.firstName, user.lastName)}
             </h1>
-            <div className="flex items-center space-x-4 mt-1">
+            <div className="flex items-center gap-4 mt-1">
               <p className="text-gray-600 dark:text-gray-400">{userEmail}</p>
               <span className="px-3 py-1 text-sm font-medium text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/30 rounded-full border border-purple-200 dark:border-purple-700">
                 {userRole}
@@ -682,11 +684,11 @@ const ProfilePage = () => {
                   <div>
                     <div className="flex items-center justify-between mb-6">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Personal Information</h3>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Manage your account details</p>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('users:profile.personalInfo')}</h3>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{t('users:profile.manageAccountDetails')}</p>
                       </div>
-                      
-                      <div className="flex items-center space-x-2">
+
+                      <div className="flex items-center gap-2">
                         {isEditingProfile ? (
                           <>
                             <Button
@@ -699,14 +701,14 @@ const ProfilePage = () => {
                               }}
                               disabled={profileLoading}
                             >
-                              Cancel
+                              {t('common:buttons.cancel')}
                             </Button>
                             <Button
                               variant="primary"
                               onClick={handleSaveProfile}
                               loading={profileLoading}
                             >
-                              Save Changes
+                              {t('common:buttons.save')}
                             </Button>
                           </>
                         ) : (
@@ -720,7 +722,7 @@ const ProfilePage = () => {
                               </svg>
                             }
                           >
-                            Edit Profile
+                            {t('common:buttons.edit')}
                           </Button>
                         )}
                       </div>
@@ -728,7 +730,7 @@ const ProfilePage = () => {
 
                     {/* Profile Photo Section */}
                     <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Profile Photo</h4>
+                      <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">{t('users:profile.photo.title')}</h4>
                       <div className="flex justify-center">
                         <ProfilePhotoUpload
                           currentPhotoUrl={profileData.profilePhotoUrl}
@@ -743,7 +745,7 @@ const ProfilePage = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <ProfileField
-                        label="First Name"
+                        label={t('users:fields.firstName')}
                         value={profileData.firstName}
                         isEditing={isEditingProfile}
                         name="firstName"
@@ -751,9 +753,9 @@ const ProfilePage = () => {
                         error={profileErrors.firstName}
                         required
                       />
-                      
+
                       <ProfileField
-                        label="Last Name"
+                        label={t('users:fields.lastName')}
                         value={profileData.lastName}
                         isEditing={isEditingProfile}
                         name="lastName"
@@ -761,9 +763,9 @@ const ProfilePage = () => {
                         error={profileErrors.lastName}
                         required
                       />
-                      
+
                       <ProfileField
-                        label="Email Address"
+                        label={t('users:fields.email')}
                         value={profileData.email}
                         isEditing={isEditingProfile}
                         name="email"
@@ -772,9 +774,9 @@ const ProfilePage = () => {
                         error={profileErrors.email}
                         required
                       />
-                      
+
                       <ProfileField
-                        label="Phone Number"
+                        label={t('users:fields.phoneNumber')}
                         value={profileData.phoneNumber}
                         isEditing={isEditingProfile}
                         name="phoneNumber"
@@ -783,18 +785,18 @@ const ProfilePage = () => {
                         error={profileErrors.phoneNumber}
                         placeholder="03 962 114"
                       />
-                      
+
                       <ProfileField
-                        label="Department"
+                        label={t('users:fields.department')}
                         value={profileData.department}
                         isEditing={isEditingProfile}
                         name="department"
                         onChange={handleProfileChange}
                         error={profileErrors.department}
                       />
-                      
+
                       <ProfileField
-                        label="Job Title"
+                        label={t('users:fields.jobTitle')}
                         value={profileData.jobTitle}
                         isEditing={isEditingProfile}
                         name="jobTitle"
@@ -805,12 +807,12 @@ const ProfilePage = () => {
 
                     {/* Enhanced Address Section */}
                     <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-                      <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Address Information</h4>
-                      
+                      <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">{t('users:profile.addressInfo')}</h4>
+
                       {isEditingProfile ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <ProfileField
-                            label="Street Address"
+                            label={t('users:profile.fields.streetAddress')}
                             value={profileData.street1}
                             isEditing={isEditingProfile}
                             name="street1"
@@ -818,9 +820,9 @@ const ProfilePage = () => {
                             error={profileErrors.street1}
                             placeholder="Building name, Street name"
                           />
-                          
+
                           <ProfileField
-                            label="Address Line 2 (Optional)"
+                            label={t('users:profile.fields.addressLine2')}
                             value={profileData.street2}
                             isEditing={isEditingProfile}
                             name="street2"
@@ -828,9 +830,9 @@ const ProfilePage = () => {
                             error={profileErrors.street2}
                             placeholder="Floor, Apartment, Unit"
                           />
-                          
+
                           <ProfileField
-                            label="City"
+                            label={t('users:profile.fields.city')}
                             value={profileData.city}
                             isEditing={isEditingProfile}
                             name="city"
@@ -838,16 +840,16 @@ const ProfilePage = () => {
                             error={profileErrors.city}
                             placeholder="e.g., Beirut, Tripoli, Sidon"
                           />
-                          
+
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Governorate</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('users:profile.fields.governorate')}</label>
                             <select
                               name="governorate"
                               value={profileData.governorate}
                               onChange={handleProfileChange}
                               className="block w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             >
-                              <option value="">Select Governorate</option>
+                              <option value="">{t('users:profile.fields.selectGovernorate')}</option>
                               <option value="Beirut">Beirut</option>
                               <option value="Mount Lebanon">Mount Lebanon</option>
                               <option value="North Lebanon">North Lebanon</option>
@@ -861,9 +863,9 @@ const ProfilePage = () => {
                               <p className="text-red-600 text-sm mt-1">{profileErrors.governorate}</p>
                             )}
                           </div>
-                          
+
                           <ProfileField
-                            label="Postal Code (Optional)"
+                            label={t('users:profile.fields.postalCode')}
                             value={profileData.postalCode}
                             isEditing={isEditingProfile}
                             name="postalCode"
@@ -871,9 +873,9 @@ const ProfilePage = () => {
                             error={profileErrors.postalCode}
                             placeholder="e.g., 1107-2180"
                           />
-                          
+
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Country</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('users:profile.fields.country')}</label>
                             <select
                               name="country"
                               value={profileData.country}
@@ -890,7 +892,7 @@ const ProfilePage = () => {
                           </div>
 
                             <ProfileField
-                              label="Latitude (Optional)"
+                              label={t('users:profile.fields.latitude')}
                               value={profileData.latitude}
                               isEditing={isEditingProfile}
                               name="latitude"
@@ -900,7 +902,7 @@ const ProfilePage = () => {
                             />
 
                             <ProfileField
-                              label="Longitude (Optional)"
+                              label={t('users:profile.fields.longitude')}
                               value={profileData.longitude}
                               isEditing={isEditingProfile}
                               name="longitude"
@@ -912,42 +914,42 @@ const ProfilePage = () => {
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <ProfileField
-                            label="Street Address"
+                            label={t('users:profile.fields.streetAddress')}
                             value={profileData.street1}
                             isEditing={false}
                           />
                           <ProfileField
-                            label="City"
+                            label={t('users:profile.fields.city')}
                             value={profileData.city}
                             isEditing={false}
                           />
                           <ProfileField
-                            label="Governorate"
+                            label={t('users:profile.fields.governorate')}
                             value={profileData.governorate}
                             isEditing={false}
                           />
                           <ProfileField
-                            label="Country"
+                            label={t('users:profile.fields.country')}
                             value={profileData.country}
                             isEditing={false}
                           />
                           <ProfileField
-                            label="Latitude"
+                            label={t('users:profile.fields.latitude')}
                             value={profileData.latitude}
                             isEditing={false}
                           />
                           <ProfileField
-                            label="Longitude"
+                            label={t('users:profile.fields.longitude')}
                             value={profileData.longitude}
                             isEditing={false}
                           />
                           <ProfileField
-                            label="Postal Code"
+                            label={t('users:profile.fields.postalCode')}
                             value={profileData.postalCode}
                             isEditing={false}
                           />
                           <ProfileField
-                            label="Address Type"
+                            label={t('users:profile.fields.addressType')}
                             value={profileData.addressType}
                             isEditing={false}
                           />
@@ -957,27 +959,27 @@ const ProfilePage = () => {
 
                     {/* Account Information (Read Only) */}
                     <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-                      <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Account Information</h4>
+                      <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">{t('users:profile.accountInfo')}</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('users:profile.fields.role')}</label>
                           <p className="text-gray-900 dark:text-white py-2.5 px-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">{userRole}</p>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Employee ID</label>
-                          <p className="text-gray-900 dark:text-white py-2.5 px-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">{profileData.employeeId || 'Not assigned'}</p>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('users:profile.fields.employeeId')}</label>
+                          <p className="text-gray-900 dark:text-white py-2.5 px-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">{profileData.employeeId || t('users:profile.notAssigned')}</p>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Member Since</label>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('users:profile.fields.memberSince')}</label>
                           <p className="text-gray-900 dark:text-white py-2.5 px-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             {console.log(profileData)}
                             {formatDate(profileData.createdOn || profileData.createdDate || profileData.registrationDate)}
                           </p>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Login</label>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('users:profile.fields.lastLogin')}</label>
                           <p className="text-gray-900 dark:text-white py-2.5 px-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            {profileData.lastLoginDate ? formatDateTime(profileData.lastLoginDate) : 'Never'}
+                            {profileData.lastLoginDate ? formatDateTime(profileData.lastLoginDate) : t('users:profile.never')}
                           </p>
                         </div>
                       </div>
@@ -988,17 +990,17 @@ const ProfilePage = () => {
                 {/* Security Tab */}
                 {activeTab === 'security' && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Security Settings</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">{t('users:profile.securitySettings')}</h3>
 
                     <div className="space-y-8">
                       {/* Password Change Section */}
                       <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
                         <div className="flex items-center justify-between mb-4">
                           <div>
-                            <h4 className="text-md font-medium text-gray-900 dark:text-white">Password</h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Keep your account secure with a strong password</p>
+                            <h4 className="text-md font-medium text-gray-900 dark:text-white">{t('users:profile.fields.password')}</h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{t('users:profile.passwordSecureNote')}</p>
                           </div>
-                          
+
                           <Button
                             variant={isChangingPassword ? "secondary" : "primary"}
                             onClick={() => {
@@ -1013,7 +1015,7 @@ const ProfilePage = () => {
                               }
                             }}
                           >
-                            {isChangingPassword ? 'Cancel' : 'Change Password'}
+                            {isChangingPassword ? t('common:buttons.cancel') : t('users:profile.fields.changePassword')}
                           </Button>
                         </div>
 
@@ -1026,17 +1028,17 @@ const ProfilePage = () => {
                           >
                             <Input
                               type="password"
-                              label="Current Password"
+                              label={t('users:profile.password.currentPassword')}
                               name="currentPassword"
                               value={passwordData.currentPassword}
                               onChange={handlePasswordChange}
                               error={passwordErrors.currentPassword}
                               required
                             />
-                            
+
                             <Input
                               type="password"
-                              label="New Password"
+                              label={t('users:profile.password.newPassword')}
                               name="newPassword"
                               value={passwordData.newPassword}
                               onChange={handlePasswordChange}
@@ -1044,24 +1046,24 @@ const ProfilePage = () => {
                               required
                               showPasswordToggle
                             />
-                            
+
                             <Input
                               type="password"
-                              label="Confirm New Password"
+                              label={t('users:profile.password.confirmPassword')}
                               name="confirmPassword"
                               value={passwordData.confirmPassword}
                               onChange={handlePasswordChange}
                               error={passwordErrors.confirmPassword}
                               required
                             />
-                            
+
                             <div className="flex justify-end">
                               <Button
                                 variant="primary"
                                 onClick={handleChangePassword}
                                 disabled={!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
                               >
-                                Update Password
+                                {t('users:profile.password.updatePassword')}
                               </Button>
                             </div>
                           </motion.div>
@@ -1070,13 +1072,13 @@ const ProfilePage = () => {
 
                       {/* Active Sessions */}
                       <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
-                        <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Active Sessions</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Manage your active login sessions across devices</p>
-                        
+                        <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">{t('users:profile.fields.activeSessions')}</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{t('users:profile.sessionsNote')}</p>
+
                         <Table
                           columns={sessionColumns}
                           data={sessions || []}
-                          emptyMessage="No active sessions found"
+                          emptyMessage={t('users:profile.sessions.noSessions')}
                           size="sm"
                         />
                       </div>
@@ -1087,15 +1089,15 @@ const ProfilePage = () => {
                 {/* Activity Tab */}
                 {activeTab === 'activity' && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Account Activity</h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">Track your recent account activity and login history</p>
-                    
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">{t('users:profile.activityTitle')}</h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">{t('users:profile.activityNote')}</p>
+
                     <Table
                       columns={activityColumns}
                       data={userActivity.data || []}
                       loading={userActivity.loading}
                       error={userActivity.error}
-                      emptyMessage="No activity found"
+                      emptyMessage={t('users:detail.activity.noActivity')}
                       pagination={{
                         currentPage: activityPage + 1,
                         totalPages: userActivity.pagination?.totalPages || 0,
@@ -1108,20 +1110,20 @@ const ProfilePage = () => {
                 {/* Preferences Tab */}
                 {activeTab === 'preferences' && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Preferences</h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">Customize your experience and notification settings</p>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">{t('users:profile.preferencesTitle')}</h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">{t('users:profile.preferencesNote')}</p>
 
                     <div className="space-y-8">
                       {/* Appearance */}
                       <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
-                        <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Appearance</h4>
+                        <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">{t('users:profile.appearanceTitle')}</h4>
 
                         <div className="space-y-4">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Theme</label>
-                            <div className="flex space-x-4">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('users:fields.theme')}</label>
+                            <div className="flex gap-4">
                               {['light', 'dark', 'auto'].map(theme => (
-                                <label key={theme} className="flex items-center space-x-2 cursor-pointer">
+                                <label key={theme} className="flex items-center gap-2 cursor-pointer">
                                   <input
                                     type="radio"
                                     name="theme"
@@ -1130,14 +1132,16 @@ const ProfilePage = () => {
                                     onChange={(e) => handlePreferenceChange('theme', e.target.value)}
                                     className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 focus:ring-blue-500"
                                   />
-                                  <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">{theme}</span>
+                                  <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">
+                                    {theme === 'light' ? t('users:profile.themeLight') : theme === 'dark' ? t('users:profile.themeDark') : t('users:profile.themeAuto')}
+                                  </span>
                                 </label>
                               ))}
                             </div>
                           </div>
 
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Language</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('users:fields.language')}</label>
                             <select
                               value={preferences.language}
                               onChange={(e) => handlePreferenceChange('language', e.target.value)}
@@ -1152,7 +1156,7 @@ const ProfilePage = () => {
                           </div>
 
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Time Zone</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('users:profile.timeZone')}</label>
                             <select
                               value={preferences.timeZone}
                               onChange={(e) => handlePreferenceChange('timeZone', e.target.value)}
@@ -1172,12 +1176,12 @@ const ProfilePage = () => {
 
                       {/* Save Preferences */}
                       <div className="flex justify-end mt-6">
-                        <Button 
-                          variant="primary" 
+                        <Button
+                          variant="primary"
                           onClick={handleSavePreferences}
                           loading={preferencesLoading}
                         >
-                          Save Preferences
+                          {t('common:buttons.save')}
                         </Button>
                       </div>
                     </div>
@@ -1194,10 +1198,10 @@ const ProfilePage = () => {
         isOpen={showTerminateModal}
         onClose={() => setShowTerminateModal(false)}
         onConfirm={handleTerminateSession}
-        title="Terminate Session"
-        message={`Are you sure you want to terminate this session? The user will be logged out from that device.`}
-        confirmText="Terminate"
-        cancelText="Cancel"
+        title={t('users:profile.sessions.terminateTitle')}
+        message={t('users:profile.sessions.terminateMessage')}
+        confirmText={t('users:profile.sessions.terminate')}
+        cancelText={t('common:buttons.cancel')}
         variant="danger"
       />
     </div>

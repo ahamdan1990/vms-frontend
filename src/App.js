@@ -13,6 +13,7 @@ import NotificationProvider from './components/notifications/NotificationProvide
 import NotificationCenter from './components/notifications/NotificationCenter.js';
 import { HelmetProvider } from 'react-helmet-async';
 import { useTheme } from './hooks/useTheme';
+import { useTranslation } from 'react-i18next';
 
 
 /**
@@ -24,6 +25,7 @@ const AppInitializer = ({ children, isAuth }) => {
   const { loading, isAuthenticated } = useAuth();
   const initialized = useRef(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const { t } = useTranslation('common');
 
   // Wait for initial auth check to complete
   useEffect(() => {
@@ -64,7 +66,7 @@ const AppInitializer = ({ children, isAuth }) => {
       <div className="fixed inset-0 bg-white dark:bg-gray-900 flex items-center justify-center z-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Initializing application...</p>
+          <p className="text-gray-600 dark:text-gray-300">{t('loading.app')}</p>
         </div>
       </div>
     );

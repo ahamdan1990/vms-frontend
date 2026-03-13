@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // Redux imports
 import {
@@ -71,6 +72,7 @@ import { useToast } from '../../../hooks/useNotifications';
 const CheckInDashboard = () => {
   const dispatch = useDispatch();
   const toast = useToast();
+  const { t } = useTranslation('checkin');
 
   // Redux selectors
   const activeInvitations = useSelector(selectActiveInvitations);
@@ -187,8 +189,8 @@ const CheckInDashboard = () => {
         const invitationNumber = result?.invitationNumber || 'N/A';
 
         toast.success(
-          'Check-in Successful',
-          `${visitorName} has been checked in successfully. Invitation: ${invitationNumber}`,
+          t('success.toastTitle'),
+          `${visitorName} ${t('success.checkedIn')} ${t('form.invitationNumber')}: ${invitationNumber}`,
           { duration: 5000 }
         );
 
@@ -297,8 +299,8 @@ const CheckInDashboard = () => {
       const invitationNumber = result?.invitationNumber || 'N/A';
 
       toast.success(
-        'Check-in Successful',
-        `${visitorName} has been checked in successfully. Invitation: ${invitationNumber}`,
+        t('success.toastTitle'),
+        t('success.toastMessage', { name: visitorName, number: invitationNumber }),
         { duration: 5000 }
       );
 
@@ -367,16 +369,16 @@ const CheckInDashboard = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Check-in Dashboard</h1>
-          <p className="text-gray-600">Manage visitor check-ins and active visits</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('pageTitle')}</h1>
+          <p className="text-gray-600">{t('pageSubtitle')}</p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
           <Button
             variant="outline"
             onClick={() => dispatch(getActiveInvitations())}
             icon={<ArrowRightOnRectangleIcon className="w-4 h-4" />}
           >
-            Refresh
+            {t('refresh')}
           </Button>
         </div>
       </div>
@@ -384,48 +386,48 @@ const CheckInDashboard = () => {
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="p-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-md">
               <CheckCircleIconSolid className="w-6 h-6 text-green-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Today's Check-ins</p>
+              <p className="text-sm font-medium text-gray-600">{t('stats.todayCheckIns')}</p>
               <p className="text-2xl font-bold text-gray-900">{checkInStats.todayCheckIns}</p>
             </div>
           </div>
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-md">
               <UserIcon className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Active Visitors</p>
+              <p className="text-sm font-medium text-gray-600">{t('stats.activeVisitors')}</p>
               <p className="text-2xl font-bold text-gray-900">{checkInStats.activeVisitors}</p>
             </div>
           </div>
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-md">
               <ClockIconSolid className="w-6 h-6 text-yellow-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Pending Check-outs</p>
+              <p className="text-sm font-medium text-gray-600">{t('stats.pendingCheckOuts')}</p>
               <p className="text-2xl font-bold text-gray-900">{checkInStats.pendingCheckOuts}</p>
             </div>
           </div>
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-md">
               <ClockIcon className="w-6 h-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Avg Duration</p>
+              <p className="text-sm font-medium text-gray-600">{t('stats.avgDuration')}</p>
               <p className="text-2xl font-bold text-gray-900">
                 {checkInStats.averageVisitDuration > 0 ? `${checkInStats.averageVisitDuration}h` : 'N/A'}
               </p>
@@ -446,14 +448,14 @@ const CheckInDashboard = () => {
             onClick={() => dispatch(clearError())}
             className="mt-2 text-red-600"
           >
-            Dismiss
+            {t('errors.dismiss')}
           </Button>
         </div>
       )}
 
       {/* Tab Navigation */}
       <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="-mb-px flex space-x-8">
+        <nav className="-mb-px flex gap-8">
           <button
             onClick={() => setActiveTab('scanner')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
@@ -462,9 +464,9 @@ const CheckInDashboard = () => {
                 : 'border-transparent text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <QrCodeIcon className="w-4 h-4" />
-              <span>QR Scanner</span>
+              <span>{t('tabs.scanner')}</span>
             </div>
           </button>
           <button
@@ -475,9 +477,9 @@ const CheckInDashboard = () => {
                 : 'border-transparent text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <UserPlusIcon className="w-4 h-4" />
-              <span>Manual Check-in</span>
+              <span>{t('tabs.manual')}</span>
             </div>
           </button>
           <button
@@ -488,9 +490,9 @@ const CheckInDashboard = () => {
                 : 'border-transparent text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <EyeIcon className="w-4 h-4" />
-              <span>Active Visitors ({checkInStats.activeVisitors})</span>
+              <span>{t('tabs.active', { count: checkInStats.activeVisitors })}</span>
             </div>
           </button>
         </nav>
@@ -509,15 +511,15 @@ const CheckInDashboard = () => {
             <Card className="p-6">
               <div className="text-center">
                 <QrCodeIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">QR Code Scanner</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">{t('scanner.title')}</h3>
                 <p className="text-gray-600 mb-4">
-                  Scan visitor QR codes for quick check-in
+                  {t('scanner.description')}
                 </p>
 
                 {/* Check-in Mode Toggle */}
-                <div className="flex items-center justify-center space-x-4 mb-6 p-4 bg-gray-50 dark:bg-slate-900/60 rounded-lg border border-gray-100 dark:border-gray-700">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Check-in Mode:</span>
-                  <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-center gap-4 mb-6 p-4 bg-gray-50 dark:bg-slate-900/60 rounded-lg border border-gray-100 dark:border-gray-700">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{t('scanner.checkInMode')}</span>
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => setAutoCheckInMode(false)}
                       className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
@@ -526,7 +528,7 @@ const CheckInDashboard = () => {
                           : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-slate-800'
                       }`}
                     >
-                      Manual Confirmation
+                      {t('scanner.manualConfirmation')}
                     </button>
                     <button
                       onClick={() => setAutoCheckInMode(true)}
@@ -536,7 +538,7 @@ const CheckInDashboard = () => {
                           : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-slate-800'
                       }`}
                     >
-                      Auto Check-in
+                      {t('scanner.autoCheckIn')}
                     </button>
                   </div>
                 </div>
@@ -544,11 +546,11 @@ const CheckInDashboard = () => {
                 <div className="mb-6 text-sm text-gray-600 dark:text-gray-300">
                   {autoCheckInMode ? (
                     <p>
-                      ✅ <strong>Auto mode:</strong> Visitors will be checked in immediately after QR scan
+                      ✅ <strong>{t('scanner.autoCheckIn')}:</strong> {t('scanner.autoModeDesc')}
                     </p>
                   ) : (
                     <p>
-                      👤 <strong>Manual mode:</strong> Review visitor details before confirming check-in
+                      👤 <strong>{t('scanner.manualConfirmation')}:</strong> {t('scanner.manualModeDesc')}
                     </p>
                   )}
                 </div>
@@ -560,7 +562,7 @@ const CheckInDashboard = () => {
                   icon={<QrCodeIcon className="h-5 w-5" />}
                   iconPosition="left"
                 >
-                  Open QR Scanner
+                  {t('scanner.openScanner')}
                 </Button>
               </div>
             </Card>
@@ -571,9 +573,9 @@ const CheckInDashboard = () => {
               <div className="max-w-md mx-auto">
                 <div className="text-center mb-6">
                   <UserPlusIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900">Manual Check-in</h3>
+                  <h3 className="text-lg font-medium text-gray-900">{t('manual.title')}</h3>
                   <p className="text-gray-600">
-                    Enter invitation number or visitor details
+                    {t('manual.description')}
                   </p>
                 </div>
                 <CheckInForm
@@ -594,14 +596,14 @@ const CheckInDashboard = () => {
                 <Table
                   data={activeInvitations}
                   columns={columns}
-                  emptyMessage="No active visitors"
+                  emptyMessage={t('activeVisitors.empty')}
                 />
               ) : (
                 <div className="text-center py-12">
                   <UserIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No active visitors</h3>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">{t('activeVisitors.empty')}</h3>
                   <p className="mt-1 text-sm text-gray-500">
-                    Visitors will appear here when they check in.
+                    {t('activeVisitors.emptyDesc')}
                   </p>
                 </div>
               )}
@@ -621,15 +623,15 @@ const CheckInDashboard = () => {
           <Card className="p-8 max-w-md mx-4">
             <div className="text-center">
               <CheckCircleIconSolid className="mx-auto h-16 w-16 text-green-500 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Check-in Successful!</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">{t('success.title')}</h3>
               <p className="text-gray-600 mb-4">
-                {checkInData.visitor?.firstName} {checkInData.visitor?.lastName} has been checked in.
+                {t('success.message', { name: `${checkInData.visitor?.firstName || ''} ${checkInData.visitor?.lastName || ''}`.trim() })}
               </p>
               <Button
                 onClick={() => dispatch(clearError())}
                 className="w-full"
               >
-                Continue
+                {t('success.continue')}
               </Button>
             </div>
           </Card>
@@ -641,12 +643,12 @@ const CheckInDashboard = () => {
         <Modal
           isOpen={showScannerModal}
           onClose={() => setShowScannerModal(false)}
-          title="Scan QR Code"
+          title={t('scanQr')}
           size="lg"
         >
           <div className="text-center">
             <p className="text-gray-600 mb-6">
-              Point your camera at the visitor's QR code
+              {t('scanner.instruction')}
             </p>
             <QrCodeScanner
               key={showScannerModal ? 'scanner-open' : 'scanner-closed'}
@@ -676,15 +678,15 @@ const CheckInDashboard = () => {
         <Modal
           isOpen={!!scannedInvitationData}
           onClose={() => setScannedInvitationData(null)}
-          title="Check-in Successful"
+          title={t('details.title')}
           size="xl"
         >
           <div className="space-y-6">
             {/* Success Message */}
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start">
-              <CheckCircleIconSolid className="h-6 w-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" />
+              <CheckCircleIconSolid className="h-6 w-6 text-green-600 me-3 flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-green-900 font-medium">Visitor Checked In Successfully</h4>
+                <h4 className="text-green-900 font-medium">{t('success.visitorCheckedIn')}</h4>
                 <p className="text-green-700 text-sm mt-1">
                   {new Date().toLocaleString()}
                 </p>
@@ -693,31 +695,31 @@ const CheckInDashboard = () => {
 
             {/* Visitor Information */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <UserIcon className="h-5 w-5 mr-2" />
-                Visitor Information
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <UserIcon className="h-5 w-5" />
+                {t('details.visitorInfo')}
               </h3>
               <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-slate-900/60 p-4 rounded-lg">
                 <div>
-                  <p className="text-sm text-gray-500">Full Name</p>
+                  <p className="text-sm text-gray-500">{t('details.fullName')}</p>
                   <p className="font-medium text-gray-900">
                     {scannedInvitationData.visitor?.fullName || 'N/A'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="text-sm text-gray-500">{t('details.email')}</p>
                   <p className="font-medium text-gray-900">
                     {scannedInvitationData.visitor?.email?.value || 'N/A'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Phone</p>
+                  <p className="text-sm text-gray-500">{t('details.phone')}</p>
                   <p className="font-medium text-gray-900">
                     {scannedInvitationData.visitor?.phoneNumber?.value || 'N/A'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Company</p>
+                  <p className="text-sm text-gray-500">{t('details.company')}</p>
                   <p className="font-medium text-gray-900">
                     {scannedInvitationData.visitor?.company || 'N/A'}
                   </p>
@@ -727,25 +729,25 @@ const CheckInDashboard = () => {
 
             {/* Invitation Information */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <CalendarIcon className="h-5 w-5 mr-2" />
-                Invitation Details
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5" />
+                {t('details.invitationDetails')}
               </h3>
               <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-slate-900/60 p-4 rounded-lg">
                 <div>
-                  <p className="text-sm text-gray-500">Invitation Number</p>
+                  <p className="text-sm text-gray-500">{t('details.invitationNumber')}</p>
                   <p className="font-medium text-gray-900">
                     {scannedInvitationData.invitationNumber || 'N/A'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Purpose</p>
+                  <p className="text-sm text-gray-500">{t('details.purpose')}</p>
                   <p className="font-medium text-gray-900">
                     {scannedInvitationData.purpose || 'N/A'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Scheduled Time</p>
+                  <p className="text-sm text-gray-500">{t('details.scheduledTime')}</p>
                   <p className="font-medium text-gray-900">
                     {scannedInvitationData.scheduledStartTime
                       ? new Date(scannedInvitationData.scheduledStartTime).toLocaleString()
@@ -753,34 +755,34 @@ const CheckInDashboard = () => {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Host</p>
+                  <p className="text-sm text-gray-500">{t('details.host')}</p>
                   <p className="font-medium text-gray-900">
                     {scannedInvitationData.host?.fullName || 'N/A'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Location</p>
-                  <p className="font-medium text-gray-900 flex items-center">
-                    <MapPinIcon className="h-4 w-4 mr-1" />
+                  <p className="text-sm text-gray-500">{t('details.location')}</p>
+                  <p className="font-medium text-gray-900 flex items-center gap-1">
+                    <MapPinIcon className="h-4 w-4" />
                     {scannedInvitationData.location?.name || 'N/A'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Status</p>
+                  <p className="text-sm text-gray-500">{t('details.status')}</p>
                   <Badge variant="success">
-                    Checked In
+                    {t('details.checkedIn')}
                   </Badge>
                 </div>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end space-x-3 pt-4 border-t">
+            <div className="flex justify-end gap-3 pt-4 border-t">
               <Button
                 variant="secondary"
                 onClick={() => setScannedInvitationData(null)}
               >
-                Close
+                {t('details.close')}
               </Button>
               <Button
                 variant="primary"
@@ -791,7 +793,7 @@ const CheckInDashboard = () => {
                 icon={<QrCodeIcon className="h-4 w-4" />}
                 iconPosition="left"
               >
-                Scan Another
+                {t('success.scanAnother')}
               </Button>
             </div>
           </div>

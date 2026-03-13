@@ -1,0 +1,199 @@
+{
+  "pageTitle": "Visitors",
+  "pageSubtitle": "Manage visitor records, VIP status, and blacklist entries",
+  "createButton": "Add Visitor",
+  "advancedSearch": "Advanced Search",
+  "backToList": "Back to Visitors",
+  "vipBadge": "VIP",
+  "vipVisitorTitle": "VIP Visitor",
+  "jobTitleAt": "{{jobTitle}} at {{company}}",
+  "search": {
+    "placeholder": "Search visitors by name, email, company..."
+  },
+  "stats": {
+    "total": "Total Visitors",
+    "active": "Active",
+    "vip": "VIP Visitors",
+    "blacklisted": "Blacklisted"
+  },
+  "filters": {
+    "title": "Filters",
+    "clearAll": "Clear Filters",
+    "vipStatus": "VIP Status",
+    "blacklistStatus": "Blacklist Status",
+    "nationality": "Nationality",
+    "securityClearance": "Security Clearance",
+    "allVisitors": "All Visitors",
+    "vipOnly": "VIP Only",
+    "nonVipOnly": "Non-VIP Only",
+    "blacklistedOnly": "Blacklisted Only",
+    "notBlacklisted": "Not Blacklisted",
+    "filterByCompany": "Filter by company",
+    "filterByNationality": "Filter by nationality",
+    "securityLevels": {
+      "all": "All Levels",
+      "standard": "Standard",
+      "medium": "Medium",
+      "high": "High",
+      "topSecret": "Top Secret"
+    },
+    "includeInactive": "Include inactive visitors",
+    "includeDeleted": "Include deleted visitors"
+  },
+  "table": {
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "company": "Company",
+      "nationality": "Nationality",
+      "status": "Status",
+      "lastVisit": "Last Visit",
+      "actions": "Actions"
+    },
+    "emptyMessage": "No visitors found",
+    "emptyDescription": "Try adjusting your search criteria or add a new visitor."
+  },
+  "pagination": {
+    "showing": "Showing {{start}} to {{end}} of {{total}} visitors",
+    "perPage": "{{count}} per page",
+    "pageOf": "Page {{current}} of {{total}}"
+  },
+  "bulk": {
+    "selected": "{{count}} visitor selected",
+    "selected_plural": "{{count}} visitors selected",
+    "deleteTitle": "Delete Selected Visitors",
+    "deleteMessage": "Are you sure you want to delete {{count}} visitor? This will deactivate the visitor but preserve historical data.",
+    "deleteMessage_plural": "Are you sure you want to delete {{count}} visitors? This will deactivate the visitors but preserve historical data.",
+    "deleteConfirm": "Delete Selected",
+    "blacklistTitle": "Blacklist Selected Visitors",
+    "blacklistMessage": "You are about to blacklist {{count}} visitor. Please provide a reason for this action.",
+    "blacklistMessage_plural": "You are about to blacklist {{count}} visitors. Please provide a reason for this action.",
+    "blacklistConfirm": "Blacklist Selected",
+    "vipMessage": "Are you sure you want to mark {{count}} visitor as VIP?",
+    "vipMessage_plural": "Are you sure you want to mark {{count}} visitors as VIP?"
+  },
+  "profile": {
+    "title": "Visitor Profile",
+    "personalInfo": "Personal Information",
+    "professionalInfo": "Professional Information",
+    "contactInfo": "Contact Information",
+    "address": "Address",
+    "governmentId": "Government ID",
+    "specialReqs": "Special Requirements",
+    "dietaryReqs": "Dietary Requirements",
+    "accessibilityReqs": "Accessibility Requirements",
+    "visitHistory": "Visit History",
+    "emergencyContacts": "Emergency Contacts",
+    "notFound": {
+      "title": "Visitor Not Found",
+      "message": "The visitor you're looking for doesn't exist or has been removed."
+    },
+    "createdOn": "Created {{date}}",
+    "visitCount": "{{count}} visits",
+    "lastVisit": "Last visit: {{date}}",
+    "uploadPhotoTitle": "Upload photo",
+    "removePhotoTitle": "Remove photo",
+    "confirmCloseUnsaved": "You have unsaved changes. Are you sure you want to close without saving?",
+    "tabs": {
+      "overview": "Overview",
+      "documents": "Documents",
+      "notes": "Notes",
+      "emergencyContacts": "Emergency Contacts",
+      "activity": "Activity"
+    }
+  },
+  "fields": {
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "company": "Company",
+    "nationality": "Nationality",
+    "idNumber": "ID Number",
+    "idType": "ID Type",
+    "dateOfBirth": "Date of Birth",
+    "jobTitle": "Job Title",
+    "securityClearance": "Security Clearance",
+    "age": "{{age}} years old"
+  },
+  "actions": {
+    "view": "View Profile",
+    "edit": "Edit",
+    "delete": "Delete",
+    "addNote": "Add Note",
+    "uploadDocument": "Upload Document",
+    "markVip": "Mark as VIP",
+    "removeVip": "Remove VIP",
+    "blacklist": "Blacklist",
+    "removeBlacklist": "Remove from Blacklist",
+    "createInvitation": "Create Invitation"
+  },
+  "modals": {
+    "createTitle": "Add New Visitor",
+    "editTitle": "Edit Visitor",
+    "deleteTitle": "Delete Visitor",
+    "deleteMessage": "Are you sure you want to delete this visitor? This action cannot be undone.",
+    "deleteVisitorMessage": "Are you sure you want to delete \"{{name}}\"? This will deactivate the visitor but preserve historical data.",
+    "blacklistTitle": "Add to Blacklist",
+    "blacklistReason": "Reason for Blacklisting",
+    "blacklistReasonPlaceholder": "Please provide a detailed reason...",
+    "blacklistAboutTo": "You are about to blacklist {{name}}. Please provide a reason for this action.",
+    "confirmUnsavedCreate": "You have unsaved visitor information. Are you sure you want to close without saving?",
+    "confirmUnsavedEdit": "You have unsaved changes to this visitor. Are you sure you want to close without saving?",
+    "createInvitationTitle": "Create Invitation for {{name}}"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "blacklisted": "Blacklisted",
+    "standard": "Standard"
+  },
+  "photo": {
+    "invalidType": "Please upload a valid image file (JPG, PNG, or GIF)",
+    "tooLarge": "File size must be less than 5MB",
+    "confirmRemove": "Are you sure you want to remove this photo?",
+    "removeFailed": "Failed to remove photo: {{error}}",
+    "uploadFailed": "Failed to upload the profile photo.",
+    "serviceError": "Face Recognition Service Error",
+    "partialSuccess": "Partial Success",
+    "serviceUnavailable": "Face Detection Unavailable",
+    "uploadWarning": "Photo Upload Warning",
+    "uploadedSuccessfully": "Photo Uploaded Successfully",
+    "faceDetected": "Face detected and recognition enabled for this visitor.",
+    "uploaded": "Photo Uploaded",
+    "uploadedMessage": "Profile photo uploaded successfully.",
+    "noFaceDetected": "No Face Detected",
+    "noFaceMessage": "No face was detected in the uploaded image. Please upload a photo with a clearly visible face.",
+    "uploadFail": "Photo Upload Failed"
+  },
+  "notes": {
+    "title": "Visitor Notes",
+    "subtitle": "Internal notes and observations about this visitor.",
+    "addNote": "Add Note",
+    "noNotes": "No Notes",
+    "noNotesMessage": "No notes have been added for this visitor yet.",
+    "addFirstNote": "Add First Note",
+    "flagged": "Flagged",
+    "confidential": "Confidential",
+    "by": "By {{name}} on {{date}}",
+    "modified": "Modified {{date}}",
+    "unknownAuthor": "Unknown",
+    "untitledNote": "Note"
+  },
+  "activity": {
+    "visitStatistics": "Visit Statistics",
+    "totalVisits": "Total Visits",
+    "lastVisit": "Last Visit",
+    "firstRegistered": "First Registered",
+    "never": "Never",
+    "statusHistory": "Status History",
+    "visitorCreated": "Visitor Created",
+    "markedAsVip": "Marked as VIP",
+    "vipStatusActive": "Status active",
+    "blacklisted": "Blacklisted",
+    "blacklistReason": "Reason: {{reason}}",
+    "recentActivity": "Recent Activity",
+    "recentActivityPlaceholder": "Detailed activity logging will be available in a future update."
+  }
+}

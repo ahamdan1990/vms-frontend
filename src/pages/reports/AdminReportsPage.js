@@ -474,7 +474,7 @@ const AdminReportsPage = () => {
                   </Button>
 
                   {canExportReports && (
-                    <div className="ml-auto">
+                    <div className="ms-auto">
                       <ExportButton
                         onExport={handleExport}
                         loading={exporting}

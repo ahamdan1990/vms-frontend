@@ -143,7 +143,7 @@ const RolesListPage = () => {
                   </Badge>
                   {isSystemRole && (
                     <Badge variant="info" size="sm">
-                      <LockClosedIcon className="w-3 h-3 mr-1" />
+                      <LockClosedIcon className="w-3 h-3 me-1" />
                       System Role
                     </Badge>
                   )}
@@ -177,7 +177,7 @@ const RolesListPage = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 ml-4">
+          <div className="flex flex-col gap-2 ms-4">
             <Tooltip content="View and manage role details">
               <Button
                 variant="secondary"
@@ -195,7 +195,7 @@ const RolesListPage = () => {
                   size="sm"
                   onClick={() => handleEditRole(role)}
                 >
-                  <PencilIcon className="w-4 h-4 mr-1" />
+                  <PencilIcon className="w-4 h-4 me-1" />
                   Edit
                 </Button>
               </Tooltip>
@@ -209,7 +209,7 @@ const RolesListPage = () => {
                   onClick={() => handleDeleteRole(role)}
                   className="text-red-600 hover:text-red-700 hover:border-red-600 dark:text-red-400 dark:hover:text-red-300 dark:hover:border-red-400"
                 >
-                  <TrashIcon className="w-4 h-4 mr-1" />
+                  <TrashIcon className="w-4 h-4 me-1" />
                   Delete
                 </Button>
               </Tooltip>
@@ -237,7 +237,7 @@ const RolesListPage = () => {
             variant="primary"
             onClick={() => dispatch(toggleCreateModal())}
           >
-            <PlusIcon className="w-5 h-5 mr-2" />
+            <PlusIcon className="w-5 h-5 me-2" />
             Create Role
           </Button>
         )}
@@ -279,7 +279,7 @@ const RolesListPage = () => {
       {/* Tabs */}
       <div className="mb-6">
         <div className="border-b border-gray-200 dark:border-gray-700">
-          <nav className="-mb-px flex space-x-8">
+          <nav className="-mb-px flex gap-8">
             {[
               { key: 'all', label: 'All Roles', count: roles.length },
               { key: 'system', label: 'System Roles', count: systemRoles.length },
@@ -297,7 +297,7 @@ const RolesListPage = () => {
                 `}
               >
                 {tab.label}
-                <span className="ml-2 py-0.5 px-2 rounded-full text-xs bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                <span className="ms-2 py-0.5 px-2 rounded-full text-xs bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-200">
                   {tab.count}
                 </span>
               </button>
@@ -327,7 +327,7 @@ const RolesListPage = () => {
                   variant="primary"
                   onClick={() => dispatch(toggleCreateModal())}
                 >
-                  <PlusIcon className="w-5 h-5 mr-2" />
+                  <PlusIcon className="w-5 h-5 me-2" />
                   Create Custom Role
                 </Button>
               </div>

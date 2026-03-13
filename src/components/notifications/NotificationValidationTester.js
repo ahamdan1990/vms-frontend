@@ -348,7 +348,7 @@ const NotificationValidationTester = ({ className = '' }) => {
     
     return (
       <div key={index} className={`p-3 mb-2 border rounded-md ${statusColors[result.status]}`}>
-        <div className="flex items-start space-x-2">
+        <div className="flex items-start gap-2">
           <div className="flex-shrink-0 mt-0.5">
             {statusIcons[result.status]}
           </div>
@@ -392,7 +392,7 @@ const NotificationValidationTester = ({ className = '' }) => {
   return (
     <Card className={`p-6 ${className}`}>
       <div className="mb-6">
-        <div className="flex items-center space-x-2 mb-2">
+        <div className="flex items-center gap-2 mb-2">
           <BugAntIcon className="w-6 h-6 text-blue-600" />
           <h2 className="text-xl font-bold">Notification System Validator</h2>
           <Badge color={testPhase === 'complete' ? 'green' : testPhase === 'testing' ? 'yellow' : 'gray'}>

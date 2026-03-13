@@ -381,7 +381,7 @@ const DocumentScanner = ({
 
         {/* Scanning controls */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-4">
             <Button
               variant="secondary"
               size="sm"
@@ -436,7 +436,7 @@ const DocumentScanner = ({
                 id="autoEnhance"
                 checked={scanSettings.autoEnhance}
                 onChange={(e) => setScanSettings(prev => ({ ...prev, autoEnhance: e.target.checked }))}
-                className="mr-2"
+                className="me-2"
               />
               <label htmlFor="autoEnhance" className="text-sm text-gray-700">
                 Auto-enhance document
@@ -487,7 +487,7 @@ const DocumentScanner = ({
                 {autoUpload && visitorId && (
                   <div className="absolute top-2 right-2">
                     {uploadingIndex === index ? (
-                      <div className="bg-blue-600 text-white px-2 py-1 rounded text-xs flex items-center space-x-1">
+                      <div className="bg-blue-600 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
                         <LoadingSpinner size="xs" />
                         <span>Uploading...</span>
                       </div>
@@ -508,7 +508,7 @@ const DocumentScanner = ({
               </div>
 
               {/* Actions */}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <Button
                   size="xs"
                   variant="outline"
@@ -606,7 +606,7 @@ const DocumentScanner = ({
       {/* Error display */}
       {error && (
         <div className="bg-red-50 border-b border-red-200 p-4">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <ExclamationTriangleIcon className="w-5 h-5 text-red-600 flex-shrink-0" />
             <span className="text-sm text-red-700">{error}</span>
           </div>

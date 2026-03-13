@@ -153,7 +153,7 @@ const CalendarView = ({
         `}
       >
         <div className="flex items-start justify-between mb-2">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <ClockIcon className="w-4 h-4 text-gray-600 dark:text-slate-200" />
             <span className="text-sm font-medium text-gray-900 dark:text-white">
               {timeSlotsService.formatTimeForDisplay(timeSlot.startTime)}
@@ -175,7 +175,7 @@ const CalendarView = ({
         </div>
 
         {timeSlot.locationName && (
-          <div className="flex items-center space-x-1 mt-1 text-xs text-gray-500 dark:text-slate-300/80">
+          <div className="flex items-center gap-1 mt-1 text-xs text-gray-500 dark:text-slate-300/80">
             <MapPinIcon className="w-3 h-3" />
             <span className="truncate">{timeSlot.locationName}</span>
           </div>
@@ -294,8 +294,8 @@ const CalendarView = ({
     <div className={`space-y-6 ${className}`}>
       {/* Controls */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:space-x-4">
-          <div className="flex items-center space-x-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -371,16 +371,16 @@ const CalendarView = ({
       )}
 
       {/* Legend */}
-      <div className="flex items-center justify-center space-x-6 text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2">
-        <div className="flex items-center space-x-2">
+      <div className="flex items-center justify-center gap-6 text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2">
+        <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-green-500 rounded"></div>
           <span>Available</span>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-yellow-500 rounded"></div>
           <span>Limited</span>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-red-500 rounded"></div>
           <span>Full</span>
         </div>

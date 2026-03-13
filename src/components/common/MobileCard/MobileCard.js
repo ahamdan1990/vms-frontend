@@ -41,7 +41,7 @@ const MobileCard = ({
 
       {/* Actions */}
       {actions.length > 0 && (
-        <div className="flex items-center justify-end space-x-2 mt-4 pt-3 border-t border-gray-100">
+        <div className="flex items-center justify-end gap-2 mt-4 pt-3 border-t border-gray-100">
           {actions.map((action, index) => (
             <div key={index} data-mobile-card-action>
               {action}
@@ -87,7 +87,7 @@ export const VisitorMobileCard = ({ visitor, actions = [] }) => {
       label: 'Name',
       layout: 'stacked',
       render: (value, visitor) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <span className="font-semibold text-gray-900">{visitor.fullName}</span>
           {visitor.isVip && <Badge color="yellow" size="xs">VIP</Badge>}
           {visitor.isBlacklisted && <Badge color="red" size="xs">Blacklisted</Badge>}

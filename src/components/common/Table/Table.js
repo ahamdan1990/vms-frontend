@@ -226,7 +226,7 @@ const Table = ({
     const isActive = sortColumn === column.key;
 
     return (
-      <span className="ml-2 flex-none rounded text-gray-400 dark:text-gray-500 group-hover:visible group-focus:visible">
+      <span className="ms-2 flex-none rounded text-gray-400 dark:text-gray-500 group-hover:visible group-focus:visible">
         {isActive ? (
           sortDirection === 'asc' ? (
             <svg className="w-4 h-4 text-gray-900 dark:text-gray-100" fill="currentColor" viewBox="0 0 20 20">

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
 import { validateLoginData } from '../../../utils/validators';
 import Input from '../../common/Input/Input';
@@ -21,6 +22,7 @@ const LoginForm = ({
   className = ''
 }) => {
   const { getRememberedEmail } = useAuth();
+  const { t } = useTranslation('auth');
 
   const [loginMethod, setLoginMethod] = useState('standard');
   const [formData, setFormData] = useState({
@@ -75,8 +77,8 @@ const LoginForm = ({
       // LDAP validation
       if (!formData.username || !formData.password) {
         setErrors({
-          username: !formData.username ? 'Username is required' : '',
-          password: !formData.password ? 'Password is required' : ''
+          username: !formData.username ? t('validation.usernameRequired') : '',
+          password: !formData.password ? t('validation.passwordRequired') : ''
         });
         return;
       }
@@ -125,8 +127,8 @@ const LoginForm = ({
             </div>
           </motion.div>
           
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h2>
-          <p className="text-gray-600">Sign in to your account to continue</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">{t('login.welcomeBack')}</h2>
+          <p className="text-gray-600">{t('login.signInToContinue')}</p>
         </div>
 
         {/* Global Error */}
@@ -137,7 +139,7 @@ const LoginForm = ({
             className="bg-red-50 border border-red-200 rounded-lg p-4"
           >
             <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 text-red-400 me-3" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
               <span className="text-red-800 text-sm font-medium">{error}</span>
@@ -163,10 +165,10 @@ const LoginForm = ({
             }`}
           >
             <div className="flex items-center justify-center">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
               </svg>
-              Standard Login
+              {t('login.standardLogin')}
             </div>
           </button>
           <button
@@ -180,10 +182,10 @@ const LoginForm = ({
             }`}
           >
             <div className="flex items-center justify-center">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
               </svg>
-              Domain (LDAP)
+              {t('login.domainLdap')}
             </div>
           </button>
         </motion.div>
@@ -198,8 +200,8 @@ const LoginForm = ({
             <Input
               type="email"
               name="email"
-              label="Email Address"
-              placeholder="Enter your email"
+              label={t('login.emailLabel')}
+              placeholder={t('login.emailPlaceholder')}
               value={formData.email}
               onChange={handleChange}
               error={errors.email}
@@ -216,8 +218,8 @@ const LoginForm = ({
             <Input
               type="text"
               name="username"
-              label="Domain Username"
-              placeholder="domain\username or username"
+              label={t('login.usernameLabel')}
+              placeholder={t('login.usernamePlaceholder')}
               value={formData.username}
               onChange={handleChange}
               error={errors.username}
@@ -242,8 +244,8 @@ const LoginForm = ({
           <Input
             type="password"
             name="password"
-            label="Password"
-            placeholder="Enter your password"
+            label={t('login.passwordLabel')}
+            placeholder={t('login.passwordPlaceholder')}
             value={formData.password}
             onChange={handleChange}
             error={errors.password}
@@ -276,8 +278,8 @@ const LoginForm = ({
                 disabled={isLoading}
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200"
               />
-              <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
-                Remember me
+              <span className="ms-2 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                {t('login.rememberMe')}
               </span>
             </label>
           )}
@@ -287,7 +289,7 @@ const LoginForm = ({
               to="/forgot-password"
               className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200 hover:underline"
             >
-              Forgot your password?
+              {t('login.forgotPassword')}
             </Link>
           )}
         </motion.div>
@@ -307,7 +309,7 @@ const LoginForm = ({
             disabled={!isFormValid || isLoading}
             className="transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            {isLoading ? 'Signing in...' : 'Sign in'}
+            {isLoading ? t('login.signingInButton') : t('login.signIn')}
           </Button>
         </motion.div>
 
@@ -319,10 +321,10 @@ const LoginForm = ({
           className="text-center"
         >
           <p className="text-xs text-gray-500 flex items-center justify-center">
-            <svg className="w-4 h-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-4 h-4 text-green-500 me-1" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
             </svg>
-            Your login is secured with encryption
+            {t('login.secureEncryption')}
           </p>
         </motion.div>
       </form>

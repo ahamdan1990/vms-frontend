@@ -248,7 +248,7 @@ const ProfilePhotoUpload = ({
             )}
           </div>
 
-          <div className="flex justify-end space-x-3">
+          <div className="flex justify-end gap-3">
             <Button
               onClick={handleUploadCancel}
               variant="outline"
@@ -288,7 +288,7 @@ const ProfilePhotoUpload = ({
             </p>
           </div>
 
-          <div className="flex justify-end space-x-3">
+          <div className="flex justify-end gap-3">
             <Button
               onClick={() => setShowRemoveModal(false)}
               variant="outline"

@@ -407,7 +407,7 @@ const AuditPage = () => {
       {/* Tabs */}
       <Card className="p-0">
         <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8 px-6">
+          <nav className="-mb-px flex gap-8 px-6">
             {visibleTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;

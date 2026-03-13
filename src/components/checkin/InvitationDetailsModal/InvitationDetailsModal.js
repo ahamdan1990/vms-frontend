@@ -183,7 +183,7 @@ const InvitationDetailsModal = ({
         {/* Too Early Warning - Cannot Check In */}
         {isTooEarly && (
           <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-800 rounded-lg p-4 flex items-start">
-            <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 dark:text-red-400 mr-3 flex-shrink-0 mt-0.5" />
+            <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 dark:text-red-400 me-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <h4 className="text-red-900 dark:text-red-200 font-bold text-sm">⚠️ TOO EARLY - CANNOT CHECK IN</h4>
               <p className="text-red-800 dark:text-red-300 text-sm mt-1 font-medium">
@@ -202,7 +202,7 @@ const InvitationDetailsModal = ({
         {/* Expired Warning - Cannot Check In */}
         {isExpired && (
           <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-800 rounded-lg p-4 flex items-start">
-            <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 dark:text-red-400 mr-3 flex-shrink-0 mt-0.5" />
+            <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 dark:text-red-400 me-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <h4 className="text-red-900 dark:text-red-200 font-bold text-sm">⚠️ EXPIRED - CANNOT CHECK IN</h4>
               <p className="text-red-800 dark:text-red-300 text-sm mt-1 font-medium">
@@ -218,7 +218,7 @@ const InvitationDetailsModal = ({
         {/* Early Arrival Notice - Can Still Check In */}
         {isEarlyButAllowed && !isCheckedIn && !isCompleted && (
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300 dark:border-yellow-800 rounded-lg p-4 flex items-start">
-            <ClockIcon className="h-6 w-6 text-yellow-600 dark:text-yellow-400 mr-3 flex-shrink-0 mt-0.5" />
+            <ClockIcon className="h-6 w-6 text-yellow-600 dark:text-yellow-400 me-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <h4 className="text-yellow-900 dark:text-yellow-200 font-bold text-sm">🕐 EARLY ARRIVAL</h4>
               <p className="text-yellow-800 dark:text-yellow-300 text-sm mt-1 font-medium">
@@ -237,7 +237,7 @@ const InvitationDetailsModal = ({
         {/* Late Arrival Notice - Can Still Check In */}
         {isLateButAllowed && !isCheckedIn && !isCompleted && (
           <div className="bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-300 dark:border-orange-800 rounded-lg p-4 flex items-start">
-            <ClockIcon className="h-6 w-6 text-orange-600 dark:text-orange-400 mr-3 flex-shrink-0 mt-0.5" />
+            <ClockIcon className="h-6 w-6 text-orange-600 dark:text-orange-400 me-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <h4 className="text-orange-900 dark:text-orange-200 font-bold text-sm">🕐 LATE ARRIVAL</h4>
               <p className="text-orange-800 dark:text-orange-300 text-sm mt-1 font-medium">
@@ -268,7 +268,7 @@ const InvitationDetailsModal = ({
         {/* Not Approved Warning */}
         {!isApproved && !isCheckedIn && !isCompleted && (
           <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-800 rounded-lg p-4 flex items-start">
-            <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 dark:text-red-400 mr-3 flex-shrink-0 mt-0.5" />
+            <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 dark:text-red-400 me-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <h4 className="text-red-900 dark:text-red-200 font-bold text-sm">⚠️ NOT APPROVED - CANNOT CHECK IN</h4>
               <p className="text-red-800 dark:text-red-300 text-sm mt-1 font-medium">
@@ -284,7 +284,7 @@ const InvitationDetailsModal = ({
         {/* Already Checked In Warning */}
         {isCheckedIn && (
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start">
-            <CheckCircleIconSolid className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-3 flex-shrink-0 mt-0.5" />
+            <CheckCircleIconSolid className="h-5 w-5 text-blue-600 dark:text-blue-400 me-3 flex-shrink-0 mt-0.5" />
             <div>
               <h4 className="text-blue-900 dark:text-blue-200 font-medium text-sm">Already Checked In</h4>
               <p className="text-blue-700 dark:text-blue-300 text-sm mt-1">
@@ -297,7 +297,7 @@ const InvitationDetailsModal = ({
         {/* Completed Visit Warning */}
         {isCompleted && (
           <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-start">
-            <InformationCircleIcon className="h-5 w-5 text-gray-600 dark:text-gray-400 mr-3 flex-shrink-0 mt-0.5" />
+            <InformationCircleIcon className="h-5 w-5 text-gray-600 dark:text-gray-400 me-3 flex-shrink-0 mt-0.5" />
             <div>
               <h4 className="text-gray-900 dark:text-gray-200 font-medium text-sm">Visit Completed</h4>
               <p className="text-gray-700 dark:text-gray-300 text-sm mt-1">
@@ -310,7 +310,7 @@ const InvitationDetailsModal = ({
         {/* Visitor Information */}
         <div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-            <UserIcon className="h-5 w-5 mr-2 text-gray-900 dark:text-white" />
+            <UserIcon className="h-5 w-5 me-2 text-gray-900 dark:text-white" />
             Visitor Information
           </h3>
           <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
@@ -330,7 +330,7 @@ const InvitationDetailsModal = ({
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
                 <div className="flex items-center">
-                  <EnvelopeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" />
+                  <EnvelopeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 me-1" />
                   <p className="text-sm font-medium text-gray-900 dark:text-white">{visitor.email}</p>
                 </div>
               </div>
@@ -339,7 +339,7 @@ const InvitationDetailsModal = ({
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
                 <div className="flex items-center">
-                  <PhoneIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" />
+                  <PhoneIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 me-1" />
                   <p className="text-sm font-medium text-gray-900 dark:text-white">{visitor.phoneNumber}</p>
                 </div>
               </div>
@@ -350,14 +350,14 @@ const InvitationDetailsModal = ({
         {/* Visit Details */}
         <div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-            <CalendarIcon className="h-5 w-5 mr-2 text-gray-900 dark:text-white" />
+            <CalendarIcon className="h-5 w-5 me-2 text-gray-900 dark:text-white" />
             Visit Details
           </h3>
           <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400">Scheduled Time</p>
               <div className="flex items-center">
-                <ClockIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" />
+                <ClockIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 me-1" />
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {formatters.formatDateTime(invitation.scheduledStartTime)}
                 </p>
@@ -366,7 +366,7 @@ const InvitationDetailsModal = ({
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400">End Time</p>
               <div className="flex items-center">
-                <ClockIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" />
+                <ClockIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 me-1" />
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {formatters.formatDateTime(invitation.scheduledEndTime)}
                 </p>
@@ -376,7 +376,7 @@ const InvitationDetailsModal = ({
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Location</p>
                 <div className="flex items-center">
-                  <MapPinIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" />
+                  <MapPinIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 me-1" />
                   <p className="text-sm font-medium text-gray-900 dark:text-white">{location.name}</p>
                 </div>
               </div>
@@ -385,7 +385,7 @@ const InvitationDetailsModal = ({
               <div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Purpose</p>
                 <div className="flex items-center">
-                  <BuildingOfficeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-1" />
+                  <BuildingOfficeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 me-1" />
                   <p className="text-sm font-medium text-gray-900 dark:text-white">{visitPurpose.name}</p>
                 </div>
               </div>
@@ -416,7 +416,7 @@ const InvitationDetailsModal = ({
         )}
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
           <Button
             variant="outline"
             onClick={onClose}

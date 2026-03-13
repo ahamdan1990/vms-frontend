@@ -269,7 +269,7 @@ const SystemManagementPage = () => {
           </p>
         </div>
         
-        <div className="mt-4 sm:mt-0 flex space-x-3">
+        <div className="mt-4 sm:mt-0 flex gap-3">
           <Button
             variant="outline"
             icon={<ArrowTopRightOnSquareIcon className="w-5 h-5" />}
@@ -296,7 +296,7 @@ const SystemManagementPage = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">System Health Overview</h3>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               <span className="text-sm text-green-600 dark:text-green-300 font-medium">All Systems Operational</span>
             </div>
@@ -345,7 +345,7 @@ const SystemManagementPage = () => {
                   <UserGroupIcon className="w-6 h-6 text-blue-600" />
                 </div>
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <h3 className="text-sm font-medium text-gray-600">Total Users</h3>
                 <p className="text-2xl font-bold text-gray-900">{systemStats.totalUsers}</p>
               </div>
@@ -365,7 +365,7 @@ const SystemManagementPage = () => {
                   <MapPinIcon className="w-6 h-6 text-green-600" />
                 </div>
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <h3 className="text-sm font-medium text-gray-600">Active Locations</h3>
                 <p className="text-2xl font-bold text-gray-900">{systemStats.activeLocations}</p>
               </div>
@@ -385,7 +385,7 @@ const SystemManagementPage = () => {
                   <DocumentTextIcon className="w-6 h-6 text-purple-600" />
                 </div>
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <h3 className="text-sm font-medium text-gray-600">Visit Purposes</h3>
                 <p className="text-2xl font-bold text-gray-900">{systemStats.visitPurposes}</p>
               </div>
@@ -405,7 +405,7 @@ const SystemManagementPage = () => {
                   <ClockIcon className="w-6 h-6 text-orange-600" />
                 </div>
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <h3 className="text-sm font-medium text-gray-600">Time Slots</h3>
                 <p className="text-2xl font-bold text-gray-900">{systemStats.timeSlots}</p>
               </div>
@@ -435,7 +435,7 @@ const SystemManagementPage = () => {
                   to={module.href}
                   className="group block p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-md transition-all duration-200 bg-white dark:bg-slate-900/60"
                 >
-                  <div className="flex items-start space-x-3">
+                  <div className="flex items-start gap-3">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${module.color}`}>
                       <module.icon className="w-5 h-5" />
                     </div>
@@ -483,7 +483,7 @@ const SystemManagementPage = () => {
               recentActivity.map((activity, index) => (
                 <div
                   key={activity.id || index}
-                  className="flex items-start space-x-3 p-3 bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 rounded-lg"
+                  className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 rounded-lg"
                 >
                   <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center ${

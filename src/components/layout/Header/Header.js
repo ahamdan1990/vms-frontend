@@ -3,11 +3,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useNotifications } from '../../../hooks/useNotifications';
 import { toggleSidebar, toggleTheme } from '../../../store/slices/uiSlice';
 import { formatName, formatRelativeTime } from '../../../utils/formatters';
+import LanguageToggle from '../../common/LanguageToggle/LanguageToggle';
 
 /**
  * Professional Header Component with user menu, notifications, and search
@@ -16,6 +18,7 @@ import { formatName, formatRelativeTime } from '../../../utils/formatters';
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { t } = useTranslation('navigation');
   const { user, logout, isAuthenticated } = useAuth();
   const { canAccessAdminFeatures } = usePermissions();
   
@@ -82,7 +85,7 @@ const Header = () => {
     <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 relative z-20 transition-colors duration-200">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
         {/* Left section - Menu toggle and Logo */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-4">
           {/* Mobile menu button */}
           <button
             type="button"
@@ -106,7 +109,7 @@ const Header = () => {
           </button>
 
           {/* Logo */}
-          {/* <Link to="/dashboard" className="flex items-center space-x-2 group">
+          {/* <Link to="/dashboard" className="flex items-center gap-2 group">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -119,14 +122,14 @@ const Header = () => {
         {/* Center section - Search */}
         <div className="flex-1 max-w-lg mx-4">
           <form onSubmit={handleSearch} className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
               <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
             <input
               type="text"
-              placeholder="Search visitors, invitations..."
+              placeholder={t('header.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 dark:focus:placeholder-gray-500 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 sm:text-sm transition-colors"
@@ -135,13 +138,13 @@ const Header = () => {
         </div>
 
         {/* Right section - Actions and user menu */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-4">
           {/* Theme toggle */}
           <button
             type="button"
             onClick={() => dispatch(toggleTheme())}
             className="p-2 rounded-md text-gray-400 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
-            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            title={theme === 'light' ? t('header.switchToDark') : t('header.switchToLight')}
           >
             {theme === 'light' ? (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -154,6 +157,9 @@ const Header = () => {
             )}
           </button>
 
+          {/* Language toggle */}
+          <LanguageToggle variant="minimal" />
+
           {/* Notifications */}
           <div className="relative" ref={notificationsRef}>
             <button
@@ -165,7 +171,7 @@ const Header = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19l2-7h12l2 7M9 12V9a3 3 0 116 0v3" />
               </svg>
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 dark:bg-red-600 text-white text-xs rounded-full flex items-center justify-center shadow-lg">
+                <span className="absolute -top-1 -end-1 h-5 w-5 bg-red-500 dark:bg-red-600 text-white text-xs rounded-full flex items-center justify-center shadow-lg">
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
@@ -179,17 +185,17 @@ const Header = () => {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -10 }}
                   transition={{ duration: 0.1 }}
-                  className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black dark:ring-gray-700 ring-opacity-5 focus:outline-none z-50"
+                  className="absolute end-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black dark:ring-gray-700 ring-opacity-5 focus:outline-none z-50"
                 >
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">Notifications</h3>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('header.notifications')}</h3>
                       <Link
                         to="/notifications"
                         className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
                         onClick={() => setNotificationsOpen(false)}
                       >
-                        View all
+                        {t('header.viewAll')}
                       </Link>
                     </div>
 
@@ -204,7 +210,7 @@ const Header = () => {
                               <svg className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4 19l2-7h12l2 7M9 12V9a3 3 0 116 0v3" />
                               </svg>
-                              <p className="text-gray-500 dark:text-gray-400 text-sm">No new notifications</p>
+                              <p className="text-gray-500 dark:text-gray-400 text-sm">{t('header.noNotifications')}</p>
                             </div>
                           );
                         }
@@ -249,7 +255,7 @@ const Header = () => {
                             <div className="flex items-start justify-between">
                               <p className="text-sm font-medium flex-1">{notification.title}</p>
                               {notification.priority && (
-                                <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-white/50 dark:bg-black/20">
+                                <span className="ms-2 text-xs px-2 py-0.5 rounded-full bg-white/50 dark:bg-black/20">
                                   {notification.priority}
                                 </span>
                               )}
@@ -273,7 +279,7 @@ const Header = () => {
             <button
               type="button"
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center space-x-3 p-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+              className="flex items-center gap-3 p-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
             >
               {(() => {
                 const photoUrl = user?.profilePhotoUrl || user?.ProfilePhotoUrl;
@@ -325,7 +331,7 @@ const Header = () => {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -10 }}
                   transition={{ duration: 0.1 }}
-                  className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black dark:ring-gray-700 ring-opacity-5 focus:outline-none z-50"
+                  className="absolute end-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black dark:ring-gray-700 ring-opacity-5 focus:outline-none z-50"
                 >
                   <div className="py-1">
                     <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
@@ -338,10 +344,10 @@ const Header = () => {
                       className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       onClick={() => setUserMenuOpen(false)}
                     >
-                      <svg className="w-4 h-4 mr-3 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 me-3 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
-                      Your Profile
+                      {t('header.yourProfile')}
                     </Link>
 
                     {canAccessAdminFeatures && (
@@ -350,11 +356,11 @@ const Header = () => {
                         className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                         onClick={() => setUserMenuOpen(false)}
                       >
-                        <svg className="w-4 h-4 mr-3 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 me-3 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        Settings
+                        {t('header.settings')}
                       </Link>
                     )}
 
@@ -363,10 +369,10 @@ const Header = () => {
                         onClick={handleLogout}
                         className="flex items-center w-full px-4 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                       >
-                        <svg className="w-4 h-4 mr-3 text-red-400 dark:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 me-3 text-red-400 dark:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
-                        Sign out
+                        {t('header.signOut')}
                       </button>
                     </div>
                   </div>

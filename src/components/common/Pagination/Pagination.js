@@ -120,7 +120,7 @@ const Pagination = ({
   return (
     <div className={classNames('flex items-center justify-between', className)}>
       {/* Items info and page size selector */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center gap-4">
         {showItemsInfo && (
           <div className={classNames('text-gray-700 dark:text-gray-300', config.text)}>
             Showing {startItem.toLocaleString()} to {endItem.toLocaleString()} of{' '}
@@ -129,7 +129,7 @@ const Pagination = ({
         )}
 
         {showPageSizeSelector && onPageSizeChange && (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <label className={classNames('text-gray-700 dark:text-gray-300', config.text)}>
               Show:
             </label>
@@ -152,7 +152,7 @@ const Pagination = ({
       </div>
 
       {/* Pagination controls */}
-      <div className="flex items-center space-x-1">
+      <div className="flex items-center gap-1">
         {/* First page button */}
         {showFirstLast && totalPages > maxVisiblePages && (
           <button
@@ -260,7 +260,7 @@ export const SimplePagination = ({
   className = ''
 }) => {
   return (
-    <div className={classNames('flex items-center justify-center space-x-2', className)}>
+    <div className={classNames('flex items-center justify-center gap-2', className)}>
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}

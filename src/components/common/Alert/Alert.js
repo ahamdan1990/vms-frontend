@@ -98,7 +98,7 @@ const Alert = ({
         </div>
 
         {/* Content */}
-        <div className="ml-3 flex-1">
+        <div className="ms-3 flex-1">
           {title && (
             <h3 className={classNames('text-sm font-medium', colors.title)}>
               {title}
@@ -128,7 +128,7 @@ const Alert = ({
           {/* Actions */}
           {actions && (
             <div className="mt-4">
-              <div className="flex space-x-3">
+              <div className="flex gap-3">
                 {actions}
               </div>
             </div>
@@ -137,7 +137,7 @@ const Alert = ({
 
         {/* Dismiss Button */}
         {dismissible && (
-          <div className="ml-auto pl-3">
+          <div className="ms-auto pl-3">
             <div className="-mx-1.5 -my-1.5">
               <button
                 type="button"

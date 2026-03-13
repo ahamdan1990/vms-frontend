@@ -49,10 +49,10 @@ const Modal = ({
 
   const variantClasses = {
     default: 'bg-white dark:bg-gray-800',
-    danger: 'bg-white dark:bg-gray-800 border-l-4 border-red-500 dark:border-red-400',
-    warning: 'bg-white dark:bg-gray-800 border-l-4 border-yellow-500 dark:border-yellow-400',
-    success: 'bg-white dark:bg-gray-800 border-l-4 border-green-500 dark:border-green-400',
-    info: 'bg-white dark:bg-gray-800 border-l-4 border-blue-500 dark:border-blue-400'
+    danger: 'bg-white dark:bg-gray-800 border-s-4 border-red-500 dark:border-red-400',
+    warning: 'bg-white dark:bg-gray-800 border-s-4 border-yellow-500 dark:border-yellow-400',
+    success: 'bg-white dark:bg-gray-800 border-s-4 border-green-500 dark:border-green-400',
+    info: 'bg-white dark:bg-gray-800 border-s-4 border-blue-500 dark:border-blue-400'
   };
 
   const modalClasses = classNames(
@@ -258,7 +258,7 @@ export const ConfirmModal = ({
   };
 
   const footer = (
-    <div className="flex space-x-3 justify-end">
+    <div className="flex gap-3 justify-end">
       <Button variant="secondary" onClick={onClose} disabled={loading}>
         {cancelText}
       </Button>

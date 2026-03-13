@@ -261,7 +261,7 @@ const CameraCapture = ({
           
           {/* Camera controls overlay */}
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-            <div className="flex items-center space-x-4 bg-black/40 backdrop-blur-md px-6 py-3 rounded-full shadow-lg">
+            <div className="flex items-center gap-4 bg-black/40 backdrop-blur-md px-6 py-3 rounded-full shadow-lg">
               <Button
                 variant="secondary"
                 size="sm"
@@ -291,7 +291,7 @@ const CameraCapture = ({
 
           {/* Camera indicator */}
           <div className="absolute top-4 right-4">
-            <div className="flex items-center space-x-2 bg-red-600 text-white px-3 py-1 rounded-full text-sm shadow">
+            <div className="flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-full text-sm shadow">
               <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
               <span>LIVE</span>
             </div>
@@ -303,22 +303,22 @@ const CameraCapture = ({
           <div className="h-full rounded-2xl border border-gray-200 bg-gray-50 p-5 shadow-sm flex flex-col">
             <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-widest text-gray-500">
               <span>Capture Status</span>
-              <span className="inline-flex items-center space-x-2 text-green-600">
+              <span className="inline-flex items-center gap-2 text-green-600">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                 <span>Ready</span>
               </span>
             </div>
 
             <div className="mt-5 space-y-3 text-sm text-gray-700 flex-1">
-              <div className="flex items-start space-x-2">
+              <div className="flex items-start gap-2">
                 <CheckIcon className="w-4 h-4 text-green-600 mt-0.5" />
                 <span>Make sure the visitor is centered with eyes at the top grid line.</span>
               </div>
-              <div className="flex items-start space-x-2">
+              <div className="flex items-start gap-2">
                 <CheckIcon className="w-4 h-4 text-green-600 mt-0.5" />
                 <span>Ask the visitor to remove hats or sunglasses for the best result.</span>
               </div>
-              <div className="flex items-start space-x-2">
+              <div className="flex items-start gap-2">
                 <CheckIcon className="w-4 h-4 text-green-600 mt-0.5" />
                 <span>Keep the background simple and ensure the lighting is even.</span>
               </div>
@@ -327,11 +327,11 @@ const CameraCapture = ({
             <div className="mt-4 rounded-lg bg-white p-4 text-sm text-gray-600 border border-gray-100">
               <p className="font-medium text-gray-900 mb-2">Quick Tips</p>
               <ul className="space-y-2">
-                <li className="flex items-center space-x-2">
+                <li className="flex items-center gap-2">
                   <PhotoIcon className="w-4 h-4 text-blue-500" />
                   <span>Use landscape mode on tablets for wider framing.</span>
                 </li>
-                <li className="flex items-center space-x-2">
+                <li className="flex items-center gap-2">
                   <PhotoIcon className="w-4 h-4 text-blue-500" />
                   <span>Remind the visitor to look directly at the camera.</span>
                 </li>
@@ -361,7 +361,7 @@ const CameraCapture = ({
       </div>
 
       {/* Photo actions */}
-      <div className="flex items-center justify-center space-x-4">
+      <div className="flex items-center justify-center gap-4">
         <Button
           variant="outline"
           onClick={retakePhoto}
@@ -396,7 +396,7 @@ const CameraCapture = ({
       
       {cameraPermission === 'denied' && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
             <span className="text-sm text-red-700">
               Camera permission denied. Please enable camera access in your browser settings.
@@ -436,7 +436,7 @@ const CameraCapture = ({
       {/* Error display */}
       {error && (
         <div className="bg-red-50 border-b border-red-200 p-4">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <ExclamationTriangleIcon className="w-5 h-5 text-red-600 flex-shrink-0" />
             <span className="text-sm text-red-700">{error}</span>
           </div>

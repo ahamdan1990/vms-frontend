@@ -1,6 +1,7 @@
 // src/pages/dashboard/UnifiedDashboard/UnifiedDashboard.js
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useDispatch } from 'react-redux';
@@ -55,6 +56,7 @@ import { BellIcon as BellIconSolid } from '@heroicons/react/24/solid';
  */
 const UnifiedDashboard = () => {
   const dispatch = useDispatch();
+  const { t } = useTranslation('dashboard');
   const { user, userRole, userName } = useAuth();
   const { 
     checkin, 
@@ -101,7 +103,7 @@ const UnifiedDashboard = () => {
 
   // Set initial view based on user role
   useEffect(() => {
-    dispatch(setPageTitle('Dashboard'));
+    dispatch(setPageTitle(t('pageTitle')));
     setActiveView(getDefaultView());
   }, [dispatch, userRole]);
 
@@ -116,9 +118,9 @@ const UnifiedDashboard = () => {
     if (userRole === ROLES.STAFF) {
       items.push({
         id: 'staff-dashboard',
-        label: 'My Dashboard',
+        label: t('tabs.myDashboard'),
         icon: HomeIcon,
-        description: 'Your invitations and visitors',
+        description: t('tabs.myDashboardDesc'),
         show: true
       });
     }
@@ -127,9 +129,9 @@ const UnifiedDashboard = () => {
     if (userRole === ROLES.ADMINISTRATOR) {
       items.push({
         id: 'overview',
-        label: 'Overview',
+        label: t('tabs.overview'),
         icon: HomeIcon,
-        description: 'System overview and quick actions',
+        description: t('tabs.overviewDesc'),
         show: true
       });
     }
@@ -138,9 +140,9 @@ const UnifiedDashboard = () => {
     if (checkin.canProcess) {
       items.push({
         id: 'receptionist',
-        label: 'Receptionist',
+        label: t('tabs.receptionist'),
         icon: UsersIcon,
-        description: 'Check-ins, walk-ins, and daily operations',
+        description: t('tabs.receptionistDesc'),
         show: true
       });
     }
@@ -149,9 +151,9 @@ const UnifiedDashboard = () => {
     if (visitor.canRead) {
       items.push({
         id: 'analytics',
-        label: 'Analytics',
+        label: t('tabs.analytics'),
         icon: ChartBarIcon,
-        description: 'Visitor insights and reporting',
+        description: t('tabs.analyticsDesc'),
         show: true
       });
     }
@@ -160,9 +162,9 @@ const UnifiedDashboard = () => {
     if (userRole === ROLES.ADMINISTRATOR && bulkImport.canManage) {
       items.push({
         id: 'excel',
-        label: 'Excel Management',
+        label: t('tabs.excel'),
         icon: DocumentArrowDownIcon,
-        description: 'Template downloads and bulk imports',
+        description: t('tabs.excelDesc'),
         show: true
       });
     }
@@ -200,13 +202,13 @@ const UnifiedDashboard = () => {
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-1">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Today's Visitors</h3>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('stats.todayVisitors')}</h3>
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               </div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{transformedSystemStats.todayVisitors}</p>
               {transformedSystemStats.todayVisitors > 0 && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Real-time data</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('stats.realTimeData')}</p>
               )}
             </div>
             <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
@@ -223,12 +225,12 @@ const UnifiedDashboard = () => {
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-1">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Now</h3>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('stats.activeVisitors')}</h3>
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               </div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{transformedSystemStats.activeVisitors}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Currently on-site</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('stats.currentlyOnSite')}</p>
             </div>
             <div className="w-12 h-12 bg-green-50 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
               <ShieldCheckIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -244,9 +246,9 @@ const UnifiedDashboard = () => {
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Pending</h3>
+              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{t('stats.pendingApprovals')}</h3>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{transformedSystemStats.pendingInvitations}</p>
-              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">Awaiting approval</p>
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">{t('stats.awaitingApproval')}</p>
             </div>
             <div className="w-12 h-12 bg-amber-50 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
               <ClockIcon className="w-6 h-6 text-amber-600 dark:text-amber-400" />
@@ -263,9 +265,9 @@ const UnifiedDashboard = () => {
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Alerts</h3>
+              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{t('stats.alerts')}</h3>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{transformedSystemStats.overdueVisitors + transformedSystemStats.systemAlerts}</p>
-              <p className="text-xs text-red-600 dark:text-red-400 font-medium mt-1">Require attention</p>
+              <p className="text-xs text-red-600 dark:text-red-400 font-medium mt-1">{t('stats.requireAttention')}</p>
             </div>
             <div className="w-12 h-12 bg-red-50 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
               <BellIconSolid className="w-6 h-6 text-red-600 dark:text-red-400" />
@@ -282,8 +284,8 @@ const UnifiedDashboard = () => {
         className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700"
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Quick Actions</h3>
-          <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">Admin Tools</span>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('quickActions.title')}</h3>
+          <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">{t('quickActions.adminTools')}</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -294,8 +296,8 @@ const UnifiedDashboard = () => {
             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-3 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
               <UsersIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
-            <h4 className="font-medium text-gray-900 dark:text-white mb-1">Receptionist</h4>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Visitor operations</p>
+            <h4 className="font-medium text-gray-900 dark:text-white mb-1">{t('quickActions.receptionist')}</h4>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t('quickActions.receptionistDesc')}</p>
           </button>
 
           <button
@@ -305,8 +307,8 @@ const UnifiedDashboard = () => {
             <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-3 group-hover:bg-purple-200 dark:group-hover:bg-purple-900/50 transition-colors">
               <ChartBarIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             </div>
-            <h4 className="font-medium text-gray-900 dark:text-white mb-1">Analytics</h4>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Insights & reports</p>
+            <h4 className="font-medium text-gray-900 dark:text-white mb-1">{t('quickActions.analytics')}</h4>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t('quickActions.analyticsDesc')}</p>
           </button>
 
           <button
@@ -316,8 +318,8 @@ const UnifiedDashboard = () => {
             <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-3 group-hover:bg-green-200 dark:group-hover:bg-green-900/50 transition-colors">
               <DocumentArrowDownIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
-            <h4 className="font-medium text-gray-900 dark:text-white mb-1">Excel Management</h4>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Import & export</p>
+            <h4 className="font-medium text-gray-900 dark:text-white mb-1">{t('quickActions.excel')}</h4>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t('quickActions.excelDesc')}</p>
           </button>
 
           <button
@@ -327,8 +329,8 @@ const UnifiedDashboard = () => {
             <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-3 group-hover:bg-gray-200 dark:group-hover:bg-gray-600 transition-colors">
               <CogIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </div>
-            <h4 className="font-medium text-gray-900 dark:text-white mb-1">System</h4>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Configuration</p>
+            <h4 className="font-medium text-gray-900 dark:text-white mb-1">{t('quickActions.system')}</h4>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t('quickActions.systemDesc')}</p>
           </button>
         </div>
       </motion.div>
@@ -342,19 +344,19 @@ const UnifiedDashboard = () => {
           className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700"
         >
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">System Health</h3>
-            <div className="flex items-center space-x-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('systemHealth.title')}</h3>
+            <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-green-600 dark:text-green-400 font-medium">All Systems Operational</span>
+              <span className="text-sm text-green-600 dark:text-green-400 font-medium">{t('systemHealth.allOperational')}</span>
             </div>
           </div>
 
           <div className="space-y-3">
             {[
-              { name: 'Database Connection', status: 'Healthy', color: 'green' },
-              { name: 'Email Service', status: 'Operational', color: 'green' },
-              { name: 'QR Code Generator', status: 'Active', color: 'green' },
-              { name: 'Document Scanner', status: 'Limited', color: 'yellow' }
+              { name: t('systemHealth.database'), status: t('systemHealth.healthy'), color: 'green' },
+              { name: t('systemHealth.email'), status: t('systemHealth.operational'), color: 'green' },
+              { name: t('systemHealth.qrCode'), status: t('systemHealth.active'), color: 'green' },
+              { name: t('systemHealth.scanner'), status: t('systemHealth.limited'), color: 'yellow' }
             ].map((service, index) => (
               <div key={service.name} className="flex items-center justify-between py-2 px-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{service.name}</span>
@@ -370,11 +372,11 @@ const UnifiedDashboard = () => {
           transition={{ delay: 0.7 }}
           className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700"
         >
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Activity</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t('widgets.recentActivity')}</h3>
           <div className="space-y-3">
             {recentActivity.length > 0 ? (
               recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                   <div className={`w-2 h-2 rounded-full mt-2 ${
                     activity.type === 'success' ? 'bg-green-500' :
                     activity.type === 'warning' ? 'bg-yellow-500' :
@@ -388,7 +390,7 @@ const UnifiedDashboard = () => {
               ))
             ) : (
               <div className="text-center py-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400">No recent activity</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('noActivity')}</p>
               </div>
             )}
           </div>
@@ -412,7 +414,7 @@ const UnifiedDashboard = () => {
             onClick={() => setActiveView(item.id)}
             className={`
               group relative px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
-              flex items-center space-x-2 min-w-0 justify-center w-full sm:flex-1
+              flex items-center gap-2 min-w-0 justify-center w-full sm:flex-1
               ${activeView === item.id
                 ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 shadow-sm border border-blue-200 dark:border-blue-700'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700/50'

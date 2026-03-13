@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { 
@@ -41,7 +42,8 @@ const UserDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+  const { t } = useTranslation(['users', 'common']);
+
   const { user: currentAuthUser, userId: currentUserId } = useAuth();
   const toast = useToast();
   const { user: userPermissions } = usePermissions();
@@ -92,11 +94,11 @@ const UserDetailPage = () => {
   // Initialize page
   useEffect(() => {
     if (isNewUser) {
-      dispatch(setPageTitle('Create User'));
+      dispatch(setPageTitle(t('users:detail.createNew')));
       dispatch(clearCurrentUser());
       setIsEditing(true);
     } else {
-      dispatch(setPageTitle('User Details'));
+      dispatch(setPageTitle(t('users:pageTitle')));
       dispatch(getUserById(id));
     }
     
@@ -140,65 +142,65 @@ const UserDetailPage = () => {
         navigate(USER_ROUTES.LIST);
       } else {
         await dispatch(updateUser({ id: currentUser.id, userData })).unwrap();
-        toast.success('Success', 'User updated successfully');
+        toast.success(t('common:alerts.success'), t('users:detail.notifications.updateSuccess'));
         setIsEditing(false);
       }
     } catch (error) {
-      toast.error('Error', 'Failed to save user');
+      toast.error(t('common:alerts.error'), t('users:detail.notifications.updateError'));
     }
   };
 
   const handleDelete = async () => {
     try {
       await dispatch(deleteUser(currentUser.id)).unwrap();
-      toast.success('Success', 'User deleted successfully');
+      toast.success(t('common:alerts.success'), t('users:detail.notifications.deleteSuccess'));
       navigate(USER_ROUTES.LIST);
     } catch (error) {
-      toast.error('Error', 'Failed to delete user');
+      toast.error(t('common:alerts.error'), t('users:detail.notifications.deleteError'));
     }
   };
 
   const handleActivate = async () => {
     try {
-      await dispatch(activateUser({ 
-        id: currentUser.id, 
+      await dispatch(activateUser({
+        id: currentUser.id,
         reason: actionReason,
         resetFailedAttempts: true
       })).unwrap();
-      toast.success('Success', 'User activated successfully');
+      toast.success(t('common:alerts.success'), t('users:detail.notifications.activateSuccess'));
       setShowActivateModal(false);
       setActionReason('');
     } catch (error) {
-      toast.error('Error', 'Failed to activate user');
+      toast.error(t('common:alerts.error'), t('users:detail.notifications.activateError'));
     }
   };
 
   const handleDeactivate = async () => {
     try {
-      await dispatch(deactivateUser({ 
-        id: currentUser.id, 
+      await dispatch(deactivateUser({
+        id: currentUser.id,
         reason: actionReason,
         revokeAllSessions: true
       })).unwrap();
-      toast.success('Success', 'User deactivated successfully');
+      toast.success(t('common:alerts.success'), t('users:detail.notifications.deactivateSuccess'));
       setShowDeactivateModal(false);
       setActionReason('');
     } catch (error) {
-      toast.error('Error', 'Failed to deactivate user');
+      toast.error(t('common:alerts.error'), t('users:detail.notifications.deactivateError'));
     }
   };
 
   const handleUnlock = async () => {
     try {
-      await dispatch(unlockUser({ 
-        id: currentUser.id, 
+      await dispatch(unlockUser({
+        id: currentUser.id,
         reason: actionReason
       })).unwrap();
-      toast.success('Success', 'User unlocked successfully');
+      toast.success(t('common:alerts.success'), t('users:detail.notifications.unlockSuccess'));
       setShowUnlockModal(false);
       setActionReason('');
     } catch (error) {
-      toast.error('Error', 'Failed to unlock user');
+      toast.error(t('common:alerts.error'), t('users:detail.notifications.unlockError'));
     }
   };
 
@@ -208,7 +210,7 @@ const UserDetailPage = () => {
         id: currentUser.id,
         ...passwordResetData
       })).unwrap();
-      toast.success('Success', 'Password reset successfully');
+      toast.success(t('common:alerts.success'), t('users:detail.notifications.passwordResetSuccess'));
       setShowPasswordResetModal(false);
       setPasswordResetData({
         newPassword: '',
@@ -217,7 +219,7 @@ const UserDetailPage = () => {
         reason:''
       });
     } catch (error) {
-      toast.error('Error', 'Failed to reset password');
+      toast.error(t('common:alerts.error'), t('users:detail.notifications.passwordResetError'));
     }
   };
 
@@ -225,7 +227,7 @@ const UserDetailPage = () => {
   const activityColumns = [
     {
       key: 'action',
-      header: 'Event',
+      header: t('users:detail.activity.event'),
       sortable: true,
       render: (action) => (
         <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
@@ -235,18 +237,18 @@ const UserDetailPage = () => {
     },
     {
       key: 'description',
-      header: 'Description',
+      header: t('users:detail.activity.description'),
       sortable: false
     },
     {
       key: 'ipAddress',
-      header: 'IP Address',
+      header: t('users:detail.activity.ipAddress'),
       sortable: false,
       render: (ip) => ip || '-'
     },
     {
       key: 'timestamp',
-      header: 'Date & Time',
+      header: t('users:detail.activity.dateTime'),
       sortable: true,
       render: (timestamp) => formatDateTime(timestamp)
     }
@@ -254,20 +256,20 @@ const UserDetailPage = () => {
 
   // Tab configuration
   const tabs = [
-    { 
-      id: 'overview', 
-      label: 'Overview', 
-      icon: '👤' 
+    {
+      id: 'overview',
+      label: t('users:detail.tabs.overview'),
+      icon: '👤'
     },
-    { 
-      id: 'activity', 
-      label: 'Activity', 
+    {
+      id: 'activity',
+      label: t('users:detail.tabs.activity'),
       icon: '📊',
       show: canViewUserActivity && !isNewUser
     },
-    { 
-      id: 'security', 
-      label: 'Security', 
+    {
+      id: 'security',
+      label: t('users:detail.tabs.security'),
       icon: '🔒',
       show: (canManageUsers || canResetPasswords) && !isNewUser
     }
@@ -277,7 +279,7 @@ const UserDetailPage = () => {
   if (isLoading && !isNewUser) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <LoadingSpinner text="Loading user details..." />
+        <LoadingSpinner text={t('users:detail.loading')} />
       </div>
     );
   }
@@ -291,10 +293,10 @@ const UserDetailPage = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Error Loading User</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('users:detail.errorTitle')}</h3>
         <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
         <Button onClick={() => navigate(USER_ROUTES.LIST)}>
-          Back to Users
+          {t('users:detail.backToUsersList')}
         </Button>
       </div>
     );
@@ -304,7 +306,7 @@ const UserDetailPage = () => {
     <button
       onClick={() => onClick(tab.id)}
       className={`
-        flex items-center space-x-2 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
+        flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
         ${isActive
           ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-2 border-blue-200 dark:border-blue-700'
           : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 border-2 border-transparent'
@@ -321,19 +323,19 @@ const UserDetailPage = () => {
 
     const getStatusConfig = () => {
       if (user.isLockedOut) {
-        return { text: 'Locked', className: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700' };
+        return { text: t('common:status.locked'), className: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700' };
       }
       if (!user.isActive) {
-        return { text: 'Inactive', className: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600' };
+        return { text: t('common:status.inactive'), className: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600' };
       }
-      return { text: 'Active', className: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700' };
+      return { text: t('common:status.active'), className: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700' };
     };
 
     const config = getStatusConfig();
 
     return (
       <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${config.className}`}>
-        <span className={`w-2 h-2 rounded-full mr-2 ${
+        <span className={`w-2 h-2 rounded-full me-2 ${
           user.isLockedOut ? 'bg-red-500' : 
           user.isActive ? 'bg-green-500' : 'bg-gray-500'
         }`}></span>
@@ -364,7 +366,7 @@ const UserDetailPage = () => {
         className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6"
       >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-4">
             <button
               onClick={() => navigate(USER_ROUTES.LIST)}
               className="p-2 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -373,14 +375,14 @@ const UserDetailPage = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            
+
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                {isNewUser ? 'Create New User' : (
-                  currentUser ? formatName(currentUser.firstName, currentUser.lastName) : 'Loading...'
+                {isNewUser ? t('users:detail.createNew') : (
+                  currentUser ? formatName(currentUser.firstName, currentUser.lastName) : t('users:detail.loading')
                 )}
               </h1>
-              <div className="flex items-center space-x-4 mt-2">
+              <div className="flex items-center gap-4 mt-2">
                 {!isNewUser && currentUser && (
                   <>
                     <p className="text-gray-600 dark:text-gray-400">{currentUser.email}</p>
@@ -395,7 +397,7 @@ const UserDetailPage = () => {
           </div>
 
           {!isNewUser && currentUser && (
-            <div className="flex items-center space-x-2 mt-4 md:mt-0">
+            <div className="flex items-center gap-2 mt-4 md:mt-0">
               {canUpdateUsers && (
                 <ActionButton
                   onClick={() => setIsEditing(!isEditing)}
@@ -406,7 +408,7 @@ const UserDetailPage = () => {
                     </svg>
                   }
                 >
-                  {isEditing ? 'Cancel' : 'Edit'}
+                  {isEditing ? t('users:detail.actions.cancel') : t('users:detail.actions.edit')}
                 </ActionButton>
               )}
 
@@ -420,7 +422,7 @@ const UserDetailPage = () => {
                     </svg>
                   }
                 >
-                  Activate
+                  {t('users:detail.actions.activate')}
                 </ActionButton>
               )}
 
@@ -434,7 +436,7 @@ const UserDetailPage = () => {
                     </svg>
                   }
                 >
-                  Deactivate
+                  {t('users:detail.actions.deactivate')}
                 </ActionButton>
               )}
 
@@ -448,7 +450,7 @@ const UserDetailPage = () => {
                     </svg>
                   }
                 >
-                  Unlock
+                  {t('users:detail.actions.unlock')}
                 </ActionButton>
               )}
 
@@ -462,7 +464,7 @@ const UserDetailPage = () => {
                     </svg>
                   }
                 >
-                  Delete
+                  {t('users:detail.actions.delete')}
                 </ActionButton>
               )}
             </div>
@@ -478,7 +480,7 @@ const UserDetailPage = () => {
           transition={{ delay: 0.1 }}
           className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 p-6"
         >
-          <div className="flex space-x-1 bg-gray-50 dark:bg-gray-700/50 p-1 rounded-lg">
+          <div className="flex gap-1 bg-gray-50 dark:bg-gray-700/50 p-1 rounded-lg">
             {tabs.map((tab) => (
               <TabButton
                 key={tab.id}
@@ -518,32 +520,32 @@ const UserDetailPage = () => {
                 />
               ) : (
                 <div className="max-w-6xl mx-auto">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 text-center">User Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 text-center">{t('users:detail.userInformation')}</h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
                     {/* Personal Information */}
                     <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
                       <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                        <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-blue-500 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
-                        Personal Information
+                        {t('users:detail.personalInfo')}
                       </h4>
-                      
+
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Full Name</label>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('users:detail.labels.fullName')}</label>
                           <p className="text-gray-900 dark:text-white font-medium">{formatName(currentUser.firstName, currentUser.lastName)}</p>
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Email</label>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('users:detail.labels.email')}</label>
                           <p className="text-gray-900 dark:text-white">{currentUser.email}</p>
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Phone Number</label>
-                          <p className="text-gray-900 dark:text-white">{currentUser.phoneNumber || 'Not provided'}</p>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('users:detail.labels.phoneNumber')}</label>
+                          <p className="text-gray-900 dark:text-white">{currentUser.phoneNumber || t('users:detail.labels.notProvided')}</p>
                         </div>
                       </div>
                     </div>
@@ -551,31 +553,31 @@ const UserDetailPage = () => {
                     {/* Work Information */}
                     <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
                       <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                        <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-green-500 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
                         </svg>
-                        Work Information
+                        {t('users:detail.workInfo')}
                       </h4>
-                      
+
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Role</label>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('users:detail.labels.role')}</label>
                           <p className="text-gray-900 dark:text-white font-medium">{currentUser.role}</p>
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Department</label>
-                          <p className="text-gray-900 dark:text-white">{currentUser.department || 'Not assigned'}</p>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('users:detail.labels.department')}</label>
+                          <p className="text-gray-900 dark:text-white">{currentUser.department || t('users:detail.labels.notAssigned')}</p>
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Job Title</label>
-                          <p className="text-gray-900 dark:text-white">{currentUser.jobTitle || 'Not specified'}</p>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('users:detail.labels.jobTitle')}</label>
+                          <p className="text-gray-900 dark:text-white">{currentUser.jobTitle || t('users:detail.labels.notSpecified')}</p>
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Employee ID</label>
-                          <p className="text-gray-900 dark:text-white">{currentUser.employeeId || 'Not assigned'}</p>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('users:detail.labels.employeeId')}</label>
+                          <p className="text-gray-900 dark:text-white">{currentUser.employeeId || t('users:detail.labels.notAssigned')}</p>
                         </div>
                       </div>
                     </div>
@@ -583,34 +585,34 @@ const UserDetailPage = () => {
                     {/* Account Information */}
                     <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
                       <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                        <svg className="w-5 h-5 text-purple-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-purple-500 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
-                        Account Status
+                        {t('users:detail.accountStatus')}
                       </h4>
-                      
+
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Status</label>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('users:detail.labels.status')}</label>
                           <StatusBadge user={currentUser} />
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Created On</label>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('users:detail.labels.createdOn')}</label>
                           <p className="text-gray-900 dark:text-white">{formatDate(currentUser.createdOn)}</p>
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Last Login</label>
+                          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('users:detail.labels.lastLogin')}</label>
                           <p className="text-gray-900 dark:text-white">
-                            {currentUser.lastLoginDate ? formatDateTime(currentUser.lastLoginDate) : 'Never'}
+                            {currentUser.lastLoginDate ? formatDateTime(currentUser.lastLoginDate) : t('users:detail.labels.never')}
                           </p>
                         </div>
 
                         {currentUser.mustChangePassword && (
                           <div className="p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg">
                             <p className="text-yellow-800 dark:text-yellow-300 text-sm font-medium">
-                              ⚠️ Password change required on next login
+                              {t('users:profile.passwordRequired')}
                             </p>
                           </div>
                         )}
@@ -620,40 +622,40 @@ const UserDetailPage = () => {
                     {/* Recent Activity Summary */}
                     <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
                       <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                        <svg className="w-5 h-5 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-orange-500 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
-                        Activity Summary
+                        {t('users:detail.activitySummary')}
                       </h4>
-                      
+
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">Login Count</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{t('users:detail.labels.loginCount')}</span>
                           <span className="font-medium text-gray-900 dark:text-white">
                             {currentUser.activitySummary?.loginCount || 0}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">Failed Login Attempts</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{t('users:detail.labels.failedLoginAttempts')}</span>
                           <span className="font-medium text-gray-900 dark:text-white">
                             {currentUser.activitySummary?.failedLoginAttempts || currentUser.failedLoginAttempts || 0}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">Invitations Created</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{t('users:detail.labels.invitationsCreated')}</span>
                           <span className="font-medium text-gray-900 dark:text-white">
                             {currentUser.activitySummary?.invitationsCreated || 0}
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">Password Changes</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{t('users:detail.labels.passwordChanges')}</span>
                           <span className="font-medium text-gray-900 dark:text-white">
                             {currentUser.activitySummary?.passwordChanges || 0}
                           </span>
                         </div>
                         {currentUser.activitySummary?.lastFailedLogin && (
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">Last Failed Login</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-400">{t('users:detail.labels.lastFailedLogin')}</span>
                             <span className="font-medium text-gray-900 dark:text-white">
                               {formatDateTime(currentUser.activitySummary.lastFailedLogin)}
                             </span>
@@ -670,14 +672,14 @@ const UserDetailPage = () => {
           {/* Activity Tab */}
           {activeTab === 'activity' && (
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">User Activity</h3>
-              
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">{t('users:detail.activityTitle')}</h3>
+
               <Table
                 columns={activityColumns}
                 data={userActivity.data || []}
                 loading={userActivity.loading}
                 error={userActivity.error}
-                emptyMessage="No activity found"
+                emptyMessage={t('users:detail.activity.noActivity')}
                 pagination={{
                   currentPage: activityPage + 1,
                   totalPages: userActivity.pagination?.totalPages || 0,
@@ -690,24 +692,24 @@ const UserDetailPage = () => {
           {/* Security Tab */}
           {activeTab === 'security' && (
             <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Security Management</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">{t('users:detail.securityTitle')}</h3>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Password Management */}
                 {canResetPasswords && (
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
                     <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                      <svg className="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-red-500 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       </svg>
-                      Password Management
+                      {t('users:detail.passwordManagement')}
                     </h4>
-                    
+
                     <div className="space-y-4">
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Manage user password and authentication settings.
+                        {t('users:detail.passwordManagementNote')}
                       </p>
-                      
+
                       <Button
                         variant="danger"
                         size="sm"
@@ -718,7 +720,7 @@ const UserDetailPage = () => {
                           </svg>
                         }
                       >
-                        Reset Password
+                        {t('users:detail.actions.resetPassword')}
                       </Button>
                     </div>
                   </div>
@@ -727,23 +729,23 @@ const UserDetailPage = () => {
                 {/* Session Management */}
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
                   <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-                    <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-blue-500 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    Session Information
+                    {t('users:detail.sessionInfo')}
                   </h4>
-                  
+
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Active Sessions</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{t('users:detail.activeSessions')}</span>
                       <span className="font-medium text-gray-900 dark:text-white">2</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Current Device</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{t('users:detail.currentDevice')}</span>
                       <span className="font-medium text-gray-900 dark:text-white">Chrome on Windows</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Last Activity</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{t('users:detail.lastActivity')}</span>
                       <span className="font-medium text-gray-900 dark:text-white">5 minutes ago</span>
                     </div>
                   </div>
@@ -759,10 +761,12 @@ const UserDetailPage = () => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
-        title="Delete User"
-        message={`Are you sure you want to delete ${currentUser ? formatName(currentUser.firstName, currentUser.lastName) : 'this user'}? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('users:detail.modals.deleteTitle')}
+        message={t('users:detail.modals.deleteMessage', {
+          name: currentUser ? formatName(currentUser.firstName, currentUser.lastName) : t('common:labels.thisUser')
+        })}
+        confirmText={t('common:buttons.delete')}
+        cancelText={t('common:buttons.cancel')}
         variant="danger"
         loading={deleteLoading}
       />
@@ -771,27 +775,27 @@ const UserDetailPage = () => {
       <Modal
         isOpen={showActivateModal}
         onClose={() => setShowActivateModal(false)}
-        title="Activate User"
+        title={t('users:detail.modals.activateTitle')}
         size="md"
       >
         <div className="space-y-4">
           <p className="text-gray-600 dark:text-gray-400">
-            Are you sure you want to activate this user account? This will allow them to log in to the system.
+            {t('users:detail.modals.activateMessage')}
           </p>
-          
+
           <Input
-            label="Reason (Optional)"
-            placeholder="Enter reason for activation"
+            label={t('users:detail.modals.activateReason')}
+            placeholder={t('users:detail.modals.activateReasonPlaceholder')}
             value={actionReason}
             onChange={(e) => setActionReason(e.target.value)}
           />
-          
-          <div className="flex justify-end space-x-3 pt-4">
+
+          <div className="flex justify-end gap-3 pt-4">
             <Button variant="secondary" onClick={() => setShowActivateModal(false)}>
-              Cancel
+              {t('common:buttons.cancel')}
             </Button>
             <Button variant="success" onClick={handleActivate}>
-              Activate User
+              {t('users:detail.modals.activateButton')}
             </Button>
           </div>
         </div>
@@ -801,28 +805,28 @@ const UserDetailPage = () => {
       <Modal
         isOpen={showDeactivateModal}
         onClose={() => setShowDeactivateModal(false)}
-        title="Deactivate User"
+        title={t('users:detail.modals.deactivateTitle')}
         size="md"
       >
         <div className="space-y-4">
           <p className="text-gray-600 dark:text-gray-400">
-            Are you sure you want to deactivate this user account? This will prevent them from logging in and revoke all active sessions.
+            {t('users:detail.modals.deactivateMessage')}
           </p>
-          
+
           <Input
-            label="Reason"
-            placeholder="Enter reason for deactivation"
+            label={t('users:detail.modals.deactivateReason')}
+            placeholder={t('users:detail.modals.deactivateReasonPlaceholder')}
             value={actionReason}
             onChange={(e) => setActionReason(e.target.value)}
             required
           />
-          
-          <div className="flex justify-end space-x-3 pt-4">
+
+          <div className="flex justify-end gap-3 pt-4">
             <Button variant="secondary" onClick={() => setShowDeactivateModal(false)}>
-              Cancel
+              {t('common:buttons.cancel')}
             </Button>
             <Button variant="warning" onClick={handleDeactivate} disabled={!actionReason.trim()}>
-              Deactivate User
+              {t('users:detail.modals.deactivateButton')}
             </Button>
           </div>
         </div>
@@ -832,93 +836,93 @@ const UserDetailPage = () => {
       <Modal
         isOpen={showUnlockModal}
         onClose={() => setShowUnlockModal(false)}
-        title="Unlock User"
+        title={t('users:detail.modals.unlockTitle')}
         size="md"
       >
         <div className="space-y-4">
           <p className="text-gray-600 dark:text-gray-400">
-            Are you sure you want to unlock this user account? This will reset their failed login attempts and allow them to log in.
+            {t('users:detail.modals.unlockMessage')}
           </p>
-          
+
           <Input
-            label="Reason (Optional)"
-            placeholder="Enter reason for unlocking"
+            label={t('users:detail.modals.unlockReason')}
+            placeholder={t('users:detail.modals.unlockReasonPlaceholder')}
             value={actionReason}
             onChange={(e) => setActionReason(e.target.value)}
           />
-          
-          <div className="flex justify-end space-x-3 pt-4">
+
+          <div className="flex justify-end gap-3 pt-4">
             <Button variant="secondary" onClick={() => setShowUnlockModal(false)}>
-              Cancel
+              {t('common:buttons.cancel')}
             </Button>
             <Button variant="info" onClick={handleUnlock}>
-              Unlock User
+              {t('users:detail.modals.unlockButton')}
             </Button>
           </div>
         </div>
       </Modal>
 
-  {/* Password Reset Modal */}
-  <Modal
-    isOpen={showPasswordResetModal}
-    onClose={() => setShowPasswordResetModal(false)}
-    title="Reset Password"
-    size="md"
-  >
-    <div className="space-y-4">
-      <p className="text-gray-600 dark:text-gray-400">
-        Reset the user's password. They will be required to change it on their next login.
-      </p>
-      
-      <Input
-        type="password"
-        label="New Password (Optional)"
-        placeholder="Leave empty to generate a temporary password"
-        value={passwordResetData.newPassword}
-        onChange={(e) => setPasswordResetData(prev => ({ ...prev, newPassword: e.target.value }))}
-        helperText="If left empty, a secure temporary password will be generated"
-      />
-      
-      <Input
-        label="Reason (Optional)"
-        placeholder="Enter reason for password reset"
-        value={passwordResetData.reason}
-        onChange={(e) => setPasswordResetData(prev => ({ ...prev, reason: e.target.value }))}
-        helperText="Provide a reason for this password reset action"
-      />
-      
-      <div className="space-y-3">
-        <label className="flex items-center space-x-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={passwordResetData.mustChangePassword}
-            onChange={(e) => setPasswordResetData(prev => ({ ...prev, mustChangePassword: e.target.checked }))}
-            className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500"
-          />
-          <span className="text-sm text-gray-700 dark:text-gray-300">Require password change on next login</span>
-        </label>
+      {/* Password Reset Modal */}
+      <Modal
+        isOpen={showPasswordResetModal}
+        onClose={() => setShowPasswordResetModal(false)}
+        title={t('users:detail.modals.resetPasswordTitle')}
+        size="md"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600 dark:text-gray-400">
+            {t('users:detail.modals.resetPasswordMessage')}
+          </p>
 
-        <label className="flex items-center space-x-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={passwordResetData.notifyUser}
-            onChange={(e) => setPasswordResetData(prev => ({ ...prev, notifyUser: e.target.checked }))}
-            className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500"
+          <Input
+            type="password"
+            label={t('users:detail.modals.resetPasswordNewLabel')}
+            placeholder={t('users:detail.modals.resetPasswordNewPlaceholder')}
+            value={passwordResetData.newPassword}
+            onChange={(e) => setPasswordResetData(prev => ({ ...prev, newPassword: e.target.value }))}
+            helperText={t('users:detail.modals.resetPasswordNewHelper')}
           />
-          <span className="text-sm text-gray-700 dark:text-gray-300">Send email notification to user</span>
-        </label>
-      </div>
-      
-      <div className="flex justify-end space-x-3 pt-4">
-        <Button variant="secondary" onClick={() => setShowPasswordResetModal(false)}>
-          Cancel
-        </Button>
-        <Button variant="danger" onClick={handlePasswordReset}>
-          Reset Password
-        </Button>
-      </div>
-    </div>
-  </Modal>
+
+          <Input
+            label={t('users:detail.modals.resetPasswordReasonLabel')}
+            placeholder={t('users:detail.modals.resetPasswordReasonPlaceholder')}
+            value={passwordResetData.reason}
+            onChange={(e) => setPasswordResetData(prev => ({ ...prev, reason: e.target.value }))}
+            helperText={t('users:detail.modals.resetPasswordReasonHelper')}
+          />
+
+          <div className="space-y-3">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={passwordResetData.mustChangePassword}
+                onChange={(e) => setPasswordResetData(prev => ({ ...prev, mustChangePassword: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700 dark:text-gray-300">{t('users:detail.modals.mustChangePassword')}</span>
+            </label>
+
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={passwordResetData.notifyUser}
+                onChange={(e) => setPasswordResetData(prev => ({ ...prev, notifyUser: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700 dark:text-gray-300">{t('users:detail.modals.notifyUser')}</span>
+            </label>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="secondary" onClick={() => setShowPasswordResetModal(false)}>
+              {t('common:buttons.cancel')}
+            </Button>
+            <Button variant="danger" onClick={handlePasswordReset}>
+              {t('users:detail.modals.resetPasswordButton')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

@@ -222,7 +222,7 @@ const ExcelInvitationManager = ({
 
       {/* Download instructions */}
       <Card className="p-4 bg-blue-50 border-blue-200">
-        <div className="flex items-start space-x-3">
+        <div className="flex items-start gap-3">
           <InformationCircleIcon className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div className="text-sm text-blue-800">
             <h4 className="font-medium mb-1">How to use templates:</h4>
@@ -238,7 +238,7 @@ const ExcelInvitationManager = ({
 
       {downloadError && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
             <span className="text-sm text-red-700">{downloadError}</span>
           </div>
@@ -305,7 +305,7 @@ const ExcelInvitationManager = ({
       {/* Upload results */}
       {uploadResult && (
         <Card className="p-4 bg-green-50 border-green-200">
-          <div className="flex items-center space-x-2 mb-3">
+          <div className="flex items-center gap-2 mb-3">
             <CheckCircleIcon className="w-5 h-5 text-green-600" />
             <h4 className="font-medium text-green-800">Upload Successful!</h4>
           </div>
@@ -335,7 +335,7 @@ const ExcelInvitationManager = ({
       {/* Upload error */}
       {uploadError && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
             <span className="text-sm text-red-700">{uploadError}</span>
           </div>
@@ -389,14 +389,14 @@ const ExcelInvitationManager = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Template Type
             </label>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-4">
               <label className="flex items-center">
                 <input
                   type="radio"
                   name="templateType"
                   checked={!emailData.includeMultipleVisitors}
                   onChange={() => setEmailData(prev => ({ ...prev, includeMultipleVisitors: false }))}
-                  className="mr-2"
+                  className="me-2"
                 />
                 Single Visitor
               </label>
@@ -406,7 +406,7 @@ const ExcelInvitationManager = ({
                   name="templateType"
                   checked={emailData.includeMultipleVisitors}
                   onChange={() => setEmailData(prev => ({ ...prev, includeMultipleVisitors: true }))}
-                  className="mr-2"
+                  className="me-2"
                 />
                 Multiple Visitors
               </label>
@@ -443,7 +443,7 @@ const ExcelInvitationManager = ({
       {/* Email success */}
       {emailSuccess && (
         <div className="bg-green-50 border border-green-200 rounded-md p-4">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <CheckCircleIcon className="w-5 h-5 text-green-600" />
             <span className="text-sm text-green-700">
               Template sent successfully to {emailData.hostEmail}!
@@ -455,7 +455,7 @@ const ExcelInvitationManager = ({
       {/* Email error */}
       {emailError && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
             <span className="text-sm text-red-700">{emailError}</span>
           </div>
@@ -466,7 +466,7 @@ const ExcelInvitationManager = ({
 
   // Render tab navigation
   const renderTabNavigation = () => (
-    <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+    <div className="flex gap-1 bg-gray-100 p-1 rounded-lg mb-6">
       {[
         { id: 'download', label: 'Download Templates', icon: DocumentArrowDownIcon },
         { id: 'upload', label: 'Upload & Process', icon: DocumentArrowUpIcon },
@@ -475,7 +475,7 @@ const ExcelInvitationManager = ({
         <button
           key={tab.id}
           onClick={() => setActiveTab(tab.id)}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-md font-medium transition-colors ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-colors ${
             activeTab === tab.id
               ? 'bg-white text-blue-600 shadow-sm'
               : 'text-gray-600 hover:text-gray-800'

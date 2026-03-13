@@ -200,7 +200,7 @@ const ChangePasswordPage = () => {
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                className="absolute inset-y-0 end-0 pe-3 flex items-center"
                 onClick={() => togglePasswordVisibility('current')}
               >
                 <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,7 +237,7 @@ const ChangePasswordPage = () => {
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                className="absolute inset-y-0 end-0 pe-3 flex items-center"
                 onClick={() => togglePasswordVisibility('new')}
               >
                 <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -286,7 +286,7 @@ const ChangePasswordPage = () => {
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                className="absolute inset-y-0 end-0 pe-3 flex items-center"
                 onClick={() => togglePasswordVisibility('confirm')}
               >
                 <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -310,7 +310,7 @@ const ChangePasswordPage = () => {
                 <svg className="h-5 w-5 text-red-400 dark:text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p className="ml-3 text-sm text-red-600 dark:text-red-300">{formErrors.submit}</p>
+                <p className="ms-3 text-sm text-red-600 dark:text-red-300">{formErrors.submit}</p>
               </div>
             </div>
           )}

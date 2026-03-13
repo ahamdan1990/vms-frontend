@@ -65,7 +65,7 @@ const ConnectionStatus = ({ showDetails = false, className = '' }) => {
   if (!showDetails) {
     // Simple indicator version
     return (
-      <div className={`flex items-center space-x-1 ${className}`}>
+      <div className={`flex items-center gap-1 ${className}`}>
         <Icon 
           className={`h-4 w-4 ${statusInfo.color} ${statusInfo.status === 'Reconnecting' ? 'animate-spin' : ''}`} 
         />
@@ -79,7 +79,7 @@ const ConnectionStatus = ({ showDetails = false, className = '' }) => {
   // Detailed version with connection breakdown
   return (
     <div className={`${className}`}>
-      <div className={`flex items-center space-x-2 px-2 py-1 rounded-md ${statusInfo.bgColor}`}>
+      <div className={`flex items-center gap-2 px-2 py-1 rounded-md ${statusInfo.bgColor}`}>
         <Icon 
           className={`h-4 w-4 ${statusInfo.color} ${statusInfo.status === 'Reconnecting' ? 'animate-spin' : ''}`} 
         />

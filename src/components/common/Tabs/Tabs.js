@@ -49,7 +49,7 @@ const tabListClasses = classNames(
   'flex border-b border-gray-200 dark:border-gray-700',
     {
       'w-full': fullWidth,
-      'space-x-8': !fullWidth
+      'gap-8': !fullWidth
     }
   );
 
@@ -94,14 +94,14 @@ const contentClasses = classNames(
                 <tab.icon 
                   className={classNames(
                     'w-5 h-5',
-                    tab.label ? 'mr-2' : '',
+                    tab.label ? 'me-2' : '',
                     isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
                   )} 
                 />
               )}
               {tab.label && <span>{tab.label}</span>}
               {tab.badge && (
-                <span className="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs">
+                <span className="ms-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs">
                   {tab.badge}
                 </span>
               )}

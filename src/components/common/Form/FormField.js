@@ -89,7 +89,7 @@ const FormField = ({
             )}
           >
             {label}
-            {required && <span className="text-red-500 ml-1">*</span>}
+            {required && <span className="text-red-500 ms-1">*</span>}
           </label>
         )}
 
@@ -100,7 +100,7 @@ const FormField = ({
             
             {/* Validation Icon */}
             {hasValidation && (
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
                 {getValidationIcon()}
               </div>
             )}
@@ -111,7 +111,7 @@ const FormField = ({
             <div 
               id={`${fieldId}-validation`}
               className={classNames(
-                `${TEXT_STYLES.body.sm} mt-2 flex items-start space-x-1`,
+                `${TEXT_STYLES.body.sm} mt-2 flex items-start gap-1`,
                 getValidationClasses()
               )}
             >
@@ -145,7 +145,7 @@ const FormField = ({
           )}
         >
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-red-500 ms-1">*</span>}
         </label>
       )}
 
@@ -155,7 +155,7 @@ const FormField = ({
         
         {/* Validation Icon for smaller inputs */}
         {hasValidation && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+          <div className="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
             {getValidationIcon()}
           </div>
         )}
@@ -166,7 +166,7 @@ const FormField = ({
         <div 
           id={`${fieldId}-validation`}
           className={classNames(
-            `${TEXT_STYLES.body.sm} flex items-start space-x-1`,
+            `${TEXT_STYLES.body.sm} flex items-start gap-1`,
             getValidationClasses()
           )}
         >

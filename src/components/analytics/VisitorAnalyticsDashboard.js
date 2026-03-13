@@ -503,8 +503,8 @@ const VisitorAnalyticsDashboard = () => {
         )}
       </div>
 
-      <div className="flex items-center space-x-4">
-        <div className="flex space-x-1 bg-gray-100 dark:bg-slate-800/80 border border-gray-200 dark:border-gray-700 p-1 rounded-lg">
+      <div className="flex items-center gap-4">
+        <div className="flex gap-1 bg-gray-100 dark:bg-slate-800/80 border border-gray-200 dark:border-gray-700 p-1 rounded-lg">
           {[
             { label: '24h', value: '1d' },
             { label: '7d', value: '7d' },
@@ -551,7 +551,7 @@ const VisitorAnalyticsDashboard = () => {
     return (
       <div className="flex items-center justify-center py-12">
         <LoadingSpinner size="lg" />
-        <span className="ml-3 text-gray-600 dark:text-gray-300">Loading analytics...</span>
+        <span className="ms-3 text-gray-600 dark:text-gray-300">Loading analytics...</span>
       </div>
     );
   }
@@ -562,7 +562,7 @@ const VisitorAnalyticsDashboard = () => {
       
       {error && (
         <div className="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-md p-4">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <ExclamationTriangleIcon className="w-5 h-5 text-red-600 dark:text-red-300" />
             <span className="text-sm text-red-700 dark:text-red-200">{error}</span>
           </div>
@@ -582,7 +582,7 @@ const VisitorAnalyticsDashboard = () => {
                 <span className="text-sm text-gray-600 dark:text-gray-300">
                   {formatters.formatDate(new Date(day.date))}
                 </span>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 w-24">
                     <div 
                       className="bg-blue-500 dark:bg-blue-400 h-2 rounded-full"
@@ -602,7 +602,7 @@ const VisitorAnalyticsDashboard = () => {
           <div className="space-y-3">
             {analytics.demographics.byCompany.slice(0, 6).map((company, index) => (
               <div key={company.company} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <div className="w-6 h-6 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
                     <span className="text-xs font-medium text-gray-600 dark:text-gray-200">#{index + 1}</span>
                   </div>
@@ -644,7 +644,7 @@ const VisitorAnalyticsDashboard = () => {
           <div className="space-y-3">
             {analytics.performance.busyLocations.map(location => (
               <div key={location.name} className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <MapPinIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                   <span className="text-sm text-gray-900 dark:text-gray-100">{location.name}</span>
                 </div>
@@ -660,7 +660,7 @@ const VisitorAnalyticsDashboard = () => {
           <div className="space-y-3">
             {analytics.performance.peakTimes.map(time => (
               <div key={time.hour} className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <ClockIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                   <span className="text-sm text-gray-900 dark:text-gray-100">
                     {formatters.formatTime(new Date().setHours(time.hour, 0, 0, 0))}

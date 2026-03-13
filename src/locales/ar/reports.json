@@ -1,0 +1,26 @@
+{
+  "pageTitle": "التقارير",
+  "pageSubtitle": "إنشاء وعرض تقارير النظام",
+  "generateButton": "إنشاء تقرير",
+  "exportButton": "تصدير",
+  "dateRange": "نطاق التاريخ",
+  "reportType": "نوع التقرير",
+  "types": {
+    "visitorReport": "تقرير الزوار",
+    "invitationReport": "تقرير الدعوات",
+    "checkinReport": "تقرير تسجيل الدخول",
+    "auditReport": "تقرير المراجعة",
+    "capacityReport": "تقرير الطاقة الاستيعابية"
+  },
+  "analytics": {
+    "title": "التحليلات",
+    "visitTrends": "اتجاهات الزيارات",
+    "peakHours": "ساعات الذروة",
+    "topVisitors": "أبرز الزوار",
+    "topHosts": "أبرز المضيفين",
+    "byDepartment": "حسب القسم",
+    "byLocation": "حسب الموقع",
+    "byPurpose": "حسب الغرض"
+  },
+  "emptyMessage": "لا توجد بيانات للفترة المحددة."
+}

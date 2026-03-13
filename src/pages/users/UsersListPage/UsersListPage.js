@@ -3,6 +3,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { usePermissions } from '../../../hooks/usePermissions';
 
 // Redux actions and selectors
@@ -46,6 +47,8 @@ import {
   selectCanBulkDeactivate,
   selectCanBulkDelete
 } from '../../../store/selectors/userSelectors';
+
+import { setPageTitle } from '../../../store/slices/uiSlice';
 
 // Notification hook
 import { useToast } from '../../../hooks/useNotifications';
@@ -93,6 +96,7 @@ import { extractErrorMessage } from '../../../utils/errorUtils';
  */
 const UsersListPage = () => {
   const dispatch = useDispatch();
+  const { t } = useTranslation(['users', 'common']);
   const { user: userPermissions } = usePermissions();
   const toast = useToast();
 
@@ -110,12 +114,12 @@ const UsersListPage = () => {
   const selectedUsers = useSelector(selectSelectedUsers);
   const availableRoles = useSelector(selectAvailableRoles);
   const userStats = useSelector(selectUsersStatsSummary);
-  
+
   // Modal states
   const isCreateModalOpen = useSelector(selectShowCreateModal);
   const isEditModalOpen = useSelector(selectShowEditModal);
   const isDeleteModalOpen = useSelector(selectShowDeleteModal);
-  
+
   // Error states
   const createError = useSelector(selectUsersCreateError);
   const updateError = useSelector(selectUsersUpdateError);
@@ -129,12 +133,13 @@ const UsersListPage = () => {
   const [currentEditUser, setCurrentEditUser] = useState(null);
   const [currentDeleteUser, setCurrentDeleteUser] = useState(null);
 
-  // Load initial data
+  // Load initial data and set page title
   useEffect(() => {
+    dispatch(setPageTitle(t('users:pageTitle')));
     dispatch(getUsers());
     dispatch(getAvailableRoles());
     dispatch(getUserStats());
-  }, [dispatch]);
+  }, [dispatch, t]);
 
   // Handle search with debouncing
   useEffect(() => {
@@ -193,19 +198,22 @@ const UsersListPage = () => {
     try {
       dispatch(clearError());
       const result = await dispatch(createUser(formData));
-      
+
       if (result.type === 'users/createUser/fulfilled') {
         dispatch(hideCreateModal());
-        
+
         // Show success notification
         toast.success(
-          'User Created Successfully',
-          `${formData.firstName} ${formData.lastName} has been created.${formData.sendWelcomeEmail ? ' Welcome email sent.' : ''}`,
+          t('users:notifications.createSuccess'),
+          t('users:notifications.createSuccessBody', {
+            name: `${formData.firstName} ${formData.lastName}`,
+            emailNote: formData.sendWelcomeEmail ? t('users:notifications.welcomeEmailSent') : ''
+          }),
           {
             duration: 6000,
             actions: [
               {
-                label: 'Create Another',
+                label: t('users:actions.createAnother'),
                 onClick: () => {
                   dispatch(showCreateModal());
                 },
@@ -222,8 +230,8 @@ const UsersListPage = () => {
     } catch (error) {
       console.error('Failed to create user:', error);
       toast.error(
-        'User Creation Failed',
-        extractErrorMessage(error) || 'An unexpected error occurred',
+        t('users:notifications.createError'),
+        extractErrorMessage(error) || t('common:errors.unexpected'),
         {
           persistent: true
         }
@@ -236,21 +244,21 @@ const UsersListPage = () => {
   const handleUpdateUser = async (formData) => {
     try {
       dispatch(clearError());
-      
+
       if (currentEditUser) {
-        const result = await dispatch(updateUser({ 
-          id: currentEditUser.id, 
-          userData: formData 
+        const result = await dispatch(updateUser({
+          id: currentEditUser.id,
+          userData: formData
         }));
-        
+
         if (result.type === 'users/updateUser/fulfilled') {
           dispatch(hideEditModal());
           setCurrentEditUser(null);
-          
+
           // Show success notification
           toast.success(
-            'User Updated Successfully',
-            `${formData.firstName} ${formData.lastName} has been updated.`,
+            t('users:notifications.updateSuccess'),
+            t('users:notifications.updateSuccessBody', { name: `${formData.firstName} ${formData.lastName}` }),
             {
               duration: 5000
             }
@@ -264,8 +272,8 @@ const UsersListPage = () => {
     } catch (error) {
       console.error('Failed to update user:', error);
       toast.error(
-        'User Update Failed',
-        extractErrorMessage(error) || 'An unexpected error occurred',
+        t('users:notifications.updateError'),
+        extractErrorMessage(error) || t('common:errors.unexpected'),
         {
           persistent: true
         }
@@ -280,13 +288,13 @@ const UsersListPage = () => {
       if (currentDeleteUser) {
         await dispatch(deleteUser(currentDeleteUser.id)).unwrap();
         dispatch(hideDeleteModal());
-        
+
         const userName = `${currentDeleteUser.firstName || currentDeleteUser.FirstName || ''} ${currentDeleteUser.lastName || currentDeleteUser.LastName || ''}`.trim();
-        
+
         // Show success notification
         toast.success(
-          'User Deleted',
-          `${userName || 'User'} has been deleted successfully.`,
+          t('users:notifications.deleteSuccess'),
+          t('users:notifications.deleteSuccessBody', { name: userName || t('common:labels.user') }),
           {
             duration: 5000
           }
@@ -299,8 +307,8 @@ const UsersListPage = () => {
     } catch (error) {
       console.error('Failed to delete user:', error);
       toast.error(
-        'Delete Failed',
-        extractErrorMessage(error) || 'Failed to delete user',
+        t('users:notifications.deleteError'),
+        extractErrorMessage(error) || t('common:errors.deleteFailed'),
         {
           persistent: true
         }
@@ -312,59 +320,59 @@ const UsersListPage = () => {
   const handleUserAction = async (action, user) => {
     try {
       const userName = `${user.firstName || user.FirstName || ''} ${user.lastName || user.LastName || ''}`.trim();
-      
+
       switch (action) {
         case 'activate':
           await dispatch(activateUser({ id: user.id, reason: 'Manual activation' }));
           toast.success(
-            'User Activated',
-            `${userName} has been activated successfully.`
+            t('users:notifications.activateSuccess'),
+            t('users:notifications.activateSuccessBody', { name: userName })
           );
           // Refresh data
           dispatch(getUsers());
           dispatch(getUserStats());
           break;
-          
+
         case 'deactivate':
           await dispatch(deactivateUser({ id: user.id, reason: 'Manual deactivation', revokeAllSessions: true }));
           toast.warning(
-            'User Deactivated',
-            `${userName} has been deactivated. All sessions revoked.`
+            t('users:notifications.deactivateSuccess'),
+            t('users:notifications.deactivateSuccessBody', { name: userName })
           );
           // Refresh data
           dispatch(getUsers());
           dispatch(getUserStats());
           break;
-          
+
         case 'unlock':
           await dispatch(unlockUser({ id: user.id, reason: 'Manual unlock' }));
           toast.success(
-            'User Unlocked',
-            `${userName} account has been unlocked.`
+            t('users:notifications.unlockSuccess'),
+            t('users:notifications.unlockSuccessBody', { name: userName })
           );
           // Refresh data
           dispatch(getUsers());
           dispatch(getUserStats());
           break;
-          
+
         case 'edit':
           setCurrentEditUser(user);
           dispatch(showEditModal(user));
           break;
-          
+
         case 'delete':
           setCurrentDeleteUser(user);
           dispatch(showDeleteModal(user));
           break;
-          
+
         default:
           break;
       }
     } catch (error) {
       console.error('User action failed:', error);
       toast.error(
-        'Action Failed',
-        extractErrorMessage(error) || `Failed to ${action} user`,
+        t('users:notifications.actionFailed'),
+        extractErrorMessage(error) || t('users:notifications.actionFailedBody', { action }),
         {
           persistent: true
         }
@@ -401,8 +409,8 @@ const UsersListPage = () => {
 
       // Show success notification
       toast.success(
-        'Bulk Action Completed',
-        `Successfully ${bulkAction}d ${selectedUsers.length} user${selectedUsers.length > 1 ? 's' : ''}.`,
+        t('users:notifications.bulkSuccess'),
+        t('users:notifications.bulkSuccessBody', { count: selectedUsers.length }),
         {
           duration: 5000
         }
@@ -414,8 +422,8 @@ const UsersListPage = () => {
     } catch (error) {
       console.error('Bulk action failed:', error);
       toast.error(
-        'Bulk Action Failed',
-        `Failed to ${bulkAction} some users. Please try again.`,
+        t('users:notifications.bulkError'),
+        t('users:notifications.bulkErrorBody'),
         {
           persistent: true
         }
@@ -426,24 +434,24 @@ const UsersListPage = () => {
   // Helper function to get user status badge
   const getUserStatusBadge = (user) => {
     if (user.isLockedOut) {
-      return <Badge variant="danger" size="sm">Locked</Badge>;
+      return <Badge variant="danger" size="sm">{t('common:status.locked')}</Badge>;
     }
     if (!user.isActive) {
-      return <Badge variant="secondary" size="sm">Inactive</Badge>;
+      return <Badge variant="secondary" size="sm">{t('common:status.inactive')}</Badge>;
     }
-    return <Badge variant="success" size="sm">Active</Badge>;
+    return <Badge variant="success" size="sm">{t('common:status.active')}</Badge>;
   };
 
   // Helper function to get role badge
   const getRoleBadge = (role) => {
     const roleConfig = {
-      Administrator: { variant: 'primary', text: 'Administrator' },
-      Operator: { variant: 'info', text: 'Operator' },
-      Staff: { variant: 'success', text: 'Staff' }
+      Administrator: { variant: 'primary' },
+      Operator: { variant: 'info' },
+      Staff: { variant: 'success' }
     };
 
-    const config = roleConfig[role] || { variant: 'secondary', text: role };
-    return <Badge variant={config.variant} size="sm">{config.text}</Badge>;
+    const config = roleConfig[role] || { variant: 'secondary' };
+    return <Badge variant={config.variant} size="sm">{t(`users:roles.${role}`, role)}</Badge>;
   };
 
   // Helper function to format user name
@@ -451,7 +459,7 @@ const UsersListPage = () => {
     const fullName = `${user.firstName || user.FirstName || ''} ${user.lastName || user.LastName || ''}`.trim();
     return (
       <div>
-        <div className="font-medium text-gray-900">{fullName || 'Unknown User'}</div>
+        <div className="font-medium text-gray-900">{fullName || t('users:table.unknownUser')}</div>
         <div className="text-sm text-gray-500">{user.email}</div>
       </div>
     );
@@ -519,7 +527,7 @@ const UsersListPage = () => {
     },
     {
       key: 'name',
-      header: 'Name',
+      header: t('users:table.columns.name'),
       sortable: true,
       className: 'min-w-[200px]',
       render: (value, user) => (
@@ -536,14 +544,14 @@ const UsersListPage = () => {
     },
     {
       key: 'role',
-      header: 'Role',
+      header: t('users:table.columns.role'),
       sortable: true,
       className: 'min-w-[120px]',
       render: (value, user) => getRoleBadge(user.role)
     },
     {
       key: 'department',
-      header: 'Department',
+      header: t('users:table.columns.department'),
       sortable: true,
       className: 'min-w-[150px]',
       render: (value, user) => (
@@ -554,35 +562,35 @@ const UsersListPage = () => {
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('common:labels.status'),
       sortable: true,
       className: 'min-w-[100px]',
       render: (value, user) => getUserStatusBadge(user)
     },
     {
       key: 'lastLoginDate',
-      header: 'Last Login',
+      header: t('users:table.columns.lastLogin'),
       sortable: true,
       className: 'min-w-[120px]',
       render: (value, user) => (
         <span className="text-sm text-gray-600 dark:text-gray-400">
-          {user.lastLoginFormatted || 'Never'}
+          {user.lastLoginFormatted || t('users:table.never')}
         </span>
       )
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('common:labels.actions'),
       sortable: false,
       className: 'min-w-[200px]',
       render: (value, user) => (
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center gap-1">
           {/* View Details */}
-          <Tooltip content="View Details">
+          <Tooltip content={t('common:buttons.view')}>
             <Link
               to={`/users/${user.id}`}
               className="text-gray-600 hover:text-gray-900 transition-colors p-1 rounded"
-              title="View user details"
+              title={t('common:buttons.view')}
             >
               <EyeIcon className="w-4 h-4" />
             </Link>
@@ -590,11 +598,11 @@ const UsersListPage = () => {
 
           {/* Edit User */}
           {userPermissions.canUpdate && (
-            <Tooltip content="Edit">
+            <Tooltip content={t('common:buttons.edit')}>
               <button
                 onClick={() => handleUserAction('edit', user)}
                 className="text-blue-600 hover:text-blue-900 transition-colors p-1 rounded"
-                title="Edit user"
+                title={t('common:buttons.edit')}
               >
                 <PencilIcon className="w-4 h-4" />
               </button>
@@ -605,21 +613,21 @@ const UsersListPage = () => {
           {userPermissions.canUpdate && !user.isLockedOut && (
             <>
               {!user.isActive ? (
-                <Tooltip content="Activate User">
+                <Tooltip content={t('users:actions.activate')}>
                   <button
                     onClick={() => handleUserAction('activate', user)}
                     className="text-green-600 hover:text-green-900 transition-colors p-1 rounded"
-                    title="Activate user"
+                    title={t('users:actions.activate')}
                   >
                     <CheckCircleIcon className="w-4 h-4" />
                   </button>
                 </Tooltip>
               ) : (
-                <Tooltip content="Deactivate User">
+                <Tooltip content={t('users:actions.deactivate')}>
                   <button
                     onClick={() => handleUserAction('deactivate', user)}
                     className="text-yellow-600 hover:text-yellow-900 transition-colors p-1 rounded"
-                    title="Deactivate user"
+                    title={t('users:actions.deactivate')}
                   >
                     <XCircleIcon className="w-4 h-4" />
                   </button>
@@ -630,11 +638,11 @@ const UsersListPage = () => {
 
           {/* Unlock User */}
           {user.isLockedOut && userPermissions.canUnlock && (
-            <Tooltip content="Unlock User">
+            <Tooltip content={t('users:actions.unlock')}>
               <button
                 onClick={() => handleUserAction('unlock', user)}
                 className="text-orange-600 hover:text-orange-900 transition-colors p-1 rounded"
-                title="Unlock user"
+                title={t('users:actions.unlock')}
               >
                 <LockOpenIcon className="w-4 h-4" />
               </button>
@@ -643,11 +651,11 @@ const UsersListPage = () => {
 
           {/* Delete User */}
           {user.role !== 'Administrator' && userPermissions.canDelete && (
-            <Tooltip content="Delete">
+            <Tooltip content={t('common:buttons.delete')}>
               <button
                 onClick={() => handleUserAction('delete', user)}
                 className="text-red-600 hover:text-red-900 transition-colors p-1 rounded"
-                title="Delete user"
+                title={t('common:buttons.delete')}
               >
                 <TrashIcon className="w-4 h-4" />
               </button>
@@ -664,9 +672,9 @@ const UsersListPage = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{t('users:pageTitle')}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Manage user accounts, roles, and permissions
+            {t('users:pageSubtitle')}
           </p>
         </div>
         <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
@@ -676,7 +684,7 @@ const UsersListPage = () => {
               loading={loading}
               icon={<PlusIcon className="w-5 h-5" />}
             >
-              Create User
+              {t('users:createButton')}
             </Button>
           )}
         </div>
@@ -692,9 +700,9 @@ const UsersListPage = () => {
                   <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Users</dt>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('users:stats.total')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">{userStats.total || 0}</dd>
                 </dl>
               </div>
@@ -708,9 +716,9 @@ const UsersListPage = () => {
                   <CheckCircleIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Active Users</dt>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('users:stats.active')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">{userStats.active || 0}</dd>
                 </dl>
               </div>
@@ -724,9 +732,9 @@ const UsersListPage = () => {
                   <XCircleIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Inactive Users</dt>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('users:stats.inactive')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">{userStats.inactive || 0}</dd>
                 </dl>
               </div>
@@ -740,9 +748,9 @@ const UsersListPage = () => {
                   <LockClosedIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Locked Users</dt>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('users:stats.locked')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">{userStats.locked || 0}</dd>
                 </dl>
               </div>
@@ -757,7 +765,7 @@ const UsersListPage = () => {
           <div className="flex-1">
             <Input
               type="text"
-              placeholder="Search users by name, email, or department..."
+              placeholder={t('users:search.placeholder')}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               icon={<MagnifyingGlassIcon className="w-5 h-5" />}
@@ -770,7 +778,7 @@ const UsersListPage = () => {
               onClick={() => setShowFilters(!showFilters)}
               icon={<FunnelIcon className="w-5 h-5" />}
             >
-              Filters
+              {t('common:buttons.filter')}
             </Button>
 
             {Object.values(filters).some(v => v && v !== '') && (
@@ -779,7 +787,7 @@ const UsersListPage = () => {
                 onClick={handleResetFilters}
                 icon={<ArrowPathIcon className="w-5 h-5" />}
               >
-                Clear Filters
+                {t('common:buttons.clearFilters')}
               </Button>
             )}
           </div>
@@ -797,14 +805,14 @@ const UsersListPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Role
+                    {t('users:table.columns.role')}
                   </label>
                   <select
                     value={filters.role || ''}
                     onChange={(e) => handleFilterChange('role', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">All Roles</option>
+                    <option value="">{t('users:filters.allRoles')}</option>
                     {availableRoles.map(role => (
                       <option key={role.name} value={role.name}>{role.name}</option>
                     ))}
@@ -813,30 +821,30 @@ const UsersListPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Status
+                    {t('common:labels.status')}
                   </label>
                   <select
                     value={filters.status || ''}
                     onChange={(e) => handleFilterChange('status', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">All Status</option>
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                    <option value="Locked">Locked</option>
+                    <option value="">{t('users:filters.allStatuses')}</option>
+                    <option value="Active">{t('common:status.active')}</option>
+                    <option value="Inactive">{t('common:status.inactive')}</option>
+                    <option value="Locked">{t('common:status.locked')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Department
+                    {t('users:table.columns.department')}
                   </label>
                   <select
                     value={filters.department || ''}
                     onChange={(e) => handleFilterChange('department', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">All Departments</option>
+                    <option value="">{t('users:filters.allDepartments')}</option>
                     {userStats?.byDepartment && Object.keys(userStats.byDepartment).map(dept => (
                       <option key={dept} value={dept}>{dept}</option>
                     ))}
@@ -851,20 +859,20 @@ const UsersListPage = () => {
       {selectedUsers.length > 0 && (
         <Card className="p-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                {selectedUsers.length} user{selectedUsers.length !== 1 ? 's' : ''} selected
+                {t('users:bulk.selected', { count: selectedUsers.length })}
               </span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => dispatch(clearSelections())}
               >
-                Clear Selection
+                {t('users:bulk.clearSelection')}
               </Button>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 sm:space-x-0">
+            <div className="flex flex-col sm:flex-row gap-2">
               {canBulkActivate && (
                 <Button
                   variant="outline"
@@ -873,10 +881,10 @@ const UsersListPage = () => {
                   icon={<CheckCircleIcon className="w-4 h-4" />}
                   className="text-green-600 border-green-300 hover:bg-green-50"
                 >
-                  Activate Selected
+                  {t('users:bulk.activateSelected')}
                 </Button>
               )}
-              
+
               {canBulkDeactivate && (
                 <Button
                   variant="outline"
@@ -885,10 +893,10 @@ const UsersListPage = () => {
                   icon={<XCircleIcon className="w-4 h-4" />}
                   className="text-yellow-600 border-yellow-300 hover:bg-yellow-50"
                 >
-                  Deactivate Selected
+                  {t('users:bulk.deactivateSelected')}
                 </Button>
               )}
-              
+
               {canBulkDelete && (
                 <Button
                   variant="outline"
@@ -897,7 +905,7 @@ const UsersListPage = () => {
                   className="text-red-600 border-red-300 hover:bg-red-50"
                   icon={<TrashIcon className="w-4 h-4" />}
                 >
-                  Delete Selected
+                  {t('users:bulk.deleteSelected')}
                 </Button>
               )}
             </div>
@@ -919,7 +927,7 @@ const UsersListPage = () => {
           onSort={handleSort}
           sortBy={filters.sortBy}
           sortDirection={filters.sortDescending ? 'desc' : 'asc'}
-          emptyMessage="No users found. Try adjusting your search or filters."
+          emptyMessage={t('users:table.emptyMessage')}
           hover
           bordered
           className="users-table"
@@ -930,19 +938,18 @@ const UsersListPage = () => {
         {pagination.totalPages > 1 && (
           <div className="px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2 sm:space-x-2 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <span>
-                  Showing {pageRange.start} to {pageRange.end} of {pageRange.total} users
+                  {t('users:pagination.showing', { start: pageRange.start, end: pageRange.end, total: pageRange.total })}
                 </span>
                 <select
                   value={pagination.pageSize}
                   onChange={(e) => handlePageSizeChange(Number(e.target.value))}
                   className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded px-2 py-1 text-sm w-full sm:w-auto"
                 >
-                  <option value={10}>10 per page</option>
-                  <option value={20}>20 per page</option>
-                  <option value={50}>50 per page</option>
-                  <option value={100}>100 per page</option>
+                  {[10, 20, 50, 100].map(n => (
+                    <option key={n} value={n}>{t('users:pagination.perPage', { count: n })}</option>
+                  ))}
                 </select>
               </div>
 
@@ -954,10 +961,10 @@ const UsersListPage = () => {
                   disabled={!hasPreviousPage}
                   icon={<ChevronLeftIcon className="w-4 h-4" />}
                 >
-                  Previous
+                  {t('common:buttons.previous')}
                 </Button>
 
-                <div className="hidden sm:flex items-center space-x-1">
+                <div className="hidden sm:flex items-center gap-1">
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     let pageNum;
                     if (totalPages <= 5) {
@@ -969,7 +976,7 @@ const UsersListPage = () => {
                     } else {
                       pageNum = pagination.pageIndex - 2 + i;
                     }
-                    
+
                     return (
                       <button
                         key={pageNum}
@@ -988,9 +995,9 @@ const UsersListPage = () => {
 
                 {/* Mobile: Show current page indicator */}
                 <div className="sm:hidden flex items-center px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
-                  Page {pagination.pageIndex + 1} of {totalPages}
+                  {t('common:pagination.page', { page: pagination.pageIndex + 1, total: totalPages })}
                 </div>
-                
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -998,7 +1005,7 @@ const UsersListPage = () => {
                   disabled={!hasNextPage}
                   icon={<ChevronRightIcon className="w-4 h-4" />}
                 >
-                  Next
+                  {t('common:buttons.next')}
                 </Button>
               </div>
             </div>
@@ -1010,7 +1017,7 @@ const UsersListPage = () => {
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => dispatch(hideCreateModal())}
-        title="Create New User"
+        title={t('users:modals.createTitle')}
         size="4xl"
         className="max-h-[90vh]"
       >
@@ -1030,7 +1037,7 @@ const UsersListPage = () => {
           dispatch(hideEditModal());
           setCurrentEditUser(null);
         }}
-        title={`Edit User${currentEditUser ? ` - ${currentEditUser.firstName || currentEditUser.FirstName || ''} ${currentEditUser.lastName || currentEditUser.LastName || ''}` : ''}`}
+        title={`${t('users:modals.editTitle')}${currentEditUser ? ` - ${currentEditUser.firstName || currentEditUser.FirstName || ''} ${currentEditUser.lastName || currentEditUser.LastName || ''}` : ''}`}
         size="4xl"
         className="max-h-[90vh]"
       >
@@ -1055,10 +1062,14 @@ const UsersListPage = () => {
           setCurrentDeleteUser(null);
         }}
         onConfirm={handleDeleteUser}
-        title="Delete User"
-        message={`Are you sure you want to delete ${currentDeleteUser ? `${currentDeleteUser.firstName || currentDeleteUser.FirstName || ''} ${currentDeleteUser.lastName || currentDeleteUser.LastName || ''}` : 'this user'}? This action cannot be undone.`}
-        confirmText="Delete User"
-        cancelText="Cancel"
+        title={t('users:modals.deleteTitle')}
+        message={t('users:confirmations.delete', {
+          name: currentDeleteUser
+            ? `${currentDeleteUser.firstName || currentDeleteUser.FirstName || ''} ${currentDeleteUser.lastName || currentDeleteUser.LastName || ''}`.trim()
+            : t('common:labels.thisUser')
+        })}
+        confirmText={t('common:buttons.delete')}
+        cancelText={t('common:buttons.cancel')}
         variant="danger"
         loading={loading}
         icon={<ExclamationTriangleIcon className="w-6 h-6 text-red-600" />}
@@ -1072,9 +1083,14 @@ const UsersListPage = () => {
           setBulkAction('');
         }}
         onConfirm={handleConfirmBulkAction}
-        title={`Confirm Bulk ${bulkAction?.charAt(0).toUpperCase() + bulkAction?.slice(1)}`}
-        message={`Are you sure you want to ${bulkAction} ${selectedUsers.length} selected user${selectedUsers.length > 1 ? 's' : ''}?`}
-        confirmText={bulkAction?.charAt(0).toUpperCase() + bulkAction?.slice(1)}
+        title={t('users:bulk.confirmTitle', {
+          action: bulkAction?.charAt(0).toUpperCase() + bulkAction?.slice(1)
+        })}
+        message={t('users:bulk.confirmMessage', {
+          action: bulkAction,
+          count: selectedUsers.length
+        })}
+        confirmText={t(`users:actions.${bulkAction}`, bulkAction?.charAt(0).toUpperCase() + bulkAction?.slice(1))}
         variant={bulkAction === 'delete' ? 'danger' : 'warning'}
         loading={loading}
       />

@@ -84,7 +84,7 @@ const DateRangePicker = ({
         disabled={disabled}
         className={inputClasses}
       />
-      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+      <div className="absolute inset-y-0 end-0 flex items-center pr-3 pointer-events-none">
         <CalendarIcon className="h-5 w-5 text-gray-400" />
       </div>
     </div>
@@ -97,7 +97,7 @@ const DateRangePicker = ({
       {label && (
         <label className="block text-sm font-medium leading-6 text-gray-900 mb-2">
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-red-500 ms-1">*</span>}
         </label>
       )}
       

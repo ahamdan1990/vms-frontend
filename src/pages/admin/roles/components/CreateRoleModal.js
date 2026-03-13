@@ -212,7 +212,7 @@ const CreateRoleModal = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Tab Navigation */}
         <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
+          <nav className="-mb-px flex gap-8">
             <button
               type="button"
               onClick={() => setCurrentTab('details')}
@@ -377,7 +377,7 @@ const CreateRoleModal = () => {
               <div className="flex gap-3">
                 <div className="flex-1">
                   <div className="relative">
-                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <MagnifyingGlassIcon className="absolute start-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                       type="text"
                       placeholder="Search permissions..."

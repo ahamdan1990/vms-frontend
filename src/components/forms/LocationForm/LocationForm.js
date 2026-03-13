@@ -458,7 +458,7 @@ const LocationForm = ({
                 onChange={(e) => handleChange('requiresEscort', e.target.checked)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label htmlFor="requiresEscort" className="ml-2 block text-sm text-gray-900">
+              <label htmlFor="requiresEscort" className="ms-2 block text-sm text-gray-900">
                 Requires escort for visitors
               </label>
             </div>
@@ -471,7 +471,7 @@ const LocationForm = ({
                 onChange={(e) => handleChange('isActive', e.target.checked)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
+              <label htmlFor="isActive" className="ms-2 block text-sm text-gray-900">
                 Active (available for selection)
               </label>
             </div>
@@ -483,11 +483,11 @@ const LocationForm = ({
           <h3 className="text-lg font-medium text-gray-900">Preview</h3>
           <div className="bg-gray-50 p-4 rounded-md">
             <div className="space-y-2">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <div className="font-medium text-gray-900">
                   {formData.name || 'Location Name'}
                   {formData.code && (
-                    <span className="ml-2 text-sm text-gray-500">({formData.code})</span>
+                    <span className="ms-2 text-sm text-gray-500">({formData.code})</span>
                   )}
                 </div>
                 <Badge variant="secondary" size="sm">
@@ -507,9 +507,9 @@ const LocationForm = ({
                 </div>
               )}
               
-              <div className="flex items-center space-x-4 text-sm">
+              <div className="flex items-center gap-4 text-sm">
                 {formData.maxCapacity && (
-                  <span className="flex items-center space-x-1">
+                  <span className="flex items-center gap-1">
                     <UserGroupIcon className="w-4 h-4 text-gray-400" />
                     <span>Max: {formData.maxCapacity}</span>
                   </span>
@@ -538,7 +538,7 @@ const LocationForm = ({
         </div>
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+        <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
           <Button
             type="button"
             variant="outline"

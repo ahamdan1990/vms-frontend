@@ -41,7 +41,7 @@ const ModalScrollTest = () => {
     <div className="p-8 space-y-4">
       <h2 className="text-2xl font-bold mb-6">Modal Scroll Test</h2>
       
-      <div className="space-x-4">
+      <div className="gap-4">
         <Button onClick={() => setShowSmallModal(true)}>
           Small Content Modal
         </Button>
@@ -70,7 +70,7 @@ const ModalScrollTest = () => {
         title="Large Content Modal"
         size="2xl"
         footer={
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setShowLargeModal(false)}>
               Cancel
             </Button>
@@ -96,7 +96,7 @@ const ModalScrollTest = () => {
         title="Large Form Modal"
         size="xl"
         footer={
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setShowFormModal(false)}>
               Cancel
             </Button>

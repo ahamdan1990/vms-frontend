@@ -1,0 +1,102 @@
+{
+  "pageTitle": "System Management",
+  "configuration": {
+    "title": "System Configuration",
+    "subtitle": "Manage system settings and configurations",
+    "accessDenied": "Access Denied",
+    "accessDeniedDesc": "You don't have permission to view system configurations.",
+    "category": "Category",
+    "allCategories": "All Categories",
+    "search": "Search",
+    "searchPlaceholder": "Search configurations...",
+    "hideSensitive": "Hide Sensitive",
+    "showSensitive": "Show Sensitive",
+    "clearCache": "Clear Cache",
+    "restartRequired_one": "{{count}} restart required",
+    "restartRequired_other": "{{count}} restarts required",
+    "noConfigurations": "No configurations found",
+    "noConfigurationsDesc": "Try adjusting your filters",
+    "noConfigurationsEmpty": "No configurations have been set up yet",
+    "errorLoading": "Error loading configurations",
+    "countConfigurations": "{{count}} configuration(s)",
+    "currentValue": "Current Value:",
+    "default": "Default:",
+    "encrypted": "Encrypted",
+    "sensitive": "Sensitive",
+    "readOnly": "Read Only",
+    "requiresRestart": "Restart Required",
+    "ldapTabs": {
+      "settings": "Settings",
+      "users": "Users"
+    },
+    "editModal": {
+      "title": "Edit Configuration",
+      "key": "Key:",
+      "categoryLabel": "Category:",
+      "description": "Description:",
+      "value": "Value",
+      "reasonLabel": "Reason for Change",
+      "reasonPlaceholder": "Enter reason for this configuration change...",
+      "auditNote": "This will be logged for audit purposes.",
+      "restartWarning": "Changing this configuration will require a system restart to take effect.",
+      "valueRequired": "Value is required",
+      "boolTrue": "True",
+      "boolFalse": "False",
+      "jsonPlaceholder": "Enter valid JSON...",
+      "saveChanges": "Save Changes"
+    },
+    "toast": {
+      "cacheInvalidated": "Cache invalidated for {{category}}",
+      "allCacheInvalidated": "All cache invalidated",
+      "cacheError": "Failed to invalidate cache",
+      "updated": "Configuration updated successfully",
+      "updateError": "Failed to update configuration"
+    }
+  },
+  "visitPurposes": {
+    "title": "Visit Purposes",
+    "createButton": "Add Purpose",
+    "emptyMessage": "No visit purposes found"
+  },
+  "locations": {
+    "title": "Locations",
+    "createButton": "Add Location",
+    "emptyMessage": "No locations found"
+  },
+  "companies": {
+    "title": "Companies",
+    "createButton": "Add Company",
+    "emptyMessage": "No companies found"
+  },
+  "departments": {
+    "title": "Departments",
+    "createButton": "Add Department",
+    "emptyMessage": "No departments found"
+  },
+  "timeSlots": {
+    "title": "Time Slots",
+    "createButton": "Add Time Slot",
+    "emptyMessage": "No time slots found"
+  },
+  "escalationRules": {
+    "title": "Escalation Rules",
+    "createButton": "Add Rule",
+    "emptyMessage": "No escalation rules found"
+  },
+  "audit": {
+    "title": "Audit Logs",
+    "subtitle": "View system activity and changes",
+    "emptyMessage": "No audit logs found"
+  },
+  "backup": {
+    "title": "Backup",
+    "subtitle": "Manage system backups",
+    "createBackup": "Create Backup",
+    "restoreBackup": "Restore Backup"
+  },
+  "roles": {
+    "title": "Roles",
+    "createButton": "Create Role",
+    "emptyMessage": "No roles found"
+  }
+}

@@ -173,7 +173,7 @@ const EmergencyReportButton = ({ className = '' }) => {
                               </div>
                               <div className="text-sm text-gray-600 mt-1">
                                 {occupant.company && (
-                                  <span className="mr-3">{occupant.company}</span>
+                                  <span className="me-3">{occupant.company}</span>
                                 )}
                                 <span>Host: {occupant.hostName}</span>
                               </div>

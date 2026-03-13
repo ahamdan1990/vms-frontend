@@ -204,7 +204,7 @@ const DepartmentsListPage = () => {
       sortable: true,
       render: (value, department) => (
         <div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <div className="flex-shrink-0">
               <Squares2X2Icon className="w-4 h-4 text-blue-600" />
             </div>
@@ -226,7 +226,7 @@ const DepartmentsListPage = () => {
         <span className="text-sm text-gray-900">
           {department.parentDepartmentName ? (
             <div className="flex items-center">
-              <ChevronRightIcon className="w-4 h-4 text-gray-400 mr-1" />
+              <ChevronRightIcon className="w-4 h-4 text-gray-400 me-1" />
               {department.parentDepartmentName}
             </div>
           ) : (
@@ -242,7 +242,7 @@ const DepartmentsListPage = () => {
         <div className="text-sm text-gray-900">
           {department.managerName ? (
             <div className="flex items-center">
-              <UserIcon className="w-4 h-4 text-gray-400 mr-1" />
+              <UserIcon className="w-4 h-4 text-gray-400 me-1" />
               {department.managerName}
             </div>
           ) : (
@@ -268,7 +268,7 @@ const DepartmentsListPage = () => {
       width: '120px',
       sortable: false,
       render: (value, department) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => {
               setViewingDepartment(department);
@@ -343,7 +343,7 @@ const DepartmentsListPage = () => {
             Manage organizational departments and hierarchical structure
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 flex space-x-3">
+        <div className="mt-4 sm:mt-0 flex gap-3">
           {/* View Mode Toggle */}
           <div className="flex rounded-lg border border-gray-300 p-1">
             <button
@@ -402,7 +402,7 @@ const DepartmentsListPage = () => {
             />
           </div>
 
-          <div className="flex space-x-3">
+          <div className="flex gap-3">
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
@@ -582,7 +582,7 @@ const DepartmentsListPage = () => {
                 <label className="block text-sm font-medium text-gray-700">Child Departments</label>
                 <div className="mt-2 space-y-2">
                   {viewingDepartment.childDepartments.map(child => (
-                    <div key={child.id} className="text-sm text-gray-900 ml-4">
+                    <div key={child.id} className="text-sm text-gray-900 ms-4">
                       • {child.name}
                     </div>
                   ))}
@@ -590,7 +590,7 @@ const DepartmentsListPage = () => {
               </div>
             )}
 
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -725,7 +725,7 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <span className="mr-1.5">{tab.icon}</span>
+            <span className="me-1.5">{tab.icon}</span>
             {tab.label}
           </button>
         ))}
@@ -872,7 +872,7 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+      <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
         <Button variant="outline" onClick={onCancel} type="button">
           Cancel
         </Button>

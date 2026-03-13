@@ -36,7 +36,7 @@ export const formatVisitorInfo = (invitation) => {
   const emailValue = visitor.email?.value || visitor.email || 'No email';
 
   return (
-    <div className="flex items-center space-x-3">
+    <div className="flex items-center gap-3">
       <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
         <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
       </div>
@@ -46,7 +46,7 @@ export const formatVisitorInfo = (invitation) => {
         </div>
         <div className="text-sm text-gray-500 dark:text-gray-400">{emailValue}</div>
         {visitor.company && (
-          <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center space-x-1">
+          <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
             <BuildingOfficeIcon className="w-3 h-3" />
             <span>{visitor.company}</span>
           </div>
@@ -61,18 +61,18 @@ export const formatVisitInfo = (invitation) => (
     <div className="font-medium text-gray-900 dark:text-white">
       {invitation.subject || invitation.purpose || 'Visit'}
     </div>
-    <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-1">
+    <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1">
       <CalendarIcon className="w-3 h-3" />
       <span>{formatters.formatDateTime(invitation.scheduledStartTime)}</span>
     </div>
     {invitation.location && (
-      <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-1">
+      <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1">
         <MapPinIcon className="w-3 h-3" />
         <span>{invitation.location.name}</span>
       </div>
     )}
     {invitation.host?.fullName && (
-      <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-1">
+      <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1">
         <UserIcon className="w-3 h-3" />
         <span>Host: {invitation.host.fullName}</span>
       </div>
@@ -170,7 +170,7 @@ export const createActiveVisitorColumns = ({
         const canCheckIn = invitation.status === 'Approved' && !invitation.checkedInAt;
 
         return (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             {onViewDetails && (
               <button
                 onClick={() => onViewDetails(invitation)}

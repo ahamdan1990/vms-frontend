@@ -364,7 +364,7 @@ const EscalationRulesPage = () => {
       header: 'Rule Name',
       sortable: true,
       render: (value, row) => (
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
           <div className="flex-shrink-0">
             {getAlertTypeIcon(row.alertType)}
           </div>
@@ -384,7 +384,7 @@ const EscalationRulesPage = () => {
       header: 'Alert Type',
       sortable: true,
       render: (value) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           {getAlertTypeIcon(value)}
           <span className="text-sm text-gray-900 dark:text-gray-100">{value}</span>
         </div>
@@ -425,7 +425,7 @@ const EscalationRulesPage = () => {
       header: 'Action',
       sortable: false,
       render: (value, row) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           {getActionIcon(value)}
           <span className="text-sm text-gray-900 dark:text-gray-100">{value}</span>
         </div>
@@ -436,7 +436,7 @@ const EscalationRulesPage = () => {
       header: 'Status',
       sortable: false,
       render: (value, row) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           {value ? (
             <CheckCircleIcon className="w-4 h-4 text-green-500" />
           ) : (
@@ -541,7 +541,7 @@ const EscalationRulesPage = () => {
           )}
         </div>
         
-        <div className="mt-4 sm:mt-0 flex space-x-3">
+        <div className="mt-4 sm:mt-0 flex gap-3">
           <Button
             variant="outline"
             icon={<FunnelIcon className="w-5 h-5" />}
@@ -568,7 +568,7 @@ const EscalationRulesPage = () => {
             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
               <Cog6ToothIcon className="w-6 h-6 text-blue-600 dark:text-blue-300" />
             </div>
-            <div className="ml-4">
+            <div className="ms-4">
               <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Rules</h3>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalCount}</p>
             </div>
@@ -580,7 +580,7 @@ const EscalationRulesPage = () => {
             <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
               <CheckCircleIcon className="w-6 h-6 text-green-600 dark:text-green-300" />
             </div>
-            <div className="ml-4">
+            <div className="ms-4">
               <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Rules</h3>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {escalationRules.filter(rule => rule.isEnabled).length}
@@ -594,7 +594,7 @@ const EscalationRulesPage = () => {
             <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
               <ExclamationTriangleIcon className="w-6 h-6 text-red-600 dark:text-red-300" />
             </div>
-            <div className="ml-4">
+            <div className="ms-4">
               <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Critical Priority</h3>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {escalationRules.filter(rule => 
@@ -610,7 +610,7 @@ const EscalationRulesPage = () => {
             <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
               <BellIcon className="w-6 h-6 text-purple-600 dark:text-purple-300" />
             </div>
-            <div className="ml-4">
+            <div className="ms-4">
               <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Alert Types</h3>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {Object.keys(alertTypes).length}
@@ -637,7 +637,7 @@ const EscalationRulesPage = () => {
             
             {/* Bulk Actions */}
             {hasSelectedRules && (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <Select
                   value={bulkAction}
                   onChange={(value) => setBulkAction(value)}
@@ -726,7 +726,7 @@ const EscalationRulesPage = () => {
       {/* Error Display */}
       {error && (
         <Card className="p-4 border-red-200 dark:border-red-500 bg-red-50 dark:bg-red-900/20">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <ExclamationTriangleIcon className="w-5 h-5 text-red-500 dark:text-red-300" />
             <p className="text-sm text-red-700 dark:text-red-300">{extractErrorMessage(error)}</p>
             <Button
@@ -771,7 +771,7 @@ const EscalationRulesPage = () => {
             {Math.min((pageIndex + 1) * pageSize, totalCount)} of {totalCount} rules
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             {/* Simple pagination buttons for debugging */}
             <button
               onClick={() => handlePageChange(1)}
@@ -812,7 +812,7 @@ const EscalationRulesPage = () => {
             <select
               value={pageSize}
               onChange={(e) => handlePageSizeChange(parseInt(e.target.value))}
-              className="ml-4 px-2 py-1 text-sm border rounded"
+              className="ms-4 px-2 py-1 text-sm border rounded"
             >
               <option value={10}>10 per page</option>
               <option value={20}>20 per page</option>

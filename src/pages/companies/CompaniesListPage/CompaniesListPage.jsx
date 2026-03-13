@@ -182,7 +182,7 @@ const CompaniesListPage = () => {
       sortable: true,
       render: (value, company) => (
         <div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <div className="flex-shrink-0">
               <BuildingOffice2Icon className="w-4 h-4 text-blue-600" />
             </div>
@@ -216,13 +216,13 @@ const CompaniesListPage = () => {
               <div>{company.contactPersonName}</div>
               {company.email && (
                 <div className="text-xs text-gray-500 flex items-center mt-1">
-                  <EnvelopeIcon className="w-3 h-3 mr-1" />
+                  <EnvelopeIcon className="w-3 h-3 me-1" />
                   {company.email}
                 </div>
               )}
               {company.phoneNumber && (
                 <div className="text-xs text-gray-500 flex items-center mt-1">
-                  <PhoneIcon className="w-3 h-3 mr-1" />
+                  <PhoneIcon className="w-3 h-3 me-1" />
                   {company.phoneNumber}
                 </div>
               )}
@@ -238,7 +238,7 @@ const CompaniesListPage = () => {
       header: 'Verification',
       sortable: true,
       render: (value, company) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Badge
             variant={company.isVerified ? 'success' : 'secondary'}
             size="sm"
@@ -286,7 +286,7 @@ const CompaniesListPage = () => {
       width: '120px',
       sortable: false,
       render: (value, company) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => {
               setViewingCompany(company);
@@ -394,7 +394,7 @@ const CompaniesListPage = () => {
             />
           </div>
 
-          <div className="flex space-x-3">
+          <div className="flex gap-3">
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
@@ -583,7 +583,7 @@ const CompaniesListPage = () => {
               </div>
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -723,7 +723,7 @@ const CompanyForm = ({ initialData, onSubmit, onCancel, loading, error }) => {
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <span className="mr-1.5">{tab.icon}</span>
+            <span className="me-1.5">{tab.icon}</span>
             {tab.label}
           </button>
         ))}
@@ -958,7 +958,7 @@ const CompanyForm = ({ initialData, onSubmit, onCancel, loading, error }) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+      <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
         <Button variant="outline" onClick={onCancel} type="button">
           Cancel
         </Button>

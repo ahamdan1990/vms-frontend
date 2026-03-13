@@ -422,7 +422,7 @@ const EmergencyContactForm = ({
             </div>
 
             {/* Primary Contact */}
-            <div className="flex items-start space-x-3 pt-6">
+            <div className="flex items-start gap-3 pt-6">
               <div className="flex items-center h-5">
                 <input
                   type="checkbox"
@@ -433,7 +433,7 @@ const EmergencyContactForm = ({
                 />
               </div>
               <div className="min-w-0 flex-1">
-                <label htmlFor="isPrimary" className="text-sm font-medium text-gray-900 dark:text-white flex items-center space-x-1">
+                <label htmlFor="isPrimary" className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-1">
                   {formData.isPrimary ? (
                     <StarIconSolid className="w-4 h-4 text-yellow-500" />
                   ) : (
@@ -483,7 +483,7 @@ const EmergencyContactForm = ({
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">Preview</h3>
           <div className="bg-gray-50 dark:bg-slate-900/60 p-4 rounded-md border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center space-x-2 mb-2">
+            <div className="flex items-center gap-2 mb-2">
               {formData.isPrimary && (
                 <StarIconSolid className="w-4 h-4 text-yellow-500" />
               )}
@@ -516,7 +516,7 @@ const EmergencyContactForm = ({
         </div>
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
           <Button
             type="button"
             variant="outline"

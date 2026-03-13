@@ -1,0 +1,54 @@
+{
+  "sidebar": {
+    "label": "التنقل",
+    "dashboard": "لوحة التحكم",
+    "visitors": "الزوار",
+    "invitations": "الدعوات",
+    "calendar": "التقويم",
+    "checkin": "تسجيل الدخول",
+    "reports": "التقارير",
+    "users": "المستخدمون",
+    "roles": "الأدوار",
+    "system": "النظام",
+    "profile": "الملف الشخصي",
+    "help": "المساعدة",
+    "version": "VMS v{{version}}"
+  },
+  "system": {
+    "configuration": "الإعدادات",
+    "visitPurposes": "أغراض الزيارة",
+    "locations": "المواقع",
+    "companies": "الشركات",
+    "departments": "الأقسام",
+    "timeSlots": "الفترات الزمنية",
+    "escalationRules": "قواعد التصعيد",
+    "auditLogs": "سجلات المراجعة",
+    "backup": "النسخ الاحتياطي"
+  },
+  "header": {
+    "searchPlaceholder": "ابحث عن زوار، دعوات...",
+    "notifications": "الإشعارات",
+    "viewAll": "عرض الكل",
+    "noNotifications": "لا توجد إشعارات جديدة",
+    "yourProfile": "ملفك الشخصي",
+    "settings": "الإعدادات",
+    "signOut": "تسجيل الخروج",
+    "switchToDark": "التبديل إلى الوضع الداكن",
+    "switchToLight": "التبديل إلى الوضع الفاتح"
+  },
+  "pageTitles": {
+    "dashboard": "لوحة التحكم",
+    "staffDashboard": "لوحة تحكم الموظفين",
+    "operatorDashboard": "لوحة تحكم المشغّل",
+    "adminDashboard": "لوحة تحكم المدير",
+    "users": "إدارة المستخدمين",
+    "invitations": "الدعوات",
+    "visitors": "الزوار",
+    "checkin": "تسجيل الدخول",
+    "reports": "التقارير",
+    "system": "النظام",
+    "profile": "الملف الشخصي",
+    "signIn": "تسجيل الدخول",
+    "appTitle": "{{title}} - نظام إدارة الزوار"
+  }
+}

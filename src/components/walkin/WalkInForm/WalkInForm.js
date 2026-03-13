@@ -526,7 +526,7 @@ const WalkInForm = ({
                 <span>{step}</span>
               )}
             </div>
-            <div className="ml-2 hidden sm:block">
+            <div className="ms-2 hidden sm:block">
               <p className={`text-sm font-medium ${
                 currentStep >= step
                   ? 'text-gray-900 dark:text-white'
@@ -566,7 +566,7 @@ const WalkInForm = ({
       </div>
 
       {/* Lookup Type Toggle */}
-      <div className="flex justify-center space-x-2 mb-4">
+      <div className="flex justify-center gap-2 mb-4">
         <Button
           variant={lookupType === 'phone' ? 'primary' : 'outline'}
           size="sm"
@@ -604,7 +604,7 @@ const WalkInForm = ({
           autoFocus
         />
         {searching && (
-          <div className="absolute right-3 top-3">
+          <div className="absolute end-3 top-3">
             <LoadingSpinner size="sm" />
           </div>
         )}
@@ -623,7 +623,7 @@ const WalkInForm = ({
                 onClick={() => handleSelectVisitor(visitor)}
                 className="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all"
               >
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
                     <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   </div>
@@ -651,7 +651,7 @@ const WalkInForm = ({
       {/* Existing Visitor Selected */}
       {existingVisitor && (
         <Card className="p-4 border-2 border-blue-500 dark:border-blue-400">
-          <div className="flex items-start space-x-3">
+          <div className="flex items-start gap-3">
             <CheckCircleIconSolid className="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-1" />
             <div className="flex-1">
               <p className="font-medium text-gray-900 dark:text-white mb-1">
@@ -674,7 +674,7 @@ const WalkInForm = ({
           {/* Pending Invitations Warning */}
           {pendingInvitations.length > 0 && (
             <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-md">
-              <div className="flex items-start space-x-2">
+              <div className="flex items-start gap-2">
                 <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
@@ -693,7 +693,7 @@ const WalkInForm = ({
             </div>
           )}
 
-          <div className="mt-4 flex space-x-2">
+          <div className="mt-4 flex gap-2">
             <Button
               onClick={handleNext}
               className="flex-1"
@@ -778,7 +778,7 @@ const WalkInForm = ({
                 alt="Captured visitor"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-2 right-2 inline-flex items-center space-x-1 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
+              <div className="absolute top-2 right-2 inline-flex items-center gap-1 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
                 <PhotoIcon className="w-4 h-4" />
                 <span>Attached</span>
               </div>
@@ -950,7 +950,7 @@ const WalkInForm = ({
         </label>
         {visitData.hostId ? (
           <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <UserIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
               <span className="text-sm font-medium text-gray-900 dark:text-white">
                 {visitData.hostName}
@@ -975,7 +975,7 @@ const WalkInForm = ({
               error={validationErrors.hostId}
             />
             {searchingHosts && (
-              <div className="absolute right-3 top-3">
+              <div className="absolute end-3 top-3">
                 <LoadingSpinner size="sm" />
               </div>
             )}
@@ -994,7 +994,7 @@ const WalkInForm = ({
                       onClick={() => handleSelectHost(host)}
                       className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
                     >
-                      <div className="flex items-start space-x-3">
+                      <div className="flex items-start gap-3">
                         <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
                           <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         </div>
@@ -1003,7 +1003,7 @@ const WalkInForm = ({
                             <p className="font-medium text-gray-900 dark:text-white">
                               {displayName}
                             </p>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center gap-2">
                               {isDirectory && (
                                 <Badge variant="warning" size="sm">
                                   Directory

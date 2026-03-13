@@ -179,7 +179,7 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
 
   const formatVisitorName = (visitor) => {
     return (
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-2">
         {visitor.isVip && (
           <StarIconSolid className="w-4 h-4 text-yellow-500" title="VIP Visitor" />
         )}
@@ -283,7 +283,7 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
         {/* Search Criteria */}
         <Card className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <MagnifyingGlassIcon className="w-6 h-6 text-blue-600" />
               <h3 className="text-lg font-medium text-gray-900">Search Criteria</h3>
             </div>
@@ -300,7 +300,7 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
           <div className="space-y-6">
             {/* General Search */}
             <div>
-              <h4 className="font-medium text-gray-900 mb-4 flex items-center space-x-2">
+              <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                 <MagnifyingGlassIcon className="w-4 h-4" />
                 <span>General Search</span>
               </h4>
@@ -315,7 +315,7 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
 
             {/* Personal Information */}
             <div>
-              <h4 className="font-medium text-gray-900 mb-4 flex items-center space-x-2">
+              <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                 <UserIcon className="w-4 h-4" />
                 <span>Personal Information</span>
               </h4>
@@ -363,7 +363,7 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
 
             {/* Professional Information */}
             <div>
-              <h4 className="font-medium text-gray-900 mb-4 flex items-center space-x-2">
+              <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                 <BuildingOfficeIcon className="w-4 h-4" />
                 <span>Professional Information</span>
               </h4>
@@ -385,7 +385,7 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
 
             {/* Status & Security */}
             <div>
-              <h4 className="font-medium text-gray-900 mb-4 flex items-center space-x-2">
+              <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                 <ShieldCheckIcon className="w-4 h-4" />
                 <span>Status & Security</span>
               </h4>
@@ -456,7 +456,7 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
 
             {/* Date Ranges */}
             <div>
-              <h4 className="font-medium text-gray-900 mb-4 flex items-center space-x-2">
+              <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                 <GlobeAltIcon className="w-4 h-4" />
                 <span>Date Ranges</span>
               </h4>
@@ -525,7 +525,7 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
           </div>
 
           {/* Search Actions */}
-          <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+          <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
             <Button
               variant="outline"
               onClick={resetCriteria}

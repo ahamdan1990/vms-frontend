@@ -296,7 +296,7 @@ const InvitationsList = () => {
     const IconComponent = config.icon;
 
     return (
-      <Badge variant={config.variant} size="sm" className="flex items-center space-x-1">
+      <Badge variant={config.variant} size="sm" className="flex items-center gap-1">
         <IconComponent className="w-3 h-3" />
         <span>{InvitationStatusLabels[invitation.status] ?? invitation.status}</span>
       </Badge>
@@ -323,7 +323,7 @@ const InvitationsList = () => {
     if (!visitor) return 'Unknown Visitor';
 
     return (
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-2">
         <UserIcon className="w-4 h-4 text-gray-400" />
         <div>
           <div className="font-medium text-gray-900">
@@ -331,7 +331,7 @@ const InvitationsList = () => {
           </div>
           <div className="text-sm text-gray-500">{visitor.email}</div>
           {visitor.company && (
-            <div className="text-sm text-gray-500 flex items-center space-x-1">
+            <div className="text-sm text-gray-500 flex items-center gap-1">
               <BuildingOfficeIcon className="w-3 h-3" />
               <span>{visitor.company}</span>
             </div>
@@ -364,11 +364,11 @@ const InvitationsList = () => {
 
     return (
       <div className="text-sm">
-        <div className="flex items-center space-x-1 text-gray-900">
+        <div className="flex items-center gap-1 text-gray-900">
           <CalendarIcon className="w-4 h-4 text-gray-400" />
           <span>{formatters.formatDate(invitation.scheduledStartTime)}</span>
         </div>
-        <div className="flex items-center space-x-1 text-gray-600">
+        <div className="flex items-center gap-1 text-gray-600">
           <ClockIcon className="w-4 h-4 text-gray-400" />
           <span>{formatters.formatTime(invitation.scheduledStartTime)} - {formatters.formatTime(invitation.scheduledEndTime)}</span>
         </div>
@@ -428,7 +428,7 @@ const InvitationsList = () => {
       render: (_, invitation) => {
         return (
           <div className="space-y-1">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <span className="font-medium text-gray-900">#{invitation.invitationNumber}</span>
               {getTypeBadge(invitation)}
             </div>
@@ -484,7 +484,7 @@ const InvitationsList = () => {
       className: 'min-w-[120px]',
       render: (_, invitation) => {
         return (
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center gap-1">
             <Tooltip content="View Details">
               <Button
                 variant="ghost"
@@ -564,7 +564,7 @@ const InvitationsList = () => {
           <h1 className="text-2xl font-bold text-gray-900">Invitations</h1>
           <p className="text-gray-600">Manage visitor invitations and approvals</p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
           <Button
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
@@ -585,7 +585,7 @@ const InvitationsList = () => {
       {statistics && (
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <Card className="p-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-100 rounded-md">
                 <DocumentDuplicateIcon className="w-6 h-6 text-blue-600" />
               </div>
@@ -597,7 +597,7 @@ const InvitationsList = () => {
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <div className="p-2 bg-yellow-100 rounded-md">
                 <ClockIconSolid className="w-6 h-6 text-yellow-600" />
               </div>
@@ -609,7 +609,7 @@ const InvitationsList = () => {
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <div className="p-2 bg-green-100 rounded-md">
                 <CheckCircleIcon className="w-6 h-6 text-green-600" />
               </div>
@@ -621,7 +621,7 @@ const InvitationsList = () => {
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-100 rounded-md">
                 <UserIcon className="w-6 h-6 text-blue-600" />
               </div>
@@ -633,7 +633,7 @@ const InvitationsList = () => {
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <div className="p-2 bg-red-100 rounded-md">
                 <XCircleIcon className="w-6 h-6 text-red-600" />
               </div>
@@ -724,7 +724,7 @@ const InvitationsList = () => {
                   </select>
                 </div>
 
-                <div className="flex items-end space-x-2">
+                <div className="flex items-end gap-2">
                   <Button
                     variant="outline"
                     onClick={handleResetFilters}
@@ -752,7 +752,7 @@ const InvitationsList = () => {
               </div>
 
               <div className="flex flex-wrap gap-4 mt-4">
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={filters.pendingApprovalsOnly}
@@ -762,7 +762,7 @@ const InvitationsList = () => {
                   <span className="text-sm text-gray-700">Pending Approvals Only</span>
                 </label>
 
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={filters.activeOnly}
@@ -772,7 +772,7 @@ const InvitationsList = () => {
                   <span className="text-sm text-gray-700">Active Only</span>
                 </label>
 
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={filters.expiredOnly}
@@ -782,7 +782,7 @@ const InvitationsList = () => {
                   <span className="text-sm text-gray-700">Expired Only</span>
                 </label>
 
-                <label className="flex items-center space-x-2">
+                <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={filters.includeDeleted}
@@ -801,12 +801,12 @@ const InvitationsList = () => {
       {selectedInvitations.length > 0 && (
         <Card className="p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-gray-700">
                 {selectedInvitations.length} invitation{selectedInvitations.length !== 1 ? 's' : ''} selected
               </span>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"

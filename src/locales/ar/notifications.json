@@ -1,0 +1,114 @@
+{
+  "pageTitle": "الإشعارات",
+  "pageSubtitle": "إدارة وتأكيد إشعارات النظام",
+  "header": {
+    "title": "الإشعارات",
+    "viewAll": "عرض الكل",
+    "noNew": "لا توجد إشعارات جديدة",
+    "markAllRead": "تحديد الكل كمقروء",
+    "clearAll": "مسح الكل"
+  },
+  "priority": {
+    "critical": "حرج",
+    "emergency": "طارئ",
+    "high": "عالي",
+    "medium": "متوسط",
+    "low": "منخفض",
+    "normal": "عادي"
+  },
+  "types": {
+    "invitationCreated": "تم إنشاء دعوة جديدة",
+    "invitationApproved": "تمت الموافقة على الدعوة",
+    "invitationRejected": "تم رفض الدعوة",
+    "visitorCheckedIn": "تم تسجيل دخول الزائر",
+    "visitorCheckedOut": "تم تسجيل خروج الزائر",
+    "approvalRequired": "مطلوب موافقة",
+    "visitorArrival": "وصول زائر",
+    "visitorOverstay": "تجاوز وقت الزائر",
+    "systemAlert": "تنبيه النظام",
+    "securityAlert": "تنبيه أمني"
+  },
+  "emptyState": "لا توجد إشعارات",
+  "readAll": "تم تحديد جميع الإشعارات كمقروءة",
+  "accessDenied": "وصول مرفوض",
+  "accessDeniedDesc": "ليس لديك صلاحية لعرض الإشعارات.",
+  "connected": "متصل",
+  "disconnected": "غير متصل",
+  "lastUpdated": "آخر تحديث:",
+  "refresh": "تحديث",
+  "filters": "الفلاتر",
+  "markAllRead_count": "تحديد الكل كمقروء ({{count}})",
+  "stats": {
+    "total": "الإجمالي",
+    "unread": "غير مقروء",
+    "critical": "حرج",
+    "last24h": "آخر 24 ساعة"
+  },
+  "tabs": {
+    "all": "جميع الإشعارات",
+    "unread": "غير مقروء",
+    "acknowledged": "تم التأكيد"
+  },
+  "searchPlaceholder": "ابحث في الإشعارات بالعنوان أو الرسالة أو النوع...",
+  "view": "عرض:",
+  "viewList": "قائمة",
+  "viewCards": "بطاقات",
+  "bulkActions": {
+    "selectAction": "اختر إجراء...",
+    "markAsRead": "تحديد كمقروء",
+    "acknowledge": "تأكيد",
+    "apply": "تطبيق ({{count}})",
+    "selectAll": "تحديد الكل ({{count}})",
+    "selected": "{{count}} محدد",
+    "clearSelection": "إلغاء التحديد"
+  },
+  "filters_panel": {
+    "priority": "الأولوية",
+    "allPriorities": "جميع الأولويات",
+    "type": "النوع",
+    "allTypes": "جميع الأنواع",
+    "dateRange": "النطاق الزمني",
+    "allTime": "كل الوقت",
+    "today": "اليوم",
+    "thisWeek": "هذا الأسبوع",
+    "thisMonth": "هذا الشهر",
+    "clearFilters": "مسح الفلاتر"
+  },
+  "card": {
+    "visitor": "الزائر:",
+    "company": "الشركة:",
+    "host": "المضيف:",
+    "location": "الموقع:",
+    "markAsRead": "تحديد كمقروء",
+    "acknowledge": "تأكيد",
+    "execute": "تنفيذ",
+    "acknowledged": "تم التأكيد",
+    "dismiss": "إغلاق"
+  },
+  "loading": "جارٍ تحميل الإشعارات...",
+  "noNotifications": "لا توجد إشعارات",
+  "noNotificationsSearch": "لا توجد إشعارات تطابق بحثك \"{{search}}\"",
+  "allCaughtUp": "أنت محدّث! لا توجد إشعارات غير مقروءة.",
+  "noNotificationsDisplay": "لا توجد إشعارات للعرض",
+  "clearSearch": "مسح البحث",
+  "bulk": {
+    "confirmTitle": "تأكيد الإجراء الجماعي",
+    "confirmDesc": "هل أنت متأكد من {{action}} {{count}} إشعار(ات)؟",
+    "actionMarkRead": "تحديد كمقروء",
+    "actionAcknowledge": "تأكيد",
+    "confirm": "تأكيد",
+    "complete": "اكتمل الإجراء الجماعي",
+    "markedRead": "تم تحديد {{count}} إشعار(ات) كمقروء",
+    "acknowledgedAll": "تم تأكيد {{count}} إشعار(ات)",
+    "failed": "فشل الإجراء الجماعي"
+  },
+  "toast": {
+    "refreshTitle": "تم تحديث الإشعارات",
+    "refreshMessage": "تم تحديث قائمة الإشعارات",
+    "acknowledgedTitle": "تم تأكيد الإشعار",
+    "acknowledgedMessage": "تم تأكيد الإشعار بنجاح",
+    "acknowledgeFailed": "فشل التأكيد",
+    "markAllReadTitle": "تم تحديد جميع الإشعارات كمقروءة",
+    "markAllReadMessage": "تم تحديد {{count}} إشعار كمقروء"
+  }
+}

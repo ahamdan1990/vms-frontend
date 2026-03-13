@@ -156,9 +156,10 @@ module.exports = {
         'glow-strong': '0 0 30px rgba(59, 130, 246, 0.25)'
       },
       
-      // Typography improvements
+      // Typography improvements — Latin (Inter) + Arabic (Cairo)
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['Inter', 'Cairo', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        arabic: ['Cairo', 'system-ui', 'sans-serif'],
       },
       
       // Border radius consistency
@@ -219,7 +220,7 @@ module.exports = {
           '@apply flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200': {},
         },
         '.nav-item-active': {
-          '@apply nav-item bg-primary-100 text-primary-900 border-r-2 border-primary-600 dark:bg-primary-900/20 dark:text-primary-100': {},
+          '@apply nav-item bg-primary-100 text-primary-900 border-e-2 border-primary-600 dark:bg-primary-900/20 dark:text-primary-100': {},
         },
         '.nav-item-inactive': {
           '@apply nav-item text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white': {},

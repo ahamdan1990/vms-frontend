@@ -334,7 +334,7 @@ const TimeSlotsListPage = () => {
           <div className="font-medium text-gray-900 dark:text-gray-100">{timeSlot.name}</div>
           {timeSlot.locationName && (
             <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1">
-              <svg className="w-4 h-4 mr-1 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 me-1 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
@@ -350,7 +350,7 @@ const TimeSlotsListPage = () => {
       sortable: true,
       render: (value, timeSlot) => (
         <div className="space-y-1">
-          <div className="flex items-center space-x-1 text-sm">
+          <div className="flex items-center gap-1 text-sm">
             <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -396,7 +396,7 @@ const TimeSlotsListPage = () => {
       sortable: false,
       render: (value, timeSlot) => (
         <div className="space-y-1">
-          <div className="flex items-center space-x-1 text-sm">
+          <div className="flex items-center gap-1 text-sm">
             <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5a2.25 2.25 0 002.25-2.25m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5a2.25 2.25 0 012.25 2.25v7.5" />
             </svg>
@@ -426,7 +426,7 @@ const TimeSlotsListPage = () => {
       width: '120px',
       sortable: false,
       render: (value, timeSlot) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => handleTimeSlotAction('view', timeSlot)}
             className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
@@ -849,7 +849,7 @@ const TimeSlotsListPage = () => {
               </div>
             )}
             
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
               <Button
                 variant="outline"
                 onClick={() => {

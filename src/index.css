@@ -3,8 +3,18 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Inter font for better typography */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Inter (Latin) + Cairo (Arabic) fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700;800&display=swap');
+
+/* Arabic font override — applied when html[lang="ar"] */
+:lang(ar), [lang="ar"] {
+  font-family: 'Cairo', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* RTL-specific adjustments */
+[dir="rtl"] .sidebar-ltr-only {
+  display: none;
+}
 
 /* Enhanced base styles */
 @layer base {

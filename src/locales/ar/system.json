@@ -1,0 +1,102 @@
+{
+  "pageTitle": "إدارة النظام",
+  "configuration": {
+    "title": "إعداد النظام",
+    "subtitle": "إدارة إعدادات وتهيئة النظام",
+    "accessDenied": "وصول مرفوض",
+    "accessDeniedDesc": "ليس لديك صلاحية لعرض إعدادات النظام.",
+    "category": "الفئة",
+    "allCategories": "جميع الفئات",
+    "search": "بحث",
+    "searchPlaceholder": "ابحث في الإعدادات...",
+    "hideSensitive": "إخفاء الحساسة",
+    "showSensitive": "إظهار الحساسة",
+    "clearCache": "مسح الذاكرة المؤقتة",
+    "restartRequired_one": "{{count}} إعادة تشغيل مطلوبة",
+    "restartRequired_other": "{{count}} إعادات تشغيل مطلوبة",
+    "noConfigurations": "لا توجد إعدادات",
+    "noConfigurationsDesc": "جرّب تعديل الفلاتر",
+    "noConfigurationsEmpty": "لم يتم إعداد أي تهيئات بعد",
+    "errorLoading": "خطأ في تحميل الإعدادات",
+    "countConfigurations": "{{count}} إعداد",
+    "currentValue": "القيمة الحالية:",
+    "default": "الافتراضي:",
+    "encrypted": "مشفّر",
+    "sensitive": "حساس",
+    "readOnly": "للقراءة فقط",
+    "requiresRestart": "يتطلب إعادة تشغيل",
+    "ldapTabs": {
+      "settings": "الإعدادات",
+      "users": "المستخدمون"
+    },
+    "editModal": {
+      "title": "تعديل الإعداد",
+      "key": "المفتاح:",
+      "categoryLabel": "الفئة:",
+      "description": "الوصف:",
+      "value": "القيمة",
+      "reasonLabel": "سبب التغيير",
+      "reasonPlaceholder": "أدخل سبب تغيير هذا الإعداد...",
+      "auditNote": "سيتم تسجيل ذلك لأغراض التدقيق.",
+      "restartWarning": "تغيير هذا الإعداد سيتطلب إعادة تشغيل النظام ليصبح فعّالاً.",
+      "valueRequired": "القيمة مطلوبة",
+      "boolTrue": "صحيح",
+      "boolFalse": "خطأ",
+      "jsonPlaceholder": "أدخل JSON صالح...",
+      "saveChanges": "حفظ التغييرات"
+    },
+    "toast": {
+      "cacheInvalidated": "تم مسح الذاكرة المؤقتة للفئة {{category}}",
+      "allCacheInvalidated": "تم مسح جميع الذاكرة المؤقتة",
+      "cacheError": "فشل مسح الذاكرة المؤقتة",
+      "updated": "تم تحديث الإعداد بنجاح",
+      "updateError": "فشل تحديث الإعداد"
+    }
+  },
+  "visitPurposes": {
+    "title": "أغراض الزيارة",
+    "createButton": "إضافة غرض",
+    "emptyMessage": "لا توجد أغراض زيارة"
+  },
+  "locations": {
+    "title": "المواقع",
+    "createButton": "إضافة موقع",
+    "emptyMessage": "لا توجد مواقع"
+  },
+  "companies": {
+    "title": "الشركات",
+    "createButton": "إضافة شركة",
+    "emptyMessage": "لا توجد شركات"
+  },
+  "departments": {
+    "title": "الأقسام",
+    "createButton": "إضافة قسم",
+    "emptyMessage": "لا توجد أقسام"
+  },
+  "timeSlots": {
+    "title": "الفترات الزمنية",
+    "createButton": "إضافة فترة زمنية",
+    "emptyMessage": "لا توجد فترات زمنية"
+  },
+  "escalationRules": {
+    "title": "قواعد التصعيد",
+    "createButton": "إضافة قاعدة",
+    "emptyMessage": "لا توجد قواعد تصعيد"
+  },
+  "audit": {
+    "title": "سجلات المراجعة",
+    "subtitle": "عرض نشاط النظام والتغييرات",
+    "emptyMessage": "لا توجد سجلات مراجعة"
+  },
+  "backup": {
+    "title": "النسخ الاحتياطي",
+    "subtitle": "إدارة النسخ الاحتياطية للنظام",
+    "createBackup": "إنشاء نسخة احتياطية",
+    "restoreBackup": "استعادة النسخة الاحتياطية"
+  },
+  "roles": {
+    "title": "الأدوار",
+    "createButton": "إنشاء دور",
+    "emptyMessage": "لا توجد أدوار"
+  }
+}

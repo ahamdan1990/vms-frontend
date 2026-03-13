@@ -241,7 +241,7 @@ const QrCodeScanner = ({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Mode Selector */}
-      <div className="flex items-center justify-center space-x-4">
+      <div className="flex items-center justify-center gap-4">
         <Button
           variant={scanMode === 'camera' ? 'primary' : 'outline'}
           size="sm"
@@ -338,7 +338,7 @@ const QrCodeScanner = ({
           {/* Scanning Status Indicator */}
           {scanningStatus && (
             <div className="mt-4 p-3 bg-blue-50 border-2 border-blue-300 rounded-lg mx-auto max-w-md">
-              <div className="flex items-center justify-center space-x-2">
+              <div className="flex items-center justify-center gap-2">
                 <div className="animate-pulse">
                   <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                 </div>
@@ -355,7 +355,7 @@ const QrCodeScanner = ({
             <p>💡 <strong>Tips:</strong> Hold QR code steady within the finder box</p>
           </div>
 
-          <div className="flex justify-center space-x-3">
+          <div className="flex justify-center gap-3">
             <Button
               onClick={toggleScanning}
               disabled={loading}
@@ -458,7 +458,7 @@ const QrCodeScanner = ({
           exit={{ opacity: 0, scale: 0.9, y: -20 }}
           className="bg-red-50 border-2 border-red-300 rounded-lg p-4 max-w-md mx-auto shadow-lg"
         >
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <motion.div
               animate={{
                 rotate: [0, -10, 10, -10, 0],
@@ -487,7 +487,7 @@ const QrCodeScanner = ({
           exit={{ opacity: 0, scale: 0.8 }}
           className="bg-green-50 border-2 border-green-300 rounded-lg p-4 max-w-md mx-auto shadow-lg"
         >
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <motion.div
               animate={{
                 scale: [1, 1.2, 1],

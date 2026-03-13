@@ -218,7 +218,7 @@ const EmergencyContactsList = ({
       header: 'Contact Information',
       sortable: true,
       render: (value, contact) => (
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
           {contact.isPrimary && (
             <StarIconSolid className="w-4 h-4 text-yellow-500" title="Primary Contact" />
           )}
@@ -226,15 +226,15 @@ const EmergencyContactsList = ({
             <div className="font-medium text-gray-900 dark:text-white">
               {contact.firstName} {contact.lastName}
             </div>
-            <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-300">
+            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-300">
               {contact.phoneNumber && (
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center gap-1">
                   <PhoneIcon className="w-3 h-3" />
                   <span>{contact.phoneNumber}</span>
                 </div>
               )}
               {contact.email && (
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center gap-1">
                   <EnvelopeIcon className="w-3 h-3" />
                   <span className="truncate">{contact.email}</span>
                 </div>
@@ -277,7 +277,7 @@ const EmergencyContactsList = ({
       header: 'Actions',
       sortable: false,
       render: (value, contact) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
@@ -382,7 +382,7 @@ const EmergencyContactsList = ({
                   <UserIcon className="w-5 h-5 text-blue-600 dark:text-blue-300" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Contacts</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">{stats.total}</dd>
@@ -398,7 +398,7 @@ const EmergencyContactsList = ({
                   <StarIconSolid className="w-5 h-5 text-yellow-600 dark:text-yellow-300" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Primary Contact</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">{stats.primary > 0 ? 'Set' : 'Missing'}</dd>
@@ -414,7 +414,7 @@ const EmergencyContactsList = ({
                   <PhoneIcon className="w-5 h-5 text-green-600 dark:text-green-300" />
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">With Phone</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">{stats.withPhone}</dd>
@@ -430,7 +430,7 @@ const EmergencyContactsList = ({
                   <div className="text-purple-600 dark:text-purple-200 font-bold text-sm">{stats.completionRate}%</div>
                 </div>
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="ms-5 w-0 flex-1">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Completion</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">
@@ -452,7 +452,7 @@ const EmergencyContactsList = ({
       {hasSelected && (
         <Card className="p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <span className="text-sm text-gray-500 dark:text-gray-300">
                 {selectedCount} contact{selectedCount !== 1 ? 's' : ''} selected
               </span>
@@ -466,7 +466,7 @@ const EmergencyContactsList = ({
             </div>
             
             {canDelete && (
-              <div className="flex space-x-2">
+              <div className="flex gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -476,7 +476,7 @@ const EmergencyContactsList = ({
                   }}
                   className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-500 dark:hover:bg-red-500/10"
                 >
-                  <TrashIcon className="w-4 h-4 mr-2" />
+                  <TrashIcon className="w-4 h-4 me-2" />
                   Delete Selected
                 </Button>
               </div>
@@ -551,7 +551,7 @@ const EmergencyContactsList = ({
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   {viewContact.isPrimary && (
                     <Badge variant="warning" size="sm">Primary</Badge>
                   )}

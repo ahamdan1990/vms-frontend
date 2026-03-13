@@ -217,7 +217,7 @@ const VisitPurposeForm = ({
               onChange={(e) => handleChange('requiresApproval', e.target.checked)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <label htmlFor="requiresApproval" className="ml-2 block text-sm text-gray-900">
+            <label htmlFor="requiresApproval" className="ms-2 block text-sm text-gray-900">
               Requires admin approval
             </label>
           </div>
@@ -231,7 +231,7 @@ const VisitPurposeForm = ({
               onChange={(e) => handleChange('isActive', e.target.checked)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
+            <label htmlFor="isActive" className="ms-2 block text-sm text-gray-900">
               Active (available for selection)
             </label>
           </div>
@@ -313,7 +313,7 @@ const VisitPurposeForm = ({
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-900">Preview</h3>
           <div className="bg-gray-50 p-4 rounded-md">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-3">
               <div 
                 className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-medium"
                 style={{ backgroundColor: formData.colorCode || '#6B7280' }}
@@ -329,7 +329,7 @@ const VisitPurposeForm = ({
                     {formData.description}
                   </div>
                 )}
-                <div className="flex items-center space-x-2 mt-1">
+                <div className="flex items-center gap-2 mt-1">
                   <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                     formData.requiresApproval 
                       ? 'bg-yellow-100 text-yellow-800' 
@@ -351,7 +351,7 @@ const VisitPurposeForm = ({
         </div>
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+        <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
           <Button
             type="button"
             variant="outline"

@@ -1,0 +1,69 @@
+{
+  "pageTitle": "لوحة التحكم",
+  "welcome": "مرحباً بعودتك، {{name}}",
+  "stats": {
+    "totalVisitors": "إجمالي الزوار",
+    "activeInvitations": "الدعوات النشطة",
+    "pendingApprovals": "الموافقات المعلقة",
+    "todayVisits": "زيارات اليوم",
+    "checkedInNow": "داخل المبنى حالياً",
+    "upcomingVisits": "الزيارات القادمة",
+    "todayVisitors": "زوار اليوم",
+    "activeVisitors": "نشط الآن",
+    "currentlyOnSite": "داخل المبنى حالياً",
+    "realTimeData": "بيانات فورية",
+    "awaitingApproval": "في انتظار الموافقة",
+    "alerts": "التنبيهات",
+    "requireAttention": "تحتاج إلى اهتمام"
+  },
+  "tabs": {
+    "myDashboard": "لوحتي",
+    "myDashboardDesc": "دعواتك وزوارك",
+    "overview": "نظرة عامة",
+    "overviewDesc": "نظرة عامة على النظام والإجراءات السريعة",
+    "receptionist": "الاستقبال",
+    "receptionistDesc": "تسجيل الدخول والزوار غير المجدولين",
+    "analytics": "التحليلات",
+    "analyticsDesc": "رؤى الزوار والتقارير",
+    "excel": "إدارة Excel",
+    "excelDesc": "تنزيل القوالب والاستيراد الجماعي"
+  },
+  "quickActions": {
+    "title": "إجراءات سريعة",
+    "adminTools": "أدوات المدير",
+    "createInvitation": "إنشاء دعوة",
+    "checkIn": "تسجيل دخول زائر",
+    "addVisitor": "إضافة زائر",
+    "viewReports": "عرض التقارير",
+    "receptionist": "الاستقبال",
+    "receptionistDesc": "عمليات الزوار",
+    "analytics": "التحليلات",
+    "analyticsDesc": "الرؤى والتقارير",
+    "excel": "إدارة Excel",
+    "excelDesc": "الاستيراد والتصدير",
+    "system": "النظام",
+    "systemDesc": "الإعدادات"
+  },
+  "systemHealth": {
+    "title": "صحة النظام",
+    "allOperational": "جميع الأنظمة تعمل",
+    "database": "اتصال قاعدة البيانات",
+    "email": "خدمة البريد الإلكتروني",
+    "qrCode": "مولّد رمز QR",
+    "scanner": "ماسح المستندات",
+    "healthy": "سليم",
+    "operational": "يعمل",
+    "active": "نشط",
+    "limited": "محدود"
+  },
+  "widgets": {
+    "recentActivity": "النشاط الأخير",
+    "upcomingInvitations": "الدعوات القادمة",
+    "pendingApprovals": "الموافقات المعلقة",
+    "visitorStats": "إحصائيات الزوار",
+    "quickActions": "إجراءات سريعة"
+  },
+  "noActivity": "لا يوجد نشاط حديث",
+  "noInvitations": "لا توجد دعوات قادمة",
+  "noPending": "لا توجد موافقات معلقة"
+}

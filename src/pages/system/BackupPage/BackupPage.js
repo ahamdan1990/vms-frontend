@@ -147,7 +147,7 @@ const BackupPage = () => {
           </p>
         </div>
         
-        <div className="mt-4 sm:mt-0 flex space-x-3">
+        <div className="mt-4 sm:mt-0 flex gap-3">
           <Button
             variant="outline"
             onClick={() => loadBackupHistory()}
@@ -180,7 +180,7 @@ const BackupPage = () => {
                   <CloudArrowUpIcon className="w-6 h-6 text-blue-600" />
                 </div>
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <h3 className="text-sm font-medium text-gray-600">Database Size</h3>
                 <p className="text-2xl font-bold text-gray-900">{systemStatus.databaseSize}</p>
               </div>
@@ -200,7 +200,7 @@ const BackupPage = () => {
                   <CheckCircleIcon className="w-6 h-6 text-green-600" />
                 </div>
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <h3 className="text-sm font-medium text-gray-600">Last Backup</h3>
                 <p className="text-lg font-bold text-gray-900">
                   {formatters.formatRelativeTime(systemStatus.lastAutoBackup)}
@@ -222,7 +222,7 @@ const BackupPage = () => {
                   <ClockIcon className="w-6 h-6 text-orange-600" />
                 </div>
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <h3 className="text-sm font-medium text-gray-600">Next Backup</h3>
                 <p className="text-lg font-bold text-gray-900">
                   {formatters.formatRelativeTime(systemStatus.nextScheduledBackup)}
@@ -244,7 +244,7 @@ const BackupPage = () => {
                   <ShieldCheckIcon className="w-6 h-6 text-purple-600" />
                 </div>
               </div>
-              <div className="ml-4">
+              <div className="ms-4">
                 <h3 className="text-sm font-medium text-gray-600">Retention</h3>
                 <p className="text-2xl font-bold text-gray-900">{systemStatus.backupRetention} days</p>
               </div>
@@ -375,7 +375,7 @@ const BackupPage = () => {
                   <tr key={backup.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className={`w-2 h-2 rounded-full mr-2 ${
+                        <div className={`w-2 h-2 rounded-full me-2 ${
                           backup.type === 'Automatic' ? 'bg-blue-500' : 'bg-green-500'
                         }`}></div>
                         <span className="text-sm font-medium text-gray-900">{backup.type}</span>
@@ -394,7 +394,7 @@ const BackupPage = () => {
                       {getStatusBadge(backup.status)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleRestoreBackup(backup.id)}
                           disabled={restoreLoading}
@@ -426,7 +426,7 @@ const BackupPage = () => {
             <div className="flex-shrink-0">
               <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />
             </div>
-            <div className="ml-3">
+            <div className="ms-3">
               <h3 className="text-sm font-medium text-yellow-800">
                 Important Backup Information
               </h3>

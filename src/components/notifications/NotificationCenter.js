@@ -310,7 +310,7 @@ const NotificationCenter = ({
     ];
 
     return (
-      <div className="flex space-x-2 overflow-x-auto">
+      <div className="flex gap-2 overflow-x-auto">
         {filters.map(f => (
           <button
             key={f.id}
@@ -348,13 +348,13 @@ const NotificationCenter = ({
             : 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-700'
         } ${isCardView ? 'shadow-sm hover:shadow-md' : 'hover:shadow-sm'}`}
       >
-        <div className="flex items-start space-x-3">
+        <div className="flex items-start gap-3">
           <div className="flex-shrink-0 mt-1">
             {getNotificationIcon(notification.type, notification.priority)}
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2 mb-1">
+            <div className="flex items-center gap-2 mb-1">
               <h4 className="text-sm font-medium text-gray-900 dark:text-white">
                 {notification.title}
               </h4>
@@ -402,7 +402,7 @@ const NotificationCenter = ({
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center space-x-2 bg-white dark:bg-gray-700 rounded-lg p-1 shadow-sm border border-gray-200 dark:border-gray-600"
+                className="flex items-center gap-2 bg-white dark:bg-gray-700 rounded-lg p-1 shadow-sm border border-gray-200 dark:border-gray-600"
               >
                 {/* Action Type Selector */}
                 <select
@@ -442,7 +442,7 @@ const NotificationCenter = ({
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center space-x-1 text-green-600 bg-green-50 px-2 py-1 rounded-lg"
+                className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-1 rounded-lg"
               >
                 <CheckCircleIcon className="w-4 h-4" />
                 <span className="text-xs font-medium">Acknowledged</span>
@@ -483,19 +483,19 @@ const NotificationCenter = ({
 
       <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <BellIconSolid className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h2>
             {unreadCount > 0 && (
               <Badge color="red" size="sm">{unreadCount}</Badge>
             )}
             {/* Real-time connection indicator */}
-            <ConnectionStatus className="ml-2" />
+            <ConnectionStatus className="ms-2" />
           </div>
 
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center gap-1">
             {/* View Mode Toggle */}
-            <div className="flex items-center bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden mr-2">
+            <div className="flex items-center bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden me-2">
               <button
                 onClick={() => setViewMode('list')}
                 className={`px-2 py-1 text-xs font-medium transition-colors ${
@@ -581,7 +581,7 @@ const NotificationCenter = ({
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <LoadingSpinner size="lg" />
-            <span className="ml-2 text-gray-500">Loading notifications...</span>
+            <span className="ms-2 text-gray-500">Loading notifications...</span>
           </div>
         ) : filteredNotifications.length === 0 ? (
           <div className="text-center py-12">
@@ -613,7 +613,7 @@ const NotificationCenter = ({
       {/* Footer */}
       <div className="p-4 border-t border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between text-xs text-gray-500">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-4">
             <span>{filteredNotifications.length} notifications</span>
             {/* FIX: Use lastSyncTime directly from root state, not from stats */}
             {lastSyncTime && (
@@ -621,7 +621,7 @@ const NotificationCenter = ({
             )}
           </div>
           
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center gap-1">
             <Button
               size="xs"
               variant="ghost"

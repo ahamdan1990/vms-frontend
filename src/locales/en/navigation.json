@@ -1,0 +1,54 @@
+{
+  "sidebar": {
+    "label": "Navigation",
+    "dashboard": "Dashboard",
+    "visitors": "Visitors",
+    "invitations": "Invitations",
+    "calendar": "Calendar",
+    "checkin": "Check-in",
+    "reports": "Reports",
+    "users": "Users",
+    "roles": "Roles",
+    "system": "System",
+    "profile": "Profile",
+    "help": "Help",
+    "version": "VMS v{{version}}"
+  },
+  "system": {
+    "configuration": "Configuration",
+    "visitPurposes": "Visit Purposes",
+    "locations": "Locations",
+    "companies": "Companies",
+    "departments": "Departments",
+    "timeSlots": "Time Slots",
+    "escalationRules": "Escalation Rules",
+    "auditLogs": "Audit Logs",
+    "backup": "Backup"
+  },
+  "header": {
+    "searchPlaceholder": "Search visitors, invitations...",
+    "notifications": "Notifications",
+    "viewAll": "View all",
+    "noNotifications": "No new notifications",
+    "yourProfile": "Your Profile",
+    "settings": "Settings",
+    "signOut": "Sign out",
+    "switchToDark": "Switch to dark mode",
+    "switchToLight": "Switch to light mode"
+  },
+  "pageTitles": {
+    "dashboard": "Dashboard",
+    "staffDashboard": "Staff Dashboard",
+    "operatorDashboard": "Operator Dashboard",
+    "adminDashboard": "Admin Dashboard",
+    "users": "User Management",
+    "invitations": "Invitations",
+    "visitors": "Visitors",
+    "checkin": "Check-in",
+    "reports": "Reports",
+    "system": "System",
+    "profile": "Profile",
+    "signIn": "Sign In",
+    "appTitle": "{{title}} - Visitor Management System"
+  }
+}

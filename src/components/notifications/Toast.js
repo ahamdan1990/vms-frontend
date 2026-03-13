@@ -200,7 +200,7 @@ const Toast = ({ toast, index = 0, position = 'top-right' }) => {
           </div>
           
           {/* Content */}
-          <div className="ml-3 w-0 flex-1">
+          <div className="ms-3 w-0 flex-1">
             {title && (
               <p className={`text-sm font-medium ${config.titleColor}`}>
                 {title}
@@ -214,7 +214,7 @@ const Toast = ({ toast, index = 0, position = 'top-right' }) => {
             
             {/* Actions */}
             {actions && actions.length > 0 && (
-              <div className="mt-3 flex space-x-3">
+              <div className="mt-3 flex gap-3">
                 {actions.map((action, actionIndex) => (
                   <button
                     key={actionIndex}
@@ -230,7 +230,7 @@ const Toast = ({ toast, index = 0, position = 'top-right' }) => {
           </div>
           
           {/* Close Button */}
-          <div className="ml-4 flex-shrink-0 flex">
+          <div className="ms-4 flex-shrink-0 flex">
             <button
               type="button"
               className={`rounded-md inline-flex text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400`}

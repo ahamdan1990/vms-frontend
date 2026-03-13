@@ -145,7 +145,7 @@ const EnhancedInput = forwardRef(({
     <div className={classNames('relative', containerClassName)}>
       {/* Left Icon */}
       {icon && iconPosition === 'left' && (
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <div className="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
           {React.cloneElement(icon, { className: iconClasses })}
         </div>
       )}
@@ -162,7 +162,7 @@ const EnhancedInput = forwardRef(({
       )}
 
       {/* Right Elements */}
-      <div className="absolute inset-y-0 right-0 flex items-center">
+      <div className="absolute inset-y-0 end-0 flex items-center">
         {/* Password Toggle */}
         {type === 'password' && (
           <button

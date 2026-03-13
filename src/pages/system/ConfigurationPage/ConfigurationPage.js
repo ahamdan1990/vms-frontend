@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
 
@@ -68,6 +69,7 @@ const ConfigurationPage = () => {
   const { user } = useAuth();
   const { hasPermission } = usePermissions();
   const toast = useToast();
+  const { t } = useTranslation('system');
 
   // Selectors
   const configurations = useSelector(selectConfigurations);
@@ -156,9 +158,9 @@ const ConfigurationPage = () => {
     
     try {
       await dispatch(invalidateCache(category)).unwrap();
-      toast.success(category ? `Cache invalidated for ${category}` : 'All cache invalidated');
+      toast.success(category ? t('configuration.toast.cacheInvalidated', { category }) : t('configuration.toast.allCacheInvalidated'));
     } catch (error) {
-      toast.error('Failed to invalidate cache');
+      toast.error(t('configuration.toast.cacheError'));
     }
   };
 
@@ -168,12 +170,12 @@ const ConfigurationPage = () => {
     
     try {
       await dispatch(updateConfiguration({ category, key, value, reason })).unwrap();
-      toast.success('Configuration updated successfully');
+      toast.success(t('configuration.toast.updated'));
       setShowEditModal(false);
       setEditingConfig(null);
       dispatch(fetchAllConfigurations());
     } catch (error) {
-      toast.error('Failed to update configuration:');
+      toast.error(t('configuration.toast.updateError'));
     }
   };
 
@@ -183,9 +185,9 @@ const ConfigurationPage = () => {
         <Card>
           <div className="text-center py-12">
             <ExclamationTriangleIcon className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Access Denied</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('configuration.accessDenied')}</h3>
             <p className="text-gray-600 dark:text-gray-400">
-              You don't have permission to view system configurations.
+              {t('configuration.accessDeniedDesc')}
             </p>
           </div>
         </Card>
@@ -198,8 +200,8 @@ const ConfigurationPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">System Configuration</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Manage system settings and configurations</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('configuration.title')}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">{t('configuration.subtitle')}</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -207,7 +209,7 @@ const ConfigurationPage = () => {
           {pendingRestarts.length > 0 && (
             <Badge variant="warning" className="flex items-center gap-1">
               <ClockIcon className="h-4 w-4" />
-              {pendingRestarts.length} restart required
+              {t('configuration.restartRequired', { count: pendingRestarts.length })}
             </Badge>
           )}
           
@@ -221,7 +223,7 @@ const ConfigurationPage = () => {
               className="flex items-center gap-2"
             >
               <ArrowPathIcon className="h-4 w-4" />
-              Clear Cache
+              {t('configuration.clearCache')}
             </Button>
           )}
           
@@ -244,11 +246,11 @@ const ConfigurationPage = () => {
           {/* Category Filter */}
           <div className="flex-1">
             <Select
-              label="Category"
+              label={t('configuration.category')}
               value={selectedCategory || 'all'}
               onChange={(e) => handleCategoryChange(e.target.value)}
               options={[
-                { value: 'all', label: 'All Categories' },
+                { value: 'all', label: t('configuration.allCategories') },
                 ...categories.map(cat => ({ value: cat, label: cat }))
               ]}
             />
@@ -257,9 +259,9 @@ const ConfigurationPage = () => {
           {/* Search */}
           <div className="flex-1">
             <Input
-              label="Search"
+              label={t('configuration.search')}
               type="text"
-              placeholder="Search configurations..."
+              placeholder={t('configuration.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               icon={MagnifyingGlassIcon}
@@ -277,12 +279,12 @@ const ConfigurationPage = () => {
                 {showSensitive ? (
                   <>
                     <EyeSlashIcon className="h-4 w-4" />
-                    Hide Sensitive
+                    {t('configuration.hideSensitive')}
                   </>
                 ) : (
                   <>
                     <EyeIcon className="h-4 w-4" />
-                    Show Sensitive
+                    {t('configuration.showSensitive')}
                   </>
                 )}
               </Button>
@@ -306,7 +308,7 @@ const ConfigurationPage = () => {
           <div className="p-4">
             <div className="flex items-center gap-2 text-red-800">
               <ExclamationTriangleIcon className="h-5 w-5" />
-              <span className="font-medium">Error loading configurations</span>
+              <span className="font-medium">{t('configuration.errorLoading')}</span>
             </div>
             <p className="text-red-700 mt-1">
               {Array.isArray(errors.listError) 
@@ -325,7 +327,7 @@ const ConfigurationPage = () => {
         <Card className="p-6">
           {/* Tabs */}
           <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
-            <nav className="-mb-px flex space-x-8">
+            <nav className="-mb-px flex gap-8">
               <button
                 onClick={() => setLdapTab('settings')}
                 className={`${
@@ -334,7 +336,7 @@ const ConfigurationPage = () => {
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
-                Settings
+                {t('configuration.ldapTabs.settings')}
               </button>
               <button
                 onClick={() => setLdapTab('users')}
@@ -344,7 +346,7 @@ const ConfigurationPage = () => {
                     : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
-                Users
+                {t('configuration.ldapTabs.users')}
               </button>
             </nav>
           </div>
@@ -359,8 +361,8 @@ const ConfigurationPage = () => {
       {!isLdapSelected && !loading.listLoading && Object.keys(filteredConfigurations).length === 0 && (
         <EmptyState
           icon={CogIcon}
-          title="No configurations found"
-          description={searchQuery || selectedCategory ? "Try adjusting your filters" : "No configurations have been set up yet"}
+          title={t('configuration.noConfigurations')}
+          description={searchQuery || selectedCategory ? t('configuration.noConfigurationsDesc') : t('configuration.noConfigurationsEmpty')}
         />
       )}
 
@@ -402,24 +404,25 @@ const ConfigurationPage = () => {
   );
 };
 // Configuration Category Component
-const ConfigurationCategory = ({ 
-  category, 
-  configurations, 
-  showSensitive, 
-  canUpdate, 
-  onEdit, 
-  onInvalidateCache, 
-  canInvalidateCache 
+const ConfigurationCategory = ({
+  category,
+  configurations,
+  showSensitive,
+  canUpdate,
+  onEdit,
+  onInvalidateCache,
+  canInvalidateCache
 }) => {
+  const { t } = useTranslation('system');
   return (
     <Card>
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">{category}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{configurations.length} configuration(s)</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{t('configuration.countConfigurations', { count: configurations.length })}</p>
           </div>
-          
+
           {canInvalidateCache && (
             <Button
               variant="outline"
@@ -428,7 +431,7 @@ const ConfigurationCategory = ({
               className="flex items-center gap-1"
             >
               <ArrowPathIcon className="h-3 w-3" />
-              Clear
+              {t('configuration.clearCache')}
             </Button>
           )}
         </div>
@@ -450,12 +453,13 @@ const ConfigurationCategory = ({
 };
 
 // Configuration Item Component
-const ConfigurationItem = ({ 
-  config, 
-  showSensitive, 
-  canUpdate, 
-  onEdit 
+const ConfigurationItem = ({
+  config,
+  showSensitive,
+  canUpdate,
+  onEdit
 }) => {
+  const { t } = useTranslation('system');
   const formatValue = (value, dataType, isSensitive) => {
     if (isSensitive && !showSensitive) {
       return '••••••••';
@@ -463,7 +467,7 @@ const ConfigurationItem = ({
     
     switch (dataType) {
       case 'Boolean':
-        return value === true ? 'Yes' : 'No';
+        return value === true ? t('configuration.editModal.boolTrue') : t('configuration.editModal.boolFalse');
       case 'DateTime':
         return new Date(value).toLocaleString();
       case 'JSON':
@@ -503,19 +507,19 @@ const ConfigurationItem = ({
             {getDataTypeBadge(config.dataType)}
             
             {config.isEncrypted && (
-              <Badge variant="secondary" size="sm">Encrypted</Badge>
+              <Badge variant="secondary" size="sm">{t('configuration.encrypted')}</Badge>
             )}
-            
+
             {config.isSensitive && (
-              <Badge variant="warning" size="sm">Sensitive</Badge>
+              <Badge variant="warning" size="sm">{t('configuration.sensitive')}</Badge>
             )}
-            
+
             {config.isReadOnly && (
-              <Badge variant="outline" size="sm">Read Only</Badge>
+              <Badge variant="outline" size="sm">{t('configuration.readOnly')}</Badge>
             )}
-            
+
             {config.requiresRestart && (
-              <Badge variant="danger" size="sm">Restart Required</Badge>
+              <Badge variant="danger" size="sm">{t('configuration.requiresRestart')}</Badge>
             )}
           </div>
           
@@ -524,7 +528,7 @@ const ConfigurationItem = ({
           )}
           
           <div className="bg-gray-50 dark:bg-gray-700/50 rounded-md p-3">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Current Value:</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('configuration.currentValue')}</div>
             <div className="text-sm font-mono text-gray-900 dark:text-gray-100">
               {config.dataType === 'JSON' ? (
                 <pre className="whitespace-pre-wrap">
@@ -538,12 +542,12 @@ const ConfigurationItem = ({
           
           {config.defaultValue && (
             <div className="mt-2 text-xs text-gray-500">
-              Default: <span className="font-mono">{config.defaultValue}</span>
+              {t('configuration.default')} <span className="font-mono">{config.defaultValue}</span>
             </div>
           )}
         </div>
         
-        <div className="flex items-center gap-2 ml-4">
+        <div className="flex items-center gap-2 ms-4">
           {canUpdate && !config.isReadOnly && (
             <Button
               variant="outline"
@@ -552,7 +556,7 @@ const ConfigurationItem = ({
               className="flex items-center gap-1"
             >
               <PencilIcon className="h-3 w-3" />
-              Edit
+              {t('common:buttons.edit')}
             </Button>
           )}
           
@@ -565,6 +569,7 @@ const ConfigurationItem = ({
 
 // Configuration Edit Modal Component
 const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) => {
+  const { t } = useTranslation('system');
   const [formData, setFormData] = useState({
     value: config?.value || '',
     reason: ''
@@ -592,7 +597,7 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
     // Basic validation
     const errors = {};
     if (!formData.value && formData.value !== '') {
-      errors.value = 'Value is required';
+      errors.value = t('configuration.editModal.valueRequired');
     }
     // if (!formData.reason.trim()) {
     //   errors.reason = 'Reason for change is required';
@@ -625,13 +630,13 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
       case 'Boolean':
         return (
           <Select
-            label="Value"
+            label={t('configuration.editModal.value')}
             value={formData.value}
             onChange={(e) => handleValueChange(e.target.value)}
             error={formErrors.value}
             options={[
-              { value: 'true', label: 'True' },
-              { value: 'false', label: 'False' }
+              { value: 'true', label: t('configuration.editModal.boolTrue') },
+              { value: 'false', label: t('configuration.editModal.boolFalse') }
             ]}
             required
           />
@@ -641,7 +646,7 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
       case 'Decimal':
         return (
           <Input
-            label="Value"
+            label={t('configuration.editModal.value')}
             type="number"
             value={formData.value}
             onChange={(e) => handleValueChange(e.target.value)}
@@ -654,7 +659,7 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
       case 'DateTime':
         return (
           <Input
-            label="Value"
+            label={t('configuration.editModal.value')}
             type="datetime-local"
             value={formData.value}
             onChange={(e) => handleValueChange(e.target.value)}
@@ -667,7 +672,7 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
         return (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Value <span className="text-red-500">*</span>
+              {t('configuration.editModal.value')} <span className="text-red-500">*</span>
             </label>
             <textarea
               rows={8}
@@ -676,7 +681,7 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
               className={`w-full px-3 py-2 border rounded-md font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                 formErrors.value ? 'border-red-300' : 'border-gray-300'
               }`}
-              placeholder="Enter valid JSON..."
+              placeholder={t('configuration.editModal.jsonPlaceholder')}
             />
             {formErrors.value && (
               <p className="mt-1 text-sm text-red-600">{formErrors.value}</p>
@@ -687,7 +692,7 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
       default: // String
         return (
           <Input
-            label="Value"
+            label={t('configuration.editModal.value')}
             type={config?.isSensitive ? 'password' : 'text'}
             value={formData.value}
             onChange={(e) => handleValueChange(e.target.value)}
@@ -701,26 +706,26 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
   if (!config) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit Configuration" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('configuration.editModal.title')} size="md">
       <div className="space-y-6">
         {/* Configuration Info */}
         <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="font-medium text-gray-700 dark:text-gray-300">Key:</span>
-              <span className="ml-2 text-gray-900 dark:text-gray-100">{config.key}</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300">{t('configuration.editModal.key')}</span>
+              <span className="ms-2 text-gray-900 dark:text-gray-100">{config.key}</span>
             </div>
             <div>
-              <span className="font-medium text-gray-700 dark:text-gray-300">Category:</span>
-              <span className="ml-2 text-gray-900 dark:text-gray-100">{config.category}</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300">{t('configuration.editModal.categoryLabel')}</span>
+              <span className="ms-2 text-gray-900 dark:text-gray-100">{config.category}</span>
             </div>
             {/* <div>
               <span className="font-medium text-gray-700">Data Type:</span>
-              <span className="ml-2 text-gray-900">{config.dataType}</span>
+              <span className="ms-2 text-gray-900">{config.dataType}</span>
             </div>
             <div>
               <span className="font-medium text-gray-700">Current:</span>
-              <span className="ml-2 text-gray-900 font-mono">
+              <span className="ms-2 text-gray-900 font-mono">
                 {config.isSensitive ? '••••••••' : config.value}
               </span>
             </div> */}
@@ -728,19 +733,19 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
           
           {config.description && (
             <div className="mt-3">
-              <span className="font-medium text-gray-700 dark:text-gray-300">Description:</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300">{t('configuration.editModal.description')}</span>
               <p className="mt-1 text-gray-600 dark:text-gray-400">{config.description}</p>
             </div>
           )}
-          
+
           {config.requiresRestart && (
             <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
               <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-400">
                 <ExclamationTriangleIcon className="h-4 w-4" />
-                <span className="text-sm font-medium">Restart Required</span>
+                <span className="text-sm font-medium">{t('configuration.requiresRestart')}</span>
               </div>
               <p className="text-xs text-yellow-700 dark:text-yellow-500 mt-1">
-                Changing this configuration will require a system restart to take effect.
+                {t('configuration.editModal.restartWarning')}
               </p>
             </div>
           )}
@@ -752,25 +757,25 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
         {/* Reason Input */}
         <div>
           <Input
-            label="Reason for Change"
+            label={t('configuration.editModal.reasonLabel')}
             type="text"
             value={formData.reason}
             onChange={(e) => handleReasonChange(e.target.value)}
             error={formErrors.reason}
-            placeholder="Enter reason for this configuration change..."
+            placeholder={t('configuration.editModal.reasonPlaceholder')}
           />
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            This will be logged for audit purposes.
+            {t('configuration.editModal.auditNote')}
           </p>
         </div>
       </div>
 
       <div className="flex justify-end gap-3 pt-6">
         <Button variant="outline" onClick={onClose} disabled={loading}>
-          Cancel
+          {t('common:buttons.cancel')}
         </Button>
         <Button onClick={handleSubmit} loading={loading}>
-          Save Changes
+          {t('configuration.editModal.saveChanges')}
         </Button>
       </div>
     </Modal>

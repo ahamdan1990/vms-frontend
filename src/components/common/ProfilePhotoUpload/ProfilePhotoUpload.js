@@ -182,7 +182,7 @@ const ProfilePhotoUpload = ({
       </div>
       {/* Action Buttons */}
       {!disabled && (
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={handleClick}

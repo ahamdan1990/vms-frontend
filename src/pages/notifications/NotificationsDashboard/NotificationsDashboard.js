@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSignalR } from '../../../hooks/useSignalR';
@@ -75,6 +76,7 @@ const NotificationsDashboard = () => {
   const dispatch = useDispatch();
   const { user: currentUser } = useAuth();
   const { hasPermission } = usePermissions();
+  const { t } = useTranslation('notifications');
 
   // Local state
   const [searchInput, setSearchInput] = useState('');
@@ -157,7 +159,7 @@ const NotificationsDashboard = () => {
 
   // Initialize page and notifications
   useEffect(() => {
-    dispatch(setPageTitle('Notifications'));
+    dispatch(setPageTitle(t('pageTitle')));
     
     if (canReadOwn || canReadAll) {
       dispatch(initializeNotifications());
@@ -206,8 +208,8 @@ const NotificationsDashboard = () => {
     }
     dispatch(addToast({
       type: 'success',
-      title: 'Notifications Refreshed',
-      message: 'Notification list has been updated',
+      title: t('toast.refreshTitle'),
+      message: t('toast.refreshMessage'),
       duration: 2000
     }));
   };
@@ -230,8 +232,8 @@ const NotificationsDashboard = () => {
       // Show success toast
       dispatch(addToast({
         type: 'success',
-        title: 'Notification Acknowledged',
-        message: 'Notification has been acknowledged successfully',
+        title: t('toast.acknowledgedTitle'),
+        message: t('toast.acknowledgedMessage'),
         duration: 3000
       }));
       
@@ -242,7 +244,7 @@ const NotificationsDashboard = () => {
       console.error('Acknowledgment failed:', error);
       dispatch(addToast({
         type: 'error',
-        title: 'Acknowledgment Failed',
+        title: t('toast.acknowledgeFailed'),
         message: extractErrorMessage(error),
         duration: 5000
       }));
@@ -265,8 +267,8 @@ const NotificationsDashboard = () => {
     dispatch(markAllAsRead());
     dispatch(addToast({
       type: 'success',
-      title: 'All Notifications Marked as Read',
-      message: `${unreadCount} notifications marked as read`,
+      title: t('toast.markAllReadTitle'),
+      message: t('toast.markAllReadMessage', { count: unreadCount }),
       duration: 3000
     }));
   };
@@ -288,8 +290,8 @@ const NotificationsDashboard = () => {
 
         dispatch(addToast({
           type: 'success',
-          title: 'Bulk Action Complete',
-          message: `${count} notification${count !== 1 ? 's' : ''} marked as read`,
+          title: t('bulk.complete'),
+          message: t('bulk.markedRead', { count }),
           duration: 3000
         }));
       } else if (bulkAction === 'acknowledge') {
@@ -306,8 +308,8 @@ const NotificationsDashboard = () => {
 
         dispatch(addToast({
           type: 'success',
-          title: 'Bulk Action Complete',
-          message: `${count} notification${count !== 1 ? 's' : ''} acknowledged`,
+          title: t('bulk.complete'),
+          message: t('bulk.acknowledgedAll', { count }),
           duration: 3000
         }));
       }
@@ -320,7 +322,7 @@ const NotificationsDashboard = () => {
       console.error('Bulk action failed:', error);
       dispatch(addToast({
         type: 'error',
-        title: 'Bulk Action Failed',
+        title: t('bulk.failed'),
         message: extractErrorMessage(error),
         duration: 5000
       }));
@@ -482,7 +484,7 @@ const NotificationsDashboard = () => {
       } ${selectedNotifications.includes(notification.id) ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}`}
       onClick={() => !notification.read && handleMarkAsRead(notification.id)}
     >
-      <div className="flex items-start space-x-3">
+      <div className="flex items-start gap-3">
         {/* Selection checkbox */}
         <div className="flex-shrink-0 mt-1">
           <input
@@ -505,7 +507,7 @@ const NotificationsDashboard = () => {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-1">
+              <div className="flex items-center gap-2 mb-1">
                 <h4 className="text-sm font-medium text-gray-900 dark:text-white">
                   {notification.title}
                 </h4>
@@ -529,23 +531,23 @@ const NotificationsDashboard = () => {
               {notification.data && (
                 <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 space-y-1">
                   {notification.data.visitorName && (
-                    <p><strong>Visitor:</strong> {notification.data.visitorName}</p>
+                    <p><strong>{t('card.visitor')}</strong> {notification.data.visitorName}</p>
                   )}
                   {notification.data.company && (
-                    <p><strong>Company:</strong> {notification.data.company}</p>
+                    <p><strong>{t('card.company')}</strong> {notification.data.company}</p>
                   )}
                   {notification.data.hostName && (
-                    <p><strong>Host:</strong> {notification.data.hostName}</p>
+                    <p><strong>{t('card.host')}</strong> {notification.data.hostName}</p>
                   )}
                   {notification.data.location && (
-                    <p><strong>Location:</strong> {notification.data.location}</p>
+                    <p><strong>{t('card.location')}</strong> {notification.data.location}</p>
                   )}
                 </div>
               )}
             </div>
 
             {/* Enhanced Actions with Dropdown */}
-            <div className="flex items-center space-x-1 ml-2">
+            <div className="flex items-center gap-1 ms-2">
               {!notification.read && canAcknowledge && (
                 <div className="relative notification-dropdown">
                   {/* Action Dropdown Toggle */}
@@ -556,17 +558,17 @@ const NotificationsDashboard = () => {
                       e.stopPropagation();
                       toggleActionDropdown(notification.id);
                     }}
-                    className="flex items-center space-x-1"
+                    className="flex items-center gap-1"
                   >
                     <span className="text-xs">
-                      {getNotificationAction(notification.id) === 'acknowledge' ? 'Acknowledge' : 'Mark as Read'}
+                      {getNotificationAction(notification.id) === 'acknowledge' ? t('card.acknowledge') : t('card.markAsRead')}
                     </span>
                     <ChevronDownIcon className="w-3 h-3" />
                   </Button>
 
                   {/* Dropdown Menu */}
                   {showActionDropdowns[notification.id] && (
-                    <div className="absolute right-0 mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50">
+                    <div className="absolute end-0 mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50">
                       <div className="py-1">
                         <button
                           onClick={(e) => {
@@ -574,12 +576,12 @@ const NotificationsDashboard = () => {
                             setNotificationAction(notification.id, 'markRead');
                             setShowActionDropdowns(prev => ({ ...prev, [notification.id]: false }));
                           }}
-                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-2 ${
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 ${
                             getNotificationAction(notification.id) === 'markRead' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
                           }`}
                         >
                           <CheckIcon className="w-3 h-3" />
-                          <span>Mark as Read</span>
+                          <span>{t('card.markAsRead')}</span>
                         </button>
                         <button
                           onClick={(e) => {
@@ -587,12 +589,12 @@ const NotificationsDashboard = () => {
                             setNotificationAction(notification.id, 'acknowledge');
                             setShowActionDropdowns(prev => ({ ...prev, [notification.id]: false }));
                           }}
-                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-2 ${
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 ${
                             getNotificationAction(notification.id) === 'acknowledge' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
                           }`}
                         >
                           <CheckCircleIcon className="w-3 h-3" />
-                          <span>Acknowledge</span>
+                          <span>{t('card.acknowledge')}</span>
                         </button>
                       </div>
                     </div>
@@ -609,17 +611,17 @@ const NotificationsDashboard = () => {
                     e.stopPropagation();
                     executeNotificationAction(notification.id);
                   }}
-                  className="ml-2"
+                  className="ms-2"
                 >
-                  Execute
+                  {t('card.execute')}
                 </Button>
               )}
               
               {/* Show acknowledged status */}
               {notification.read && (
-                <div className="flex items-center space-x-1 text-green-600">
+                <div className="flex items-center gap-1 text-green-600">
                   <CheckCircleIcon className="w-4 h-4" />
-                  <span className="text-xs">Acknowledged</span>
+                  <span className="text-xs">{t('card.acknowledged')}</span>
                 </div>
               )}
             </div>
@@ -655,8 +657,8 @@ const NotificationsDashboard = () => {
       <div className="p-6">
         <div className="text-center">
           <ExclamationTriangleIconSolid className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
-          <p className="text-gray-500">You don't have permission to view notifications.</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('accessDenied')}</h3>
+          <p className="text-gray-500">{t('accessDeniedDesc')}</p>
         </div>
       </div>
     );
@@ -667,49 +669,49 @@ const NotificationsDashboard = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Notifications</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('pageTitle')}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Manage and acknowledge system notifications
+            {t('pageSubtitle')}
           </p>
-          <div className="flex items-center space-x-4 mt-2">
-            <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-4 mt-2">
+            <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isSignalRConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
               <span className="text-xs text-gray-500 dark:text-gray-400">
-                {isSignalRConnected ? 'Connected' : 'Disconnected'}
+                {isSignalRConnected ? t('connected') : t('disconnected')}
               </span>
             </div>
             {lastSyncTime && (
               <span className="text-xs text-gray-400 dark:text-gray-500">
-                Last updated: {formatRelativeTime(new Date(lastSyncTime))}
+                {t('lastUpdated')} {formatRelativeTime(new Date(lastSyncTime))}
               </span>
             )}
           </div>
         </div>
         
-        <div className="mt-4 sm:mt-0 flex space-x-3">
+        <div className="mt-4 sm:mt-0 flex gap-3">
           <Button
             variant="outline"
             icon={<ArrowPathIcon className="w-5 h-5" />}
             onClick={handleRefresh}
             disabled={loading}
           >
-            Refresh
+            {t('refresh')}
           </Button>
-          
+
           <Button
             variant="outline"
             icon={<FunnelIcon className="w-5 h-5" />}
             onClick={() => setShowFilters(!showFilters)}
           >
-            Filters
+            {t('filters')}
           </Button>
-          
+
           {unreadCount > 0 && canAcknowledge && (
             <Button
               onClick={handleMarkAllAsRead}
               icon={<CheckCircleIcon className="w-5 h-5" />}
             >
-              Mark All Read ({unreadCount})
+              {t('markAllRead_count', { count: unreadCount })}
             </Button>
           )}
         </div>
@@ -723,8 +725,8 @@ const NotificationsDashboard = () => {
               <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                 <BellIconSolid className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Total</h3>
+              <div className="ms-4">
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('stats.total')}</h3>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{notifications.length}</p>
               </div>
             </div>
@@ -735,8 +737,8 @@ const NotificationsDashboard = () => {
               <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
                 <ExclamationTriangleIconSolid className="w-6 h-6 text-orange-600 dark:text-orange-400" />
               </div>
-              <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Unread</h3>
+              <div className="ms-4">
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('stats.unread')}</h3>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{unreadCount}</p>
               </div>
             </div>
@@ -747,8 +749,8 @@ const NotificationsDashboard = () => {
               <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
                 <ExclamationTriangleIconSolid className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
-              <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Critical</h3>
+              <div className="ms-4">
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('stats.critical')}</h3>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {notifications.filter(n => n.priority === 'Critical' || n.priority === 'Emergency').length}
                 </p>
@@ -761,8 +763,8 @@ const NotificationsDashboard = () => {
               <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
                 <CheckCircleIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
-              <div className="ml-4">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Last 24h</h3>
+              <div className="ms-4">
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('stats.last24h')}</h3>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {stats.last24Hours || 0}
                 </p>
@@ -774,16 +776,16 @@ const NotificationsDashboard = () => {
 
       {/* Navigation Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="-mb-px flex space-x-8">
+        <nav className="-mb-px flex gap-8">
           {[
-            { id: 'all', label: 'All Notifications' },
-            { id: 'unread', label: 'Unread' },
-            { id: 'acknowledged', label: 'Acknowledged' }
+            { id: 'all', label: t('tabs.all') },
+            { id: 'unread', label: t('tabs.unread') },
+            { id: 'acknowledged', label: t('tabs.acknowledged') }
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center space-x-2 ${
+              className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center gap-2 ${
                 activeTab === tab.id
                   ? 'border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
@@ -808,7 +810,7 @@ const NotificationsDashboard = () => {
             <div className="flex-1">
               <Input
                 type="text"
-                placeholder="Search notifications by title, message, or type..."
+                placeholder={t('searchPlaceholder')}
                 value={searchInput}
                 onChange={(e) => handleSearch(e.target.value)}
                 icon={<MagnifyingGlassIcon className="w-5 h-5" />}
@@ -816,41 +818,41 @@ const NotificationsDashboard = () => {
             </div>
             
             {/* View Mode Toggle */}
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-500 dark:text-gray-400">View:</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500 dark:text-gray-400">{t('view')}</span>
               <Select
                 value={viewMode}
                 onChange={(e) => setViewMode(e.target.value)}
                 size="sm"
                 className="w-24"
               >
-                <option value="list">List</option>
-                <option value="cards">Cards</option>
+                <option value="list">{t('viewList')}</option>
+                <option value="cards">{t('viewCards')}</option>
               </Select>
             </div>
-            
+
             {/* Bulk Actions */}
             {hasSelectedNotifications && canAcknowledge && (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <Select
                   value={bulkAction}
                   onChange={(e) => setBulkAction(e.target.value)}
-                  placeholder="Bulk actions"
+                  placeholder={t('bulkActions.selectAction')}
                   size="sm"
                   className="w-40"
                 >
-                  <option value="">Select action...</option>
-                  <option value="markRead">Mark as Read</option>
-                  <option value="acknowledge">Acknowledge</option>
+                  <option value="">{t('bulkActions.selectAction')}</option>
+                  <option value="markRead">{t('bulkActions.markAsRead')}</option>
+                  <option value="acknowledge">{t('bulkActions.acknowledge')}</option>
                 </Select>
-                
+
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={handleBulkAction}
                   disabled={!bulkAction}
                 >
-                  Apply ({selectedNotifications.length})
+                  {t('bulkActions.apply', { count: selectedNotifications.length })}
                 </Button>
               </div>
             )}
@@ -867,43 +869,43 @@ const NotificationsDashboard = () => {
                 className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200"
               >
                 <Select
-                  label="Priority"
+                  label={t('filters_panel.priority')}
                   value=""
                   onChange={() => {}}
-                  placeholder="All Priorities"
+                  placeholder={t('filters_panel.allPriorities')}
                   size="sm"
                 >
-                  <option value="Emergency">Emergency</option>
-                  <option value="Critical">Critical</option>
-                  <option value="High">High</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Low">Low</option>
+                  <option value="Emergency">{t('priority.emergency')}</option>
+                  <option value="Critical">{t('priority.critical')}</option>
+                  <option value="High">{t('priority.high')}</option>
+                  <option value="Medium">{t('priority.medium')}</option>
+                  <option value="Low">{t('priority.low')}</option>
                 </Select>
 
                 <Select
-                  label="Type"
+                  label={t('filters_panel.type')}
                   value=""
                   onChange={() => {}}
-                  placeholder="All Types"
+                  placeholder={t('filters_panel.allTypes')}
                   size="sm"
                 >
-                  <option value="VisitorArrival">Visitor Arrival</option>
-                  <option value="VisitorCheckedIn">Visitor Check-in</option>
-                  <option value="VisitorOverstay">Visitor Overstay</option>
-                  <option value="SystemAlert">System Alert</option>
-                  <option value="SecurityAlert">Security Alert</option>
+                  <option value="VisitorArrival">{t('types.visitorArrival')}</option>
+                  <option value="VisitorCheckedIn">{t('types.visitorCheckedIn')}</option>
+                  <option value="VisitorOverstay">{t('types.visitorOverstay')}</option>
+                  <option value="SystemAlert">{t('types.systemAlert')}</option>
+                  <option value="SecurityAlert">{t('types.securityAlert')}</option>
                 </Select>
 
                 <Select
-                  label="Date Range"
+                  label={t('filters_panel.dateRange')}
                   value=""
                   onChange={() => {}}
-                  placeholder="All Time"
+                  placeholder={t('filters_panel.allTime')}
                   size="sm"
                 >
-                  <option value="today">Today</option>
-                  <option value="week">This Week</option>
-                  <option value="month">This Month</option>
+                  <option value="today">{t('filters_panel.today')}</option>
+                  <option value="week">{t('filters_panel.thisWeek')}</option>
+                  <option value="month">{t('filters_panel.thisMonth')}</option>
                 </Select>
 
                 <div className="flex items-end">
@@ -916,7 +918,7 @@ const NotificationsDashboard = () => {
                     }}
                     className="w-full"
                   >
-                    Clear Filters
+                    {t('filters_panel.clearFilters')}
                   </Button>
                 </div>
               </motion.div>
@@ -926,7 +928,7 @@ const NotificationsDashboard = () => {
           {/* Selection Controls */}
           {filteredNotifications.length > 0 && (
             <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-              <label className="flex items-center space-x-2 cursor-pointer">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={selectedNotifications.length === filteredNotifications.length}
@@ -934,21 +936,21 @@ const NotificationsDashboard = () => {
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-600">
-                  Select all ({filteredNotifications.length})
+                  {t('bulkActions.selectAll', { count: filteredNotifications.length })}
                 </span>
               </label>
-              
+
               {hasSelectedNotifications && (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">
-                    {selectedNotifications.length} selected
+                    {t('bulkActions.selected', { count: selectedNotifications.length })}
                   </span>
                   <Button
                     size="xs"
                     variant="ghost"
                     onClick={() => setSelectedNotifications([])}
                   >
-                    Clear selection
+                    {t('bulkActions.clearSelection')}
                   </Button>
                 </div>
               )}
@@ -960,7 +962,7 @@ const NotificationsDashboard = () => {
       {/* Error Display */}
       {error && (
         <Card className="p-4 border-red-200 bg-red-50">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <ExclamationTriangleIcon className="w-5 h-5 text-red-500" />
             <p className="text-sm text-red-700">{extractErrorMessage(error)}</p>
             <Button
@@ -968,7 +970,7 @@ const NotificationsDashboard = () => {
               variant="ghost"
               onClick={() => {/* Clear error if available */}}
             >
-              Dismiss
+              {t('card.dismiss')}
             </Button>
           </div>
         </Card>
@@ -980,20 +982,20 @@ const NotificationsDashboard = () => {
           <Card className="p-8">
             <div className="flex items-center justify-center">
               <LoadingSpinner size="lg" />
-              <span className="ml-3 text-gray-500">Loading notifications...</span>
+              <span className="ms-3 text-gray-500">{t('loading')}</span>
             </div>
           </Card>
         ) : filteredNotifications.length === 0 ? (
           <Card className="p-8">
             <EmptyState
               icon={BellIcon}
-              title="No notifications found"
+              title={t('noNotifications')}
               description={
-                searchInput 
-                  ? `No notifications match your search criteria "${searchInput}"` 
+                searchInput
+                  ? t('noNotificationsSearch', { search: searchInput })
                   : activeTab === 'unread'
-                    ? "You're all caught up! No unread notifications."
-                    : "No notifications to display"
+                    ? t('allCaughtUp')
+                    : t('noNotificationsDisplay')
               }
               action={
                 searchInput && (
@@ -1001,7 +1003,7 @@ const NotificationsDashboard = () => {
                     variant="outline"
                     onClick={() => handleSearch('')}
                   >
-                    Clear search
+                    {t('clearSearch')}
                   </Button>
                 )
               }
@@ -1033,38 +1035,35 @@ const NotificationsDashboard = () => {
               className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-start space-x-4">
+              <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
                   <ExclamationTriangleIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    Confirm Bulk Action
+                    {t('bulk.confirmTitle')}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    Are you sure you want to{' '}
-                    <strong>
-                      {bulkAction === 'markRead'
-                        ? 'mark as read'
-                        : bulkAction === 'acknowledge'
-                          ? 'acknowledge'
-                          : bulkAction}
-                    </strong>{' '}
-                    <strong>{selectedNotifications.length}</strong> notification{selectedNotifications.length !== 1 ? 's' : ''}?
+                    {t('bulk.confirmDesc', {
+                      action: bulkAction === 'markRead'
+                        ? t('bulk.actionMarkRead')
+                        : t('bulk.actionAcknowledge'),
+                      count: selectedNotifications.length,
+                    })}
                   </p>
 
-                  <div className="flex justify-end space-x-3">
+                  <div className="flex justify-end gap-3">
                     <Button
                       variant="outline"
                       onClick={() => setShowBulkConfirm(false)}
                     >
-                      Cancel
+                      {t('common:buttons.cancel')}
                     </Button>
                     <Button
                       variant="primary"
                       onClick={handleConfirmBulkAction}
                     >
-                      Confirm
+                      {t('bulk.confirm')}
                     </Button>
                   </div>
                 </div>
