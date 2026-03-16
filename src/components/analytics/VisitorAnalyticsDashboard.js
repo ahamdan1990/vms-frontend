@@ -1,5 +1,6 @@
 // src/components/analytics/VisitorAnalyticsDashboard.js
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
 // Services
@@ -38,6 +39,8 @@ import { extractErrorMessage } from '../../utils/errorUtils';
  * Includes real-time data, historical analysis, and predictive insights
  */
 const VisitorAnalyticsDashboard = () => {
+  const { t } = useTranslation(['analytics', 'common']);
+
   // State for analytics data
   const [analytics, setAnalytics] = useState({
     overview: {
@@ -442,7 +445,7 @@ const VisitorAnalyticsDashboard = () => {
       <Card className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-gray-600">Total Visitors</h3>
+            <h3 className="text-sm font-medium text-gray-600">{t('analytics:cards.totalVisitors')}</h3>
             <p className="text-2xl font-bold text-blue-600">{analytics.overview.totalVisitors}</p>
           </div>
           <UsersIcon className="w-8 h-8 text-blue-500" />
@@ -452,7 +455,7 @@ const VisitorAnalyticsDashboard = () => {
       <Card className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-gray-600">Total Invitations</h3>
+            <h3 className="text-sm font-medium text-gray-600">{t('analytics:cards.totalInvitations')}</h3>
             <p className="text-2xl font-bold text-green-600">{analytics.overview.totalInvitations}</p>
           </div>
           <CalendarIcon className="w-8 h-8 text-green-500" />
@@ -462,7 +465,7 @@ const VisitorAnalyticsDashboard = () => {
       <Card className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-gray-600">Avg Visit Duration</h3>
+            <h3 className="text-sm font-medium text-gray-600">{t('analytics:cards.avgVisitDuration')}</h3>
             <p className="text-2xl font-bold text-purple-600">{analytics.overview.averageVisitDuration}m</p>
           </div>
           <ClockIcon className="w-8 h-8 text-purple-500" />
@@ -472,7 +475,7 @@ const VisitorAnalyticsDashboard = () => {
       <Card className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-gray-600">Check-in Rate</h3>
+            <h3 className="text-sm font-medium text-gray-600">{t('analytics:cards.checkInRate')}</h3>
             <p className="text-2xl font-bold text-orange-600">{analytics.overview.checkInRate}%</p>
           </div>
           <ArrowTrendingUpIcon className="w-8 h-8 text-orange-500" />
@@ -482,7 +485,7 @@ const VisitorAnalyticsDashboard = () => {
       <Card className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-gray-600">No-show Rate</h3>
+            <h3 className="text-sm font-medium text-gray-600">{t('analytics:cards.noShowRate')}</h3>
             <p className="text-2xl font-bold text-red-600">{analytics.overview.noShowRate}%</p>
           </div>
           <ArrowTrendingDownIcon className="w-8 h-8 text-red-500" />
@@ -495,10 +498,10 @@ const VisitorAnalyticsDashboard = () => {
   const renderDateRangeSelector = () => (
     <div className="flex items-center justify-between mb-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Visitor Analytics</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('analytics:title')}</h1>
         {lastUpdated && (
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Last updated: {formatters.formatDateTime(lastUpdated)}
+            {t('analytics:labels.lastUpdated', { datetime: formatters.formatDateTime(lastUpdated) })}
           </p>
         )}
       </div>
@@ -532,7 +535,7 @@ const VisitorAnalyticsDashboard = () => {
           onClick={exportAnalytics}
           icon={<ArrowDownTrayIcon className="w-4 h-4" />}
         >
-          Export
+          {t('analytics:buttons.export')}
         </Button>
 
         <Button
@@ -541,7 +544,7 @@ const VisitorAnalyticsDashboard = () => {
           loading={loading}
           icon={<ChartBarIcon className="w-4 h-4" />}
         >
-          Refresh
+          {t('analytics:buttons.refresh')}
         </Button>
       </div>
     </div>
@@ -551,7 +554,7 @@ const VisitorAnalyticsDashboard = () => {
     return (
       <div className="flex items-center justify-center py-12">
         <LoadingSpinner size="lg" />
-        <span className="ms-3 text-gray-600 dark:text-gray-300">Loading analytics...</span>
+        <span className="ms-3 text-gray-600 dark:text-gray-300">{t('analytics:loading.analytics')}</span>
       </div>
     );
   }
@@ -575,7 +578,7 @@ const VisitorAnalyticsDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* Daily Visitor Trend */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Daily Visitor Trend</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t('analytics:sections.dailyVisitorTrend')}</h3>
           <div className="space-y-3">
             {analytics.trends.dailyVisitors.slice(-7).map(day => (
               <div key={day.date} className="flex items-center justify-between">
@@ -598,7 +601,7 @@ const VisitorAnalyticsDashboard = () => {
 
         {/* Popular Companies */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Companies</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t('analytics:sections.topCompanies')}</h3>
           <div className="space-y-3">
             {analytics.demographics.byCompany.slice(0, 6).map((company, index) => (
               <div key={company.company} className="flex items-center justify-between">
@@ -619,13 +622,13 @@ const VisitorAnalyticsDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Popular Hosts */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Hosts</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t('analytics:sections.topHosts')}</h3>
           <div className="space-y-3">
             {analytics.performance.popularHosts.slice(0, 5).map(host => (
               <div key={host.name} className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{host.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{host.invitations} invitations</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t('analytics:labels.invitationsCount', { count: host.invitations })}</p>
                 </div>
                 <Badge 
                   color={host.checkInRate >= 80 ? 'green' : host.checkInRate >= 60 ? 'yellow' : 'red'} 
@@ -640,7 +643,7 @@ const VisitorAnalyticsDashboard = () => {
 
         {/* Busy Locations */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Busy Locations</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t('analytics:sections.busyLocations')}</h3>
           <div className="space-y-3">
             {analytics.performance.busyLocations.map(location => (
               <div key={location.name} className="flex items-center justify-between">
@@ -656,7 +659,7 @@ const VisitorAnalyticsDashboard = () => {
 
         {/* Peak Times */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Peak Times</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t('analytics:sections.peakTimes')}</h3>
           <div className="space-y-3">
             {analytics.performance.peakTimes.map(time => (
               <div key={time.hour} className="flex items-center justify-between">

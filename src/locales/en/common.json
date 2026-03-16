@@ -113,5 +113,24 @@
     "error": "Error",
     "warning": "Warning",
     "info": "Information"
+  },
+  "footer": {
+    "copyright": "© {{year}} Visitor Management System. All rights reserved.",
+    "copyrightSal": "© {{year}} Visitor Management System. All rights reserved for Security Engineering SAL.",
+    "tagline": "Secure • Reliable • Professional",
+    "description": "Streamlined visitor management with advanced security features and real-time monitoring.",
+    "role": "Role:",
+    "quickLinks": "Quick Links",
+    "systemInfo": "System Info",
+    "version": "Version:",
+    "status": "Status:",
+    "online": "Online",
+    "lastUpdated": "Last Updated:",
+    "secureConnection": "Secure Connection",
+    "helpCenter": "Help Center",
+    "systemStatus": "System Status",
+    "reports": "Reports",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfUse": "Terms of Use"
   }
 }

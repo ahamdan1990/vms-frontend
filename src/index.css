@@ -441,28 +441,28 @@
   .toast-notification {
     @apply relative w-full max-w-sm rounded-lg shadow-lg pointer-events-auto overflow-hidden backdrop-blur-sm;
     @apply bg-white dark:bg-gray-800;
-    @apply border-r border-t border-b;
+    @apply border-e border-t border-b;
   }
-  
+
   .toast-notification.success {
-    @apply border-l-4 border-l-green-500 border-green-200 dark:border-green-600;
+    @apply border-s-4 border-s-green-500 border-green-200 dark:border-green-600;
   }
-  
+
   .toast-notification.error {
-    @apply border-l-4 border-l-red-500 border-red-200 dark:border-red-600;
+    @apply border-s-4 border-s-red-500 border-red-200 dark:border-red-600;
   }
-  
+
   .toast-notification.warning {
-    @apply border-l-4 border-l-yellow-500 border-yellow-200 dark:border-yellow-600;
+    @apply border-s-4 border-s-yellow-500 border-yellow-200 dark:border-yellow-600;
   }
-  
+
   .toast-notification.info {
-    @apply border-l-4 border-l-blue-500 border-blue-200 dark:border-blue-600;
+    @apply border-s-4 border-s-blue-500 border-blue-200 dark:border-blue-600;
   }
 
   /* Enhanced toast close button */
   .toast-close {
-    @apply ml-4 flex-shrink-0 inline-flex rounded-md p-1.5;
+    @apply ms-4 flex-shrink-0 inline-flex rounded-md p-1.5;
     @apply text-gray-400 hover:text-gray-500;
     @apply hover:bg-gray-100 dark:hover:bg-gray-700;
     @apply dark:text-gray-500 dark:hover:text-gray-400;
@@ -508,4 +508,79 @@
     transform: translateX(100%) scale(0.8);
     opacity: 0;
   }
+}
+
+/* RTL toast animations */
+[dir="rtl"] @keyframes toastSlideIn {
+  from {
+    transform: translateX(-100%) scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+[dir="rtl"] @keyframes toastSlideOut {
+  from {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   RTL Scroll Fixes
+   ============================================ */
+
+/* Ensure scrollable containers work in RTL mode */
+[dir="rtl"] .overflow-auto,
+[dir="rtl"] .overflow-y-auto,
+[dir="rtl"] .overflow-x-auto,
+[dir="rtl"] .custom-scrollbar,
+[dir="rtl"] .modal-scroll {
+  /* RTL browsers move scrollbar to left — this ensures content is accessible */
+  scrollbar-gutter: stable;
+}
+
+/* Tab list: allow horizontal scrolling in both directions */
+.tabs-container [role="tablist"] {
+  overflow-x: auto;
+  scrollbar-width: none; /* hide scrollbar, allow gesture scroll */
+  -ms-overflow-style: none;
+}
+
+.tabs-container [role="tablist"]::-webkit-scrollbar {
+  display: none;
+}
+
+/* Prevent RTL flip of scroll momentum on iOS */
+[dir="rtl"] * {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure flex row containers don't clip RTL content */
+[dir="rtl"] .flex-row {
+  flex-direction: row;
+}
+
+/* Fix reversed chevron icons for RTL navigation */
+[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+/* Table horizontal scroll in RTL */
+[dir="rtl"] .overflow-x-auto {
+  direction: rtl;
+}
+
+/* Keep table cell content in LTR where needed (numbers, dates, emails) */
+[dir="rtl"] table td.ltr-content,
+[dir="rtl"] table th.ltr-content {
+  direction: ltr;
+  text-align: right;
 }

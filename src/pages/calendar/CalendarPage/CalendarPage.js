@@ -1,5 +1,6 @@
 // src/pages/calendar/CalendarPage/CalendarPage.js
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { CalendarView } from '../../../components/calendar';
@@ -32,6 +33,7 @@ import timeSlotsService from '../../../services/timeSlotsService';
  * Calendar Page for visualizing and booking time slots
  */
 const CalendarPage = () => {
+  const { t } = useTranslation(['calendar', 'common']);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const toast = useToast();
@@ -128,7 +130,7 @@ const CalendarPage = () => {
 
   // Location options
   const locationOptions = [
-    { value: '', label: 'All Locations' },
+    { value: '', label: t('calendar:filters.allLocations') },
     ...locations.map(location => ({
       value: location.id.toString(),
       label: location.name
@@ -142,9 +144,9 @@ const CalendarPage = () => {
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-3">
             <CalendarDaysIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            <span>Calendar</span>
+            <span>{t('calendar:title')}</span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">View and book available time slots</p>
+          <p className="text-gray-600 dark:text-gray-300">{t('calendar:subtitle')}</p>
         </div>
 
         <div className="flex flex-wrap gap-3 justify-start lg:justify-end">
@@ -153,7 +155,7 @@ const CalendarPage = () => {
               variant="outline"
               onClick={handleManageTimeSlots}
             >
-              Manage Time Slots
+              {t('calendar:buttons.manageTimeSlots')}
             </Button>
           )}
           {canCreate && (
@@ -161,7 +163,7 @@ const CalendarPage = () => {
               onClick={() => navigate('/invitations/create')}
             >
               <PlusCircleIcon className="w-5 h-5 me-2" />
-              Create Invitation
+              {t('calendar:buttons.createInvitation')}
             </Button>
           )}
         </div>
@@ -172,7 +174,7 @@ const CalendarPage = () => {
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
             <label className="text-sm font-medium text-gray-700 dark:text-gray-200">
-              Filter by Location:
+              {t('calendar:filters.filterByLocation')}
             </label>
             <Select
               value={selectedLocationId?.toString() || ''}
@@ -185,7 +187,7 @@ const CalendarPage = () => {
           <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
             <div className="flex items-center gap-2">
               <ClockIcon className="w-5 h-5 text-gray-500 dark:text-gray-300" />
-              <span>{filteredTimeSlots.length} time slots available</span>
+              <span>{t('calendar:filters.timeSlotsAvailable', { count: filteredTimeSlots.length })}</span>
             </div>
           </div>
         </div>
@@ -209,7 +211,7 @@ const CalendarPage = () => {
       <Modal
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}
-        title="Book Time Slot"
+        title={t('calendar:modal.bookTimeSlot')}
         size="md"
       >
         {selectedTimeSlot && selectedDate && (
@@ -220,7 +222,7 @@ const CalendarPage = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <div className="text-gray-600 mb-1">Date</div>
+                  <div className="text-gray-600 mb-1">{t('calendar:modal.date')}</div>
                   <div className="font-medium text-gray-900">
                     {selectedDate.toLocaleDateString('en-US', {
                       weekday: 'long',
@@ -232,7 +234,7 @@ const CalendarPage = () => {
                 </div>
 
                 <div>
-                  <div className="text-gray-600 mb-1">Time</div>
+                  <div className="text-gray-600 mb-1">{t('calendar:modal.time')}</div>
                   <div className="font-medium text-gray-900 flex items-center gap-1">
                     <ClockIcon className="w-4 h-4" />
                     <span>
@@ -243,7 +245,7 @@ const CalendarPage = () => {
 
                 {selectedTimeSlot.locationName && (
                   <div>
-                    <div className="text-gray-600 mb-1">Location</div>
+                    <div className="text-gray-600 mb-1">{t('calendar:modal.location')}</div>
                     <div className="font-medium text-gray-900 flex items-center gap-1">
                       <MapPinIcon className="w-4 h-4" />
                       <span>{selectedTimeSlot.locationName}</span>
@@ -252,17 +254,17 @@ const CalendarPage = () => {
                 )}
 
                 <div>
-                  <div className="text-gray-600 mb-1">Capacity</div>
+                  <div className="text-gray-600 mb-1">{t('calendar:modal.capacity')}</div>
                   <div className="font-medium text-gray-900 flex items-center gap-1">
                     <UserGroupIcon className="w-4 h-4" />
-                    <span>{selectedTimeSlot.maxVisitors} visitors max</span>
+                    <span>{t('calendar:modal.visitorsMax', { count: selectedTimeSlot.maxVisitors })}</span>
                   </div>
                 </div>
               </div>
 
               {selectedTimeSlot.bufferMinutes > 0 && (
                 <div className="mt-3 pt-3 border-t border-blue-200 text-sm text-gray-600">
-                  <strong>Note:</strong> This time slot includes a {selectedTimeSlot.bufferMinutes}-minute buffer period
+                  {t('calendar:modal.bufferNote', { minutes: selectedTimeSlot.bufferMinutes })}
                 </div>
               )}
             </div>
@@ -273,18 +275,18 @@ const CalendarPage = () => {
                 variant="outline"
                 onClick={() => setShowBookingModal(false)}
               >
-                Cancel
+                {t('calendar:buttons.cancel')}
               </Button>
               <Button
                 onClick={handleCreateInvitation}
               >
-                Create Invitation for This Slot
+                {t('calendar:buttons.createInvitationForSlot')}
               </Button>
             </div>
 
             {/* Help Text */}
             <div className="text-sm text-gray-500 text-center">
-              You will be redirected to the invitation form with this time slot pre-selected
+              {t('calendar:modal.redirectHint')}
             </div>
           </div>
         )}

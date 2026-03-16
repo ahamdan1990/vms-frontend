@@ -1,0 +1,62 @@
+{
+  "title": "Visitor Analytics",
+  "unifiedTitle": "Unified Analytics",
+  "unifiedSubtitle": "Comprehensive visitor and capacity analytics • Last updated {{time}}",
+  "tabs": {
+    "overview": "Overview",
+    "visitors": "Visitor Analytics",
+    "capacity": "Capacity Monitor",
+    "insights": "Insights"
+  },
+  "buttons": {
+    "refresh": "Refresh",
+    "export": "Export"
+  },
+  "cards": {
+    "activeVisitors": "Active Visitors",
+    "activeVisitorsSubtitle": "Currently in building",
+    "todayVisitors": "Today's Visitors",
+    "todayVisitorsSubtitle": "Checked in today",
+    "capacityUtilization": "Capacity Utilization",
+    "avgVisitDuration": "Avg Visit Duration",
+    "avgVisitDurationSubtitle": "Average time spent",
+    "checkInRate": "Check-in Rate",
+    "checkInRateSubtitle": "Successful check-ins",
+    "availableSlots": "Available Slots",
+    "availableSlotsSubtitle": "Remaining capacity",
+    "totalVisitors": "Total Visitors",
+    "totalInvitations": "Total Invitations",
+    "noShowRate": "No-show Rate"
+  },
+  "trends": {
+    "vsLastWeek": "vs last week"
+  },
+  "insights": {
+    "peakHours": "Peak Hours",
+    "popularLocations": "Popular Locations",
+    "aiInsights": "AI-Powered Insights",
+    "peakBadge": "Peak",
+    "noPeakData": "No peak hour data available yet",
+    "noPeakDataHint": "Data will appear as visitors check in",
+    "noLocationData": "No location data available yet",
+    "noLocationDataHint": "Data will appear as invitations are created"
+  },
+  "sections": {
+    "dailyVisitorTrend": "Daily Visitor Trend",
+    "topCompanies": "Top Companies",
+    "topHosts": "Top Hosts",
+    "busyLocations": "Busy Locations",
+    "peakTimes": "Peak Times"
+  },
+  "labels": {
+    "lastUpdated": "Last updated: {{datetime}}",
+    "invitationsCount": "{{count}} invitations",
+    "minutesSuffix": "{{value}}m"
+  },
+  "loading": {
+    "analytics": "Loading analytics..."
+  },
+  "errors": {
+    "loadFailed": "Failed to load analytics data. Please try again."
+  }
+}

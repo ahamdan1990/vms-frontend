@@ -104,9 +104,9 @@ const Layout = ({ children, title, showFooter = true, className = '' }) => {
         <Header />
         
         {/* Main content */}
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 flex flex-col min-h-0">
           {pageLoading ? (
-            <div className="h-full flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
                 <p className="text-gray-600 dark:text-gray-400">{t('loading.page')}</p>
@@ -119,12 +119,10 @@ const Layout = ({ children, title, showFooter = true, className = '' }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="h-full"
+              className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar"
             >
-              <div className="h-full overflow-auto custom-scrollbar">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                  {children}
-                </div>
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                {children}
               </div>
             </motion.div>
           )}

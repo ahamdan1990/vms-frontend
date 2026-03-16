@@ -15,6 +15,9 @@ import enSystem from './locales/en/system.json';
 import enReports from './locales/en/reports.json';
 import enNotifications from './locales/en/notifications.json';
 import enErrors from './locales/en/errors.json';
+import enReceptionist from './locales/en/receptionist.json';
+import enAnalytics from './locales/en/analytics.json';
+import enCalendar from './locales/en/calendar.json';
 
 // Arabic namespaces
 import arCommon from './locales/ar/common.json';
@@ -29,6 +32,9 @@ import arSystem from './locales/ar/system.json';
 import arReports from './locales/ar/reports.json';
 import arNotifications from './locales/ar/notifications.json';
 import arErrors from './locales/ar/errors.json';
+import arReceptionist from './locales/ar/receptionist.json';
+import arAnalytics from './locales/ar/analytics.json';
+import arCalendar from './locales/ar/calendar.json';
 
 const LANGUAGE_KEY = 'vms_language_preference';
 
@@ -60,7 +66,10 @@ i18n
         system: enSystem,
         reports: enReports,
         notifications: enNotifications,
-        errors: enErrors
+        errors: enErrors,
+        receptionist: enReceptionist,
+        analytics: enAnalytics,
+        calendar: enCalendar
       },
       ar: {
         common: arCommon,
@@ -74,7 +83,10 @@ i18n
         system: arSystem,
         reports: arReports,
         notifications: arNotifications,
-        errors: arErrors
+        errors: arErrors,
+        receptionist: arReceptionist,
+        analytics: arAnalytics,
+        calendar: arCalendar
       }
     },
     lng: storedLang,
@@ -83,7 +95,8 @@ i18n
     ns: [
       'common', 'auth', 'navigation', 'invitations',
       'visitors', 'checkin', 'dashboard', 'users',
-      'system', 'reports', 'notifications', 'errors'
+      'system', 'reports', 'notifications', 'errors',
+      'receptionist', 'analytics', 'calendar'
     ],
     interpolation: {
       escapeValue: false // React already escapes values

@@ -1,6 +1,7 @@
 // src/pages/receptionist/ReceptionistDashboard.js
 import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Redux imports
@@ -96,6 +97,7 @@ import {
 const ReceptionistDashboard = () => {
   const dispatch = useDispatch();
   const toast = useToast();
+  const { t } = useTranslation(['receptionist', 'common']);
   const { isConnected, host, operator, security, admin } = useSignalR();
   const { emergency, report: reportPermissions } = usePermissions();
 
@@ -170,14 +172,14 @@ const ReceptionistDashboard = () => {
     if (current > 0 && canShowNotification) {
       // Show notification if there are overdue visitors and 15 minutes have passed
       toast.warning(
-        'Overdue Visitors',
-        `${current} visitor${current === 1 ? '' : 's'} have exceeded their scheduled checkout time.`,
+        t('receptionist:notifications.overdueTitle'),
+        t('receptionist:notifications.overdueMessage', { count: current }),
         { duration: 7000 }
       );
       lastOverdueNotificationTime.current = now;
     } else if (current === 0 && previous > 0) {
       // Always show the "cleared" notification when all overdue visitors check out
-      toast.success('Overdue Cleared', 'All overdue visitors have checked out.', { duration: 4000 });
+      toast.success(t('receptionist:notifications.overdueCleared'), t('receptionist:notifications.overdueClearedDesc'), { duration: 4000 });
       lastOverdueNotificationTime.current = null; // Reset timer when cleared
     }
 
@@ -231,13 +233,13 @@ const ReceptionistDashboard = () => {
     try {
       await reportService.exportInBuildingReport();
       toast.success(
-        'Report Downloaded',
-        'The in-building report has been downloaded successfully.',
+        t('receptionist:toasts.reportDownloaded'),
+        t('receptionist:toasts.reportDownloadedDesc'),
         { duration: 5000 }
       );
     } catch (error) {
-      const errorMessage = extractErrorMessage(error) || 'Unable to export the report right now.';
-      toast.error('Export Failed', errorMessage, { duration: 6000 });
+      const errorMessage = extractErrorMessage(error) || t('receptionist:toasts.unableToExport');
+      toast.error(t('receptionist:toasts.exportFailed'), errorMessage, { duration: 6000 });
     } finally {
       setExportingReport(false);
     }
@@ -293,9 +295,9 @@ const ReceptionistDashboard = () => {
 
         // Show toast notification
         if (eventType === 'visitor-checked-in') {
-          toast.success(`Visitor ${data.visitorName} checked in`);
+          toast.success(t('receptionist:notifications.visitorCheckedIn', { name: data.visitorName }));
         } else {
-          toast.info(`Visitor ${data.visitorName} checked out`);
+          toast.info(t('receptionist:notifications.visitorCheckedOut', { name: data.visitorName }));
         }
       }
     });
@@ -314,16 +316,16 @@ const ReceptionistDashboard = () => {
         console.log('Face detection service is disabled/unavailable, skipping validation');
 
         toast.success(
-          'Photo Accepted',
-          validationResult.message || 'Face detection is currently unavailable. Proceeding without validation.',
+          t('receptionist:toasts.photoAccepted'),
+          validationResult.message || t('receptionist:toasts.faceDetectionUnavailable'),
           { duration: 3000 }
         );
 
         // Continue the flow without blocking
       } else if (!validationResult.faceDetected) {
         toast.error(
-          'No Face Detected',
-          validationResult.message || 'No face was detected in the captured photo. Please retake the photo with a clearly visible face.',
+          t('receptionist:toasts.noFaceDetected'),
+          validationResult.message || t('receptionist:toasts.noFaceDetectedDesc'),
           { duration: 6000 }
         );
         return;
@@ -343,8 +345,8 @@ const ReceptionistDashboard = () => {
           // Known visitor recognized!
           console.log('Returning visitor recognized:', recognizedVisitorData);
           toast.success(
-            'Returning Visitor Recognized!',
-            `Welcome back, ${recognizedVisitorData.fullName}! Your information has been pre-filled.`,
+            t('receptionist:toasts.returningVisitor'),
+            t('receptionist:toasts.returningVisitorDesc', { name: recognizedVisitorData.fullName }),
             { duration: 5000 }
           );
           setRecognizedVisitor(recognizedVisitorData);
@@ -352,8 +354,8 @@ const ReceptionistDashboard = () => {
           // New visitor
           console.log('No matching visitor found - new visitor');
           toast.success(
-            'Face Detected',
-            'Face detected successfully! Proceeding to registration form.',
+            t('receptionist:toasts.faceDetected'),
+            t('receptionist:toasts.faceDetectedDesc'),
             { duration: 3000 }
           );
           setRecognizedVisitor(null);
@@ -362,8 +364,8 @@ const ReceptionistDashboard = () => {
         // Face recognition failed or unavailable - proceed as new visitor
         console.warn('Face recognition search failed:', searchError);
         toast.success(
-          'Face Detected',
-          'Face detected successfully! Proceeding to registration form.',
+          t('receptionist:toasts.faceDetected'),
+          t('receptionist:toasts.faceDetectedDesc'),
           { duration: 3000 }
         );
         setRecognizedVisitor(null);
@@ -381,8 +383,8 @@ const ReceptionistDashboard = () => {
                           'Failed to validate the photo.';
 
       toast.error(
-        'Validation Failed',
-        errorMessage + ' Please try again.',
+        t('receptionist:toasts.validationFailed'),
+        errorMessage + t('receptionist:toasts.validationFailedSuffix'),
         { duration: 6000 }
       );
 
@@ -442,35 +444,35 @@ const ReceptionistDashboard = () => {
             switch (photoResult.warningType) {
               case 'ServiceError':
                 toast.error(
-                  'Face Recognition Service Error',
+                  t('receptionist:toasts.faceRecognitionError'),
                   photoResult.warningMessage,
                   { duration: 10000 }
                 );
                 break;
               case 'PartialSuccess':
                 toast.warning(
-                  'Partial Success',
+                  t('receptionist:toasts.partialSuccess'),
                   photoResult.warningMessage,
                   { duration: 7000 }
                 );
                 break;
               case 'ServiceUnavailable':
                 toast.info(
-                  'Face Detection Unavailable',
+                  t('receptionist:toasts.faceDetectionUnavailableTitle'),
                   photoResult.warningMessage,
                   { duration: 6000 }
                 );
                 break;
               default:
                 if (photoResult.warningMessage) {
-                  toast.warning('Photo Upload Warning', photoResult.warningMessage, { duration: 6000 });
+                  toast.warning(t('receptionist:toasts.photoUploadWarning'), photoResult.warningMessage, { duration: 6000 });
                 }
             }
           } else if (photoResult && photoResult.faceDetected && photoResult.faceRecognitionEnabled) {
             // Success case - face detected and recognition enabled
             toast.success(
-              'Photo Uploaded',
-              'Face detected successfully. Face recognition is enabled for this visitor.',
+              t('receptionist:toasts.photoUploaded'),
+              t('receptionist:toasts.photoUploadedDesc'),
               { duration: 4000 }
             );
           }
@@ -486,8 +488,8 @@ const ReceptionistDashboard = () => {
           // Note: "No face detected" errors should NOT happen here since we validate
           // the photo before accepting it. This is just a safety net.
           toast.error(
-            'Photo Upload Failed',
-            errorMessage + ' The visitor was created but without a photo.',
+            t('receptionist:toasts.photoUploadFailed'),
+            errorMessage + t('receptionist:toasts.photoUploadFailedDesc'),
             { duration: 8000 }
           );
           // Continue with registration - photo was already validated, this is likely a different error
@@ -560,8 +562,8 @@ const ReceptionistDashboard = () => {
         console.error('Check-in failed:', checkInError);
         // Still show success - visitor and invitation created
         toast.warning(
-          'Check-in Requires Approval',
-          'Visitor registered successfully but requires approval before check-in.',
+          t('receptionist:toasts.checkInRequiresApproval'),
+          t('receptionist:toasts.checkInRequiresApprovalDesc'),
           { duration: 6000 }
         );
       }
@@ -570,13 +572,17 @@ const ReceptionistDashboard = () => {
       const visitorName = `${visitor.firstName} ${visitor.lastName}`;
 
       toast.success(
-        'Walk-in Successful',
-        `${visitorName} has been ${checkInResult ? 'checked in' : 'registered'} successfully. Host ${visitData.hostName} has been notified.`,
+        t('receptionist:toasts.walkInSuccessful'),
+        t('receptionist:toasts.walkInSuccessDesc', {
+          name: visitorName,
+          action: checkInResult ? t('receptionist:toasts.checkedIn') : t('receptionist:toasts.registered'),
+          host: visitData.hostName
+        }),
         {
           duration: 8000,
           actions: [
             {
-              label: 'Print Badge',
+              label: t('receptionist:toasts.printBadge'),
               onClick: () => {
                 window.open(
                   `/print/badge/${invitation.id}`,
@@ -608,7 +614,7 @@ const ReceptionistDashboard = () => {
     } catch (error) {
       const errorMessage = extractErrorMessage(error);
       setWalkInError(errorMessage);
-      toast.error('Walk-in Failed', errorMessage, { duration: 6000 });
+      toast.error(t('receptionist:toasts.walkInFailed'), errorMessage, { duration: 6000 });
       throw error;
     } finally {
       setWalkInLoading(false);
@@ -632,8 +638,8 @@ const ReceptionistDashboard = () => {
         })).unwrap();
 
         toast.success(
-          'Check-in Successful',
-          `${result?.visitor?.fullName || 'Visitor'} has been checked in successfully.`,
+          t('receptionist:toasts.checkInSuccessful'),
+          t('receptionist:toasts.checkInSuccessDesc', { name: result?.visitor?.fullName || 'Visitor' }),
           { duration: 5000 }
         );
 
@@ -730,8 +736,8 @@ const ReceptionistDashboard = () => {
       setInvitationDetailsError(null);
 
       toast.success(
-        'Check-in Successful',
-        `${result?.visitor?.fullName || 'Visitor'} has been checked in successfully.`,
+        t('receptionist:toasts.checkInSuccessful'),
+        t('receptionist:toasts.checkInSuccessDesc', { name: result?.visitor?.fullName || 'Visitor' }),
         { duration: 5000 }
       );
 
@@ -741,7 +747,7 @@ const ReceptionistDashboard = () => {
     } catch (error) {
       console.error('Confirmed check-in failed:', error);
       const errorMessage = extractErrorMessage(error);
-      toast.error('Check-in Failed', errorMessage, { duration: 6000 });
+      toast.error(t('receptionist:toasts.checkInFailed'), errorMessage, { duration: 6000 });
     }
   };
 
@@ -752,11 +758,11 @@ const ReceptionistDashboard = () => {
         notes: 'Quick check-in by receptionist'
       })).unwrap();
 
-      toast.success('Check-in Successful', 'Visitor checked in successfully');
+      toast.success(t('receptionist:toasts.checkInSuccessful'), t('receptionist:toasts.checkInSuccessDesc', { name: 'Visitor' }));
       loadDashboardData();
       dispatch(getActiveInvitations());
     } catch (error) {
-      toast.error('Check-in Failed', extractErrorMessage(error));
+      toast.error(t('receptionist:toasts.checkInFailed'), extractErrorMessage(error));
     }
   };
 
@@ -768,13 +774,13 @@ const ReceptionistDashboard = () => {
         notes: 'Manual check-out by receptionist'
       })).unwrap();
 
-      toast.success('Check-out Successful', 'Visitor has been checked out successfully.');
+      toast.success(t('receptionist:toasts.checkOutSuccessful'), t('receptionist:toasts.checkOutSuccessDesc'));
 
       loadDashboardData();
       dispatch(getActiveInvitations());
     } catch (error) {
       console.error('Check-out failed:', error);
-      toast.error('Check-out Failed', extractErrorMessage(error));
+      toast.error(t('receptionist:toasts.checkOutFailed'), extractErrorMessage(error));
     }
   };
 
@@ -909,7 +915,7 @@ const ReceptionistDashboard = () => {
           onClick={() => handleToggleVisitorDetails(invitation.visitor?.id)}
           icon={<EyeIcon className="w-4 h-4" />}
         >
-          Details
+          {t('receptionist:activeVisitors.details')}
         </Button>
         {canCheckIn && (
           <Button
@@ -918,7 +924,7 @@ const ReceptionistDashboard = () => {
             onClick={() => handleQuickCheckIn(invitation)}
             icon={<ArrowRightOnRectangleIcon className="w-4 h-4" />}
           >
-            Check In
+            {t('receptionist:activeVisitors.checkIn')}
           </Button>
         )}
         {isCheckedIn && (
@@ -928,7 +934,7 @@ const ReceptionistDashboard = () => {
             onClick={() => handleCheckOut(invitation.id)}
             icon={<ArrowLeftOnRectangleIcon className="w-4 h-4" />}
           >
-            Check Out
+            {t('receptionist:activeVisitors.checkOut')}
           </Button>
         )}
       </div>

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../../store/slices/uiSlice';
@@ -13,6 +14,7 @@ import Button from '../../../components/common/Button/Button';
 const ChangePasswordPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { t } = useTranslation('auth');
   const { changePassword, user, userRole, loading } = useAuth();
   
   const [formData, setFormData] = useState({
@@ -28,17 +30,17 @@ const ChangePasswordPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
-    dispatch(setPageTitle('Change Password'));
-  }, [dispatch]);
+    dispatch(setPageTitle(t('changePassword.title')));
+  }, [dispatch, t]);
 
   // Password validation rules
   const validatePassword = (password) => {
     const errors = [];
-    if (password.length < 8) errors.push('At least 8 characters');
-    if (!/[A-Z]/.test(password)) errors.push('One uppercase letter');
-    if (!/[a-z]/.test(password)) errors.push('One lowercase letter');
-    if (!/[0-9]/.test(password)) errors.push('One number');
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) errors.push('One special character');
+    if (password.length < 8) errors.push(t('changePassword.req8chars'));
+    if (!/[A-Z]/.test(password)) errors.push(t('changePassword.reqUppercase'));
+    if (!/[a-z]/.test(password)) errors.push(t('changePassword.reqLowercase'));
+    if (!/[0-9]/.test(password)) errors.push(t('changePassword.reqNumber'));
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) errors.push(t('changePassword.reqSpecial'));
     return errors;
   };
 
@@ -63,12 +65,12 @@ const ChangePasswordPage = () => {
 
     // Current password validation
     if (!formData.currentPassword) {
-      errors.currentPassword = 'Current password is required';
+      errors.currentPassword = t('validation.currentPasswordRequired');
     }
 
     // New password validation
     if (!formData.newPassword) {
-      errors.newPassword = 'New password is required';
+      errors.newPassword = t('validation.newPasswordRequired');
     } else {
       const passwordErrors = validatePassword(formData.newPassword);
       if (passwordErrors.length > 0) {
@@ -78,15 +80,15 @@ const ChangePasswordPage = () => {
 
     // Confirm password validation
     if (!formData.confirmPassword) {
-      errors.confirmPassword = 'Please confirm your new password';
+      errors.confirmPassword = t('validation.confirmNewPasswordRequired');
     } else if (formData.newPassword !== formData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
+      errors.confirmPassword = t('validation.passwordsDoNotMatch');
     }
 
     // Check if new password is same as current
-    if (formData.currentPassword && formData.newPassword && 
+    if (formData.currentPassword && formData.newPassword &&
         formData.currentPassword === formData.newPassword) {
-      errors.newPassword = 'New password must be different from current password';
+      errors.newPassword = t('validation.newPasswordSameAsCurrent');
     }
 
     setFormErrors(errors);
@@ -117,14 +119,14 @@ const ChangePasswordPage = () => {
         navigate(dashboardPath, { replace: true });
       } else {
         // Handle API errors
-        const errorMessage = result.payload?.errorMessage || 
-                           result.error?.message || 
-                           'Failed to change password';
+        const errorMessage = result.payload?.errorMessage ||
+                           result.error?.message ||
+                           t('validation.unexpectedError');
         setFormErrors({ submit: errorMessage });
       }
     } catch (error) {
       console.error('Password change error:', error);
-      setFormErrors({ submit: 'An unexpected error occurred. Please try again.' });
+      setFormErrors({ submit: t('validation.unexpectedError') });
     } finally {
       setIsSubmitting(false);
     }
@@ -172,9 +174,9 @@ const ChangePasswordPage = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 1.732a2 2 0 0 1-1.732-1v-3.464a2 2 0 0 1 .732-1.536l7-5.732a2 2 0 0 1 2.532 0l7 5.732a2 2 0 0 1 .732 1.536V16a2 2 0 0 1-1.732 1" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Password Change Required</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('changePassword.pageTitle')}</h1>
           <p className="text-gray-600 dark:text-gray-300">
-            For security reasons, you must change your password before continuing.
+            {t('changePassword.subtitle')}
           </p>
         </div>
 
@@ -183,7 +185,7 @@ const ChangePasswordPage = () => {
           {/* Current Password */}
           <div>
             <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-              Current Password
+              {t('changePassword.currentPassword')}
             </label>
             <div className="relative">
               <input
@@ -195,7 +197,7 @@ const ChangePasswordPage = () => {
                 className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors ${
                   formErrors.currentPassword ? 'border-red-300 dark:border-red-500' : 'border-gray-300 dark:border-gray-700'
                 }`}
-                placeholder="Enter your current password"
+                placeholder={t('changePassword.currentPasswordPlaceholder')}
                 disabled={isSubmitting}
               />
               <button
@@ -220,7 +222,7 @@ const ChangePasswordPage = () => {
           {/* New Password */}
           <div>
             <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-              New Password
+              {t('changePassword.newPassword')}
             </label>
             <div className="relative">
               <input
@@ -232,7 +234,7 @@ const ChangePasswordPage = () => {
                 className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors ${
                   formErrors.newPassword ? 'border-red-300 dark:border-red-500' : 'border-gray-300 dark:border-gray-700'
                 }`}
-                placeholder="Enter your new password"
+                placeholder={t('changePassword.newPasswordPlaceholder')}
                 disabled={isSubmitting}
               />
               <button
@@ -255,13 +257,13 @@ const ChangePasswordPage = () => {
             
             {/* Password Requirements */}
             <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-              <p>Password must contain:</p>
+              <p>{t('changePassword.requirementsTitle')}</p>
               <ul className="list-disc list-inside mt-1 space-y-0.5">
-                <li>At least 8 characters</li>
-                <li>One uppercase letter</li>
-                <li>One lowercase letter</li>
-                <li>One number</li>
-                <li>One special character</li>
+                <li>{t('changePassword.req8chars')}</li>
+                <li>{t('changePassword.reqUppercase')}</li>
+                <li>{t('changePassword.reqLowercase')}</li>
+                <li>{t('changePassword.reqNumber')}</li>
+                <li>{t('changePassword.reqSpecial')}</li>
               </ul>
             </div>
           </div>

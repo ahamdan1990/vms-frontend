@@ -1,0 +1,41 @@
+{
+  "title": "التقويم",
+  "subtitle": "عرض وحجز الفترات الزمنية المتاحة",
+  "buttons": {
+    "today": "اليوم",
+    "week": "أسبوع",
+    "day": "يوم",
+    "manageTimeSlots": "إدارة الفترات الزمنية",
+    "createInvitation": "إنشاء دعوة",
+    "createInvitationForSlot": "إنشاء دعوة لهذه الفترة",
+    "cancel": "إلغاء"
+  },
+  "filters": {
+    "filterByLocation": "التصفية حسب الموقع:",
+    "allLocations": "جميع المواقع",
+    "timeSlotsAvailable": "{{count}} فترة زمنية متاحة"
+  },
+  "modal": {
+    "bookTimeSlot": "حجز فترة زمنية",
+    "date": "التاريخ",
+    "time": "الوقت",
+    "location": "الموقع",
+    "capacity": "الطاقة الاستيعابية",
+    "visitorsMax": "{{count}} زائر كحد أقصى",
+    "bufferNote": "ملاحظة: تتضمن هذه الفترة الزمنية فترة انتظار مدتها {{minutes}} دقيقة",
+    "redirectHint": "سيتم توجيهك إلى نموذج الدعوة مع تحديد هذه الفترة الزمنية مسبقًا"
+  },
+  "availability": {
+    "available": "متاح",
+    "limited": "محدود",
+    "full": "ممتلئ",
+    "noSlots": "لا توجد فترات"
+  },
+  "dayView": {
+    "noSlotsTitle": "لا توجد فترات زمنية متاحة",
+    "noSlotsMessage": "لا توجد فترات زمنية مُهيَّأة لهذا التاريخ."
+  },
+  "labels": {
+    "today": "اليوم"
+  }
+}

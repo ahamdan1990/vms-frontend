@@ -1,0 +1,62 @@
+{
+  "title": "تحليلات الزوار",
+  "unifiedTitle": "التحليلات الموحدة",
+  "unifiedSubtitle": "تحليلات شاملة للزوار والطاقة الاستيعابية • آخر تحديث {{time}}",
+  "tabs": {
+    "overview": "نظرة عامة",
+    "visitors": "تحليلات الزوار",
+    "capacity": "مراقبة الطاقة الاستيعابية",
+    "insights": "الرؤى التحليلية"
+  },
+  "buttons": {
+    "refresh": "تحديث",
+    "export": "تصدير"
+  },
+  "cards": {
+    "activeVisitors": "الزوار النشطون",
+    "activeVisitorsSubtitle": "حاليًا في المبنى",
+    "todayVisitors": "زوار اليوم",
+    "todayVisitorsSubtitle": "تم تسجيل الدخول اليوم",
+    "capacityUtilization": "نسبة الإشغال",
+    "avgVisitDuration": "متوسط مدة الزيارة",
+    "avgVisitDurationSubtitle": "متوسط الوقت المستغرق",
+    "checkInRate": "معدل تسجيل الدخول",
+    "checkInRateSubtitle": "عمليات تسجيل الدخول الناجحة",
+    "availableSlots": "الفترات المتاحة",
+    "availableSlotsSubtitle": "الطاقة الاستيعابية المتبقية",
+    "totalVisitors": "إجمالي الزوار",
+    "totalInvitations": "إجمالي الدعوات",
+    "noShowRate": "معدل الغياب"
+  },
+  "trends": {
+    "vsLastWeek": "مقارنةً بالأسبوع الماضي"
+  },
+  "insights": {
+    "peakHours": "ساعات الذروة",
+    "popularLocations": "المواقع الشائعة",
+    "aiInsights": "رؤى مدعومة بالذكاء الاصطناعي",
+    "peakBadge": "ذروة",
+    "noPeakData": "لا تتوفر بيانات ساعات الذروة بعد",
+    "noPeakDataHint": "ستظهر البيانات عند تسجيل دخول الزوار",
+    "noLocationData": "لا تتوفر بيانات المواقع بعد",
+    "noLocationDataHint": "ستظهر البيانات عند إنشاء الدعوات"
+  },
+  "sections": {
+    "dailyVisitorTrend": "اتجاه الزوار اليومي",
+    "topCompanies": "أبرز الشركات",
+    "topHosts": "أبرز المضيفين",
+    "busyLocations": "المواقع الأكثر ازدحامًا",
+    "peakTimes": "أوقات الذروة"
+  },
+  "labels": {
+    "lastUpdated": "آخر تحديث: {{datetime}}",
+    "invitationsCount": "{{count}} دعوة",
+    "minutesSuffix": "{{value}} د"
+  },
+  "loading": {
+    "analytics": "جارٍ تحميل التحليلات..."
+  },
+  "errors": {
+    "loadFailed": "فشل تحميل بيانات التحليلات. يرجى المحاولة مرة أخرى."
+  }
+}

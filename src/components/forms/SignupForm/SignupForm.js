@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import Input from '../../common/Input/Input';
 import Button from '../../common/Button/Button';
 import PropTypes from 'prop-types';
@@ -16,6 +17,7 @@ const SignupForm = ({
   error = null,
   className = ''
 }) => {
+  const { t } = useTranslation('auth');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -32,39 +34,39 @@ const SignupForm = ({
 
     // First Name validation
     if (!formData.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
+      newErrors.firstName = t('validation.firstNameRequired');
     } else if (formData.firstName.trim().length < 2) {
-      newErrors.firstName = 'First name must be at least 2 characters';
+      newErrors.firstName = t('validation.firstNameMin');
     }
 
     // Last Name validation
     if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
+      newErrors.lastName = t('validation.lastNameRequired');
     } else if (formData.lastName.trim().length < 2) {
-      newErrors.lastName = 'Last name must be at least 2 characters';
+      newErrors.lastName = t('validation.lastNameMin');
     }
 
     // Email validation
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('validation.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = t('validation.emailInvalid');
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = t('validation.passwordRequired');
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = t('validation.passwordMin');
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = 'Password must contain uppercase, lowercase, and number';
+      newErrors.password = t('validation.passwordComplexity');
     }
 
     // Confirm Password validation
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = t('validation.confirmPasswordRequired');
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = t('validation.passwordsDoNotMatch');
     }
 
     return newErrors;
@@ -135,8 +137,8 @@ const SignupForm = ({
             animate={{ scale: 1 }}
             transition={{ delay: 0.1, duration: 0.3 }}
           >
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
-            <p className="text-gray-600">Join the Visitor Management System</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">{t('signup.createAccount')}</h2>
+            <p className="text-gray-600">{t('signup.subtitle')}</p>
           </motion.div>
         </div>
 
@@ -166,8 +168,8 @@ const SignupForm = ({
             <Input
               type="text"
               name="firstName"
-              label="First Name"
-              placeholder="John"
+              label={t('signup.firstName')}
+              placeholder={t('signup.firstNamePlaceholder')}
               value={formData.firstName}
               onChange={handleChange}
               error={errors.firstName}
@@ -189,8 +191,8 @@ const SignupForm = ({
             <Input
               type="text"
               name="lastName"
-              label="Last Name"
-              placeholder="Doe"
+              label={t('signup.lastName')}
+              placeholder={t('signup.lastNamePlaceholder')}
               value={formData.lastName}
               onChange={handleChange}
               error={errors.lastName}
@@ -214,8 +216,8 @@ const SignupForm = ({
           <Input
             type="email"
             name="email"
-            label="Email Address"
-            placeholder="john.doe@example.com"
+            label={t('signup.email')}
+            placeholder={t('signup.emailPlaceholder')}
             value={formData.email}
             onChange={handleChange}
             error={errors.email}
@@ -238,8 +240,8 @@ const SignupForm = ({
           <Input
             type="password"
             name="password"
-            label="Password"
-            placeholder="Create a strong password"
+            label={t('signup.password')}
+            placeholder={t('signup.passwordPlaceholder')}
             value={formData.password}
             onChange={handleChange}
             error={errors.password}
@@ -253,7 +255,7 @@ const SignupForm = ({
             }
           />
           <p className="mt-1 text-xs text-gray-500">
-            Must be at least 8 characters with uppercase, lowercase, and number
+            {t('signup.passwordHint')}
           </p>
         </motion.div>
 
@@ -266,8 +268,8 @@ const SignupForm = ({
           <Input
             type="password"
             name="confirmPassword"
-            label="Confirm Password"
-            placeholder="Re-enter your password"
+            label={t('signup.confirmPassword')}
+            placeholder={t('signup.confirmPasswordPlaceholder')}
             value={formData.confirmPassword}
             onChange={handleChange}
             error={errors.confirmPassword}
@@ -297,7 +299,7 @@ const SignupForm = ({
             disabled={!isFormValid || isLoading}
             className="transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            {isLoading ? 'Creating Account...' : 'Create Account'}
+            {isLoading ? t('signup.creatingAccount') : t('signup.createAccount')}
           </Button>
         </motion.div>
 
@@ -309,12 +311,12 @@ const SignupForm = ({
           className="text-center"
         >
           <p className="text-sm text-gray-600">
-            Already have an account?{' '}
+            {t('signup.alreadyHaveAccount')}{' '}
             <Link
               to="/login"
               className="text-blue-600 hover:text-blue-500 font-medium transition-colors hover:underline"
             >
-              Sign in
+              {t('signup.signIn')}
             </Link>
           </p>
         </motion.div>
@@ -330,7 +332,7 @@ const SignupForm = ({
             <svg className="w-4 h-4 text-green-500 me-1" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
             </svg>
-            Your information is secure and encrypted
+            {t('signup.secureEncryption')}
           </p>
         </motion.div>
       </form>

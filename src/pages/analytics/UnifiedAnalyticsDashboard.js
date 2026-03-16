@@ -8,6 +8,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // Design System
 import { TEXT_STYLES } from '../../constants/typography';
@@ -48,6 +49,8 @@ import formatters from '../../utils/formatters';
 import { debounce } from '../../utils/asyncHelpers';
 
 const UnifiedAnalyticsDashboard = () => {
+  const { t } = useTranslation(['analytics', 'common']);
+
   // Navigation state
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
@@ -107,19 +110,19 @@ const UnifiedAnalyticsDashboard = () => {
   const navigationItems = useMemo(() => [
     {
       id: 'overview',
-      label: 'Overview',
+      label: t('analytics:tabs.overview'),
       icon: <ChartBarIcon className="w-5 h-5" />,
       badge: analytics.overview.activeVisitors > 0 ? analytics.overview.activeVisitors : null
     },
     {
       id: 'visitors',
-      label: 'Visitor Analytics', 
+      label: t('analytics:tabs.visitors'),
       icon: <UsersIcon className="w-5 h-5" />,
       badge: analytics.overview.todayVisitors
     },
     {
       id: 'capacity',
-      label: 'Capacity Monitor',
+      label: t('analytics:tabs.capacity'),
       icon: <ChartPieIcon className="w-5 h-5" />,
       badge: `${typeof analytics.overview.utilizationRate === 'number' && !isNaN(analytics.overview.utilizationRate)
         ? analytics.overview.utilizationRate
@@ -127,7 +130,7 @@ const UnifiedAnalyticsDashboard = () => {
     },
     {
       id: 'insights',
-      label: 'Insights',
+      label: t('analytics:tabs.insights'),
       icon: <EyeIcon className="w-5 h-5" />,
       badge: analytics.insights.recommendations.length
     }
@@ -165,7 +168,7 @@ const UnifiedAnalyticsDashboard = () => {
       setLastUpdated(realTimeLastUpdated || new Date());
     } catch (error) {
       console.error('Failed to load analytics data:', error);
-      setError('Failed to load analytics data. Please try again.');
+      setError(t('analytics:errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -232,27 +235,27 @@ const UnifiedAnalyticsDashboard = () => {
   const renderOverviewCards = () => {
     const cards = [
       {
-        title: 'Active Visitors',
+        title: t('analytics:cards.activeVisitors'),
         value: typeof analytics.overview.activeVisitors === 'number' && !isNaN(analytics.overview.activeVisitors)
           ? analytics.overview.activeVisitors
           : 0,
-        subtitle: 'Currently in building',
+        subtitle: t('analytics:cards.activeVisitorsSubtitle'),
         icon: <UsersIcon className="w-8 h-8 text-blue-500" />,
         trend: analytics.overview.visitorTrend,
         color: 'blue'
       },
       {
-        title: 'Today\'s Visitors',
+        title: t('analytics:cards.todayVisitors'),
         value: typeof analytics.overview.todayVisitors === 'number' && !isNaN(analytics.overview.todayVisitors)
           ? analytics.overview.todayVisitors
           : 0,
-        subtitle: 'Checked in today',
+        subtitle: t('analytics:cards.todayVisitorsSubtitle'),
         icon: <CalendarDaysIcon className="w-8 h-8 text-green-500" />,
         trend: 0, // Will be calculated from historical data when available
         color: 'green'
       },
       {
-        title: 'Capacity Utilization',
+        title: t('analytics:cards.capacityUtilization'),
         value: `${typeof analytics.overview.utilizationRate === 'number' && !isNaN(analytics.overview.utilizationRate)
           ? analytics.overview.utilizationRate
           : 0}%`,
@@ -262,31 +265,31 @@ const UnifiedAnalyticsDashboard = () => {
         color: 'purple'
       },
       {
-        title: 'Avg Visit Duration',
+        title: t('analytics:cards.avgVisitDuration'),
         value: `${typeof analytics.overview.avgVisitDuration === 'number' && !isNaN(analytics.overview.avgVisitDuration)
           ? analytics.overview.avgVisitDuration
           : 0}m`,
-        subtitle: 'Average time spent',
+        subtitle: t('analytics:cards.avgVisitDurationSubtitle'),
         icon: <ClockIcon className="w-8 h-8 text-orange-500" />,
         trend: 0, // Will be calculated from historical data when available
         color: 'orange'
       },
       {
-        title: 'Check-in Rate',
+        title: t('analytics:cards.checkInRate'),
         value: `${typeof analytics.overview.checkInRate === 'number' && !isNaN(analytics.overview.checkInRate)
           ? analytics.overview.checkInRate
           : 0}%`,
-        subtitle: 'Successful check-ins',
+        subtitle: t('analytics:cards.checkInRateSubtitle'),
         icon: <ArrowTrendingUpIcon className="w-8 h-8 text-indigo-500" />,
         trend: 0, // Will be calculated from historical data when available
         color: 'indigo'
       },
       {
-        title: 'Available Slots',
+        title: t('analytics:cards.availableSlots'),
         value: typeof analytics.overview.availableSlots === 'number' && !isNaN(analytics.overview.availableSlots)
           ? analytics.overview.availableSlots
           : 0,
-        subtitle: 'Remaining capacity',
+        subtitle: t('analytics:cards.availableSlotsSubtitle'),
         icon: <BuildingOfficeIcon className="w-8 h-8 text-cyan-500" />,
         trend: 0,
         color: 'cyan'
@@ -329,7 +332,7 @@ const UnifiedAnalyticsDashboard = () => {
                       <span className="text-sm font-medium">
                         {Math.abs(card.trend)}%
                       </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400 ms-1">vs last week</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 ms-1">{t('analytics:trends.vsLastWeek')}</span>
                     </div>
                   )}
                 </div>
@@ -348,7 +351,7 @@ const UnifiedAnalyticsDashboard = () => {
   const renderInsights = () => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card className="p-6 border border-gray-100 dark:border-gray-700 bg-white dark:bg-slate-900/70">
-        <h3 className={`${TEXT_STYLES.cardTitle} mb-4 text-gray-900 dark:text-white`}>Peak Hours</h3>
+        <h3 className={`${TEXT_STYLES.cardTitle} mb-4 text-gray-900 dark:text-white`}>{t('analytics:insights.peakHours')}</h3>
         <div className="space-y-3">
           {analytics.insights.peakHours && analytics.insights.peakHours.length > 0 ? (
             analytics.insights.peakHours.map((hour, index) => (
@@ -359,21 +362,21 @@ const UnifiedAnalyticsDashboard = () => {
                   </div>
                   <span className={`${TEXT_STYLES.bodyText} text-gray-900 dark:text-gray-100`}>{hour}</span>
                 </div>
-                <Badge variant="primary" size="sm">Peak</Badge>
+                <Badge variant="primary" size="sm">{t('analytics:insights.peakBadge')}</Badge>
               </div>
             ))
           ) : (
             <div className="text-center py-8">
               <ClockIcon className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-              <p className="text-sm text-gray-500 dark:text-gray-400">No peak hour data available yet</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Data will appear as visitors check in</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics:insights.noPeakData')}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{t('analytics:insights.noPeakDataHint')}</p>
             </div>
           )}
         </div>
       </Card>
 
       <Card className="p-6 border border-gray-100 dark:border-gray-700 bg-white dark:bg-slate-900/70">
-        <h3 className={`${TEXT_STYLES.cardTitle} mb-4 text-gray-900 dark:text-white`}>Popular Locations</h3>
+        <h3 className={`${TEXT_STYLES.cardTitle} mb-4 text-gray-900 dark:text-white`}>{t('analytics:insights.popularLocations')}</h3>
         <div className="space-y-3">
           {analytics.insights.popularLocations && analytics.insights.popularLocations.length > 0 ? (
             analytics.insights.popularLocations.map((location, index) => (
@@ -396,8 +399,8 @@ const UnifiedAnalyticsDashboard = () => {
           ) : (
             <div className="text-center py-8">
               <MapPinIcon className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-              <p className="text-sm text-gray-500 dark:text-gray-400">No location data available yet</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Data will appear as invitations are created</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('analytics:insights.noLocationData')}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{t('analytics:insights.noLocationDataHint')}</p>
             </div>
           )}
         </div>
@@ -411,9 +414,9 @@ const UnifiedAnalyticsDashboard = () => {
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className={`${TEXT_STYLES.pageTitle} text-gray-900 dark:text-white`}>Unified Analytics</h1>
+            <h1 className={`${TEXT_STYLES.pageTitle} text-gray-900 dark:text-white`}>{t('analytics:unifiedTitle')}</h1>
             <p className={`${TEXT_STYLES.helpText} mt-1 text-gray-600 dark:text-gray-400`}>
-              Comprehensive visitor and capacity analytics • Last updated {formatters.formatTime(lastUpdated)}
+              {t('analytics:unifiedSubtitle', { time: formatters.formatTime(lastUpdated) })}
             </p>
           </div>
           
@@ -425,16 +428,16 @@ const UnifiedAnalyticsDashboard = () => {
               loading={loading}
               icon={<ArrowPathIcon className="w-4 h-4" />}
             >
-              Refresh
+              {t('analytics:buttons.refresh')}
             </Button>
-            
+
             <Button
-              size="sm" 
+              size="sm"
               variant="outline"
               onClick={exportAnalytics}
               icon={<ArrowDownTrayIcon className="w-4 h-4" />}
             >
-              Export
+              {t('analytics:buttons.export')}
             </Button>
           </div>
         </div>
@@ -474,7 +477,7 @@ const UnifiedAnalyticsDashboard = () => {
               {loading && !analytics.overview.totalVisitors ? (
                 <div className="flex items-center justify-center py-12">
                   <LoadingSpinner size="lg" />
-                  <span className="ms-3 text-gray-600 dark:text-gray-300">Loading analytics...</span>
+                  <span className="ms-3 text-gray-600 dark:text-gray-300">{t('analytics:loading.analytics')}</span>
                 </div>
               ) : (
                 <>
@@ -523,7 +526,7 @@ const UnifiedAnalyticsDashboard = () => {
               className="space-y-6"
             >
               <Card className="p-6 border border-gray-100 dark:border-gray-700 bg-white dark:bg-slate-900/70">
-                <h2 className={`${TEXT_STYLES.sectionTitle} mb-6 text-gray-900 dark:text-white`}>AI-Powered Insights</h2>
+                <h2 className={`${TEXT_STYLES.sectionTitle} mb-6 text-gray-900 dark:text-white`}>{t('analytics:insights.aiInsights')}</h2>
                 
                 <div className="space-y-4">
                   {analytics.insights.recommendations.map((recommendation, index) => (

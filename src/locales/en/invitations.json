@@ -30,9 +30,12 @@
     "columns": {
       "invitationNumber": "Invitation #",
       "visitor": "Visitor",
+      "host": "Host",
       "schedule": "Schedule",
+      "location": "Location",
       "status": "Status",
-      "actions": "Actions"
+      "actions": "Actions",
+      "invitation": "Invitation"
     },
     "emptyMessage": "No invitations found"
   },
@@ -49,7 +52,9 @@
     "clear": "Clear",
     "approve": "Approve",
     "reject": "Reject",
-    "delete": "Delete"
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "clearSelection": "Clear Selection"
   },
   "actions": {
     "view": "View",
@@ -57,15 +62,23 @@
     "approve": "Approve",
     "reApprove": "Re-approve",
     "reject": "Reject",
+    "cancel": "Cancel",
     "qr": "QR",
-    "delete": "Delete"
+    "delete": "Delete",
+    "assignToReview": "Assign to Review",
+    "approveReject": "Approve/Reject",
+    "createInvitation": "Create Invitation",
+    "reset": "Reset"
   },
   "type": {
     "single": "Single",
     "group": "Group",
     "recurring": "Recurring",
     "walkIn": "Walk-in",
-    "bulk": "Bulk"
+    "bulk": "Bulk",
+    "singleVisitor": "Single Visitor",
+    "groupVisit": "Group Visit",
+    "recurringVisit": "Recurring Visit"
   },
   "tooltips": {
     "viewDetails": "View details",
@@ -84,7 +97,9 @@
     "qrTitle": "QR Code",
     "deleteTitle": "Delete Invitation",
     "deleteMessage": "Are you sure you want to delete the invitation \"{{subject}}\"? This action cannot be undone.",
-    "deleteMessageGeneric": "Are you sure you want to delete this invitation?"
+    "deleteMessageGeneric": "Are you sure you want to delete this invitation?",
+    "createNewLocation": "Create New Location",
+    "addNewVisitor": "Add New Visitor"
   },
   "details": {
     "visitorInfo": "Visitor Information",
@@ -141,7 +156,8 @@
     "sentSuccess": "QR code sent successfully to {{email}}!",
     "emailError": "Email Error: {{error}}",
     "willSendTo": "Will be sent to: {{email}}",
-    "noEmailAddress": "No email address available for this visitor"
+    "noEmailAddress": "No email address available for this visitor",
+    "visitor": "Visitor"
   },
   "confirmBulk": {
     "title": "{{action}} Invitations",
@@ -158,5 +174,202 @@
   },
   "unknownVisitor": "Unknown Visitor",
   "unknownHost": "Unknown Host",
-  "noLocation": "No location specified"
+  "noLocation": "No location specified",
+  "empty": {
+    "noInvitations": "No invitations",
+    "getStarted": "Get started by creating a new invitation."
+  },
+  "form": {
+    "title": {
+      "create": "New Invitation",
+      "edit": "Edit Invitation"
+    },
+    "sections": {
+      "basicInfo": "Basic Information",
+      "schedule": "Schedule",
+      "availableTimeSlots": "Available Time Slots",
+      "capacityCheck": "Capacity Check",
+      "requirementsAccess": "Requirements & Access"
+    },
+    "fields": {
+      "subject": "Subject",
+      "subjectPlaceholder": "Meeting with John Doe",
+      "visitor": "Visitor",
+      "visitors": "Visitors",
+      "visitPurpose": "Visit Purpose",
+      "visitPurposePlaceholder": "Select visit purpose...",
+      "location": "Location",
+      "locationPlaceholder": "Select location...",
+      "invitationType": "Invitation Type",
+      "expectedVisitorCount": "Expected Visitor Count",
+      "expectedTotalVisitors": "Expected Total Visitors",
+      "expectedTotalVisitorsHint": "Include visitors not yet added to the list above",
+      "message": "Message",
+      "messagePlaceholder": "Additional details about the visit...",
+      "specialInstructions": "Special Instructions",
+      "specialInstructionsPlaceholder": "Any special requirements or instructions for the visit...",
+      "parkingInstructions": "Parking Instructions",
+      "parkingInstructionsPlaceholder": "Parking lot A, visitor spaces 1-10",
+      "requiresApproval": "Requires Approval",
+      "requiresApprovalHint": "Must be approved before visit",
+      "requiresEscort": "Requires Escort",
+      "requiresEscortHint": "Visitor must be escorted at all times",
+      "requiresBadge": "Requires Badge",
+      "requiresBadgeHint": "Visitor badge will be printed",
+      "needsParking": "Needs Parking",
+      "needsParkingHint": "Visitor requires parking space",
+      "submitForApproval": "Submit for Approval",
+      "submitForApprovalHint": "Submit immediately after saving",
+      "startDateTime": "Start Date & Time",
+      "startDateTimeHint": "Select both date and time for visit start",
+      "endDateTime": "End Date & Time",
+      "endDateTimeHint": "Select both date and time for visit end",
+      "searchVisitorPlaceholder": "Search for a visitor...",
+      "searchGroupVisitorPlaceholder": "Search and add visitors to group...",
+      "totalVisitorCountPlaceholder": "Total number of expected visitors"
+    },
+    "addButton": "+ Add",
+    "addVisitorTitle": "Add new visitor",
+    "addLocationTitle": "Add new location",
+    "selectedVisitors": "Selected Visitors ({{count}})",
+    "charCount": "{{current}}/{{max}} characters",
+    "dateTimeInfo": "Date & Time Selection: Click on the date field to select a date, then click on the time portion to set the specific time for your visit.",
+    "visitDuration": "Visit Duration: {{hours}} hours",
+    "quickTimePresets": "Quick Time Presets:",
+    "pastTimeNote": "Past times will automatically use tomorrow's date",
+    "timeSlots": {
+      "loading": "(Loading...)",
+      "noSlots": "No time slots available for the selected date and location. You can still proceed without selecting a time slot.",
+      "selectOptional": "Select a time slot for your visit (optional):",
+      "selected": "Selected",
+      "full": "Full",
+      "limited": "Limited",
+      "spotsAvailable": "{{available}} of {{max}} spots available",
+      "bufferMinutes": "{{minutes}}min buffer",
+      "selectedInfo": "Selected: {{name}} ({{start}} - {{end}})"
+    },
+    "capacityIssue": "Capacity Issue",
+    "capacityError": "The selected time slot is at capacity. Please choose an alternative time or location.",
+    "validationErrors": "Form Validation Errors ({{count}}):",
+    "buttons": {
+      "cancel": "Cancel",
+      "create": "Create Invitation",
+      "update": "Update Invitation"
+    }
+  },
+  "validation": {
+    "visitorRequired": "Visitor is required",
+    "groupVisitorRequired": "At least one visitor is required for group invitations",
+    "subjectRequired": "Subject is required",
+    "subjectTooLong": "Subject must be less than 200 characters",
+    "locationRequired": "Location is required. Please select a location or create a new one.",
+    "startTimeRequired": "Start time is required",
+    "startTimeInPast": "Start time must be in the future",
+    "endTimeRequired": "End time is required",
+    "endTimeBeforeStart": "End time must be after start time",
+    "durationTooLong": "Visit duration cannot exceed 24 hours",
+    "durationTooShort": "Visit duration must be at least 15 minutes",
+    "visitorCountMin": "Must have at least 1 visitor",
+    "visitorCountMax": "Cannot exceed 100 visitors",
+    "messageTooLong": "Message must be less than 1000 characters",
+    "specialInstructionsTooLong": "Special instructions must be less than 500 characters",
+    "parkingInstructionsTooLong": "Parking instructions must be less than 200 characters",
+    "parkingInstructionsRequired": "Parking instructions are required when parking is needed"
+  },
+  "excel": {
+    "pageTitle": "Excel Invitation Management",
+    "pageSubtitle": "Manage visitor invitations using Excel templates for bulk processing and offline workflow",
+    "stats": {
+      "filesProcessed": "Files Processed",
+      "invitationsCreated": "Invitations Created",
+      "newVisitors": "New Visitors",
+      "processingErrors": "Processing Errors"
+    },
+    "recentActivity": {
+      "title": "Recent Processing Activity",
+      "empty": "No recent Excel processing activity",
+      "emptyHint": "Upload Excel files to see processing results here",
+      "success": "Success",
+      "error": "Error",
+      "processedSuccessfully": "Excel file processed successfully",
+      "processingFailed": "Excel processing failed",
+      "visitors": "Visitors: {{newCount}} new, {{existingCount}} existing",
+      "invitations": "Invitations: {{submittedCount}} submitted, {{draftCount}} draft"
+    },
+    "guide": {
+      "title": "Excel Invitation Management Guide",
+      "downloadTitle": "Download Templates",
+      "downloadDesc": "Download Excel templates with pre-configured fields and dropdown lists. Choose between single visitor or multiple visitors per meeting.",
+      "fillTitle": "Fill Templates Offline",
+      "fillDesc": "Complete the Excel template offline. Required fields are highlighted in red. Use dropdown lists for consistent data entry.",
+      "uploadTitle": "Upload & Process",
+      "uploadDesc": "Upload completed templates for automatic processing. The system will create visitors and invitations, then provide a detailed summary.",
+      "emailTitle": "Email Templates",
+      "emailDesc": "Send templates directly to hosts via email. Include custom messages and choose template types based on meeting requirements.",
+      "bestPractices": "Best Practices:",
+      "practice1": "Validate data before uploading (check email formats, phone numbers)",
+      "practice2": "Use existing visitor data when possible to avoid duplicates",
+      "practice3": "Review generated invitations and approve as needed",
+      "practice4": "Keep template files under 10MB for optimal performance"
+    },
+    "tabs": {
+      "download": "Download Templates",
+      "upload": "Upload & Process",
+      "email": "Email Templates"
+    },
+    "download": {
+      "title": "Download Invitation Templates",
+      "description": "Download Excel templates to create invitations offline. Fill out the template and upload it back to automatically create visitors and invitations.",
+      "singleVisitor": "Single Visitor",
+      "singleVisitorDesc": "Template for creating one invitation with one visitor",
+      "singleVisitorButton": "Download Single Visitor Template",
+      "multipleVisitors": "Multiple Visitors",
+      "multipleVisitorsDesc": "Template for creating one meeting with multiple visitors",
+      "multipleVisitorsButton": "Download Multiple Visitors Template",
+      "howToUse": "How to use templates:",
+      "step1": "Download the appropriate template",
+      "step2": "Fill in all required fields (marked in red)",
+      "step3": "Save the file and upload it using the Upload tab",
+      "step4": "Review the created invitations and approve as needed"
+    },
+    "upload": {
+      "title": "Upload Filled Template",
+      "description": "Upload your completed Excel template to automatically create visitors and invitations.",
+      "selectLabel": "Select Excel Template",
+      "selectDescription": "Only .xlsx files up to 10MB are accepted",
+      "selectedFile": "Selected File",
+      "valid": "Valid",
+      "invalid": "Invalid",
+      "validating": "Validating...",
+      "fileName": "File",
+      "fileSize": "Size",
+      "fileType": "Type",
+      "processing": "Processing...",
+      "processButton": "Process Excel File",
+      "successTitle": "Upload Successful!",
+      "summary": "Summary:",
+      "newVisitors": "New Visitors",
+      "existingVisitors": "Existing Visitors",
+      "draftInvitations": "Draft Invitations",
+      "submittedInvitations": "Submitted Invitations"
+    },
+    "email": {
+      "title": "Email Template to Host",
+      "description": "Send Excel templates directly to hosts via email for offline invitation creation.",
+      "hostName": "Host Name",
+      "hostNameRequired": "Host Name *",
+      "hostNamePlaceholder": "Enter host full name",
+      "hostEmail": "Host Email",
+      "hostEmailRequired": "Host Email *",
+      "hostEmailPlaceholder": "host@company.com",
+      "templateType": "Template Type",
+      "singleVisitor": "Single Visitor",
+      "multipleVisitors": "Multiple Visitors",
+      "customMessage": "Custom Message (Optional)",
+      "customMessagePlaceholder": "Add a custom message to include in the email...",
+      "sendButton": "Send Template via Email",
+      "sending": "Sending...",
+      "sentSuccess": "Template sent successfully to {{email}}!"
+    }
+  }
 }

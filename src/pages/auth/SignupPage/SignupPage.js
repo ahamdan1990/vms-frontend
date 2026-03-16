@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { setPageTitle } from '../../../store/slices/uiSlice';
 import SignupForm from '../../../components/forms/SignupForm/SignupForm';
 import authService from '../../../services/authService';
@@ -13,13 +14,14 @@ import authService from '../../../services/authService';
 const SignupPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { t } = useTranslation('auth');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    dispatch(setPageTitle('Sign Up'));
-  }, [dispatch]);
+    dispatch(setPageTitle(t('signup.title')));
+  }, [dispatch, t]);
 
   const handleSignup = async (userData) => {
     setLoading(true);
@@ -33,12 +35,12 @@ const SignupPage = () => {
       setTimeout(() => {
         navigate('/login', {
           state: {
-            message: 'Account created successfully! Please sign in with your credentials.'
+            message: t('signup.successMessage')
           }
         });
       }, 2000);
     } catch (err) {
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to create account. Please try again.';
+      const errorMessage = err.response?.data?.message || err.message || t('validation.unexpectedError');
       setError(errorMessage);
       setLoading(false);
     }
@@ -62,9 +64,9 @@ const SignupPage = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </motion.div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Account Created!</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">{t('signup.successTitle')}</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Your account has been successfully created. Redirecting to login...
+            {t('signup.successMessage')}
           </p>
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -104,10 +106,10 @@ const SignupPage = () => {
               </svg>
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Visitor Management System
+              {t('signup.systemTitle')}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 text-sm">
-              Create your account to get started
+              {t('signup.systemSubtitle')}
             </p>
           </motion.div>
 
@@ -133,25 +135,25 @@ const SignupPage = () => {
           className="mt-8 bg-white/60 dark:bg-slate-900/70 backdrop-blur-sm rounded-xl p-6 border border-white/20 dark:border-white/5"
         >
           <div className="text-center">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Why Sign Up?</h3>
-            <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2 text-left">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{t('signup.whySignUp')}</h3>
+            <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2 text-start">
               <li className="flex items-start">
-                <svg className="w-5 h-5 text-blue-600 me-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-blue-600 me-2 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Manage visitor invitations seamlessly
+                {t('signup.benefit1')}
               </li>
               <li className="flex items-start">
-                <svg className="w-5 h-5 text-blue-600 me-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-blue-600 me-2 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Track visitor check-ins and check-outs
+                {t('signup.benefit2')}
               </li>
               <li className="flex items-start">
-                <svg className="w-5 h-5 text-blue-600 me-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-blue-600 me-2 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Access real-time analytics and reports
+                {t('signup.benefit3')}
               </li>
             </ul>
           </div>
@@ -164,8 +166,8 @@ const SignupPage = () => {
           transition={{ delay: 0.6, duration: 0.5 }}
           className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400"
         >
-          <p>© 2024 Visitor Management System. All rights reserved.</p>
-          <p className="mt-1">Version 1.0.0</p>
+          <p>{t('signup.copyright', { year: new Date().getFullYear() })}</p>
+          <p className="mt-1">{t('signup.version', { version: '1.0.0' })}</p>
         </motion.div>
       </div>
 
@@ -180,7 +182,7 @@ const SignupPage = () => {
           <div className="bg-white dark:bg-slate-900 rounded-xl p-6 shadow-xl border border-white/10">
             <div className="flex items-center gap-3">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-              <span className="text-gray-900 dark:text-gray-100 font-medium">Creating your account...</span>
+              <span className="text-gray-900 dark:text-gray-100 font-medium">{t('signup.creatingAccountOverlay')}</span>
             </div>
           </div>
         </motion.div>

@@ -30,9 +30,12 @@
     "columns": {
       "invitationNumber": "رقم الدعوة",
       "visitor": "الزائر",
+      "host": "المضيف",
       "schedule": "الجدول",
+      "location": "الموقع",
       "status": "الحالة",
-      "actions": "الإجراءات"
+      "actions": "الإجراءات",
+      "invitation": "الدعوة"
     },
     "emptyMessage": "لا توجد دعوات"
   },
@@ -49,7 +52,9 @@
     "clear": "مسح",
     "approve": "موافقة",
     "reject": "رفض",
-    "delete": "حذف"
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "clearSelection": "إلغاء التحديد"
   },
   "actions": {
     "view": "عرض",
@@ -57,15 +62,23 @@
     "approve": "موافقة",
     "reApprove": "إعادة موافقة",
     "reject": "رفض",
+    "cancel": "إلغاء",
     "qr": "رمز QR",
-    "delete": "حذف"
+    "delete": "حذف",
+    "assignToReview": "إسناد للمراجعة",
+    "approveReject": "موافقة/رفض",
+    "createInvitation": "إنشاء دعوة",
+    "reset": "إعادة ضبط"
   },
   "type": {
     "single": "فردية",
     "group": "جماعية",
     "recurring": "متكررة",
     "walkIn": "بدون موعد",
-    "bulk": "مجمّعة"
+    "bulk": "مجمّعة",
+    "singleVisitor": "زائر واحد",
+    "groupVisit": "زيارة جماعية",
+    "recurringVisit": "زيارة متكررة"
   },
   "tooltips": {
     "viewDetails": "عرض التفاصيل",
@@ -84,7 +97,9 @@
     "qrTitle": "رمز QR",
     "deleteTitle": "حذف الدعوة",
     "deleteMessage": "هل أنت متأكد من حذف الدعوة \"{{subject}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
-    "deleteMessageGeneric": "هل أنت متأكد من حذف هذه الدعوة؟"
+    "deleteMessageGeneric": "هل أنت متأكد من حذف هذه الدعوة؟",
+    "createNewLocation": "إنشاء موقع جديد",
+    "addNewVisitor": "إضافة زائر جديد"
   },
   "details": {
     "visitorInfo": "معلومات الزائر",
@@ -141,7 +156,8 @@
     "sentSuccess": "تم إرسال رمز QR بنجاح إلى {{email}}!",
     "emailError": "خطأ في البريد الإلكتروني: {{error}}",
     "willSendTo": "سيُرسل إلى: {{email}}",
-    "noEmailAddress": "لا يوجد بريد إلكتروني لهذا الزائر"
+    "noEmailAddress": "لا يوجد بريد إلكتروني لهذا الزائر",
+    "visitor": "الزائر"
   },
   "confirmBulk": {
     "title": "{{action}} الدعوات",
@@ -158,5 +174,202 @@
   },
   "unknownVisitor": "زائر غير معروف",
   "unknownHost": "مضيف غير معروف",
-  "noLocation": "لم يُحدَّد موقع"
+  "noLocation": "لم يُحدَّد موقع",
+  "empty": {
+    "noInvitations": "لا توجد دعوات",
+    "getStarted": "ابدأ بإنشاء دعوة جديدة."
+  },
+  "form": {
+    "title": {
+      "create": "دعوة جديدة",
+      "edit": "تعديل الدعوة"
+    },
+    "sections": {
+      "basicInfo": "المعلومات الأساسية",
+      "schedule": "الجدول الزمني",
+      "availableTimeSlots": "الفترات الزمنية المتاحة",
+      "capacityCheck": "فحص الطاقة الاستيعابية",
+      "requirementsAccess": "المتطلبات والوصول"
+    },
+    "fields": {
+      "subject": "الموضوع",
+      "subjectPlaceholder": "اجتماع مع أحمد محمد",
+      "visitor": "الزائر",
+      "visitors": "الزوار",
+      "visitPurpose": "غرض الزيارة",
+      "visitPurposePlaceholder": "اختر غرض الزيارة...",
+      "location": "الموقع",
+      "locationPlaceholder": "اختر الموقع...",
+      "invitationType": "نوع الدعوة",
+      "expectedVisitorCount": "عدد الزوار المتوقع",
+      "expectedTotalVisitors": "إجمالي الزوار المتوقع",
+      "expectedTotalVisitorsHint": "أدرج الزوار غير المضافين للقائمة أعلاه",
+      "message": "الرسالة",
+      "messagePlaceholder": "تفاصيل إضافية حول الزيارة...",
+      "specialInstructions": "تعليمات خاصة",
+      "specialInstructionsPlaceholder": "أي متطلبات أو تعليمات خاصة بالزيارة...",
+      "parkingInstructions": "تعليمات الموقف",
+      "parkingInstructionsPlaceholder": "موقف أ، أماكن الزوار 1-10",
+      "requiresApproval": "تتطلب موافقة",
+      "requiresApprovalHint": "يجب الموافقة عليها قبل الزيارة",
+      "requiresEscort": "تتطلب مرافقة",
+      "requiresEscortHint": "يجب مرافقة الزائر في جميع الأوقات",
+      "requiresBadge": "تتطلب بطاقة",
+      "requiresBadgeHint": "سيتم طباعة بطاقة الزائر",
+      "needsParking": "تتطلب موقف سيارة",
+      "needsParkingHint": "الزائر يحتاج مكان للسيارة",
+      "submitForApproval": "إرسال للموافقة",
+      "submitForApprovalHint": "إرسال فوري بعد الحفظ",
+      "startDateTime": "تاريخ ووقت البدء",
+      "startDateTimeHint": "اختر التاريخ والوقت لبداية الزيارة",
+      "endDateTime": "تاريخ ووقت الانتهاء",
+      "endDateTimeHint": "اختر التاريخ والوقت لنهاية الزيارة",
+      "searchVisitorPlaceholder": "ابحث عن زائر...",
+      "searchGroupVisitorPlaceholder": "ابحث وأضف زوار للمجموعة...",
+      "totalVisitorCountPlaceholder": "العدد الإجمالي للزوار المتوقعين"
+    },
+    "addButton": "+ إضافة",
+    "addVisitorTitle": "إضافة زائر جديد",
+    "addLocationTitle": "إضافة موقع جديد",
+    "selectedVisitors": "الزوار المحددون ({{count}})",
+    "charCount": "{{current}}/{{max}} حرف",
+    "dateTimeInfo": "اختيار التاريخ والوقت: انقر على حقل التاريخ لاختياره، ثم انقر على الوقت لتحديد وقت الزيارة.",
+    "visitDuration": "مدة الزيارة: {{hours}} ساعة",
+    "quickTimePresets": "أوقات مسبقة الضبط:",
+    "pastTimeNote": "الأوقات الماضية ستستخدم تاريخ الغد تلقائياً",
+    "timeSlots": {
+      "loading": "(جارٍ التحميل...)",
+      "noSlots": "لا توجد فترات زمنية متاحة للتاريخ والموقع المحددين. يمكنك المتابعة بدون اختيار فترة زمنية.",
+      "selectOptional": "اختر فترة زمنية لزيارتك (اختياري):",
+      "selected": "محدد",
+      "full": "ممتلئ",
+      "limited": "محدود",
+      "spotsAvailable": "{{available}} من {{max}} مكان متاح",
+      "bufferMinutes": "وقت فاصل {{minutes}} دقيقة",
+      "selectedInfo": "محدد: {{name}} ({{start}} - {{end}})"
+    },
+    "capacityIssue": "مشكلة في الطاقة الاستيعابية",
+    "capacityError": "الفترة الزمنية المحددة ممتلئة. يرجى اختيار وقت أو موقع بديل.",
+    "validationErrors": "أخطاء التحقق من النموذج ({{count}}):",
+    "buttons": {
+      "cancel": "إلغاء",
+      "create": "إنشاء دعوة",
+      "update": "تحديث الدعوة"
+    }
+  },
+  "validation": {
+    "visitorRequired": "الزائر مطلوب",
+    "groupVisitorRequired": "يجب إضافة زائر واحد على الأقل للدعوات الجماعية",
+    "subjectRequired": "الموضوع مطلوب",
+    "subjectTooLong": "يجب أن يكون الموضوع أقل من 200 حرف",
+    "locationRequired": "الموقع مطلوب. يرجى اختيار موقع أو إنشاء موقع جديد.",
+    "startTimeRequired": "وقت البدء مطلوب",
+    "startTimeInPast": "يجب أن يكون وقت البدء في المستقبل",
+    "endTimeRequired": "وقت الانتهاء مطلوب",
+    "endTimeBeforeStart": "يجب أن يكون وقت الانتهاء بعد وقت البدء",
+    "durationTooLong": "لا يمكن أن تتجاوز مدة الزيارة 24 ساعة",
+    "durationTooShort": "يجب أن تكون مدة الزيارة 15 دقيقة على الأقل",
+    "visitorCountMin": "يجب أن يكون هناك زائر واحد على الأقل",
+    "visitorCountMax": "لا يمكن تجاوز 100 زائر",
+    "messageTooLong": "يجب أن تكون الرسالة أقل من 1000 حرف",
+    "specialInstructionsTooLong": "يجب أن تكون التعليمات الخاصة أقل من 500 حرف",
+    "parkingInstructionsTooLong": "يجب أن تكون تعليمات الموقف أقل من 200 حرف",
+    "parkingInstructionsRequired": "تعليمات الموقف مطلوبة عند الحاجة لموقف سيارة"
+  },
+  "excel": {
+    "pageTitle": "إدارة Excel للدعوات",
+    "pageSubtitle": "إدارة دعوات الزوار باستخدام نماذج Excel للمعالجة المجمّعة وسير العمل دون اتصال",
+    "stats": {
+      "filesProcessed": "الملفات المعالَجة",
+      "invitationsCreated": "الدعوات المنشأة",
+      "newVisitors": "الزوار الجدد",
+      "processingErrors": "أخطاء المعالجة"
+    },
+    "recentActivity": {
+      "title": "نشاط المعالجة الأخير",
+      "empty": "لا يوجد نشاط معالجة Excel مؤخراً",
+      "emptyHint": "ارفع ملفات Excel لرؤية نتائج المعالجة هنا",
+      "success": "نجاح",
+      "error": "خطأ",
+      "processedSuccessfully": "تمت معالجة ملف Excel بنجاح",
+      "processingFailed": "فشلت معالجة Excel",
+      "visitors": "الزوار: {{newCount}} جديد، {{existingCount}} موجود",
+      "invitations": "الدعوات: {{submittedCount}} مُرسَلة، {{draftCount}} مسودة"
+    },
+    "guide": {
+      "title": "دليل إدارة دعوات Excel",
+      "downloadTitle": "تنزيل النماذج",
+      "downloadDesc": "نزّل نماذج Excel بحقول وقوائم منسدلة مُعدَّة مسبقاً. اختر بين زائر واحد أو عدة زوار لكل اجتماع.",
+      "fillTitle": "ملء النماذج دون اتصال",
+      "fillDesc": "أكمل نموذج Excel دون اتصال. الحقول المطلوبة مُمَيَّزة باللون الأحمر. استخدم القوائم المنسدلة لإدخال بيانات متسقة.",
+      "uploadTitle": "رفع ومعالجة",
+      "uploadDesc": "ارفع النماذج المكتملة للمعالجة التلقائية. سينشئ النظام الزوار والدعوات ويوفر ملخصاً تفصيلياً.",
+      "emailTitle": "إرسال النماذج بالبريد",
+      "emailDesc": "أرسل النماذج مباشرة للمضيفين عبر البريد الإلكتروني. أضف رسائل مخصصة واختر نوع النموذج بحسب متطلبات الاجتماع.",
+      "bestPractices": "أفضل الممارسات:",
+      "practice1": "تحقق من البيانات قبل الرفع (تنسيقات البريد الإلكتروني، أرقام الهاتف)",
+      "practice2": "استخدم بيانات الزوار الموجودة قدر الإمكان لتجنب التكرار",
+      "practice3": "راجع الدعوات المنشأة ووافق عليها حسب الحاجة",
+      "practice4": "احتفظ بحجم ملفات النماذج أقل من 10 ميغابايت لأداء مثالي"
+    },
+    "tabs": {
+      "download": "تنزيل النماذج",
+      "upload": "رفع ومعالجة",
+      "email": "إرسال النماذج"
+    },
+    "download": {
+      "title": "تنزيل نماذج الدعوات",
+      "description": "نزّل نماذج Excel لإنشاء الدعوات دون اتصال. أكمل النموذج وارفعه لإنشاء الزوار والدعوات تلقائياً.",
+      "singleVisitor": "زائر واحد",
+      "singleVisitorDesc": "نموذج لإنشاء دعوة واحدة لزائر واحد",
+      "singleVisitorButton": "تنزيل نموذج الزائر الواحد",
+      "multipleVisitors": "عدة زوار",
+      "multipleVisitorsDesc": "نموذج لإنشاء اجتماع واحد مع عدة زوار",
+      "multipleVisitorsButton": "تنزيل نموذج عدة زوار",
+      "howToUse": "كيفية استخدام النماذج:",
+      "step1": "نزّل النموذج المناسب",
+      "step2": "أكمل جميع الحقول المطلوبة (المُمَيَّزة باللون الأحمر)",
+      "step3": "احفظ الملف وارفعه من تبويب الرفع",
+      "step4": "راجع الدعوات المنشأة ووافق عليها حسب الحاجة"
+    },
+    "upload": {
+      "title": "رفع النموذج المكتمل",
+      "description": "ارفع نموذج Excel المكتمل لإنشاء الزوار والدعوات تلقائياً.",
+      "selectLabel": "اختر نموذج Excel",
+      "selectDescription": "يُقبل فقط ملفات .xlsx بحجم أقصاه 10 ميغابايت",
+      "selectedFile": "الملف المحدد",
+      "valid": "صالح",
+      "invalid": "غير صالح",
+      "validating": "جارٍ التحقق...",
+      "fileName": "الملف",
+      "fileSize": "الحجم",
+      "fileType": "النوع",
+      "processing": "جارٍ المعالجة...",
+      "processButton": "معالجة ملف Excel",
+      "successTitle": "تم الرفع بنجاح!",
+      "summary": "الملخص:",
+      "newVisitors": "الزوار الجدد",
+      "existingVisitors": "الزوار الموجودون",
+      "draftInvitations": "الدعوات المسودة",
+      "submittedInvitations": "الدعوات المُرسَلة"
+    },
+    "email": {
+      "title": "إرسال النموذج للمضيف",
+      "description": "أرسل نماذج Excel مباشرة للمضيفين عبر البريد الإلكتروني لإنشاء الدعوات دون اتصال.",
+      "hostName": "اسم المضيف",
+      "hostNameRequired": "اسم المضيف *",
+      "hostNamePlaceholder": "أدخل الاسم الكامل للمضيف",
+      "hostEmail": "بريد المضيف",
+      "hostEmailRequired": "بريد المضيف *",
+      "hostEmailPlaceholder": "host@company.com",
+      "templateType": "نوع النموذج",
+      "singleVisitor": "زائر واحد",
+      "multipleVisitors": "عدة زوار",
+      "customMessage": "رسالة مخصصة (اختياري)",
+      "customMessagePlaceholder": "أضف رسالة مخصصة لتضمينها في البريد الإلكتروني...",
+      "sendButton": "إرسال النموذج بالبريد الإلكتروني",
+      "sending": "جارٍ الإرسال...",
+      "sentSuccess": "تم إرسال النموذج بنجاح إلى {{email}}!"
+    }
+  }
 }

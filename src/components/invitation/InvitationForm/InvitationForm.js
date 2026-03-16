@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Components
@@ -62,6 +63,7 @@ const InvitationForm = ({
   isEdit = false
 }) => {
   const dispatch = useDispatch();
+  const { t } = useTranslation(['invitations', 'common']);
 
   // Redux selectors for autocomplete data
   const visitors = useSelector(selectVisitorsList);
@@ -224,9 +226,9 @@ const InvitationForm = ({
       // Revalidate scheduledStartTime
       if (touched.scheduledStartTime) {
         if (!formData.scheduledStartTime) {
-          newErrors.scheduledStartTime = 'Start time is required';
+          newErrors.scheduledStartTime = t('validation.startTimeRequired');
         } else if (new Date(formData.scheduledStartTime) <= new Date()) {
-          newErrors.scheduledStartTime = 'Start time must be in the future';
+          newErrors.scheduledStartTime = t('validation.startTimeInPast');
         } else {
           delete newErrors.scheduledStartTime;
         }
@@ -235,9 +237,9 @@ const InvitationForm = ({
       // Revalidate scheduledEndTime
       if (touched.scheduledEndTime) {
         if (!formData.scheduledEndTime) {
-          newErrors.scheduledEndTime = 'End time is required';
+          newErrors.scheduledEndTime = t('validation.endTimeRequired');
         } else if (formData.scheduledStartTime && new Date(formData.scheduledEndTime) <= new Date(formData.scheduledStartTime)) {
-          newErrors.scheduledEndTime = 'End time must be after start time';
+          newErrors.scheduledEndTime = t('validation.endTimeBeforeStart');
         } else {
           // Check duration
           const startTime = new Date(formData.scheduledStartTime);
@@ -245,9 +247,9 @@ const InvitationForm = ({
           const durationHours = (endTime - startTime) / (1000 * 60 * 60);
 
           if (durationHours > 24) {
-            newErrors.scheduledEndTime = 'Visit duration cannot exceed 24 hours';
+            newErrors.scheduledEndTime = t('validation.durationTooLong');
           } else if (durationHours < 0.25) {
-            newErrors.scheduledEndTime = 'Visit duration must be at least 15 minutes';
+            newErrors.scheduledEndTime = t('validation.durationTooShort');
           } else {
             delete newErrors.scheduledEndTime;
           }
@@ -257,7 +259,7 @@ const InvitationForm = ({
       // Revalidate locationId
       if (touched.locationId) {
         if (!formData.locationId) {
-          newErrors.locationId = 'Location is required. Please select a location or create a new one.';
+          newErrors.locationId = t('validation.locationRequired');
         } else {
           delete newErrors.locationId;
         }
@@ -333,40 +335,40 @@ const InvitationForm = ({
   const validateField = (field, value) => {
     switch (field) {
       case 'visitorId':
-        if (!value && formData.type === 'Single') return 'Visitor is required';
+        if (!value && formData.type === 'Single') return t('validation.visitorRequired');
         break;
       case 'visitorIds':
-        if (formData.type === 'Group' && (!value || value.length === 0)) return 'At least one visitor is required for group invitations';
+        if (formData.type === 'Group' && (!value || value.length === 0)) return t('validation.groupVisitorRequired');
         break;
       case 'subject':
-        if (!value?.trim()) return 'Subject is required';
-        if (value.length > 200) return 'Subject must be less than 200 characters';
+        if (!value?.trim()) return t('validation.subjectRequired');
+        if (value.length > 200) return t('validation.subjectTooLong');
         break;
       case 'locationId':
-        if (!value) return 'Location is required. Please select a location or create a new one.';
+        if (!value) return t('validation.locationRequired');
         break;
       case 'scheduledStartTime':
-        if (!value) return 'Start time is required';
-        if (new Date(value) <= new Date()) return 'Start time must be in the future';
+        if (!value) return t('validation.startTimeRequired');
+        if (new Date(value) <= new Date()) return t('validation.startTimeInPast');
         break;
       case 'scheduledEndTime':
-        if (!value) return 'End time is required';
+        if (!value) return t('validation.endTimeRequired');
         if (formData.scheduledStartTime && new Date(value) <= new Date(formData.scheduledStartTime)) {
-          return 'End time must be after start time';
+          return t('validation.endTimeBeforeStart');
         }
         break;
       case 'expectedVisitorCount':
-        if (value < 1) return 'Must have at least 1 visitor';
-        if (value > 100) return 'Cannot exceed 100 visitors';
+        if (value < 1) return t('validation.visitorCountMin');
+        if (value > 100) return t('validation.visitorCountMax');
         break;
       case 'message':
-        if (value && value.length > 1000) return 'Message must be less than 1000 characters';
+        if (value && value.length > 1000) return t('validation.messageTooLong');
         break;
       case 'specialInstructions':
-        if (value && value.length > 500) return 'Special instructions must be less than 500 characters';
+        if (value && value.length > 500) return t('validation.specialInstructionsTooLong');
         break;
       case 'parkingInstructions':
-        if (value && value.length > 200) return 'Parking instructions must be less than 200 characters';
+        if (value && value.length > 200) return t('validation.parkingInstructionsTooLong');
         break;
       default:
         break;
@@ -392,15 +394,15 @@ const InvitationForm = ({
       const durationHours = (endTime - startTime) / (1000 * 60 * 60);
       
       if (durationHours > 24) {
-        errors.scheduledEndTime = 'Visit duration cannot exceed 24 hours';
+        errors.scheduledEndTime = t('validation.durationTooLong');
       } else if (durationHours < 0.25) {
-        errors.scheduledEndTime = 'Visit duration must be at least 15 minutes';
+        errors.scheduledEndTime = t('validation.durationTooShort');
       }
     }
 
     // Parking validation
     if (formData.needsParking && !formData.parkingInstructions?.trim()) {
-      errors.parkingInstructions = 'Parking instructions are required when parking is needed';
+      errors.parkingInstructions = t('validation.parkingInstructionsRequired');
     }
 
     return errors;
@@ -655,7 +657,7 @@ const InvitationForm = ({
     if (!capacityValid && capacityResult && !capacityResult.isAvailable) {
       setFormErrors(prev => ({
         ...prev,
-        capacity: 'The selected time slot is at capacity. Please choose an alternative time or location.'
+        capacity: t('form.capacityError')
       }));
       return;
     }
@@ -767,12 +769,12 @@ const InvitationForm = ({
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-6">
             <DocumentTextIcon className="w-6 h-6 text-blue-600" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Basic Information</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('form.sections.basicInfo')}</h3>
           </div>
 
           <div className="space-y-4">
             <Input
-              label="Subject"
+              label={t('form.fields.subject')}
               type="text"
               value={formData.subject}
               onChange={(e) => handleChange('subject', e.target.value)}
@@ -780,14 +782,14 @@ const InvitationForm = ({
               error={touched.subject ? formErrors.subject : undefined}
               required
               maxLength={200}
-              placeholder="Meeting with John Doe"
+              placeholder={t('form.fields.subjectPlaceholder')}
             />
 
             {/* Visitor Selection */}
             {formData.type === 'Single' ? (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
-                  Visitor <span className="text-red-500">*</span>
+                  {t('form.fields.visitor')} <span className="text-red-500">*</span>
                 </label>
                 <div className="flex gap-2">
                   <div className="flex-1">
@@ -797,7 +799,7 @@ const InvitationForm = ({
                       onChange={handleVisitorSelect}
                       getOptionLabel={(visitor) => `${visitor.fullName}`}
                       getOptionDescription={(visitor) => visitor.email}
-                      placeholder="Search for a visitor..."
+                      placeholder={t('form.fields.searchVisitorPlaceholder')}
                       error={touched.visitorId ? formErrors.visitorId : undefined}
                       required
                     />
@@ -807,9 +809,9 @@ const InvitationForm = ({
                     variant="outline"
                     onClick={() => handleOpenVisitorModal('single')}
                     className="whitespace-nowrap"
-                    title="Add new visitor"
+                    title={t('form.addVisitorTitle')}
                   >
-                    + Add
+                    {t('form.addButton')}
                   </Button>
                 </div>
                 {touched.visitorId && formErrors.visitorId && (
@@ -819,7 +821,7 @@ const InvitationForm = ({
             ) : (
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Visitors <span className="text-red-500">*</span>
+                  {t('form.fields.visitors')} <span className="text-red-500">*</span>
                 </label>
                 
                 {/* Add Visitor Input */}
@@ -832,7 +834,7 @@ const InvitationForm = ({
                         onChange={handleAddVisitorToGroup}
                         getOptionLabel={(visitor) => `${visitor.firstName} ${visitor.lastName}`}
                         getOptionDescription={(visitor) => visitor.email}
-                        placeholder="Search and add visitors to group..."
+                        placeholder={t('form.fields.searchGroupVisitorPlaceholder')}
                       />
                     </div>
                     <Button
@@ -840,9 +842,9 @@ const InvitationForm = ({
                       variant="outline"
                       onClick={() => handleOpenVisitorModal('group')}
                       className="whitespace-nowrap"
-                      title="Add new visitor"
+                      title={t('form.addVisitorTitle')}
                     >
-                      + Add
+                      {t('form.addButton')}
                     </Button>
                   </div>
                 </div>
@@ -851,7 +853,7 @@ const InvitationForm = ({
                 {selectedVisitors.length > 0 && (
                   <div className="space-y-2 mb-3">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                      Selected Visitors ({selectedVisitors.length})
+                      {t('form.selectedVisitors', { count: selectedVisitors.length })}
                     </p>
                     <div className="border border-gray-200 dark:border-gray-700 rounded-md max-h-40 overflow-y-auto bg-white dark:bg-gray-900/30">
                       {selectedVisitors.map((visitor) => (
@@ -888,7 +890,7 @@ const InvitationForm = ({
                 {/* Expected Visitor Count Input */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Expected Total Visitors
+                    {t('form.fields.expectedTotalVisitors')}
                   </label>
                   <Input
                     type="number"
@@ -896,10 +898,10 @@ const InvitationForm = ({
                     value={formData.expectedVisitorCount}
                     onChange={(e) => handleChange('expectedVisitorCount', parseInt(e.target.value) || 1)}
                     className="w-full"
-                    placeholder="Total number of expected visitors"
+                    placeholder={t('form.fields.totalVisitorCountPlaceholder')}
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Include visitors not yet added to the list above
+                    {t('form.fields.expectedTotalVisitorsHint')}
                   </p>
                 </div>
 
@@ -912,7 +914,7 @@ const InvitationForm = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
-                  Visit Purpose
+                  {t('form.fields.visitPurpose')}
                 </label>
                 <AutocompleteInput
                   options={visitPurposes}
@@ -920,13 +922,13 @@ const InvitationForm = ({
                   onChange={handleVisitPurposeSelect}
                   getOptionLabel={(purpose) => purpose.name}
                   getOptionDescription={(purpose) => purpose.description}
-                  placeholder="Select visit purpose..."
+                  placeholder={t('form.fields.visitPurposePlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
-                  Location <span className="text-red-500">*</span>
+                  {t('form.fields.location')} <span className="text-red-500">*</span>
                 </label>
                 <div className="flex gap-2">
                   <div className="flex-1">
@@ -937,7 +939,7 @@ const InvitationForm = ({
                       onBlur={() => handleBlur('locationId')}
                       getOptionLabel={(location) => location.name}
                       getOptionDescription={(location) => location.description}
-                      placeholder="Select location..."
+                      placeholder={t('form.fields.locationPlaceholder')}
                       error={touched.locationId ? formErrors.locationId : undefined}
                       required
                     />
@@ -947,9 +949,9 @@ const InvitationForm = ({
                     variant="outline"
                     onClick={handleOpenLocationModal}
                     className="whitespace-nowrap"
-                    title="Add new location"
+                    title={t('form.addLocationTitle')}
                   >
-                    + Add
+                    {t('form.addButton')}
                   </Button>
                 </div>
               </div>
@@ -958,22 +960,22 @@ const InvitationForm = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Invitation Type
+                {t('form.fields.invitationType')}
               </label>
               <select
                 value={formData.type}
                 onChange={(e) => handleChange('type', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500"
               >
-                <option value="Single">Single Visitor</option>
-                <option value="Group">Group Visit</option>
-                <option value="Recurring">Recurring Visit</option>
-                <option value="WalkIn">Walk-in</option>
+                <option value="Single">{t('type.singleVisitor')}</option>
+                <option value="Group">{t('type.groupVisit')}</option>
+                <option value="Recurring">{t('type.recurringVisit')}</option>
+                <option value="WalkIn">{t('type.walkIn')}</option>
               </select>
             </div>
 
               <Input
-                label="Expected Visitor Count"
+                label={t('form.fields.expectedVisitorCount')}
                 type="number"
                 min="1"
                 max="100"

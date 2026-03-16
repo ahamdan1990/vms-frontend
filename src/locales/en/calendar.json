@@ -1,0 +1,41 @@
+{
+  "title": "Calendar",
+  "subtitle": "View and book available time slots",
+  "buttons": {
+    "today": "Today",
+    "week": "Week",
+    "day": "Day",
+    "manageTimeSlots": "Manage Time Slots",
+    "createInvitation": "Create Invitation",
+    "createInvitationForSlot": "Create Invitation for This Slot",
+    "cancel": "Cancel"
+  },
+  "filters": {
+    "filterByLocation": "Filter by Location:",
+    "allLocations": "All Locations",
+    "timeSlotsAvailable": "{{count}} time slots available"
+  },
+  "modal": {
+    "bookTimeSlot": "Book Time Slot",
+    "date": "Date",
+    "time": "Time",
+    "location": "Location",
+    "capacity": "Capacity",
+    "visitorsMax": "{{count}} visitors max",
+    "bufferNote": "Note: This time slot includes a {{minutes}}-minute buffer period",
+    "redirectHint": "You will be redirected to the invitation form with this time slot pre-selected"
+  },
+  "availability": {
+    "available": "Available",
+    "limited": "Limited",
+    "full": "Full",
+    "noSlots": "No slots"
+  },
+  "dayView": {
+    "noSlotsTitle": "No Time Slots Available",
+    "noSlotsMessage": "There are no time slots configured for this date."
+  },
+  "labels": {
+    "today": "Today"
+  }
+}
