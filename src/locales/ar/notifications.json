@@ -102,6 +102,43 @@
     "acknowledgedAll": "تم تأكيد {{count}} إشعار(ات)",
     "failed": "فشل الإجراء الجماعي"
   },
+  "center": {
+    "acknowledgeNote": "تمت المعالجة من مركز الإشعارات",
+    "archive": "أرشفة",
+    "clearAllConfirm": "هل تريد مسح جميع الإشعارات؟",
+    "clearAllTitle": "مسح جميع الإشعارات",
+    "directAcknowledgeNote": "إقرار سريع من مركز الإشعارات",
+    "emptyFilterMessage": "لا توجد إشعارات في {{filter}}",
+    "emptyTitle": "لا توجد إشعارات",
+    "errorLoading": "حدث خطأ أثناء تحميل الإشعارات: {{error}}",
+    "footerCount": "{{count}} إشعار",
+    "markAllReadTitle": "تحديد الكل كمقروء",
+    "realtimeUnavailable": "التحديثات الفورية غير متاحة مؤقتاً.",
+    "retry": "إعادة المحاولة",
+    "updatedLabel": "آخر تحديث:",
+    "viewArchiveTitle": "عرض الإشعارات المؤرشفة",
+    "view": {
+      "listTitle": "عرض قائمة",
+      "cardTitle": "عرض بطاقات"
+    },
+    "filters": {
+      "all": "الكل ({{count}})",
+      "allShort": "الكل",
+      "unread": "غير المقروءة ({{count}})",
+      "visitors": "الزوار",
+      "security": "الأمن",
+      "system": "النظام"
+    }
+  },
+  "toastContainer": {
+    "ariaLabel": "إشعارات منبثقة",
+    "clearSingleConfirm": "هل تريد مسح هذا الإشعار؟",
+    "clearAllTitle": "مسح جميع الإشعارات",
+    "clearSingleTitle": "مسح الإشعار",
+    "clearAria": "مسح {{count}} إشعار",
+    "clearAllButton": "مسح الكل ({{count}})",
+    "clearSingleButton": "مسح"
+  },
   "toast": {
     "refreshTitle": "تم تحديث الإشعارات",
     "refreshMessage": "تم تحديث قائمة الإشعارات",

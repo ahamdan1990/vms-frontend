@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 import { usePermissions } from '../../../hooks/usePermissions';
 
 // Services
@@ -32,6 +32,8 @@ import {
  * Manages department CRUD operations with hierarchical structure support
  */
 const DepartmentsListPage = () => {
+  const { t, i18n } = useTranslation('system');
+  const isRtl = i18n.dir() === 'rtl';
   // Hooks
   const { isAdmin, systemConfig } = usePermissions();
 
@@ -88,12 +90,12 @@ const DepartmentsListPage = () => {
         }
       }
     } catch (err) {
-      setError(err.message || 'Failed to load departments');
+      setError(err.message || t('departments.failedLoad'));
       console.error('Error loading departments:', err);
     } finally {
       setLoading(false);
     }
-  }, [pagination.pageNumber, pagination.pageSize, filters]);
+  }, [pagination.pageNumber, pagination.pageSize, filters, t]);
 
   // Load department hierarchy
   const loadHierarchy = useCallback(async () => {
@@ -152,7 +154,7 @@ const DepartmentsListPage = () => {
       await loadDepartments();
       await loadHierarchy();
     } catch (err) {
-      setError(err.message || 'Failed to create department');
+      setError(err.message || t('departments.failedCreate'));
       console.error('Error creating department:', err);
     } finally {
       setFormLoading(false);
@@ -171,7 +173,7 @@ const DepartmentsListPage = () => {
       await loadDepartments();
       await loadHierarchy();
     } catch (err) {
-      setError(err.message || 'Failed to update department');
+      setError(err.message || t('departments.failedUpdate'));
       console.error('Error updating department:', err);
     } finally {
       setFormLoading(false);
@@ -189,7 +191,7 @@ const DepartmentsListPage = () => {
       await loadDepartments();
       await loadHierarchy();
     } catch (err) {
-      setError(err.message || 'Failed to delete department');
+      setError(err.message || t('departments.failedDelete'));
       console.error('Error deleting department:', err);
     } finally {
       setFormLoading(false);
@@ -200,7 +202,7 @@ const DepartmentsListPage = () => {
   const columns = [
     {
       key: 'name',
-      header: 'Department',
+      header: t('departments.columns.department'),
       sortable: true,
       render: (value, department) => (
         <div>
@@ -220,13 +222,13 @@ const DepartmentsListPage = () => {
     },
     {
       key: 'parentDepartmentName',
-      header: 'Parent Department',
+      header: t('departments.columns.parentDepartment'),
       sortable: false,
       render: (value, department) => (
         <span className="text-sm text-gray-900">
           {department.parentDepartmentName ? (
             <div className="flex items-center">
-              <ChevronRightIcon className="w-4 h-4 text-gray-400 me-1" />
+              <ChevronRightIcon className={`w-4 h-4 text-gray-400 me-1 ${isRtl ? 'rotate-180' : ''}`} />
               {department.parentDepartmentName}
             </div>
           ) : (
@@ -237,7 +239,7 @@ const DepartmentsListPage = () => {
     },
     {
       key: 'managerName',
-      header: 'Manager',
+      header: t('departments.columns.manager'),
       render: (value, department) => (
         <div className="text-sm text-gray-900">
           {department.managerName ? (
@@ -253,7 +255,7 @@ const DepartmentsListPage = () => {
     },
     {
       key: 'displayOrder',
-      header: 'Order',
+      header: t('departments.columns.order'),
       sortable: true,
       width: '80px',
       render: (value, department) => (
@@ -264,7 +266,7 @@ const DepartmentsListPage = () => {
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('departments.columns.actions'),
       width: '120px',
       sortable: false,
       render: (value, department) => (
@@ -275,7 +277,7 @@ const DepartmentsListPage = () => {
               setShowViewModal(true);
             }}
             className="text-gray-600 hover:text-gray-900 transition-colors"
-            title="View details"
+            title={t('common:buttons.view')}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -290,7 +292,7 @@ const DepartmentsListPage = () => {
                 setShowEditModal(true);
               }}
               className="text-blue-600 hover:text-blue-900 transition-colors"
-              title="Edit department"
+              title={t('common:buttons.edit')}
             >
               <PencilIcon className="w-4 h-4" />
             </button>
@@ -302,7 +304,7 @@ const DepartmentsListPage = () => {
                 setShowDeleteModal(true);
               }}
               className="text-red-600 hover:text-red-900 transition-colors"
-              title="Delete department"
+              title={t('common:buttons.delete')}
             >
               <TrashIcon className="w-4 h-4" />
             </button>
@@ -327,8 +329,8 @@ const DepartmentsListPage = () => {
     return (
       <div className="text-center py-12">
         <XCircleIcon className="w-12 h-12 text-red-500 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-gray-900">Access Denied</h2>
-        <p className="text-gray-500 mt-2">You don't have permission to view departments</p>
+        <h2 className="text-xl font-bold text-gray-900">{t('departments.accessDenied')}</h2>
+        <p className="text-gray-500 mt-2">{t('departments.accessDeniedDesc')}</p>
       </div>
     );
   }
@@ -338,9 +340,9 @@ const DepartmentsListPage = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Departments</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('departments.title')}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Manage organizational departments and hierarchical structure
+            {t('departments.subtitle')}
           </p>
         </div>
         <div className="mt-4 sm:mt-0 flex gap-3">
@@ -354,7 +356,7 @@ const DepartmentsListPage = () => {
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              Table
+              {t('departments.viewTable')}
             </button>
             <button
               onClick={() => setViewMode('tree')}
@@ -364,7 +366,7 @@ const DepartmentsListPage = () => {
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              Tree
+              {t('departments.viewTree')}
             </button>
           </div>
 
@@ -376,7 +378,7 @@ const DepartmentsListPage = () => {
               }}
               icon={<PlusIcon className="w-5 h-5" />}
             >
-              Add Department
+              {t('departments.createButton')}
             </Button>
           )}
         </div>
@@ -395,10 +397,10 @@ const DepartmentsListPage = () => {
           <div className="flex-1">
             <Input
               type="text"
-              placeholder="Search departments..."
+              placeholder={t('departments.searchPlaceholder')}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              icon={<MagnifyingGlassIcon className="w-5 h-5" />}
+              leftIcon={<MagnifyingGlassIcon className="w-5 h-5" />}
             />
           </div>
 
@@ -408,7 +410,7 @@ const DepartmentsListPage = () => {
               onClick={() => setShowFilters(!showFilters)}
               icon={<FunnelIcon className="w-5 h-5" />}
             >
-              Filters
+              {t('departments.filters')}
             </Button>
 
             {filters.searchTerm && (
@@ -416,7 +418,7 @@ const DepartmentsListPage = () => {
                 variant="ghost"
                 onClick={handleResetFilters}
               >
-                Clear Filters
+                {t('departments.clearFilters')}
               </Button>
             )}
           </div>
@@ -434,7 +436,7 @@ const DepartmentsListPage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Parent Department
+                    {t('departments.parentDepartment')}
                   </label>
                   <select
                     value={filters.parentDepartmentId || ''}
@@ -446,7 +448,7 @@ const DepartmentsListPage = () => {
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">All Departments</option>
+                    <option value="">{t('departments.allDepartments')}</option>
                     {parentDepartments.map(dept => (
                       <option key={dept.id} value={dept.id}>
                         {dept.name}
@@ -457,7 +459,7 @@ const DepartmentsListPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sort By
+                    {t('departments.sortBy')}
                   </label>
                   <select
                     value={filters.sortBy}
@@ -466,16 +468,16 @@ const DepartmentsListPage = () => {
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="DisplayOrder">Display Order</option>
-                    <option value="Name">Name</option>
-                    <option value="Code">Code</option>
-                    <option value="CreatedOn">Created Date</option>
+                    <option value="DisplayOrder">{t('departments.sortByDisplayOrder')}</option>
+                    <option value="Name">{t('departments.sortByName')}</option>
+                    <option value="Code">{t('departments.sortByCode')}</option>
+                    <option value="CreatedOn">{t('departments.sortByCreatedDate')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sort Direction
+                    {t('departments.sortDirection')}
                   </label>
                   <select
                     value={filters.sortDirection}
@@ -484,8 +486,8 @@ const DepartmentsListPage = () => {
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="asc">Ascending</option>
-                    <option value="desc">Descending</option>
+                    <option value="asc">{t('departments.ascending')}</option>
+                    <option value="desc">{t('departments.descending')}</option>
                   </select>
                 </div>
               </div>
@@ -504,30 +506,30 @@ const DepartmentsListPage = () => {
           departments.length === 0 ? (
             <div className="text-center py-12">
               <Squares2X2Icon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900">No departments found</h3>
-              <p className="text-gray-500 mt-2">Get started by creating a new department</p>
+              <h3 className="text-lg font-medium text-gray-900">{t('departments.emptyMessage')}</h3>
+              <p className="text-gray-500 mt-2">{t('departments.emptyDesc')}</p>
             </div>
           ) : (
             <Table
               data={departments}
               columns={columns}
               loading={loading}
-              emptyMessage="No departments found"
+              emptyMessage={t('departments.emptyMessage')}
               className="departments-table"
             />
           )
         ) : (
           <div className="p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Department Hierarchy</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('departments.hierarchyTitle')}</h3>
             {departmentHierarchy.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                <p>No departments to display</p>
+                <p>{t('departments.noHierarchy')}</p>
               </div>
             ) : (
               <div className="space-y-2">
                 {/* Tree view would be implemented here */}
                 <div className="text-sm text-gray-600">
-                  Tree view coming soon. Currently showing {departmentHierarchy.length} departments.
+                  {t('departments.treeComingSoon', { count: departmentHierarchy.length })}
                 </div>
               </div>
             )}
@@ -542,48 +544,48 @@ const DepartmentsListPage = () => {
           setShowViewModal(false);
           setViewingDepartment(null);
         }}
-        title="Department Details"
+        title={t('departments.details.title')}
         size="lg"
       >
         {viewingDepartment && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Department Name</label>
+                <label className="block text-sm font-medium text-gray-700">{t('departments.details.departmentName')}</label>
                 <p className="mt-1 text-sm text-gray-900">{viewingDepartment.name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Department Code</label>
+                <label className="block text-sm font-medium text-gray-700">{t('departments.details.departmentCode')}</label>
                 <p className="mt-1 text-sm text-gray-900">{viewingDepartment.code || '-'}</p>
               </div>
             </div>
 
             {viewingDepartment.parentDepartmentName && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Parent Department</label>
+                <label className="block text-sm font-medium text-gray-700">{t('departments.details.parentDepartment')}</label>
                 <p className="mt-1 text-sm text-gray-900">{viewingDepartment.parentDepartmentName}</p>
               </div>
             )}
 
             {viewingDepartment.managerName && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Manager</label>
+                <label className="block text-sm font-medium text-gray-700">{t('departments.details.manager')}</label>
                 <p className="mt-1 text-sm text-gray-900">{viewingDepartment.managerName}</p>
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Display Order</label>
+              <label className="block text-sm font-medium text-gray-700">{t('departments.details.displayOrder')}</label>
               <p className="mt-1 text-sm text-gray-900">{viewingDepartment.displayOrder || 0}</p>
             </div>
 
             {viewingDepartment.childDepartments && viewingDepartment.childDepartments.length > 0 && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Child Departments</label>
+                <label className="block text-sm font-medium text-gray-700">{t('departments.details.childDepartments')}</label>
                 <div className="mt-2 space-y-2">
                   {viewingDepartment.childDepartments.map(child => (
                     <div key={child.id} className="text-sm text-gray-900 ms-4">
-                      • {child.name}
+                      - {child.name}
                     </div>
                   ))}
                 </div>
@@ -598,7 +600,7 @@ const DepartmentsListPage = () => {
                   setViewingDepartment(null);
                 }}
               >
-                Close
+                {t('departments.details.close')}
               </Button>
               {canUpdate && (
                 <Button
@@ -609,7 +611,7 @@ const DepartmentsListPage = () => {
                     setShowEditModal(true);
                   }}
                 >
-                  Edit
+                  {t('departments.details.edit')}
                 </Button>
               )}
             </div>
@@ -626,7 +628,7 @@ const DepartmentsListPage = () => {
           setFormData(null);
           setCurrentDepartment(null);
         }}
-        title={showCreateModal ? 'Create Department' : 'Edit Department'}
+        title={showCreateModal ? t('departments.createTitle') : t('departments.editTitle')}
         size="lg"
       >
         <DepartmentForm
@@ -652,14 +654,14 @@ const DepartmentsListPage = () => {
           setCurrentDepartment(null);
         }}
         onConfirm={handleDeleteDepartment}
-        title="Delete Department"
+        title={t('departments.deleteTitle')}
         message={
           currentDepartment
-            ? `Are you sure you want to delete "${currentDepartment.name}"? This cannot be undone.`
-            : 'Are you sure you want to delete this department?'
+            ? t('departments.deleteMessage', { name: currentDepartment.name })
+            : t('common:confirm.delete')
         }
-        confirmText="Delete"
-        cancelText="Cancel"
+        confirmText={t('departments.deleteConfirm')}
+        cancelText={t('departments.cancel')}
         variant="danger"
         loading={formLoading}
       />
@@ -669,6 +671,7 @@ const DepartmentsListPage = () => {
 
 // Placeholder DepartmentForm component
 const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, loading, error }) => {
+  const { t } = useTranslation('system');
   const [formState, setFormState] = useState(initialData || {
     name: '',
     code: '',
@@ -700,8 +703,8 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
   };
 
   const tabs = [
-    { id: 'basic', label: 'Basic Info', icon: '🏢' },
-    { id: 'contact', label: 'Contact', icon: '📞' }
+    { id: 'basic', label: t('departments.form.tabBasic') },
+    { id: 'contact', label: t('departments.form.tabContact') }
   ];
 
   return (
@@ -725,7 +728,6 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <span className="me-1.5">{tab.icon}</span>
             {tab.label}
           </button>
         ))}
@@ -739,7 +741,7 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Department Name <span className="text-red-500">*</span>
+                  {t('departments.form.departmentName')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -748,13 +750,13 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
                   value={formState.name || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., Human Resources"
+                  placeholder={t('departments.form.departmentNamePlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Department Code <span className="text-red-500">*</span>
+                  {t('departments.form.departmentCode')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -763,21 +765,21 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
                   value={formState.code || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., HR"
+                  placeholder={t('departments.form.departmentCodePlaceholder')}
                   disabled={!!initialData}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Parent Department</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('departments.form.parentDepartment')}</label>
               <select
                 name="parentDepartmentId"
                 value={formState.parentDepartmentId || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">None (Root Department)</option>
+                <option value="">{t('departments.form.noneRoot')}</option>
                 {parentDepartments.map(dept => (
                   <option key={dept.id} value={dept.id}>
                     {dept.name}
@@ -788,7 +790,7 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Budget</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('departments.form.budget')}</label>
                 <input
                   type="number"
                   name="budget"
@@ -797,12 +799,12 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
                   min="0"
                   step="0.01"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., 50000"
+                  placeholder={t('departments.form.budgetPlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Display Order</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('departments.form.displayOrder')}</label>
                 <input
                   type="number"
                   name="displayOrder"
@@ -810,20 +812,20 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
                   onChange={handleChange}
                   min="0"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="0"
+                  placeholder={t('departments.form.displayOrderPlaceholder')}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('departments.form.description')}</label>
               <textarea
                 name="description"
                 value={formState.description || ''}
                 onChange={handleChange}
                 rows="3"
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Brief description of the department..."
+                placeholder={t('departments.form.descriptionPlaceholder')}
               />
             </div>
           </div>
@@ -833,38 +835,38 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
         {activeTab === 'contact' && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Department Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('departments.form.departmentEmail')}</label>
               <input
                 type="email"
                 name="email"
                 value={formState.email || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="department@example.com"
+                placeholder={t('departments.form.departmentEmailPlaceholder')}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Department Phone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('departments.form.departmentPhone')}</label>
               <input
                 type="tel"
                 name="phone"
                 value={formState.phone || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="+1 (555) 123-4567"
+                placeholder={t('departments.form.departmentPhonePlaceholder')}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Location / Office</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('departments.form.locationOffice')}</label>
               <input
                 type="text"
                 name="location"
                 value={formState.location || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., Building A, Floor 3"
+                placeholder={t('departments.form.locationPlaceholder')}
               />
             </div>
           </div>
@@ -874,10 +876,10 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
       {/* Action Buttons */}
       <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
         <Button variant="outline" onClick={onCancel} type="button">
-          Cancel
+          {t('departments.form.cancel')}
         </Button>
         <Button type="submit" loading={loading}>
-          {initialData ? 'Update' : 'Create'}
+          {initialData ? t('departments.form.update') : t('departments.form.create')}
         </Button>
       </div>
     </form>
@@ -885,3 +887,4 @@ const DepartmentForm = ({ initialData, parentDepartments, onSubmit, onCancel, lo
 };
 
 export default DepartmentsListPage;
+

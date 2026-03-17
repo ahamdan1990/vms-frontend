@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import Button from '../../common/Button/Button';
 import Select from '../../common/Select/Select';
 import Input from '../../common/Input/Input';
@@ -18,14 +19,10 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
 
-const roleOptions = [
-  { label: 'Staff', value: 'Staff' },
-  { label: 'Receptionist', value: 'Receptionist' },
-  { label: 'Administrator', value: 'Administrator' }
-];
-
 const LdapUsersPanel = ({ canEdit }) => {
+  const { t, i18n } = useTranslation('system');
   const toast = useToast();
+  const isRtl = i18n.dir() === 'rtl';
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
@@ -40,17 +37,26 @@ const LdapUsersPanel = ({ canEdit }) => {
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const [showRolesConfirm, setShowRolesConfirm] = useState(false);
 
+  const roleOptions = useMemo(
+    () => [
+      { label: t('ldap.roleStaff', { defaultValue: 'Staff' }), value: 'Staff' },
+      { label: t('ldap.roleReceptionist', { defaultValue: 'Receptionist' }), value: 'Receptionist' },
+      { label: t('ldap.roleAdministrator', { defaultValue: 'Administrator' }), value: 'Administrator' }
+    ],
+    [t]
+  );
+
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const data = await ldapUsersService.getAllUsers();
       setUsers(data);
     } catch (error) {
-      toast.error('Failed to load LDAP users', error);
+      toast.error(t('ldap.failedLoadUsers'), error?.message);
     } finally {
       setLoading(false);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [t, toast]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const testConnection = useCallback(async () => {
     setTestingConnection(true);
@@ -58,17 +64,17 @@ const LdapUsersPanel = ({ canEdit }) => {
       const status = await ldapUsersService.testConnection();
       setConnectionStatus(status);
       if (status.isConnected) {
-        toast.success('LDAP connection successful');
+        toast.success(t('ldap.connectionSuccess'));
       } else {
-        toast.error('LDAP connection failed', status.message);
+        toast.error(t('ldap.connectionFailedMsg'), status.message);
       }
     } catch (error) {
-      toast.error('Failed to test connection', error);
+      toast.error(t('ldap.failedTestConnection'), error?.message);
       setConnectionStatus({ isConnected: false, message: error.message });
     } finally {
       setTestingConnection(false);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [t, toast]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     fetchUsers();
@@ -121,7 +127,7 @@ const LdapUsersPanel = ({ canEdit }) => {
 
   const handleImportBulk = async () => {
     if (selectedUsers.size === 0) {
-      toast.warning('No users selected', 'Please select at least one user to import');
+      toast.warning(t('ldap.noUsersSelected'), t('ldap.selectAtLeastOne'));
       return;
     }
 
@@ -133,16 +139,16 @@ const LdapUsersPanel = ({ canEdit }) => {
 
       if (result.successCount > 0) {
         toast.success(
-          'Users imported',
-          `Successfully imported ${result.successCount} user(s). ${result.failureCount} failed.`
+          t('ldap.importSuccess'),
+          t('ldap.importSuccessMsg', { success: result.successCount, failed: result.failureCount })
         );
         setSelectedUsers(new Set());
         await fetchUsers();
       } else {
-        toast.error('Import failed', 'No users were imported successfully');
+        toast.error(t('ldap.importFailed'), t('ldap.importFailedMsg'));
       }
     } catch (error) {
-      toast.error('Failed to import users', error);
+      toast.error(t('ldap.failedImportUsers'), error?.message);
     } finally {
       setImporting(false);
     }
@@ -150,7 +156,7 @@ const LdapUsersPanel = ({ canEdit }) => {
 
   const handleImportWithRoles = async () => {
     if (selectedUsers.size === 0) {
-      toast.warning('No users selected', 'Please select at least one user to import');
+      toast.warning(t('ldap.noUsersSelected'), t('ldap.selectAtLeastOne'));
       return;
     }
 
@@ -166,17 +172,17 @@ const LdapUsersPanel = ({ canEdit }) => {
 
       if (result.successCount > 0) {
         toast.success(
-          'Users imported',
-          `Successfully imported ${result.successCount} user(s). ${result.failureCount} failed.`
+          t('ldap.importSuccess'),
+          t('ldap.importSuccessMsg', { success: result.successCount, failed: result.failureCount })
         );
         setSelectedUsers(new Set());
         setIndividualRoles({});
         await fetchUsers();
       } else {
-        toast.error('Import failed', 'No users were imported successfully');
+        toast.error(t('ldap.importFailed'), t('ldap.importFailedMsg'));
       }
     } catch (error) {
-      toast.error('Failed to import users', error);
+      toast.error(t('ldap.failedImportUsers'), error?.message);
     } finally {
       setImporting(false);
     }
@@ -211,7 +217,7 @@ const LdapUsersPanel = ({ canEdit }) => {
               />
               <div>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  {connectionStatus.isConnected ? 'Connected to LDAP' : 'LDAP Connection Failed'}
+                  {connectionStatus.isConnected ? t('ldap.connectedToLdap') : t('ldap.connectionFailed')}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{connectionStatus.message}</p>
               </div>
@@ -223,7 +229,7 @@ const LdapUsersPanel = ({ canEdit }) => {
               disabled={testingConnection}
               icon={testingConnection ? <LoadingSpinner size="sm" /> : <ArrowPathIcon className="h-4 w-4" />}
             >
-              Test Connection
+              {t('ldap.testConnection')}
             </Button>
           </div>
         </div>
@@ -234,19 +240,19 @@ const LdapUsersPanel = ({ canEdit }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
               <p className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-1">
-                Total Users
+                {t('ldap.totalUsers')}
               </p>
               <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{filteredUsers.length}</p>
             </div>
             <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg p-4 border border-green-200 dark:border-green-700">
               <p className="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wide mb-1">
-                Available to Import
+                {t('ldap.availableToImport')}
               </p>
               <p className="text-2xl font-bold text-green-900 dark:text-green-100">{availableUsers.length}</p>
             </div>
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg p-4 border border-purple-200 dark:border-purple-700">
               <p className="text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wide mb-1">
-                Already Imported
+                {t('ldap.alreadyImported')}
               </p>
               <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
                 {filteredUsers.length - availableUsers.length}
@@ -259,9 +265,9 @@ const LdapUsersPanel = ({ canEdit }) => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">LDAP Users</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('ldap.usersTitle')}</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Import users from your LDAP/Active Directory domain.
+              {t('ldap.usersSubtitle')}
             </p>
           </div>
           <Button
@@ -271,7 +277,7 @@ const LdapUsersPanel = ({ canEdit }) => {
             disabled={loading}
             icon={loading ? <LoadingSpinner size="sm" /> : <ArrowPathIcon className="h-4 w-4" />}
           >
-            Refresh
+            {t('ldap.refresh')}
           </Button>
         </div>
 
@@ -279,10 +285,10 @@ const LdapUsersPanel = ({ canEdit }) => {
         <div className="flex gap-4">
           <div className="flex-1">
             <Input
-              placeholder="Search users..."
+              placeholder={t('ldap.searchUsers')}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              icon={MagnifyingGlassIcon}
+              leftIcon={<MagnifyingGlassIcon className="h-5 w-5" />}
             />
           </div>
         </div>
@@ -297,15 +303,15 @@ const LdapUsersPanel = ({ canEdit }) => {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">
-                    {selectedUsers.size} user{selectedUsers.size > 1 ? 's' : ''} selected
+                    {t('ldap.usersSelected', { count: selectedUsers.size })}
                   </p>
-                  <p className="text-xs text-blue-700 dark:text-blue-300">Ready to import into the system</p>
+                  <p className="text-xs text-blue-700 dark:text-blue-300">{t('ldap.readyToImport')}</p>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <div className="w-48">
                   <Select
-                    label="Default Role"
+                    label={t('ldap.defaultRole2')}
                     value={selectedRole}
                     onChange={(e) => setSelectedRole(e.target.value)}
                     options={roleOptions}
@@ -318,7 +324,7 @@ const LdapUsersPanel = ({ canEdit }) => {
                   onClick={() => setSelectedUsers(new Set())}
                   disabled={importing}
                 >
-                  Clear
+                  {t('ldap.clear')}
                 </Button>
                 <Button
                   size="sm"
@@ -326,7 +332,7 @@ const LdapUsersPanel = ({ canEdit }) => {
                   disabled={!canEdit || importing}
                   icon={importing ? <LoadingSpinner size="sm" /> : <UserGroupIcon className="h-4 w-4" />}
                 >
-                  Import All as {selectedRole}
+                  {t('ldap.importAllAs', { role: selectedRole })}
                 </Button>
                 <Button
                   size="sm"
@@ -335,7 +341,7 @@ const LdapUsersPanel = ({ canEdit }) => {
                   disabled={!canEdit || importing}
                   icon={importing ? <LoadingSpinner size="sm" /> : <UserPlusIcon className="h-4 w-4" />}
                 >
-                  Import with Custom Roles
+                  {t('ldap.importWithCustomRoles')}
                 </Button>
               </div>
             </div>
@@ -348,7 +354,7 @@ const LdapUsersPanel = ({ canEdit }) => {
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900/20 dark:to-gray-800/40">
                 <tr>
-                  <th className="px-6 py-4 text-left w-12">
+                  <th className="px-6 py-4 text-start w-12">
                     <input
                       type="checkbox"
                       checked={selectedUsers.size === availableUsers.length && availableUsers.length > 0}
@@ -357,23 +363,23 @@ const LdapUsersPanel = ({ canEdit }) => {
                       className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2 bg-white dark:bg-gray-900 disabled:opacity-50"
                     />
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                    User
+                  <th className="px-6 py-4 text-start text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                    {t('ldap.user')}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                    Email
+                  <th className="px-6 py-4 text-start text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                    {t('ldap.email')}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                    Department
+                  <th className="px-6 py-4 text-start text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                    {t('ldap.department')}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                    Job Title
+                  <th className="px-6 py-4 text-start text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                    {t('ldap.jobTitle')}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                    Status
+                  <th className="px-6 py-4 text-start text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                    {t('ldap.status')}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider min-w-[180px]">
-                    Role
+                  <th className="px-6 py-4 text-start text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider min-w-[180px]">
+                    {t('ldap.role')}
                   </th>
                 </tr>
               </thead>
@@ -386,10 +392,10 @@ const LdapUsersPanel = ({ canEdit }) => {
                           <UserGroupIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                         </div>
                         <p className="text-base font-medium text-gray-900 dark:text-white mb-1">
-                          {searchQuery ? 'No users match your search' : 'No users found'}
+                          {searchQuery ? t('ldap.noUsersMatch') : t('ldap.noUsersFound')}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {searchQuery ? 'Try adjusting your search criteria' : 'No users found in LDAP directory'}
+                          {searchQuery ? t('ldap.adjustSearch') : t('ldap.noUsersFoundDesc')}
                         </p>
                       </div>
                     </td>
@@ -424,7 +430,7 @@ const LdapUsersPanel = ({ canEdit }) => {
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                              {user.displayName || 'Unknown User'}
+                              {user.displayName || t('ldap.unknownUser')}
                             </p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">@{user.username}</p>
                           </div>
@@ -443,12 +449,12 @@ const LdapUsersPanel = ({ canEdit }) => {
                         {user.isAlreadyImported ? (
                           <Badge variant="success" size="sm" className="inline-flex items-center gap-1.5">
                             <CheckIcon className="h-3.5 w-3.5" />
-                            Imported
+                            {t('ldap.imported')}
                           </Badge>
                         ) : (
                           <Badge variant="secondary" size="sm" className="inline-flex items-center gap-1.5">
                             <XMarkIcon className="h-3.5 w-3.5" />
-                            Available
+                            {t('ldap.available')}
                           </Badge>
                         )}
                       </td>
@@ -467,7 +473,7 @@ const LdapUsersPanel = ({ canEdit }) => {
                             />
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-400 dark:text-gray-500">Not selected</span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500">{t('ldap.notSelected')}</span>
                         )}
                       </td>
                     </tr>
@@ -483,13 +489,13 @@ const LdapUsersPanel = ({ canEdit }) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <p className="text-sm text-gray-700 dark:text-gray-300">
-                    Showing <span className="font-semibold">{startIndex + 1}</span> to{' '}
-                    <span className="font-semibold">{Math.min(endIndex, filteredUsers.length)}</span> of{' '}
-                    <span className="font-semibold">{filteredUsers.length}</span> users
+                    {t('ldap.showing')} <span className="font-semibold">{startIndex + 1}</span> {t('ldap.to')}{' '}
+                    <span className="font-semibold">{Math.min(endIndex, filteredUsers.length)}</span> {t('ldap.of')}{' '}
+                    <span className="font-semibold">{filteredUsers.length}</span> {t('ldap.users')}
                   </p>
                   {availableUsers.length > 0 && (
                     <span className="text-xs text-gray-500 dark:text-gray-400">
-                      ({availableUsers.length} available for import)
+                      {t('ldap.availableForImport', { count: availableUsers.length })}
                     </span>
                   )}
                 </div>
@@ -499,9 +505,13 @@ const LdapUsersPanel = ({ canEdit }) => {
                     size="sm"
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
-                    icon={<ChevronLeftIcon className="h-4 w-4" />}
+                    icon={
+                      isRtl
+                        ? <ChevronRightIcon className="h-4 w-4" />
+                        : <ChevronLeftIcon className="h-4 w-4" />
+                    }
                   >
-                    Previous
+                    {t('ldap.previous')}
                   </Button>
                   <div className="flex items-center gap-1">
                     {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
@@ -535,9 +545,13 @@ const LdapUsersPanel = ({ canEdit }) => {
                     size="sm"
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
-                    icon={<ChevronRightIcon className="h-4 w-4" />}
+                    icon={
+                      isRtl
+                        ? <ChevronLeftIcon className="h-4 w-4" />
+                        : <ChevronRightIcon className="h-4 w-4" />
+                    }
                   >
-                    Next
+                    {t('ldap.next')}
                   </Button>
                 </div>
               </div>
@@ -552,11 +566,12 @@ const LdapUsersPanel = ({ canEdit }) => {
         isOpen={showBulkConfirm}
         onClose={() => setShowBulkConfirm(false)}
         onConfirm={handleImportBulk}
-        title="Import Users with Unified Role"
-        message={`Are you sure you want to import ${selectedUsers.size} user${
-          selectedUsers.size > 1 ? 's' : ''
-        } with the role "${selectedRole}"? This action cannot be undone.`}
-        confirmText="Import Users"
+        title={t('ldap.importUsersUnified')}
+        message={t('ldap.importUsersUnifiedMsg', {
+          count: selectedUsers.size,
+          role: selectedRole
+        })}
+        confirmText={t('ldap.importUsers')}
         confirmVariant="primary"
       />
 
@@ -564,11 +579,11 @@ const LdapUsersPanel = ({ canEdit }) => {
         isOpen={showRolesConfirm}
         onClose={() => setShowRolesConfirm(false)}
         onConfirm={handleImportWithRoles}
-        title="Import Users with Custom Roles"
-        message={`Are you sure you want to import ${selectedUsers.size} user${
-          selectedUsers.size > 1 ? 's' : ''
-        } with their individually assigned roles? This action cannot be undone.`}
-        confirmText="Import Users"
+        title={t('ldap.importUsersCustomRoles')}
+        message={t('ldap.importUsersCustomRolesMsg', {
+          count: selectedUsers.size
+        })}
+        confirmText={t('ldap.importUsers')}
         confirmVariant="primary"
       />
     </div>

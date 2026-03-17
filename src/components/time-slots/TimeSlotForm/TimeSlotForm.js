@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 
 // Components
 import Input from '../../common/Input/Input';
@@ -24,9 +25,11 @@ const TimeSlotForm = ({
   onCancel,
   loading = false,
   error = null,
-  submitText = 'Save',
-  cancelText = 'Cancel'
+  submitText = null,
+  cancelText = null
 }) => {
+  const { t } = useTranslation(['system', 'common']);
+
   // Redux state
   const { list: locations, loading: locationsLoading } = useSelector(state => state.locations);
 
@@ -127,33 +130,33 @@ const TimeSlotForm = ({
     
     // Basic field validation
     if (!formData.name.trim()) {
-      errors.name = 'Time slot name is required';
+      errors.name = t('timeSlots.form.validation.nameRequired');
     }
     
     if (!formData.startTime) {
-      errors.startTime = 'Start time is required';
+      errors.startTime = t('timeSlots.form.validation.startTimeRequired');
     }
     
     if (!formData.endTime) {
-      errors.endTime = 'End time is required';
+      errors.endTime = t('timeSlots.form.validation.endTimeRequired');
     }
     
     if (formData.startTime && formData.endTime && formData.startTime >= formData.endTime) {
-      errors.endTime = 'End time must be after start time';
+      errors.endTime = t('timeSlots.form.validation.endAfterStart');
     }
     
     if (!formData.maxVisitors || formData.maxVisitors < 1) {
-      errors.maxVisitors = 'Maximum visitors must be at least 1';
+      errors.maxVisitors = t('timeSlots.form.validation.maxVisitorsMin');
     }
     
     // Active days validation - ensure we have selected days and correct format
     if (selectedDays.length === 0) {
-      errors.activeDays = 'Please select at least one active day';
+      errors.activeDays = t('timeSlots.form.validation.activeDaysRequired');
     } else {
       // Validate that all selected days are in valid range (1-7)
       const invalidDays = selectedDays.filter(day => day < 1 || day > 7);
       if (invalidDays.length > 0) {
-        errors.activeDays = 'Invalid day selection detected. Please reselect days.';
+        errors.activeDays = t('timeSlots.form.validation.activeDaysInvalid');
       }
     }
     
@@ -221,18 +224,18 @@ const TimeSlotForm = ({
 
   // Day options - Backend expects: 1=Monday, 2=Tuesday, ..., 7=Sunday
   const dayOptions = [
-    { value: 1, label: 'Monday', short: 'Mon', color: 'blue' },
-    { value: 2, label: 'Tuesday', short: 'Tue', color: 'blue' },
-    { value: 3, label: 'Wednesday', short: 'Wed', color: 'blue' },
-    { value: 4, label: 'Thursday', short: 'Thu', color: 'blue' },
-    { value: 5, label: 'Friday', short: 'Fri', color: 'blue' },
-    { value: 6, label: 'Saturday', short: 'Sat', color: 'purple' },
-    { value: 7, label: 'Sunday', short: 'Sun', color: 'red' }
+    { value: 1, label: t('timeSlots.form.days.monday'), short: t('timeSlots.form.daysShort.monday'), color: 'blue' },
+    { value: 2, label: t('timeSlots.form.days.tuesday'), short: t('timeSlots.form.daysShort.tuesday'), color: 'blue' },
+    { value: 3, label: t('timeSlots.form.days.wednesday'), short: t('timeSlots.form.daysShort.wednesday'), color: 'blue' },
+    { value: 4, label: t('timeSlots.form.days.thursday'), short: t('timeSlots.form.daysShort.thursday'), color: 'blue' },
+    { value: 5, label: t('timeSlots.form.days.friday'), short: t('timeSlots.form.daysShort.friday'), color: 'blue' },
+    { value: 6, label: t('timeSlots.form.days.saturday'), short: t('timeSlots.form.daysShort.saturday'), color: 'purple' },
+    { value: 7, label: t('timeSlots.form.days.sunday'), short: t('timeSlots.form.daysShort.sunday'), color: 'red' }
   ];
 
   // Location options
   const locationOptions = [
-    { value: '', label: 'No specific location' },
+    { value: '', label: t('timeSlots.form.noSpecificLocation') },
     ...locations.map(location => ({
       value: location.id.toString(),
       label: location.name
@@ -252,11 +255,11 @@ const TimeSlotForm = ({
           <div className="flex">
             <div className="ms-3">
               <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-                {Array.isArray(error) ? 'Validation Errors' : 'Error'}
+                {Array.isArray(error) ? t('timeSlots.form.validationErrorsTitle') : t('common:alerts.error')}
               </h3>
               <div className="mt-2 text-sm text-red-700 dark:text-red-200">
                 {Array.isArray(error) ? (
-                  <ul className="list-disc pl-5 space-y-1">
+                  <ul className="list-disc ps-5 space-y-1">
                     {error.map((err, index) => (
                       <li key={index}>{err}</li>
                     ))}
@@ -283,36 +286,36 @@ const TimeSlotForm = ({
             <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Basic Information
+            {t('timeSlots.form.sections.basicInfo')}
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              label="Time Slot Name"
+              label={t('timeSlots.form.fields.name')}
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
               error={validationErrors.name}
               required
-              placeholder="e.g., Morning Session"
+              placeholder={t('timeSlots.form.placeholders.name')}
             />
 
             <div>
               <Select
-                label="Location"
+                label={t('common:labels.location')}
                 value={formData.locationId?.toString() || ''}
                 onChange={(e) => handleInputChange('locationId', e.target.value || null)}
                 options={locationOptions}
                 loading={locationsLoading}
                 error={validationErrors.locationId}
               />
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Optional: Assign to specific location</p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('timeSlots.form.help.location')}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Input
               type="time"
-              label="Start Time"
+              label={t('timeSlots.form.fields.startTime')}
               value={formData.startTime}
               onChange={(e) => handleInputChange('startTime', e.target.value)}
               error={validationErrors.startTime}
@@ -321,7 +324,7 @@ const TimeSlotForm = ({
 
             <Input
               type="time"
-              label="End Time"
+              label={t('timeSlots.form.fields.endTime')}
               value={formData.endTime}
               onChange={(e) => handleInputChange('endTime', e.target.value)}
               error={validationErrors.endTime}
@@ -330,10 +333,10 @@ const TimeSlotForm = ({
 
             <div className="flex flex-col">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                Duration
+                {t('common:labels.duration')}
               </label>
               <div className="px-3 py-2 bg-gray-50 dark:bg-gray-900/60 border border-gray-300 dark:border-gray-700 rounded-md text-sm text-gray-600 dark:text-gray-200">
-                {duration > 0 ? `${duration} minutes` : 'Select times'}
+                {duration > 0 ? t('timeSlots.form.durationValue', { count: duration }) : t('timeSlots.form.selectTimes')}
               </div>
             </div>
           </div>
@@ -345,13 +348,13 @@ const TimeSlotForm = ({
             <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            Capacity & Settings
+            {t('timeSlots.form.sections.capacitySettings')}
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Input
               type="number"
-              label="Maximum Visitors"
+              label={t('timeSlots.form.fields.maxVisitors')}
               value={formData.maxVisitors}
               onChange={(e) => handleInputChange('maxVisitors', parseInt(e.target.value) || 1)}
               error={validationErrors.maxVisitors}
@@ -362,23 +365,23 @@ const TimeSlotForm = ({
 
             <Input
               type="number"
-              label="Buffer Minutes"
+              label={t('timeSlots.form.fields.bufferMinutes')}
               value={formData.bufferMinutes}
               onChange={(e) => handleInputChange('bufferMinutes', parseInt(e.target.value) || 0)}
               error={validationErrors.bufferMinutes}
               min="0"
               max="120"
-              helperText="Time between appointments"
+              helperText={t('timeSlots.form.help.bufferMinutes')}
             />
 
             <Input
               type="number"
-              label="Display Order"
+              label={t('timeSlots.form.fields.displayOrder')}
               value={formData.displayOrder}
               onChange={(e) => handleInputChange('displayOrder', parseInt(e.target.value) || 0)}
               error={validationErrors.displayOrder}
               min="0"
-              helperText="Sort order in lists"
+              helperText={t('timeSlots.form.help.displayOrder')}
             />
           </div>
         </div>
@@ -389,16 +392,16 @@ const TimeSlotForm = ({
             <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            Active Days Schedule
+            {t('timeSlots.form.sections.activeDays')}
           </h3>
 
           <div className="bg-white dark:bg-gray-950/40 border border-gray-100 dark:border-gray-800 rounded-lg p-4">
             <div className="mb-3">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                Select Active Days <span className="text-red-500 dark:text-red-400">*</span>
+                {t('timeSlots.form.fields.activeDays')} <span className="text-red-500 dark:text-red-400">*</span>
               </label>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Choose the days when this time slot is available
+                {t('timeSlots.form.help.activeDays')}
               </p>
             </div>
             
@@ -436,7 +439,7 @@ const TimeSlotForm = ({
                     </div>
 
                     {isSelected && (
-                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                      <div className="absolute -top-1 -end-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
                         <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
@@ -454,7 +457,7 @@ const TimeSlotForm = ({
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   <p className="text-xs font-medium text-green-800 dark:text-green-200">
-                    {selectedDays.length} day{selectedDays.length > 1 ? 's' : ''} selected:
+                    {t('timeSlots.form.selectedDaysCount', { count: selectedDays.length })}
                   </p>
                   <p className="text-xs text-green-700 dark:text-green-200">
                     {selectedDays
@@ -473,7 +476,7 @@ const TimeSlotForm = ({
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                   <p className="text-xs text-amber-800 dark:text-amber-200">
-                    Please select at least one day for this time slot
+                    {t('timeSlots.form.selectAtLeastOneDay')}
                   </p>
                 </div>
               </div>
@@ -493,14 +496,14 @@ const TimeSlotForm = ({
                   className="h-5 w-5 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded transition-all bg-white dark:bg-gray-900"
                 />
                 <label htmlFor="isActive" className="ms-3 block cursor-pointer">
-                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Enable Time Slot</span>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('timeSlots.form.fields.enableTimeSlot')}</span>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Active slots are available for scheduling
+                    {t('timeSlots.form.help.enableTimeSlot')}
                   </p>
                 </label>
               </div>
               <Badge variant={formData.isActive ? 'success' : 'secondary'} size="sm">
-                {formData.isActive ? 'Active' : 'Inactive'}
+                {formData.isActive ? t('common:status.active') : t('common:status.inactive')}
               </Badge>
             </div>
           </div>
@@ -514,7 +517,7 @@ const TimeSlotForm = ({
             onClick={onCancel}
             disabled={loading}
           >
-            {cancelText}
+            {cancelText || t('common:buttons.cancel')}
           </Button>
           
           <Button
@@ -522,7 +525,7 @@ const TimeSlotForm = ({
             loading={loading}
             disabled={selectedDays.length === 0}
           >
-            {submitText}
+            {submitText || t('common:buttons.save')}
           </Button>
         </div>
       </form>

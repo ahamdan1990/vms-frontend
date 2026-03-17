@@ -60,7 +60,7 @@ const Accordion = ({
         );
 
         const headerClasses = classNames(
-          'accordion-header w-full px-4 py-3 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-200',
+          'accordion-header w-full px-4 py-3 text-start focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-200',
           {
             'hover:bg-gray-50 cursor-pointer': !isDisabled,
             'cursor-not-allowed text-gray-400': isDisabled,
@@ -86,7 +86,7 @@ const Accordion = ({
               disabled={isDisabled}
             >
               <div className="flex items-center justify-between">
-                <div className="flex-1 text-left">
+                <div className="flex-1 text-start">
                   {typeof item.header === 'string' ? (
                     <span className="text-sm font-medium text-gray-900">
                       {item.header}
@@ -108,7 +108,7 @@ const Accordion = ({
               </div>
               
               {item.subtitle && (
-                <div className="mt-1 text-sm text-gray-500 text-left">
+                <div className="mt-1 text-sm text-gray-500 text-start">
                   {item.subtitle}
                 </div>
               )}
@@ -153,7 +153,7 @@ export const AccordionItem = ({
   );
 
   const headerClasses = classNames(
-    'accordion-header w-full px-4 py-3 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-200',
+    'accordion-header w-full px-4 py-3 text-start focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset transition-colors duration-200',
     {
       'hover:bg-gray-50 cursor-pointer': !disabled,
       'cursor-not-allowed text-gray-400': disabled,
@@ -176,7 +176,7 @@ export const AccordionItem = ({
         disabled={disabled}
       >
         <div className="flex items-center justify-between">
-          <div className="flex-1 text-left">
+          <div className="flex-1 text-start">
             {typeof header === 'string' ? (
               <span className="text-sm font-medium text-gray-900">
                 {header}
@@ -198,7 +198,7 @@ export const AccordionItem = ({
         </div>
         
         {subtitle && (
-          <div className="mt-1 text-sm text-gray-500 text-left">
+          <div className="mt-1 text-sm text-gray-500 text-start">
             {subtitle}
           </div>
         )}

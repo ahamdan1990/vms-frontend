@@ -137,7 +137,7 @@ const Alert = ({
 
         {/* Dismiss Button */}
         {dismissible && (
-          <div className="ms-auto pl-3">
+          <div className="ms-auto ps-3">
             <div className="-mx-1.5 -my-1.5">
               <button
                 type="button"

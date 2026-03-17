@@ -60,6 +60,9 @@
     "hideSensitive": "Hide Sensitive",
     "showSensitive": "Show Sensitive",
     "clearCache": "Clear Cache",
+    "errorOccurred": "An error occurred",
+    "maskedValue": "••••••••",
+    "restartRequired": "Restart required: {{count}}",
     "restartRequired_one": "{{count}} restart required",
     "restartRequired_other": "{{count}} restarts required",
     "noConfigurations": "No configurations found",
@@ -122,6 +125,9 @@
     "syncProfile": "Sync Profile on Login",
     "syncProfileDesc": "Refresh LDAP attributes every time the user signs in.",
     "defaultRole": "Default Role for Imported Users",
+    "roleStaff": "Staff",
+    "roleReceptionist": "Receptionist",
+    "roleAdministrator": "Administrator",
     "allowRoleOverride": "Allow Role Overrides on Import",
     "allowRoleOverrideDesc": "Permit admins to assign a different role when importing directory users.",
     "failedLoad": "Failed to load LDAP settings",
@@ -392,8 +398,19 @@
         "emailInvalid": "Invalid email format: {{emails}}",
         "phoneRequired": "Phone numbers are required for SMS escalation",
         "phoneInvalid": "Invalid phone format: {{phones}}"
-      }
-    }
+      },
+      "actionDescriptions": {
+        "escalateToUser": "Escalate the alert to a specific user",
+        "escalateToRole": "Escalate the alert to all users with a specific role",
+        "sendEmail": "Send email notifications to specified addresses",
+        "sendSms": "Send SMS notifications to specified phone numbers",
+        "createHighPriorityAlert": "Create a high priority alert in the system",
+        "logCriticalEvent": "Log the event as a critical system event"
+      },
+      "configPlaceholder": "{\"key\": \"value\"}"
+    },
+    "bulkMessage_one": "Are you sure you want to {{action}} {{count}} selected escalation rule?",
+    "bulkMessage_other": "Are you sure you want to {{action}} {{count}} selected escalation rules?"
   },
   "roles": {
     "title": "Role Management",
@@ -424,7 +441,50 @@
     "editTooltipFull": "Edit role details",
     "deactivateTooltip": "Deactivate role",
     "viewTooltip": "View and manage role details",
-    "edit": "Edit",
+    "edit": {
+      "title": "Edit Role: {{name}}",
+      "roleDetails": "Role Details",
+      "permissionsTab": "Permissions ({{count}} selected)",
+      "systemRoleWarning": "System Role - Limited Editing",
+      "systemRoleDesc": "System roles have restricted editing. You can only modify display properties (name, description, color, icon).",
+      "roleNameReadonly": "Role Name (Cannot be changed)",
+      "displayName": "Display Name",
+      "displayNameHelper": "User-friendly name shown in the UI",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe the role's purpose and responsibilities",
+      "displayOrder": "Display Order",
+      "displayOrderHelper": "Order in which this role appears in lists (lower numbers appear first)",
+      "color": "Color",
+      "icon": "Icon (Emoji or Text)",
+      "iconHelper": "Emoji or short text to represent the role visually",
+      "activeLabel": "Active (Uncheck to deactivate this role)",
+      "inactive": "Inactive",
+      "preview": "Preview:",
+      "searchPermissions": "Search permissions...",
+      "allCategories": "All Categories",
+      "noPermissions": "No permissions found",
+      "adjustSearch": "Try adjusting your search or filter",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "selectedOf": "{{selected}} of {{total}} selected",
+      "permissionsSelected": "{{count}} permission(s) selected",
+      "cancel": "Cancel",
+      "backToDetails": "Back to Details",
+      "updateRole": "Update Role",
+      "validationError": "Please fix the validation errors",
+      "noRoleSelected": "No role selected",
+      "updatedSuccess": "Role \"{{name}}\" updated with {{count}} permissions",
+      "updatedSuccessSimple": "Role \"{{name}}\" updated successfully",
+      "permissionUpdateReason": "Permissions updated for role {{name}}",
+      "failedUpdate": "Failed to update role",
+      "validation": {
+        "displayNameRequired": "Display name is required",
+        "displayNameLengthError": "Display name cannot exceed 150 characters",
+        "descriptionLengthError": "Description cannot exceed 500 characters",
+        "colorError": "Color must be a valid hex color (e.g., #3B82F6)",
+        "iconLengthError": "Icon cannot exceed 50 characters"
+      }
+    },
     "delete": "Delete",
     "details": {
       "backToRoles": "Back to Roles",
@@ -446,6 +506,7 @@
       "cancel": "Cancel",
       "saveChanges": "Save Changes",
       "permissionsUpdated": "Role permissions updated successfully",
+      "permissionUpdateReason": "Permissions updated for role {{name}}",
       "failedUpdate": "Failed to update permissions"
     },
     "create": {
@@ -488,49 +549,6 @@
         "displayNameLengthError": "Display name cannot exceed 150 characters",
         "descriptionLengthError": "Description cannot exceed 500 characters",
         "hierarchyLevelError": "Hierarchy level must be between 1 and 10",
-        "colorError": "Color must be a valid hex color (e.g., #3B82F6)",
-        "iconLengthError": "Icon cannot exceed 50 characters"
-      }
-    },
-    "edit": {
-      "title": "Edit Role: {{name}}",
-      "roleDetails": "Role Details",
-      "permissionsTab": "Permissions ({{count}} selected)",
-      "systemRoleWarning": "System Role - Limited Editing",
-      "systemRoleDesc": "System roles have restricted editing. You can only modify display properties (name, description, color, icon).",
-      "roleNameReadonly": "Role Name (Cannot be changed)",
-      "displayName": "Display Name",
-      "displayNameHelper": "User-friendly name shown in the UI",
-      "description": "Description",
-      "descriptionPlaceholder": "Describe the role's purpose and responsibilities",
-      "displayOrder": "Display Order",
-      "displayOrderHelper": "Order in which this role appears in lists (lower numbers appear first)",
-      "color": "Color",
-      "icon": "Icon (Emoji or Text)",
-      "iconHelper": "Emoji or short text to represent the role visually",
-      "activeLabel": "Active (Uncheck to deactivate this role)",
-      "inactive": "Inactive",
-      "preview": "Preview:",
-      "searchPermissions": "Search permissions...",
-      "allCategories": "All Categories",
-      "noPermissions": "No permissions found",
-      "adjustSearch": "Try adjusting your search or filter",
-      "selectAll": "Select All",
-      "deselectAll": "Deselect All",
-      "selectedOf": "{{selected}} of {{total}} selected",
-      "permissionsSelected": "{{count}} permission(s) selected",
-      "cancel": "Cancel",
-      "backToDetails": "Back to Details",
-      "updateRole": "Update Role",
-      "validationError": "Please fix the validation errors",
-      "noRoleSelected": "No role selected",
-      "updatedSuccess": "Role \"{{name}}\" updated with {{count}} permissions",
-      "updatedSuccessSimple": "Role \"{{name}}\" updated successfully",
-      "failedUpdate": "Failed to update role",
-      "validation": {
-        "displayNameRequired": "Display name is required",
-        "displayNameLengthError": "Display name cannot exceed 150 characters",
-        "descriptionLengthError": "Description cannot exceed 500 characters",
         "colorError": "Color must be a valid hex color (e.g., #3B82F6)",
         "iconLengthError": "Icon cannot exceed 50 characters"
       }
@@ -619,23 +637,37 @@
       "tabContact": "Contact",
       "tabAddress": "Address",
       "companyName": "Company Name",
+      "companyNamePlaceholder": "e.g., Acme Corporation",
       "companyCode": "Company Code",
+      "companyCodePlaceholder": "e.g., ACME",
       "industry": "Industry",
+      "industryPlaceholder": "e.g., Technology",
       "employeeCount": "Employee Count",
+      "employeeCountPlaceholder": "e.g., 100",
       "website": "Website",
+      "websitePlaceholder": "https://example.com",
       "taxId": "Tax ID / Registration Number",
+      "taxIdPlaceholder": "e.g., 12-3456789",
       "descriptionLabel": "Description",
       "descriptionPlaceholder": "Brief description of the company...",
       "contactPersonName": "Contact Person Name",
+      "contactPersonNamePlaceholder": "e.g., John Doe",
       "contactEmail": "Contact Email",
+      "contactEmailPlaceholder": "contact@example.com",
       "contactPhone": "Contact Phone",
+      "contactPhonePlaceholder": "+1 (555) 123-4567",
       "street1": "Street Address 1",
+      "street1Placeholder": "e.g., 123 Main Street",
       "street2": "Street Address 2",
       "street2Placeholder": "Suite, Floor, Building (optional)",
       "city": "City",
+      "cityPlaceholder": "e.g., New York",
       "stateProvince": "State / Province",
+      "stateProvincePlaceholder": "e.g., NY",
       "postalCode": "Postal Code",
+      "postalCodePlaceholder": "e.g., 10001",
       "country": "Country",
+      "countryPlaceholder": "e.g., United States",
       "cancel": "Cancel",
       "create": "Create",
       "update": "Update"
@@ -700,15 +732,21 @@
       "tabBasic": "Basic Info",
       "tabContact": "Contact",
       "departmentName": "Department Name",
+      "departmentNamePlaceholder": "e.g., Human Resources",
       "departmentCode": "Department Code",
+      "departmentCodePlaceholder": "e.g., HR",
       "parentDepartment": "Parent Department",
       "noneRoot": "None (Root Department)",
       "budget": "Budget",
+      "budgetPlaceholder": "e.g., 50000",
       "displayOrder": "Display Order",
+      "displayOrderPlaceholder": "0",
       "description": "Description",
       "descriptionPlaceholder": "Brief description of the department...",
       "departmentEmail": "Department Email",
+      "departmentEmailPlaceholder": "department@example.com",
       "departmentPhone": "Department Phone",
+      "departmentPhonePlaceholder": "+1 (555) 123-4567",
       "locationOffice": "Location / Office",
       "locationPlaceholder": "e.g., Building A, Floor 3",
       "cancel": "Cancel",
@@ -732,6 +770,19 @@
     "viewTable": "Table",
     "viewTree": "Tree",
     "locationType": "Location Type",
+    "typeGeneral": "General",
+    "typeBadge": {
+      "floor": "F",
+      "room": "R"
+    },
+    "types": {
+      "building": "Building",
+      "floor": "Floor",
+      "room": "Room",
+      "zone": "Zone",
+      "parking": "Parking",
+      "other": "Other"
+    },
     "allTypes": "All Types",
     "includeInactive": "Include inactive locations",
     "rootOnly": "Root locations only",
@@ -780,9 +831,84 @@
     "deleteMessageGeneric": "Are you sure you want to delete this location?",
     "bulkDeleteTitle": "Delete Selected Locations",
     "bulkDeleteMessage": "Are you sure you want to delete {{count}} location{{plural}}? This will deactivate the locations but preserve historical data.",
-    "deleteSelected": "Delete Selected",
     "deleteConfirm": "Delete",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "form": {
+      "sections": {
+        "basicInfo": "Basic Information",
+        "typeHierarchy": "Type and Hierarchy",
+        "capacityAccess": "Capacity and Access Control",
+        "preview": "Preview"
+      },
+      "fields": {
+        "name": "Location Name",
+        "code": "Location Code",
+        "description": "Description",
+        "locationType": "Location Type",
+        "parentLocation": "Parent Location",
+        "building": "Building",
+        "floor": "Floor",
+        "zone": "Zone",
+        "maxCapacity": "Maximum Capacity",
+        "accessLevel": "Access Level",
+        "displayOrder": "Display Order",
+        "requiresEscort": "Requires escort for visitors",
+        "isActive": "Active (available for selection)"
+      },
+      "placeholders": {
+        "name": "e.g., Conference Room A, Building 1, Floor 2",
+        "code": "e.g., CONF-A, B1-F2-R101",
+        "description": "Optional description of the location...",
+        "building": "e.g., Main Building, Tower A",
+        "floor": "e.g., 1, 2, B1, Mezzanine",
+        "zone": "e.g., North Wing, East Side",
+        "maxCapacity": "Leave empty if no limit",
+        "displayOrder": "Optional sort order"
+      },
+      "help": {
+        "code": "Optional unique identifier (letters, numbers, hyphens, underscores)",
+        "maxCapacity": "Maximum number of people allowed",
+        "displayOrder": "Lower numbers appear first"
+      },
+      "options": {
+        "noParent": "No Parent (Root Location)"
+      },
+      "loadingLocations": "Loading locations...",
+      "descriptionCount": "{{count}}/500 characters",
+      "accessLevels": {
+        "standard": "Standard Access",
+        "medium": "Medium Security",
+        "high": "High Security",
+        "restricted": "Restricted Access"
+      },
+      "preview": {
+        "fallbackName": "Location Name",
+        "maxLabel": "Max: {{count}}",
+        "accessBadge": "{{level}} Access",
+        "escortRequired": "Escort Required"
+      },
+      "actions": {
+        "create": "Create Location",
+        "update": "Update Location"
+      },
+      "validation": {
+        "nameRequired": "Location name is required",
+        "nameMin": "Location name must be at least 2 characters",
+        "nameMax": "Location name must be less than 100 characters",
+        "codeInvalid": "Location code must contain only letters, numbers, hyphens, and underscores",
+        "descriptionMax": "Description must be less than 500 characters",
+        "displayOrderInvalid": "Display order must be a number",
+        "maxCapacityInvalid": "Max capacity must be a positive number",
+        "floorMax": "Floor must be less than 20 characters",
+        "buildingMax": "Building name must be less than 100 characters",
+        "zoneMax": "Zone must be less than 50 characters",
+        "parentSelf": "A location cannot be its own parent"
+      }
+    },
+    "bulkSelected_one": "{{count}} location selected",
+    "bulkSelected_other": "{{count}} locations selected",
+    "bulkDeleteMessage_one": "Are you sure you want to delete {{count}} location? This will deactivate the location but preserve historical data.",
+    "bulkDeleteMessage_other": "Are you sure you want to delete {{count}} locations? This will deactivate the locations but preserve historical data."
   },
   "timeSlots": {
     "title": "Time Slots",
@@ -861,7 +987,73 @@
     "failedCreate": "Failed to create time slot: {{error}}",
     "failedUpdate": "Failed to update time slot: {{error}}",
     "failedDelete": "Failed to delete time slot: {{error}}",
-    "bulkFailed": "Bulk action failed: {{error}}"
+    "bulkFailed": "Bulk action failed: {{error}}",
+    "form": {
+      "sections": {
+        "basicInfo": "Basic Information",
+        "capacitySettings": "Capacity & Settings",
+        "activeDays": "Active Days Schedule"
+      },
+      "fields": {
+        "name": "Time Slot Name",
+        "startTime": "Start Time",
+        "endTime": "End Time",
+        "maxVisitors": "Maximum Visitors",
+        "bufferMinutes": "Buffer Minutes",
+        "displayOrder": "Display Order",
+        "activeDays": "Select Active Days",
+        "enableTimeSlot": "Enable Time Slot"
+      },
+      "placeholders": {
+        "name": "e.g., Morning Session"
+      },
+      "help": {
+        "location": "Optional: Assign to specific location",
+        "bufferMinutes": "Time between appointments",
+        "displayOrder": "Sort order in lists",
+        "activeDays": "Choose the days when this time slot is available",
+        "enableTimeSlot": "Active slots are available for scheduling"
+      },
+      "validationErrorsTitle": "Validation Errors",
+      "durationValue": "{{count}} minutes",
+      "selectTimes": "Select times",
+      "selectedDaysCount": "{{count}} day selected:",
+      "selectedDaysCount_one": "{{count}} day selected:",
+      "selectedDaysCount_other": "{{count}} days selected:",
+      "selectAtLeastOneDay": "Please select at least one day for this time slot",
+      "noSpecificLocation": "No specific location",
+      "days": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      },
+      "daysShort": {
+        "monday": "Mon",
+        "tuesday": "Tue",
+        "wednesday": "Wed",
+        "thursday": "Thu",
+        "friday": "Fri",
+        "saturday": "Sat",
+        "sunday": "Sun"
+      },
+      "validation": {
+        "nameRequired": "Time slot name is required",
+        "startTimeRequired": "Start time is required",
+        "endTimeRequired": "End time is required",
+        "endAfterStart": "End time must be after start time",
+        "maxVisitorsMin": "Maximum visitors must be at least 1",
+        "activeDaysRequired": "Please select at least one active day",
+        "activeDaysInvalid": "Invalid day selection detected. Please reselect days."
+      }
+    },
+    "bulkSelected_one": "{{count}} time slot selected",
+    "bulkSelected_other": "{{count}} time slots selected",
+    "bulkConfirmMessage_one": "Are you sure you want to {{action}} {{count}} time slot?",
+    "bulkConfirmMessage_other": "Are you sure you want to {{action}} {{count}} time slots?"
   },
   "visitPurposes": {
     "title": "Visit Purposes",
@@ -911,7 +1103,9 @@
       "usedIn": "Used in {{count}} invitation{{plural}}",
       "lastUsed": "Last used: {{time}}",
       "close": "Close",
-      "edit": "Edit"
+      "edit": "Edit",
+      "usedIn_one": "Used in {{count}} invitation",
+      "usedIn_other": "Used in {{count}} invitations"
     },
     "createTitle": "Create Visit Purpose",
     "editTitle": "Edit Visit Purpose",
@@ -920,8 +1114,67 @@
     "deleteMessageGeneric": "Are you sure you want to delete this visit purpose?",
     "bulkDeleteTitle": "Delete Selected Purposes",
     "bulkDeleteMessage": "Are you sure you want to delete {{count}} visit purpose{{plural}}? This will deactivate the purposes but preserve historical data.",
-    "deleteSelected": "Delete Selected",
     "deleteConfirm": "Delete",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "form": {
+      "sections": {
+        "basicInfo": "Basic Information",
+        "configuration": "Configuration",
+        "appearance": "Appearance",
+        "preview": "Preview"
+      },
+      "fields": {
+        "name": "Purpose Name",
+        "description": "Description",
+        "requiresApproval": "Requires admin approval",
+        "isActive": "Active (available for selection)",
+        "displayOrder": "Display Order",
+        "color": "Color",
+        "customColorCode": "Custom Color Code",
+        "iconName": "Icon Name"
+      },
+      "placeholders": {
+        "name": "e.g., Meeting, Delivery, Interview",
+        "description": "Optional description of the visit purpose...",
+        "displayOrder": "Optional sort order (lower numbers appear first)",
+        "iconName": "Optional icon identifier"
+      },
+      "help": {
+        "iconName": "Single character or icon name for display purposes"
+      },
+      "descriptionCount": "{{count}}/500 characters",
+      "colors": {
+        "gray": "Gray",
+        "blue": "Blue",
+        "green": "Green",
+        "yellow": "Yellow",
+        "red": "Red",
+        "purple": "Purple",
+        "cyan": "Cyan",
+        "orange": "Orange"
+      },
+      "preview": {
+        "defaultIcon": "P",
+        "fallbackName": "Purpose Name",
+        "approvalRequired": "Approval Required",
+        "noApprovalRequired": "No Approval Required"
+      },
+      "actions": {
+        "create": "Create Purpose",
+        "update": "Update Purpose"
+      },
+      "validation": {
+        "nameRequired": "Purpose name is required",
+        "nameMin": "Purpose name must be at least 2 characters",
+        "nameMax": "Purpose name must be less than 100 characters",
+        "descriptionMax": "Description must be less than 500 characters",
+        "displayOrderInvalid": "Display order must be a number",
+        "colorInvalid": "Color code must be a valid hex color (e.g., #6B7280)"
+      }
+    },
+    "bulkSelected_one": "{{count}} purpose selected",
+    "bulkSelected_other": "{{count}} purposes selected",
+    "bulkDeleteMessage_one": "Are you sure you want to delete {{count}} visit purpose? This will deactivate the purpose but preserve historical data.",
+    "bulkDeleteMessage_other": "Are you sure you want to delete {{count}} visit purposes? This will deactivate the purposes but preserve historical data."
   }
 }

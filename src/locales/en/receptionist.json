@@ -33,7 +33,17 @@
     "openScanner": "Open QR Scanner",
     "modalTitle": "Scan QR Code",
     "modalDescription": "Point your camera at the visitor's QR code",
-    "checkInSuccessful": "Check-in successful!"
+    "checkInSuccessful": "Check-in successful!",
+    "checkInFailed": "Check-in failed",
+    "invitationReferenceNotFound": "Invitation with reference '{{reference}}' not found.",
+    "failedLoadInvitationDetails": "Failed to load invitation details",
+    "errorDetails": {
+      "tooEarly": "This invitation is scheduled for a future time. Check-in is allowed starting 2 hours before the scheduled time.",
+      "expired": "This invitation has expired and can no longer be used for check-in.",
+      "notFound": "The scanned QR code does not match any invitation in the system.",
+      "notApproved": "This invitation must be approved before check-in is allowed.",
+      "alreadyCheckedIn": "This visitor has already been checked in."
+    }
   },
   "walkIn": {
     "sectionTitle": "Walk-in Visitor Registration",
@@ -46,7 +56,12 @@
     "photoCapturedSuccess": "Photo captured successfully!",
     "photoCapturedSubtitle": "Start the registration form when you are ready.",
     "startRegistration": "Start Registration",
-    "remove": "Remove"
+    "remove": "Remove",
+    "walkInDocumentDescription": "Walk-in ID document - {{type}}",
+    "defaultDocumentType": "ID",
+    "walkInSubject": "Walk-in Visit - {{purpose}}",
+    "defaultPurpose": "General",
+    "capturedPhotoAlt": "Captured visitor photo"
   },
   "activeVisitors": {
     "noActiveVisitors": "No active visitors",
@@ -54,7 +69,8 @@
     "noActiveVisitorsTable": "No active visitors",
     "details": "Details",
     "checkIn": "Check In",
-    "checkOut": "Check Out"
+    "checkOut": "Check Out",
+    "visitorLabel": "Visitor"
   },
   "documents": {
     "sectionTitle": "Document Scanner",
@@ -73,6 +89,10 @@
     "sensitive": "Sensitive",
     "required": "Required",
     "scanScannerTitle": "Scan Visitor Documents",
+    "scannedDocumentName": "Scanned Document {{id}}",
+    "scannedByReceptionistOn": "Document scanned by receptionist on {{time}}",
+    "defaultDownloadName": "document",
+    "scanAlt": "Scan {{index}}",
     "types": {
       "idCards": "ID Cards",
       "passports": "Passports",
@@ -83,6 +103,7 @@
   },
   "notifications": {
     "overdueTitle": "Overdue Visitors",
+    "overdueMessage": "{{count}} visitor{{plural}} has exceeded their scheduled checkout time.",
     "overdueMessage_one": "{{count}} visitor has exceeded their scheduled checkout time.",
     "overdueMessage_other": "{{count}} visitors have exceeded their scheduled checkout time.",
     "overdueCleared": "Overdue Cleared",
@@ -126,7 +147,18 @@
     "checkOutSuccessDesc": "Visitor has been checked out successfully.",
     "checkOutFailed": "Check-out Failed",
     "validationFailed": "Validation Failed",
-    "validationFailedSuffix": " Please try again."
+    "validationFailedSuffix": " Please try again.",
+    "photoValidationFailedDefault": "Failed to validate the photo.",
+    "photoUploadFailedDefault": "Failed to upload the profile photo."
+  },
+  "systemNotes": {
+    "walkInRegistered": "Walk-in visitor - registered by receptionist",
+    "walkInAutoApproved": "Walk-in visitor - auto-approved by receptionist",
+    "walkInImmediateCheckIn": "Walk-in visitor - immediate check-in by receptionist",
+    "qrCheckIn": "QR Code Check-in by receptionist",
+    "manualConfirmationCheckIn": "Manual confirmation check-in by receptionist",
+    "quickCheckIn": "Quick check-in by receptionist",
+    "manualCheckOut": "Manual check-out by receptionist"
   },
   "walkInForm": {
     "steps": {
@@ -139,6 +171,7 @@
       "subtitle": "Search by phone or email to check if visitor exists",
       "phone": "Phone",
       "email": "Email",
+      "foundCount": "Found {{count}} visitor{{plural}}",
       "foundCount_one": "Found {{count}} visitor",
       "foundCount_other": "Found {{count}} visitors",
       "visitorFound": "Visitor Found",
@@ -149,9 +182,12 @@
       "createNewVisitor": "Create New Visitor",
       "skipLookup": "Skip Lookup - Create New Visitor",
       "pendingInvitationTitle": "Pending Invitation Detected",
+      "pendingInvitationDesc": "This visitor has {{count}} pending invitation{{plural}} awaiting approval.",
       "pendingInvitationDesc_one": "This visitor has {{count}} pending invitation awaiting approval.",
       "pendingInvitationDesc_other": "This visitor has {{count}} pending invitations awaiting approval.",
-      "scheduled": "Scheduled: {{time}}"
+      "scheduled": "Scheduled: {{time}}",
+      "phonePlaceholder": "+961 70 123 456",
+      "emailPlaceholder": "visitor@example.com"
     },
     "step2": {
       "title": "Visitor Details",
@@ -180,7 +216,10 @@
       "docLabel": "Doc {{number}}",
       "updateNote": "Changes will update the existing visitor profile.",
       "back": "Back",
-      "continue": "Continue"
+      "continue": "Continue",
+      "noteLabel": "Note",
+      "phonePlaceholder": "+961 70 123 456",
+      "emailPlaceholder": "visitor@example.com"
     },
     "step3": {
       "title": "Visit Information",
@@ -207,7 +246,12 @@
       "submitting": "Processing...",
       "directory": "Directory",
       "noEmail": "No email on record",
-      "autoCreatedFromDirectory": "Will be auto-created from directory"
+      "autoCreatedFromDirectory": "Will be auto-created from directory",
+      "hostProvisioningIdentifierMissing": "Unable to add this host because no directory identifier is available.",
+      "hostProvisioningSuccess": "{{name}} is now available as a host.",
+      "hostProvisioningFailed": "Failed to add host from directory.",
+      "unknownHost": "Unknown Host",
+      "selectedHost": "Selected Host"
     },
     "cancel": "Cancel Walk-in Registration",
     "returningVisitor": "Returning Visitor",

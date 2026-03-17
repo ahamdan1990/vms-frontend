@@ -54,7 +54,9 @@
     "reject": "رفض",
     "cancel": "إلغاء",
     "delete": "حذف",
-    "clearSelection": "إلغاء التحديد"
+    "clearSelection": "إلغاء التحديد",
+    "approvalComment": "موافقة جماعية",
+    "rejectionReason": "سبب الرفض الجماعي"
   },
   "actions": {
     "view": "عرض",
@@ -68,7 +70,8 @@
     "assignToReview": "إسناد للمراجعة",
     "approveReject": "موافقة/رفض",
     "createInvitation": "إنشاء دعوة",
-    "reset": "إعادة ضبط"
+    "reset": "إعادة ضبط",
+    "approveShort": "موافقة"
   },
   "type": {
     "single": "فردية",
@@ -87,7 +90,8 @@
     "reApproveInvitation": "إعادة الموافقة",
     "rejectInvitation": "رفض الدعوة",
     "viewQrCode": "عرض رمز QR",
-    "deleteInvitation": "حذف الدعوة"
+    "deleteInvitation": "حذف الدعوة",
+    "qrShort": "QR"
   },
   "modals": {
     "createTitle": "إنشاء دعوة",
@@ -142,7 +146,10 @@
     "reasonPlaceholder": "يرجى تحديد سبب الرفض...",
     "characterCount": "{{count}}/{{max}} حرف",
     "approveButton": "الموافقة على الدعوة",
-    "rejectButton": "رفض الدعوة"
+    "rejectButton": "رفض الدعوة",
+    "quickComment": "موافقة سريعة",
+    "detailsApproved": "تمت الموافقة من شاشة التفاصيل",
+    "detailsReapproved": "تمت إعادة الموافقة من شاشة التفاصيل"
   },
   "qr": {
     "title": "رمز QR للدعوة",
@@ -157,7 +164,9 @@
     "emailError": "خطأ في البريد الإلكتروني: {{error}}",
     "willSendTo": "سيُرسل إلى: {{email}}",
     "noEmailAddress": "لا يوجد بريد إلكتروني لهذا الزائر",
-    "visitor": "الزائر"
+    "visitor": "الزائر",
+    "emailDefaultMessage": "يرجى استخدام رمز QR هذا لزيارتك بتاريخ {{date}}.",
+    "imageAlt": "رمز QR للدعوة"
   },
   "confirmBulk": {
     "title": "{{action}} الدعوات",
@@ -170,7 +179,8 @@
     "deleteFailed": "فشل حذف الدعوة.",
     "approveFailed": "فشل الموافقة على الدعوة.",
     "rejectFailed": "فشل رفض الدعوة.",
-    "qrFailed": "فشل تحميل رمز QR."
+    "qrFailed": "فشل تحميل رمز QR.",
+    "createLocationFailed": "فشل إنشاء الموقع. يرجى المحاولة مرة أخرى."
   },
   "unknownVisitor": "زائر غير معروف",
   "unknownHost": "مضيف غير معروف",
@@ -226,7 +236,8 @@
       "endDateTimeHint": "اختر التاريخ والوقت لنهاية الزيارة",
       "searchVisitorPlaceholder": "ابحث عن زائر...",
       "searchGroupVisitorPlaceholder": "ابحث وأضف زوار للمجموعة...",
-      "totalVisitorCountPlaceholder": "العدد الإجمالي للزوار المتوقعين"
+      "totalVisitorCountPlaceholder": "العدد الإجمالي للزوار المتوقعين",
+      "dateTimePlaceholder": "YYYY-MM-DDTHH:MM"
     },
     "addButton": "+ إضافة",
     "addVisitorTitle": "إضافة زائر جديد",
@@ -255,6 +266,12 @@
       "cancel": "إلغاء",
       "create": "إنشاء دعوة",
       "update": "تحديث الدعوة"
+    },
+    "presets": {
+      "morningOneHour": "9:00 AM - 10:00 AM",
+      "lateMorningTwoHours": "10:00 AM - 12:00 PM",
+      "afternoonOneHour": "2:00 PM - 3:00 PM",
+      "afternoonTwoHours": "3:00 PM - 5:00 PM"
     }
   },
   "validation": {
@@ -351,7 +368,9 @@
       "newVisitors": "الزوار الجدد",
       "existingVisitors": "الزوار الموجودون",
       "draftInvitations": "الدعوات المسودة",
-      "submittedInvitations": "الدعوات المُرسَلة"
+      "submittedInvitations": "الدعوات المُرسَلة",
+      "validationFailed": "فشل التحقق: {{details}}",
+      "invalidStructure": "بنية الملف غير صالحة"
     },
     "email": {
       "title": "إرسال النموذج للمضيف",

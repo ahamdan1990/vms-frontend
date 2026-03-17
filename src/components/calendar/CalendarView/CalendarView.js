@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -29,8 +30,11 @@ const CalendarView = ({
   bookings = {},
   className = ''
 }) => {
+  const { t, i18n } = useTranslation('calendar');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('week'); // 'week' or 'day'
+  const isRtl = i18n.dir() === 'rtl';
+  const locale = i18n.language === 'ar' ? 'ar' : 'en-US';
 
   // Get the week dates
   const weekDates = useMemo(() => {
@@ -137,7 +141,7 @@ const CalendarView = ({
         onClick={() => !isDisabled && handleTimeSlotClick(timeSlot, date)}
         disabled={isDisabled}
         className={`
-          w-full p-4 rounded-2xl border-2 text-left transition-all shadow-sm
+          w-full p-4 rounded-2xl border-2 text-start transition-all shadow-sm
           bg-white text-gray-900 dark:bg-slate-800/70 dark:text-white dark:backdrop-blur
           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 dark:focus-visible:ring-offset-slate-900
           ${selectedTimeSlot?.id === timeSlot.id && isSelected(date)
@@ -221,14 +225,14 @@ const CalendarView = ({
               `}
             >
               <div className="text-xs text-gray-600 dark:text-slate-200 font-medium uppercase tracking-wide">
-                {date.toLocaleDateString('en-US', { weekday: 'short' })}
+                {date.toLocaleDateString(locale, { weekday: 'short' })}
               </div>
               <div className={`text-2xl font-bold ${isToday(date) ? 'text-blue-600 dark:text-blue-300' : ''}`}>
                 {date.getDate()}
               </div>
               {isToday(date) && (
                 <div className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-400/40">
-                  Today
+                  {t('labels.today')}
                 </div>
               )}
             </button>
@@ -241,7 +245,7 @@ const CalendarView = ({
                 ))
               ) : (
                 <div className="text-center py-8 text-sm text-gray-500 dark:text-slate-300 border border-dashed border-gray-200 dark:border-slate-800 rounded-xl bg-gray-50 dark:bg-slate-900/40">
-                  No slots
+                  {t('availability.noSlots')}
                 </div>
               )}
             </div>
@@ -261,13 +265,13 @@ const CalendarView = ({
         <div className="bg-white dark:bg-slate-900/70 rounded-2xl border-2 border-blue-200 dark:border-blue-500/60 p-6 shadow-sm">
           <div className="text-center">
             <div className="text-sm text-gray-600 dark:text-gray-300 font-medium uppercase">
-              {currentDate.toLocaleDateString('en-US', { weekday: 'long' })}
+              {currentDate.toLocaleDateString(locale, { weekday: 'long' })}
             </div>
             <div className="text-4xl font-bold text-gray-900 dark:text-gray-100 my-2">
-              {currentDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              {currentDate.toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' })}
             </div>
             {isToday(currentDate) && (
-              <Badge variant="info" size="sm">Today</Badge>
+              <Badge variant="info" size="sm">{t('labels.today')}</Badge>
             )}
           </div>
         </div>
@@ -281,8 +285,8 @@ const CalendarView = ({
           ) : (
             <div className="col-span-full text-center py-12 border border-dashed border-gray-200 dark:border-slate-800 rounded-2xl bg-gray-50 dark:bg-slate-900/60">
               <ClockIcon className="w-16 h-16 text-gray-300 dark:text-slate-600 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Time Slots Available</h3>
-              <p className="text-gray-600 dark:text-slate-300">There are no time slots configured for this date.</p>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('dayView.noSlotsTitle')}</h3>
+              <p className="text-gray-600 dark:text-slate-300">{t('dayView.noSlotsMessage')}</p>
             </div>
           )}
         </div>
@@ -301,31 +305,31 @@ const CalendarView = ({
               size="sm"
               onClick={() => viewMode === 'week' ? navigateWeek(-1) : navigateDay(-1)}
             >
-              <ChevronLeftIcon className="w-5 h-5" />
+              {isRtl ? <ChevronRightIcon className="w-5 h-5" /> : <ChevronLeftIcon className="w-5 h-5" />}
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={goToToday}
             >
-              Today
+              {t('buttons.today')}
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => viewMode === 'week' ? navigateWeek(1) : navigateDay(1)}
             >
-              <ChevronRightIcon className="w-5 h-5" />
+              {isRtl ? <ChevronLeftIcon className="w-5 h-5" /> : <ChevronRightIcon className="w-5 h-5" />}
             </Button>
           </div>
 
           <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             {viewMode === 'week' ? (
               <>
-                {weekDates[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDates[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                {weekDates[0].toLocaleDateString(locale, { month: 'short', day: 'numeric' })} - {weekDates[6].toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })}
               </>
             ) : (
-              currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+              currentDate.toLocaleDateString(locale, { month: 'long', year: 'numeric' })
             )}
           </div>
         </div>
@@ -336,14 +340,14 @@ const CalendarView = ({
             size="sm"
             onClick={() => setViewMode('week')}
           >
-            Week
+            {t('buttons.week')}
           </Button>
           <Button
             variant={viewMode === 'day' ? 'primary' : 'outline'}
             size="sm"
             onClick={() => setViewMode('day')}
           >
-            Day
+            {t('buttons.day')}
           </Button>
         </div>
       </div>
@@ -374,15 +378,15 @@ const CalendarView = ({
       <div className="flex items-center justify-center gap-6 text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900/40 border border-gray-200 dark:border-slate-800 rounded-xl px-4 py-2">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-green-500 rounded"></div>
-          <span>Available</span>
+          <span>{t('availability.available')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-yellow-500 rounded"></div>
-          <span>Limited</span>
+          <span>{t('availability.limited')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-red-500 rounded"></div>
-          <span>Full</span>
+          <span>{t('availability.full')}</span>
         </div>
       </div>
     </div>

@@ -1,8 +1,8 @@
-// src/components/forms/PasswordChangeForm/PasswordChangeForm.js
-import React, { useState, useEffect } from 'react';
+﻿// src/components/forms/PasswordChangeForm/PasswordChangeForm.js
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
-import { validatePassword } from '../../../utils/validators';
 import Input from '../../common/Input/Input';
 import Button from '../../common/Button/Button';
 import PropTypes from 'prop-types';
@@ -16,56 +16,76 @@ const PasswordChangeForm = ({
   onCancel,
   className = '',
   showCurrentPassword = true,
-  title = 'Change Password',
-  submitText = 'Update Password'
+  title,
+  submitText
 }) => {
+  const { t } = useTranslation('auth');
   const { changePassword, loading, error } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
-  
+
   const [errors, setErrors] = useState({});
-  const [passwordStrength, setPasswordStrength] = useState({
-    score: 0,
-    feedback: []
-  });
   const [touchedFields, setTouchedFields] = useState(new Set());
 
-  // Reset form errors when error prop changes
+  const resolvedTitle = title ?? t('changePassword.title');
+  const resolvedSubmitText = submitText ?? t('passwordForm.updatePassword');
+
   useEffect(() => {
     if (!error) {
       setErrors({});
     }
   }, [error]);
 
-  // Validate password strength in real-time
-  useEffect(() => {
-    if (formData.newPassword) {
-      const validation = validatePassword(formData.newPassword);
-      setPasswordStrength({
-        score: validation.score,
-        feedback: validation.feedback
-      });
-    } else {
-      setPasswordStrength({ score: 0, feedback: [] });
+  const passwordFeedback = useMemo(() => {
+    const feedback = [];
+    const password = formData.newPassword;
+
+    if (!password) {
+      return feedback;
     }
+
+    if (password.length < 8) feedback.push(t('changePassword.req8chars'));
+    if (!/[A-Z]/.test(password)) feedback.push(t('changePassword.reqUppercase'));
+    if (!/[a-z]/.test(password)) feedback.push(t('changePassword.reqLowercase'));
+    if (!/[0-9]/.test(password)) feedback.push(t('changePassword.reqNumber'));
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) feedback.push(t('changePassword.reqSpecial'));
+
+    return feedback;
+  }, [formData.newPassword, t]);
+
+  const passwordStrengthScore = useMemo(() => {
+    const password = formData.newPassword;
+    if (!password) {
+      return 0;
+    }
+
+    let score = 0;
+    if (password.length >= 8) score += 1;
+    if (/[A-Z]/.test(password)) score += 1;
+    if (/[a-z]/.test(password)) score += 1;
+    if (/[0-9]/.test(password)) score += 1;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 1;
+
+    if (score <= 1) return 1;
+    if (score <= 2) return 2;
+    if (score <= 4) return 3;
+    return 4;
   }, [formData.newPassword]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
 
-    // Mark field as touched
     setTouchedFields(prev => new Set([...prev, name]));
 
-    // Clear field error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -86,23 +106,23 @@ const PasswordChangeForm = ({
     switch (fieldName) {
       case 'currentPassword':
         if (showCurrentPassword && !value) {
-          newErrors.currentPassword = 'Current password is required';
+          newErrors.currentPassword = t('validation.currentPasswordRequired');
         } else {
           delete newErrors.currentPassword;
         }
         break;
 
       case 'newPassword':
-        const passwordValidation = validatePassword(value);
-        if (!passwordValidation.isValid) {
-          newErrors.newPassword = passwordValidation.message;
+        if (!value) {
+          newErrors.newPassword = t('validation.newPasswordRequired');
+        } else if (passwordFeedback.length > 0) {
+          newErrors.newPassword = passwordFeedback[0];
         } else {
           delete newErrors.newPassword;
         }
-        
-        // Re-validate confirm password if it exists
+
         if (formData.confirmPassword && value !== formData.confirmPassword) {
-          newErrors.confirmPassword = 'Passwords do not match';
+          newErrors.confirmPassword = t('validation.passwordsDoNotMatch');
         } else if (formData.confirmPassword && value === formData.confirmPassword) {
           delete newErrors.confirmPassword;
         }
@@ -110,9 +130,9 @@ const PasswordChangeForm = ({
 
       case 'confirmPassword':
         if (!value) {
-          newErrors.confirmPassword = 'Please confirm your new password';
+          newErrors.confirmPassword = t('validation.confirmNewPasswordRequired');
         } else if (value !== formData.newPassword) {
-          newErrors.confirmPassword = 'Passwords do not match';
+          newErrors.confirmPassword = t('validation.passwordsDoNotMatch');
         } else {
           delete newErrors.confirmPassword;
         }
@@ -128,27 +148,24 @@ const PasswordChangeForm = ({
   const validateForm = () => {
     const newErrors = {};
 
-    // Validate current password
     if (showCurrentPassword && !formData.currentPassword) {
-      newErrors.currentPassword = 'Current password is required';
+      newErrors.currentPassword = t('validation.currentPasswordRequired');
     }
 
-    // Validate new password
-    const passwordValidation = validatePassword(formData.newPassword);
-    if (!passwordValidation.isValid) {
-      newErrors.newPassword = passwordValidation.message;
+    if (!formData.newPassword) {
+      newErrors.newPassword = t('validation.newPasswordRequired');
+    } else if (passwordFeedback.length > 0) {
+      newErrors.newPassword = passwordFeedback[0];
     }
 
-    // Validate password confirmation
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your new password';
+      newErrors.confirmPassword = t('validation.confirmNewPasswordRequired');
     } else if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = t('validation.passwordsDoNotMatch');
     }
 
-    // Check if new password is same as current
     if (showCurrentPassword && formData.currentPassword === formData.newPassword) {
-      newErrors.newPassword = 'New password must be different from current password';
+      newErrors.newPassword = t('validation.newPasswordSameAsCurrent');
     }
 
     setErrors(newErrors);
@@ -169,9 +186,8 @@ const PasswordChangeForm = ({
         newPassword: formData.newPassword,
         confirmPassword: formData.confirmPassword
       });
-      
+
       if (result.payload) {
-        // Reset form
         setFormData({
           currentPassword: '',
           newPassword: '',
@@ -179,12 +195,12 @@ const PasswordChangeForm = ({
         });
         setErrors({});
         setTouchedFields(new Set());
-        
+
         if (onSuccess) {
           onSuccess();
         }
       }
-    } catch (error) {
+    } catch {
       // Error is handled by Redux
     }
   };
@@ -197,17 +213,18 @@ const PasswordChangeForm = ({
   };
 
   const getPasswordStrengthText = (score) => {
-    if (score < 2) return 'Weak';
-    if (score < 3) return 'Fair';
-    if (score < 4) return 'Good';
-    return 'Strong';
+    if (score < 2) return t('resetPassword.strengthWeak');
+    if (score < 3) return t('resetPassword.strengthFair');
+    if (score < 4) return t('resetPassword.strengthGood');
+    return t('resetPassword.strengthStrong');
   };
 
-  const isFormValid = !Object.values(errors).some(error => error) && 
-                     (showCurrentPassword ? formData.currentPassword : true) && 
-                     formData.newPassword && 
-                     formData.confirmPassword &&
-                     passwordStrength.score >= 2;
+  const isFormValid =
+    !Object.values(errors).some(validationError => validationError) &&
+    (showCurrentPassword ? formData.currentPassword : true) &&
+    formData.newPassword &&
+    formData.confirmPassword &&
+    passwordStrengthScore >= 2;
 
   return (
     <motion.div
@@ -217,22 +234,20 @@ const PasswordChangeForm = ({
       className={className}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Header */}
-        {title && (
+        {resolvedTitle && (
           <div className="border-b border-gray-200 pb-4">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center">
               <svg className="w-5 h-5 text-blue-500 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              {title}
+              {resolvedTitle}
             </h3>
             <p className="text-sm text-gray-600 mt-1">
-              Update your password to keep your account secure
+              {t('passwordForm.subtitle')}
             </p>
           </div>
         )}
 
-        {/* Global Error */}
         {error && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -248,7 +263,6 @@ const PasswordChangeForm = ({
           </motion.div>
         )}
 
-        {/* Current Password Field */}
         {showCurrentPassword && (
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -258,8 +272,8 @@ const PasswordChangeForm = ({
             <Input
               type="password"
               name="currentPassword"
-              label="Current Password"
-              placeholder="Enter your current password"
+              label={t('changePassword.currentPassword')}
+              placeholder={t('changePassword.currentPasswordPlaceholder')}
               value={formData.currentPassword}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -277,7 +291,6 @@ const PasswordChangeForm = ({
           </motion.div>
         )}
 
-        {/* New Password Field */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -286,8 +299,8 @@ const PasswordChangeForm = ({
           <Input
             type="password"
             name="newPassword"
-            label="New Password"
-            placeholder="Enter your new password"
+            label={t('changePassword.newPassword')}
+            placeholder={t('changePassword.newPasswordPlaceholder')}
             value={formData.newPassword}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -302,8 +315,7 @@ const PasswordChangeForm = ({
             showPasswordToggle={true}
             className="transition-all duration-200"
           />
-          
-          {/* Password Strength Indicator */}
+
           {formData.newPassword && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -312,21 +324,21 @@ const PasswordChangeForm = ({
               className="mt-3"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-gray-600">Password strength:</span>
-                <span className={`text-xs font-medium ${passwordStrength.score >= 4 ? 'text-green-600' : passwordStrength.score >= 3 ? 'text-blue-600' : passwordStrength.score >= 2 ? 'text-yellow-600' : 'text-red-600'}`}>
-                  {getPasswordStrengthText(passwordStrength.score)}
+                <span className="text-xs font-medium text-gray-600">{t('resetPassword.passwordStrengthLabel')}</span>
+                <span className={`text-xs font-medium ${passwordStrengthScore >= 4 ? 'text-green-600' : passwordStrengthScore >= 3 ? 'text-blue-600' : passwordStrengthScore >= 2 ? 'text-yellow-600' : 'text-red-600'}`}>
+                  {getPasswordStrengthText(passwordStrengthScore)}
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <motion.div 
-                  className={`h-2 rounded-full transition-all duration-500 ${getPasswordStrengthColor(passwordStrength.score)}`}
+                <motion.div
+                  className={`h-2 rounded-full transition-all duration-500 ${getPasswordStrengthColor(passwordStrengthScore)}`}
                   initial={{ width: 0 }}
-                  animate={{ width: `${(passwordStrength.score / 4) * 100}%` }}
+                  animate={{ width: `${(passwordStrengthScore / 4) * 100}%` }}
                 />
               </div>
-              {passwordStrength.feedback.length > 0 && (
+              {passwordFeedback.length > 0 && (
                 <ul className="mt-2 text-xs text-gray-600 space-y-1">
-                  {passwordStrength.feedback.map((item, index) => (
+                  {passwordFeedback.map((item, index) => (
                     <motion.li
                       key={index}
                       initial={{ opacity: 0, x: -10 }}
@@ -346,7 +358,6 @@ const PasswordChangeForm = ({
           )}
         </motion.div>
 
-        {/* Confirm Password Field */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -355,13 +366,13 @@ const PasswordChangeForm = ({
           <Input
             type="password"
             name="confirmPassword"
-            label="Confirm New Password"
-            placeholder="Confirm your new password"
+            label={t('changePassword.confirmPassword')}
+            placeholder={t('changePassword.confirmPasswordPlaceholder')}
             value={formData.confirmPassword}
             onChange={handleChange}
             onBlur={handleBlur}
             error={touchedFields.has('confirmPassword') ? errors.confirmPassword : null}
-            success={formData.confirmPassword && formData.newPassword === formData.confirmPassword ? "Passwords match" : null}
+            success={formData.confirmPassword && formData.newPassword === formData.confirmPassword ? t('resetPassword.passwordsMatch') : null}
             disabled={loading}
             autoComplete="new-password"
             leftIcon={
@@ -374,7 +385,6 @@ const PasswordChangeForm = ({
           />
         </motion.div>
 
-        {/* Security Tips */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -386,18 +396,17 @@ const PasswordChangeForm = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <h4 className="text-blue-800 font-medium text-sm mb-1">Password Requirements</h4>
+              <h4 className="text-blue-800 font-medium text-sm mb-1">{t('passwordForm.requirementsTitle')}</h4>
               <ul className="text-blue-700 text-xs space-y-1">
-                <li>• At least 8 characters long</li>
-                <li>• Mix of uppercase and lowercase letters</li>
-                <li>• Include numbers and special characters</li>
-                <li>• Avoid common words or personal information</li>
+                <li>{t('passwordForm.requirement1')}</li>
+                <li>{t('passwordForm.requirement2')}</li>
+                <li>{t('passwordForm.requirement3')}</li>
+                <li>{t('passwordForm.requirement4')}</li>
               </ul>
             </div>
           </div>
         </motion.div>
 
-        {/* Form Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -412,10 +421,10 @@ const PasswordChangeForm = ({
               disabled={loading}
               className="transition-all duration-200"
             >
-              Cancel
+              {t('common:buttons.cancel')}
             </Button>
           )}
-          
+
           <Button
             type="submit"
             variant="primary"
@@ -423,7 +432,7 @@ const PasswordChangeForm = ({
             disabled={!isFormValid || loading}
             className="transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
           >
-            {loading ? 'Updating...' : submitText}
+            {loading ? t('passwordForm.updating') : resolvedSubmitText}
           </Button>
         </motion.div>
       </form>

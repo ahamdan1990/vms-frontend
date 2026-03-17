@@ -1,9 +1,10 @@
-// Enhanced VisitorForm - Part 1: Imports and Initial Setup
+﻿// Enhanced VisitorForm - Part 1: Imports and Initial Setup
 // src/components/visitor/VisitorForm/VisitorForm.js
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // Services
 import visitorDocumentService from '../../../services/visitorDocumentService';
@@ -75,6 +76,7 @@ const VisitorForm = ({
   onFormChange = null, // Callback to notify parent of form changes
   hideInvitationStep = false
 }) => {
+  const { t } = useTranslation(['visitors', 'common']);
   
   const dispatch = useDispatch();
   
@@ -84,7 +86,7 @@ const VisitorForm = ({
 
   // Enhanced form state with new fields
   const [formData, setFormData] = useState({
-    // Basic Information
+    // Basic info
     firstName: '',
     lastName: '',
     email: '',
@@ -134,7 +136,7 @@ const VisitorForm = ({
     notes: '',
     externalId: '',
     
-    // Emergency Contacts
+    // Emergency contacts
     emergencyContacts: []
   });
 
@@ -202,11 +204,11 @@ const VisitorForm = ({
 
     // Phone number should have between 7 and 15 digits
     if (digitsOnly.length < 7) {
-      return `Phone number must have at least 7 digits (currently ${digitsOnly.length})`;
+      return t('form.validation.phoneMinDigits', { count: digitsOnly.length });
     }
 
     if (digitsOnly.length > 15) {
-      return `Phone number must not exceed 15 digits (currently ${digitsOnly.length})`;
+      return t('form.validation.phoneMaxDigits');
     }
 
     // Check various formats
@@ -215,7 +217,7 @@ const VisitorForm = ({
     const isSimpleFormat = digitsOnly.length >= 7 && digitsOnly.length <= 15;
 
     if (!phoneRegex.test(phoneNumber) && !isInternationalFormat && !isSimpleFormat) {
-      return 'Invalid phone number format. Use formats like: +961 71 123456, (123) 456-7890, or 71123456';
+      return t('form.validation.phoneFormat');
     }
 
     return null; // Valid
@@ -238,7 +240,7 @@ const VisitorForm = ({
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = doc.originalFileName || doc.fileName || 'document';
+      link.download = doc.originalFileName || doc.fileName || t('form.documents.defaultDownloadName');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -444,57 +446,57 @@ const VisitorForm = ({
   const steps = [
     {
       id: 'basic',
-      title: 'Basic Information',
+      title: t('form.steps.basic.title'),
       icon: UserIcon,
-      description: 'Name, contact details, and company information'
+      description: t('form.steps.basic.description')
     },
     {
       id: 'photo_docs',
-      title: 'Photo & Documents',
+      title: t('form.steps.photoDocs.title'),
       icon: PhotoIcon,
-      description: 'Upload visitor photo and identification documents'
+      description: t('form.steps.photoDocs.description')
     },
     {
       id: 'preferences',
-      title: 'Preferences',
+      title: t('form.steps.preferences.title'),
       icon: MapPinIcon,
-      description: 'Default location and visit purpose preferences'
+      description: t('form.steps.preferences.description')
     },
     {
       id: 'address',
-      title: 'Address',
+      title: t('form.steps.address.title'),
       icon: GlobeAltIcon,
-      description: 'Physical address information'
+      description: t('form.steps.address.description')
     },
     {
       id: 'personal',
-      title: 'Personal Details',
+      title: t('form.steps.personal.title'),
       icon: IdentificationIcon,
-      description: 'ID, nationality, and personal information'
+      description: t('form.steps.personal.description')
     },
     {
       id: 'requirements',
-      title: 'Special Requirements',
+      title: t('form.steps.requirements.title'),
       icon: ShieldCheckIcon,
-      description: 'Dietary, accessibility, and security requirements'
+      description: t('form.steps.requirements.description')
     },
     {
       id: 'emergency',
-      title: 'Emergency Contacts',
+      title: t('form.steps.emergency.title'),
       icon: UserGroupIcon,
-      description: 'Emergency contact information (optional)'
+      description: t('form.steps.emergency.description')
     },
     !hideInvitationStep && {
       id: 'invitation',
-      title: 'Create Invitation',
+      title: t('form.steps.invitation.title'),
       icon: ClipboardDocumentListIcon,
-      description: 'Optionally create an invitation for this visitor'
+      description: t('form.steps.invitation.description')
     },
     {
       id: 'review',
-      title: 'Review & Submit',
+      title: t('form.steps.review.title'),
       icon: CheckCircleIcon,
-      description: 'Review all information before submitting'
+      description: t('form.steps.review.description')
     }
   ].filter(Boolean);
 
@@ -505,29 +507,29 @@ const VisitorForm = ({
     switch (stepId) {
       case 'basic':
         if (!formData.firstName.trim()) {
-          errors.firstName = 'First name is required';
+          errors.firstName = t('form.validation.firstNameRequired');
         }
         if (!formData.lastName.trim()) {
-          errors.lastName = 'Last name is required';
+          errors.lastName = t('form.validation.lastNameRequired');
         }
         if (!formData.email.trim()) {
-          errors.email = 'Email is required';
+          errors.email = t('form.validation.emailRequired');
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-          errors.email = 'Email format is invalid';
+          errors.email = t('form.validation.emailInvalid');
         }
         if (!formData.phoneNumber.trim()) {
-          errors.phoneNumber = 'Phone number is required';
+          errors.phoneNumber = t('form.validation.phoneRequired');
         }
         break;
 
       case 'photo_docs':
         // Photo is optional but validate if provided
         if (formData.photoFile && formData.photoFile.size > 5 * 1024 * 1024) {
-          errors.photo = 'Photo must be less than 5MB';
+          errors.photo = t('form.validation.photoMaxSize');
         }
         // Documents validation
         if (formData.documentFiles.length > 5) {
-          errors.documents = 'Maximum 5 documents allowed';
+          errors.documents = t('form.validation.documentsMax');
         }
         break;
 
@@ -537,10 +539,10 @@ const VisitorForm = ({
 
       case 'address':
         if (formData.address.street1.trim() && !formData.address.city.trim()) {
-          errors['address.city'] = 'City is required when address is provided';
+          errors['address.city'] = t('form.validation.addressCityRequired');
         }
         if (formData.address.street1.trim() && !formData.address.country.trim()) {
-          errors['address.country'] = 'Country is required when address is provided';
+          errors['address.country'] = t('form.validation.addressCountryRequired');
         }
         break;
 
@@ -550,25 +552,25 @@ const VisitorForm = ({
           const today = new Date();
           const age = today.getFullYear() - birthDate.getFullYear();
           if (age < 16 || age > 120) {
-            errors.dateOfBirth = 'Please enter a valid date of birth';
+            errors.dateOfBirth = t('form.validation.dateOfBirthRange');
           }
         }
         break;
 
       case 'emergency':
-        // Emergency contacts are optional — validate fields only if any are added
+        // Validate emergency contact fields only if any contacts are added.
         formData.emergencyContacts.forEach((contact, index) => {
           if (!contact.firstName.trim()) {
-            errors[`emergencyContacts.${index}.firstName`] = 'First name is required';
+            errors[`emergencyContacts.${index}.firstName`] = t('form.validation.firstNameRequired');
           }
           if (!contact.lastName.trim()) {
-            errors[`emergencyContacts.${index}.lastName`] = 'Last name is required';
+            errors[`emergencyContacts.${index}.lastName`] = t('form.validation.lastNameRequired');
           }
           if (!contact.phoneNumber.trim()) {
-            errors[`emergencyContacts.${index}.phoneNumber`] = 'Phone number is required';
+            errors[`emergencyContacts.${index}.phoneNumber`] = t('form.validation.phoneRequired');
           }
           if (!contact.relationship.trim()) {
-            errors[`emergencyContacts.${index}.relationship`] = 'Relationship is required';
+            errors[`emergencyContacts.${index}.relationship`] = t('form.validation.relationshipRequired');
           }
         });
         break;
@@ -603,7 +605,7 @@ const VisitorForm = ({
             initialData.id,
             file,
             {
-              description: 'Visitor profile photo',
+              description: t('form.documents.profilePhotoDescription'),
               isSensitive: false,
               isRequired: false
             }
@@ -671,7 +673,7 @@ const VisitorForm = ({
             file.name,
             'Other', // Default document type
             {
-              description: `Document: ${file.name}`,
+              description: t('form.documents.uploadDocumentDescription', { name: file.name }),
               isSensitive: false,
               isRequired: false
             }
@@ -760,7 +762,10 @@ const VisitorForm = ({
       setCreatingCompany(true);
       const result = await companyService.createCompany(companyData);
 
-      toast.success('Company Created', `${companyData.name} has been created successfully.`);
+      toast.success(
+        t('form.company.toasts.createdTitle'),
+        t('form.company.toasts.createdMessage', { name: companyData.name })
+      );
 
       // Set the newly created company
       const newCompany = result.company || result;
@@ -768,8 +773,8 @@ const VisitorForm = ({
 
       setShowCreateCompanyModal(false);
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.errors?.[0] || 'Failed to create company';
-      toast.error('Creation Failed', errorMessage);
+      const errorMessage = error.response?.data?.message || error.response?.data?.errors?.[0] || t('form.company.toasts.createFailedMessage');
+      toast.error(t('form.company.toasts.createFailedTitle'), errorMessage);
     } finally {
       setCreatingCompany(false);
     }
@@ -786,7 +791,7 @@ const VisitorForm = ({
     if (!invitationData.subject) {
       const visitorName = `${formData.firstName} ${formData.lastName}`.trim();
       if (visitorName) {
-        handleInvitationChange('subject', `Meeting with ${visitorName}`);
+        handleInvitationChange('subject', t('form.invitation.defaultSubject', { name: visitorName }));
       }
     }
   };
@@ -817,50 +822,50 @@ const VisitorForm = ({
   const validateInvitationField = (field, value) => {
     switch (field) {
       case 'subject':
-        if (!value?.trim()) return 'Subject is required';
-        if (value.length > 200) return 'Subject must be less than 200 characters';
+        if (!value?.trim()) return t('form.invitation.validation.subjectRequired');
+        if (value.length > 200) return t('form.invitation.validation.subjectMax');
         break;
       case 'scheduledStartTime':
-        if (!value) return 'Start time is required';
+        if (!value) return t('form.invitation.validation.startRequired');
         const startTime = new Date(value);
         const now = new Date();
-        if (startTime <= now) return 'Start time must be in the future';
+        if (startTime <= now) return t('form.invitation.validation.startFuture');
         // Check if it's more than 2 years in the future
         const twoYearsFromNow = new Date();
         twoYearsFromNow.setFullYear(twoYearsFromNow.getFullYear() + 2);
-        if (startTime > twoYearsFromNow) return 'Start time cannot be more than 2 years in the future';
+        if (startTime > twoYearsFromNow) return t('form.invitation.validation.startMaxFuture');
         break;
       case 'scheduledEndTime':
-        if (!value) return 'End time is required';
+        if (!value) return t('form.invitation.validation.endRequired');
         if (invitationData.scheduledStartTime) {
           const startTime = new Date(invitationData.scheduledStartTime);
           const endTime = new Date(value);
           if (endTime <= startTime) {
-            return 'End time must be after start time';
+            return t('form.invitation.validation.endAfterStart');
           }
           // Check duration limits
           const durationMinutes = (endTime - startTime) / (1000 * 60);
           if (durationMinutes < 15) {
-            return 'Visit duration must be at least 15 minutes';
+            return t('form.invitation.validation.durationMin');
           }
           if (durationMinutes > 24 * 60) {
-            return 'Visit duration cannot exceed 24 hours';
+            return t('form.invitation.validation.durationMax');
           }
         }
         break;
       case 'locationId':
         if (createInvitation && !value && !formData.preferredLocationId) {
-          return 'Location is required for invitation';
+          return t('form.invitation.validation.locationRequired');
         }
         break;
       case 'visitPurposeId':
         if (createInvitation && !value && !formData.defaultVisitPurposeId) {
-          return 'Visit purpose is required for invitation';
+          return t('form.invitation.validation.purposeRequired');
         }
         break;
       case 'parkingInstructions':
         if (invitationData.needsParking && !value?.trim()) {
-          return 'Parking instructions are required when parking is needed';
+          return t('form.invitation.validation.parkingInstructionsRequired');
         }
         break;
       default:
@@ -966,7 +971,7 @@ const VisitorForm = ({
   const removeEmergencyContact = (index) => {
     setFormData(prev => {
       const updatedContacts = prev.emergencyContacts.filter((_, i) => i !== index);
-      // If we removed the primary contact, make the first one primary
+      // If we removed the {t('form.emergency.primaryContact')}, make the first one primary
       if (updatedContacts.length > 0 && !updatedContacts.some(c => c.isPrimary)) {
         updatedContacts[0].isPrimary = true;
       }
@@ -1118,14 +1123,14 @@ const VisitorForm = ({
       if (errorMessage.includes('invitation')) {
         // Invitation-specific error
         console.error('Invitation creation failed:', errorMessage);
-        setInvitationErrors({ general: 'Failed to create invitation. Please try creating it manually from the visitor profile.' });
+        setInvitationErrors({ general: t('form.invitation.submitFailed') });
       } else if (errorMessage.includes('email')) {
         // Email validation error
-        setFormErrors({ email: 'This email address is already registered.' });
-        setCurrentStep(0); // Go back to basic information step
+        setFormErrors({ email: t('form.validation.emailExists') });
+        setCurrentStep(0); // Go back to basic info step
       } else if (errorMessage.includes('government')) {
         // Government ID validation error
-        setFormErrors({ governmentId: 'This government ID is already registered.' });
+        setFormErrors({ governmentId: t('form.validation.governmentIdExists') });
         setCurrentStep(4); // Go to personal details step
       }
       
@@ -1166,42 +1171,42 @@ const VisitorForm = ({
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Input
-          label="First Name"
+          label={t('fields.firstName')}
           type="text"
           value={formData.firstName}
           onChange={(e) => handleChange('firstName', e.target.value)}
           onBlur={() => handleBlur('firstName')}
           error={touched.firstName ? formErrors.firstName : undefined}
           required
-          placeholder="Enter first name"
+          placeholder={t('form.placeholders.firstName')}
         />
 
         <Input
-          label="Last Name"
+          label={t('fields.lastName')}
           type="text"
           value={formData.lastName}
           onChange={(e) => handleChange('lastName', e.target.value)}
           onBlur={() => handleBlur('lastName')}
           error={touched.lastName ? formErrors.lastName : undefined}
           required
-          placeholder="Enter last name"
+          placeholder={t('form.placeholders.lastName')}
         />
 
         <Input
-          label="Email"
+          label={t('fields.email')}
           type="email"
           value={formData.email}
           onChange={(e) => handleChange('email', e.target.value)}
           onBlur={() => handleBlur('email')}
           error={touched.email ? formErrors.email : undefined}
           required
-          placeholder="Enter email address"
+          placeholder={t('form.placeholders.email')}
         />
 
         {/* Enhanced Phone Number - Lebanon Focused */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
-            Phone Number
+            {t('fields.phone')}
           </label>
           
           <div className="flex gap-2">
@@ -1212,21 +1217,21 @@ const VisitorForm = ({
               onBlur={() => handleBlur('phoneCountryCode')}
               className="w-32 px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
             >
-              <option value="961">🇱🇧 +961</option>
-              <option value="963">🇸🇾 +963</option>
-              <option value="962">🇯🇴 +962</option>
-              <option value="972">🇮🇱 +972</option>
-              <option value="90">🇹🇷 +90</option>
-              <option value="20">🇪🇬 +20</option>
-              <option value="966">🇸🇦 +966</option>
-              <option value="971">🇦🇪 +971</option>
-              <option value="965">🇰🇼 +965</option>
-              <option value="974">🇶🇦 +974</option>
-              <option value="1">🇺🇸 +1</option>
-              <option value="44">🇬🇧 +44</option>
-              <option value="33">🇫🇷 +33</option>
-              <option value="49">🇩🇪 +49</option>
-              <option value="39">🇮🇹 +39</option>
+              <option value="961">ðŸ‡±ðŸ‡§ +961</option>
+              <option value="963">ðŸ‡¸ðŸ‡¾ +963</option>
+              <option value="962">ðŸ‡¯ðŸ‡´ +962</option>
+              <option value="972">ðŸ‡®ðŸ‡± +972</option>
+              <option value="90">ðŸ‡¹ðŸ‡· +90</option>
+              <option value="20">ðŸ‡ªðŸ‡¬ +20</option>
+              <option value="966">ðŸ‡¸ðŸ‡¦ +966</option>
+              <option value="971">ðŸ‡¦ðŸ‡ª +971</option>
+              <option value="965">ðŸ‡°ðŸ‡¼ +965</option>
+              <option value="974">ðŸ‡¶ðŸ‡¦ +974</option>
+              <option value="1">ðŸ‡ºðŸ‡¸ +1</option>
+              <option value="44">ðŸ‡¬ðŸ‡§ +44</option>
+              <option value="33">ðŸ‡«ðŸ‡· +33</option>
+              <option value="49">ðŸ‡©ðŸ‡ª +49</option>
+              <option value="39">ðŸ‡®ðŸ‡¹ +39</option>
             </select>
 
             {/* Phone Number Input */}
@@ -1238,7 +1243,7 @@ const VisitorForm = ({
                 onBlur={() => handleBlur('phoneNumber')}
                 error={touched.phoneNumber ? formErrors.phoneNumber : undefined}
                 required
-                placeholder="71 123 456"
+                placeholder={t('form.placeholders.phone')}
               />
             </div>
 
@@ -1249,9 +1254,9 @@ const VisitorForm = ({
               onBlur={() => handleBlur('phoneType')}
               className="w-32 px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
             >
-              <option value="Mobile">📱 Mobile</option>
-              <option value="Landline">☎️ Landline</option>
-              <option value="Unknown">❓ Unknown</option>
+              <option value="Mobile">{t('form.options.phoneType.mobile')}</option>
+              <option value="Landline">{t('form.options.phoneType.landline')}</option>
+              <option value="Unknown">{t('form.options.phoneType.unknown')}</option>
             </select>
           </div>
           
@@ -1268,11 +1273,11 @@ const VisitorForm = ({
         <div className="flex items-end gap-2">
           <div className="flex-1">
             <CompanyAutocomplete
-              label="Company"
+              label={t('fields.company')}
               value={selectedCompany}
               onChange={handleCompanySelect}
               onCreateNew={handleCreateNewCompany}
-              placeholder="Search for a company..."
+              placeholder={t('form.placeholders.companySearch')}
               error={touched.company ? formErrors.company : undefined}
               showCreateOption={false}
             />
@@ -1282,20 +1287,20 @@ const VisitorForm = ({
             onClick={() => setShowCreateCompanyModal(true)}
             disabled={loading}
             className="h-[42px] px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Create new company"
+            title={t('form.company.createButtonTitle')}
           >
             <PlusIcon className="w-5 h-5" />
           </button>
         </div>
 
         <Input
-          label="Job Title"
+          label={t('fields.jobTitle')}
           type="text"
           value={formData.jobTitle}
           onChange={(e) => handleChange('jobTitle', e.target.value)}
           onBlur={() => handleBlur('jobTitle')}
           error={touched.jobTitle ? formErrors.jobTitle : undefined}
-          placeholder="Enter job title"
+          placeholder={t('form.placeholders.jobTitle')}
         />
       </div>
 
@@ -1309,7 +1314,7 @@ const VisitorForm = ({
         />
         <label htmlFor="isVip" className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200">
           <StarIconSolid className="w-4 h-4 text-yellow-500" />
-          <span>VIP Visitor</span>
+          <span>{t('vipVisitorTitle')}</span>
         </label>
       </div>
     </div>
@@ -1355,7 +1360,7 @@ const VisitorForm = ({
             {loadingDocuments ? (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                <span>Loading existing documents...</span>
+                <span>{t('form.documents.loadingExisting')}</span>
               </div>
             ) : existingDocuments.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1370,7 +1375,7 @@ const VisitorForm = ({
                           </p>
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
-                          {doc.documentType} • {doc.formattedFileSize}
+                          {doc.documentType} - {doc.formattedFileSize}
                         </p>
                         {doc.description && (
                           <p className="text-xs text-gray-600 mt-1 truncate">
@@ -1380,10 +1385,10 @@ const VisitorForm = ({
                       </div>
                       <div className="flex items-center gap-1">
                         {doc.isSensitive && (
-                          <Badge variant="warning" size="xs">Sensitive</Badge>
+                          <Badge variant="warning" size="xs">{t('form.documents.sensitive')}</Badge>
                         )}
                         {doc.isRequired && (
-                          <Badge variant="info" size="xs">Required</Badge>
+                          <Badge variant="info" size="xs">{t('form.documents.required')}</Badge>
                         )}
                       </div>
                     </div>
@@ -1394,21 +1399,21 @@ const VisitorForm = ({
                         className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
                       >
                         <EyeIcon className="w-3.5 h-3.5" />
-                        <span>Preview</span>
+                        <span>{t('form.documents.preview')}</span>
                       </button>
                       <button
                         onClick={() => handleDownloadDocument(doc)}
                         className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors"
                       >
                         <ArrowDownTrayIcon className="w-3.5 h-3.5" />
-                        <span>Download</span>
+                        <span>{t('form.documents.download')}</span>
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-gray-500">No documents uploaded yet.</p>
+              <p className="text-sm text-gray-500">{t('form.documents.noneUploaded')}</p>
             )}
           </div>
         )}
@@ -1416,7 +1421,7 @@ const VisitorForm = ({
         {/* Upload New Documents */}
         <div>
           <h4 className="text-sm font-medium text-gray-700 mb-3">
-            {isEdit ? 'Upload Additional Documents' : 'Upload Documents'}
+            {isEdit ? t('form.documents.uploadAdditional') : t('form.documents.upload')}
           </h4>
           <FileUpload
             onFileSelect={handleDocumentUpload}
@@ -1425,12 +1430,12 @@ const VisitorForm = ({
             maxSize={10 * 1024 * 1024} // 10MB
             maxFiles={5}
             files={formData.documentFiles}
-            label="Upload Documents"
-            description="Upload ID, passport, or other identification documents"
+            label={t('form.documents.upload')}
+            description={t('form.documents.uploadDescription')}
             error={touched.documents ? formErrors.documents : undefined}
           />
           <p className="text-sm text-gray-500 mt-2">
-            Accepted formats: PDF, DOC, DOCX, JPG, PNG. Max 5 files, 10MB each.
+            {t('form.documents.acceptedFormats')}
           </p>
         </div>
       </div>
@@ -1440,15 +1445,15 @@ const VisitorForm = ({
   const renderPreferences = () => (
     <div className="space-y-6">
       <div className="text-center mb-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Default Preferences</h3>
-        <p className="text-gray-600 dark:text-gray-300">Set default location and visit purpose for faster invitation creation</p>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('form.preferences.title')}</h3>
+        <p className="text-gray-600 dark:text-gray-300">{t('form.preferences.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Preferred Location */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-            Preferred Location
+            {t('form.preferences.preferredLocation')}
           </label>
           <AutocompleteInput
             options={locations || []}
@@ -1456,18 +1461,18 @@ const VisitorForm = ({
             onChange={handleLocationSelect}
             getOptionLabel={(location) => location.name}
             getOptionDescription={(location) => location.description}
-            placeholder="Select default location..."
+            placeholder={t('form.preferences.selectDefaultLocation')}
             error={touched.preferredLocationId ? formErrors.preferredLocationId : undefined}
           />
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            The location this visitor typically visits
+            {t('form.preferences.preferredLocationHelp')}
           </p>
         </div>
 
         {/* Default Visit Purpose */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-            Default Visit Purpose
+            {t('form.preferences.defaultVisitPurpose')}
           </label>
           <AutocompleteInput
             options={visitPurposes || []}
@@ -1475,11 +1480,11 @@ const VisitorForm = ({
             onChange={handleVisitPurposeSelect}
             getOptionLabel={(purpose) => purpose.name}
             getOptionDescription={(purpose) => purpose.description}
-            placeholder="Select default visit purpose..."
+            placeholder={t('form.preferences.selectDefaultVisitPurpose')}
             error={touched.defaultVisitPurposeId ? formErrors.defaultVisitPurposeId : undefined}
           />
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            The typical reason for this visitor's visits
+            {t('form.preferences.defaultVisitPurposeHelp')}
           </p>
         </div>
       </div>
@@ -1488,10 +1493,9 @@ const VisitorForm = ({
         <div className="flex items-start gap-3">
           <ClipboardDocumentListIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
           <div>
-            <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">Why set preferences?</h4>
+            <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">{t('form.preferences.whySetTitle')}</h4>
             <p className="text-sm text-blue-700 dark:text-blue-200 mt-1">
-              Default preferences will be automatically selected when creating invitations for this visitor, 
-              making the invitation process faster and more consistent.
+              {t('form.preferences.whySetDescription')}
             </p>
           </div>
         </div>
@@ -1503,42 +1507,42 @@ const VisitorForm = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="md:col-span-2">
           <Input
-            label="Street Address Line 1"
+            label={t('form.address.street1')}
             type="text"
             value={formData.address.street1}
             onChange={(e) => handleChange('address.street1', e.target.value)}
             onBlur={() => handleBlur('address.street1')}
             error={touched['address.street1'] ? formErrors['address.street1'] : undefined}
-            placeholder="Enter street address"
+            placeholder={t('form.address.placeholders.street1')}
           />
         </div>
 
         <div className="md:col-span-2">
           <Input
-            label="Street Address Line 2"
+            label={t('form.address.street2')}
             type="text"
             value={formData.address.street2}
             onChange={(e) => handleChange('address.street2', e.target.value)}
             onBlur={() => handleBlur('address.street2')}
             error={touched['address.street2'] ? formErrors['address.street2'] : undefined}
-            placeholder="Apartment, suite, etc. (optional)"
+            placeholder={t('form.address.placeholders.street2')}
           />
         </div>
 
         <Input
-          label="City"
+          label={t('form.address.city')}
           type="text"
           value={formData.address.city}
           onChange={(e) => handleChange('address.city', e.target.value)}
           onBlur={() => handleBlur('address.city')}
           error={touched['address.city'] ? formErrors['address.city'] : undefined}
-          placeholder="e.g., Beirut, Tripoli, Sidon"
+          placeholder={t('form.address.placeholders.city')}
         />
 
         {/* Lebanese Governorates */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
-            Governorate
+            {t('form.address.governorate')}
           </label>
           <select
             value={formData.address.governorate}
@@ -1546,10 +1550,10 @@ const VisitorForm = ({
             onBlur={() => handleBlur('address.governorate')}
             className="block w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="">Select Governorate</option>
+            <option value="">{t('form.address.selectGovernorate')}</option>
             {lebaneseGovernorates.map(governorate => (
               <option key={governorate} value={governorate}>
-                {governorate}
+                {t(`form.address.governorates.${governorate}`)}
               </option>
             ))}
           </select>
@@ -1559,20 +1563,20 @@ const VisitorForm = ({
         </div>
 
         <Input
-          label="Postal Code (Optional)"
+          label={t('form.address.postalCode')}
           type="text"
           value={formData.address.postalCode}
           onChange={(e) => handleChange('address.postalCode', e.target.value)}
           onBlur={() => handleBlur('address.postalCode')}
           error={touched['address.postalCode'] ? formErrors['address.postalCode'] : undefined}
-          placeholder="e.g., 1107-2180"
-          helperText="Lebanon postal codes are optional"
+          placeholder={t('form.address.placeholders.postalCode')}
+          helperText={t('form.address.postalCodeHelper')}
         />
 
         {/* Enhanced Country Selector - Lebanon and Region First */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
-            Country
+            {t('form.address.country')}
           </label>
           <select
             value={formData.address.country}
@@ -1580,32 +1584,32 @@ const VisitorForm = ({
             onBlur={() => handleBlur('address.country')}
             className="block w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="Lebanon">🇱🇧 Lebanon</option>
-            <option value="">--- Middle East ---</option>
-            <option value="Syria">🇸🇾 Syria</option>
-            <option value="Jordan">🇯🇴 Jordan</option>
-            <option value="Israel">🇮🇱 Israel</option>
-            <option value="Turkey">🇹🇷 Turkey</option>
-            <option value="Cyprus">🇨🇾 Cyprus</option>
-            <option value="Egypt">🇪🇬 Egypt</option>
-            <option value="Saudi Arabia">🇸🇦 Saudi Arabia</option>
-            <option value="United Arab Emirates">🇦🇪 United Arab Emirates</option>
-            <option value="Kuwait">🇰🇼 Kuwait</option>
-            <option value="Qatar">🇶🇦 Qatar</option>
-            <option value="Bahrain">🇧🇭 Bahrain</option>
-            <option value="Oman">🇴🇲 Oman</option>
-            <option value="Iraq">🇮🇶 Iraq</option>
-            <option value="Iran">🇮🇷 Iran</option>
-            <option value="">--- International ---</option>
-            <option value="United States">🇺🇸 United States</option>
-            <option value="Canada">🇨🇦 Canada</option>
-            <option value="United Kingdom">🇬🇧 United Kingdom</option>
-            <option value="France">🇫🇷 France</option>
-            <option value="Germany">🇩🇪 Germany</option>
-            <option value="Italy">🇮🇹 Italy</option>
-            <option value="Australia">🇦🇺 Australia</option>
-            <option value="Brazil">🇧🇷 Brazil</option>
-            <option value="Other">🌍 Other</option>
+            <option value="Lebanon">{t('form.address.countries.Lebanon')}</option>
+            <option value="" disabled>{t('form.address.middleEastGroup')}</option>
+            <option value="Syria">{t('form.address.countries.Syria')}</option>
+            <option value="Jordan">{t('form.address.countries.Jordan')}</option>
+            <option value="Israel">{t('form.address.countries.Israel')}</option>
+            <option value="Turkey">{t('form.address.countries.Turkey')}</option>
+            <option value="Cyprus">{t('form.address.countries.Cyprus')}</option>
+            <option value="Egypt">{t('form.address.countries.Egypt')}</option>
+            <option value="Saudi Arabia">{t('form.address.countries.SaudiArabia')}</option>
+            <option value="United Arab Emirates">{t('form.address.countries.UnitedArabEmirates')}</option>
+            <option value="Kuwait">{t('form.address.countries.Kuwait')}</option>
+            <option value="Qatar">{t('form.address.countries.Qatar')}</option>
+            <option value="Bahrain">{t('form.address.countries.Bahrain')}</option>
+            <option value="Oman">{t('form.address.countries.Oman')}</option>
+            <option value="Iraq">{t('form.address.countries.Iraq')}</option>
+            <option value="Iran">{t('form.address.countries.Iran')}</option>
+            <option value="" disabled>{t('form.address.internationalGroup')}</option>
+            <option value="United States">{t('form.address.countries.UnitedStates')}</option>
+            <option value="Canada">{t('form.address.countries.Canada')}</option>
+            <option value="United Kingdom">{t('form.address.countries.UnitedKingdom')}</option>
+            <option value="France">{t('form.address.countries.France')}</option>
+            <option value="Germany">{t('form.address.countries.Germany')}</option>
+            <option value="Italy">{t('form.address.countries.Italy')}</option>
+            <option value="Australia">{t('form.address.countries.Australia')}</option>
+            <option value="Brazil">{t('form.address.countries.Brazil')}</option>
+            <option value="Other">{t('form.personal.idTypes.other')}</option>
           </select>
           {touched['address.country'] && formErrors['address.country'] && (
             <p className="text-red-600 dark:text-red-400 text-sm mt-1">{formErrors['address.country']}</p>
@@ -1615,18 +1619,18 @@ const VisitorForm = ({
 
       {/* Address Type Selector */}
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">Address Type</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">{t('form.address.addressType')}</label>
         <select
           value={formData.address.addressType}
           onChange={(e) => handleChange('address.addressType', e.target.value)}
           onBlur={() => handleBlur('address.addressType')}
           className="w-full md:w-48 px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
-          <option value="Home">🏠 Home</option>
-          <option value="Work">🏢 Work</option>
-          <option value="Billing">💳 Billing</option>
-          <option value="Shipping">📦 Shipping</option>
-          <option value="Other">📍 Other</option>
+          <option value="Home">{t('form.address.addressTypes.home')}</option>
+          <option value="Work">{t('form.address.addressTypes.work')}</option>
+          <option value="Billing">{t('form.address.addressTypes.billing')}</option>
+          <option value="Shipping">{t('form.address.addressTypes.shipping')}</option>
+          <option value="Other">{t('form.address.addressTypes.other')}</option>
         </select>
       </div>
     </div>
@@ -1636,7 +1640,7 @@ const VisitorForm = ({
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Input
-          label="Date of Birth"
+          label={t('form.personal.dateOfBirth')}
           type="date"
           value={formData.dateOfBirth}
           onChange={(e) => handleChange('dateOfBirth', e.target.value)}
@@ -1646,67 +1650,67 @@ const VisitorForm = ({
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-            Government ID Type
+            {t('form.personal.governmentIdType')}
           </label>
           <select
             value={formData.governmentIdType}
             onChange={(e) => handleChange('governmentIdType', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="Passport">Passport</option>
-            <option value="DriverLicense">Driver's License</option>
-            <option value="NationalId">National ID</option>
-            <option value="Other">Other</option>
+            <option value="Passport">{t('form.personal.idTypes.passport')}</option>
+            <option value="DriverLicense">{t('form.personal.idTypes.driverLicense')}</option>
+            <option value="NationalId">{t('form.personal.idTypes.nationalId')}</option>
+            <option value="Other">{t('form.address.addressTypes.other')}</option>
           </select>
         </div>
 
         <Input
-          label="Government ID Number"
+          label={t('form.personal.governmentIdNumber')}
           type="text"
           value={formData.governmentId}
           onChange={(e) => handleChange('governmentId', e.target.value)}
           onBlur={() => handleBlur('governmentId')}
           error={touched.governmentId ? formErrors.governmentId : undefined}
-          placeholder="Enter ID number"
+          placeholder={t('form.personal.placeholders.governmentId')}
         />
 
         <Input
-          label="Nationality"
+          label={t('form.personal.nationality')}
           type="text"
           value={formData.nationality}
           onChange={(e) => handleChange('nationality', e.target.value)}
           onBlur={() => handleBlur('nationality')}
           error={touched.nationality ? formErrors.nationality : undefined}
-          placeholder="Enter nationality"
+          placeholder={t('form.personal.placeholders.nationality')}
         />
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-            Preferred Language
+            {t('form.personal.preferredLanguage')}
           </label>
           <select
             value={formData.language}
             onChange={(e) => handleChange('language', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="en-US">English</option>
-            <option value="es-ES">Spanish</option>
-            <option value="fr-FR">French</option>
-            <option value="de-DE">German</option>
-            <option value="zh-CN">Chinese</option>
-            <option value="ja-JP">Japanese</option>
-            <option value="ar-SA">Arabic</option>
+            <option value="en-US">{t('form.personal.languages.english')}</option>
+            <option value="es-ES">{t('form.personal.languages.spanish')}</option>
+            <option value="fr-FR">{t('form.personal.languages.french')}</option>
+            <option value="de-DE">{t('form.personal.languages.german')}</option>
+            <option value="zh-CN">{t('form.personal.languages.chinese')}</option>
+            <option value="ja-JP">{t('form.personal.languages.japanese')}</option>
+            <option value="ar-SA">{t('form.personal.languages.arabic')}</option>
           </select>
         </div>
 
         <Input
-          label="External ID"
+          label={t('form.personal.externalId')}
           type="text"
           value={formData.externalId}
           onChange={(e) => handleChange('externalId', e.target.value)}
           onBlur={() => handleBlur('externalId')}
           error={touched.externalId ? formErrors.externalId : undefined}
-          placeholder="Employee ID, customer number, etc."
+          placeholder={t('form.personal.placeholders.externalId')}
         />
       </div>
     </div>
@@ -1716,35 +1720,35 @@ const VisitorForm = ({
     <div className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-          Dietary Requirements
+          {t('form.requirements.dietary')}
         </label>
         <textarea
           value={formData.dietaryRequirements}
           onChange={(e) => handleChange('dietaryRequirements', e.target.value)}
           onBlur={() => handleBlur('dietaryRequirements')}
           rows={3}
-          placeholder="Any dietary restrictions, allergies, or special meal requirements..."
+          placeholder={t('form.requirements.placeholders.dietary')}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-          Accessibility Requirements
+          {t('form.requirements.accessibility')}
         </label>
         <textarea
           value={formData.accessibilityRequirements}
           onChange={(e) => handleChange('accessibilityRequirements', e.target.value)}
           onBlur={() => handleBlur('accessibilityRequirements')}
           rows={3}
-          placeholder="Wheelchair access, hearing assistance, or other accessibility needs..."
+          placeholder={t('form.requirements.placeholders.accessibility')}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-          Security Clearance
+          {t('form.requirements.securityClearance')}
         </label>
         <Input
           type="text"
@@ -1752,20 +1756,20 @@ const VisitorForm = ({
           onChange={(e) => handleChange('securityClearance', e.target.value)}
           onBlur={() => handleBlur('securityClearance')}
           error={touched.securityClearance ? formErrors.securityClearance : undefined}
-          placeholder="Security clearance level, if applicable"
+          placeholder={t('form.requirements.placeholders.securityClearance')}
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-          Additional Notes
+          {t('form.requirements.additionalNotes')}
         </label>
         <textarea
           value={formData.notes}
           onChange={(e) => handleChange('notes', e.target.value)}
           onBlur={() => handleBlur('notes')}
           rows={4}
-          placeholder="Any additional information about this visitor..."
+          placeholder={t('form.requirements.placeholders.additionalNotes')}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
@@ -1776,17 +1780,15 @@ const VisitorForm = ({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Emergency Contacts</h3>
-          <p className="text-gray-600 dark:text-gray-300">Emergency contacts are optional</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('form.emergency.title')}</h3>
+          <p className="text-gray-600 dark:text-gray-300">{t('form.emergency.subtitle')}</p>
         </div>
         <Button
           variant="outline"
           size="sm"
           onClick={addEmergencyContact}
           icon={<PlusIcon className="w-4 h-4" />}
-        >
-          Add Contact
-        </Button>
+        >{t('form.emergency.addContact')}</Button>
       </div>
 
       {formErrors.emergencyContacts && (
@@ -1799,10 +1801,10 @@ const VisitorForm = ({
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                  Contact {index + 1}
+                  {t('form.emergency.contactNumber', { count: index + 1 })}
                 </span>
                 {contact.isPrimary && (
-                  <Badge variant="primary" size="xs">Primary</Badge>
+                  <Badge variant="primary" size="xs">{t('form.emergency.primary')}</Badge>
                 )}
               </div>
               {formData.emergencyContacts.length > 1 && (
@@ -1818,52 +1820,52 @@ const VisitorForm = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
-                label="First Name"
+                label={t('fields.firstName')}
                 type="text"
                 value={contact.firstName}
                 onChange={(e) => updateEmergencyContact(index, 'firstName', e.target.value)}
                 error={formErrors[`emergencyContacts.${index}.firstName`]}
                 required
-                placeholder="Enter first name"
+                placeholder={t('form.placeholders.firstName')}
               />
 
               <Input
-                label="Last Name"
+                label={t('fields.lastName')}
                 type="text"
                 value={contact.lastName}
                 onChange={(e) => updateEmergencyContact(index, 'lastName', e.target.value)}
                 error={formErrors[`emergencyContacts.${index}.lastName`]}
                 required
-                placeholder="Enter last name"
+                placeholder={t('form.placeholders.lastName')}
               />
 
               <Input
-                label="Phone Number"
+                label={t('fields.phone')}
                 type="tel"
                 value={contact.phoneNumber}
                 onChange={(e) => updateEmergencyContact(index, 'phoneNumber', e.target.value)}
                 error={formErrors[`emergencyContacts.${index}.phoneNumber`]}
                 required
-                placeholder="Enter phone number"
+                placeholder={t('form.placeholders.phone')}
               />
 
               <Input
-                label="Email"
+                label={t('fields.email')}
                 type="email"
                 value={contact.email}
                 onChange={(e) => updateEmergencyContact(index, 'email', e.target.value)}
                 error={formErrors[`emergencyContacts.${index}.email`]}
-                placeholder="Enter email (optional)"
+                placeholder={t('form.emergency.placeholders.email')}
               />
 
               <Input
-                label="Relationship"
+                label={t('form.emergency.relationship')}
                 type="text"
                 value={contact.relationship}
                 onChange={(e) => updateEmergencyContact(index, 'relationship', e.target.value)}
                 error={formErrors[`emergencyContacts.${index}.relationship`]}
                 required
-                placeholder="e.g., Spouse, Parent, Friend"
+                placeholder={t('form.emergency.placeholders.relationship')}
               />
 
               <div className="flex items-center gap-3 mt-6">
@@ -1875,7 +1877,7 @@ const VisitorForm = ({
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900"
                 />
                 <label htmlFor={`primary-${index}`} className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                  Primary Contact
+                  {t('form.emergency.primaryContact')}
                 </label>
               </div>
             </div>
@@ -1886,18 +1888,16 @@ const VisitorForm = ({
       {formData.emergencyContacts.length === 0 && (
         <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900/40">
           <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No emergency contacts</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{t('form.emergency.emptyTitle')}</h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            You can add emergency contacts now or skip this step.
+            {t('form.emergency.emptyDescription')}
           </p>
           <div className="mt-6">
             <Button
               variant="primary"
               onClick={addEmergencyContact}
               icon={<PlusIcon className="w-5 h-5" />}
-            >
-              Add First Contact
-            </Button>
+            >{t('form.emergency.addFirstContact')}</Button>
           </div>
         </div>
       )}
@@ -1907,8 +1907,8 @@ const VisitorForm = ({
   const renderInvitationForm = () => (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Create Invitation (Optional)</h3>
-        <p className="text-gray-600 dark:text-gray-300">You can create an invitation for this visitor immediately after creating their profile</p>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('form.invitation.title')}</h3>
+        <p className="text-gray-600 dark:text-gray-300">{t('form.invitation.subtitle')}</p>
       </div>
 
       {/* Enable/Disable Invitation Creation */}
@@ -1929,13 +1929,13 @@ const VisitorForm = ({
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900"
           />
           <label htmlFor="createInvitation" className="text-sm font-medium text-gray-900 dark:text-gray-100">
-            Create an invitation for this visitor
+            {t('form.invitation.enableLabel')}
           </label>
         </div>
         
         {!createInvitation && (
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-            You can always create invitations later from the visitor's profile or the invitations page.
+            {t('form.invitation.enableHelp')}
           </p>
         )}
       </Card>
@@ -1952,19 +1952,19 @@ const VisitorForm = ({
             <Card className="p-6">
               <div className="flex items-center gap-2 mb-6">
                 <ClipboardDocumentListIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100">Invitation Details</h4>
+                <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('form.invitation.detailsTitle')}</h4>
               </div>
 
               <div className="space-y-6">
                 {/* Subject */}
                 <Input
-                  label="Subject"
+                  label={t('form.invitation.subject')}
                   type="text"
                   value={invitationData.subject}
                   onChange={(e) => handleInvitationChange('subject', e.target.value)}
                   onBlur={() => handleInvitationBlur('subject')}
                   error={touchedInvitation.subject ? invitationErrors.subject : undefined}
-                  placeholder="Meeting with John Doe"
+                  placeholder={t('form.invitation.placeholders.subject')}
                   required
                 />
 
@@ -1972,7 +1972,7 @@ const VisitorForm = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Input
-                      label="Start Date & Time"
+                      label={t('form.invitation.startDateTime')}
                       type="datetime-local"
                       value={invitationData.scheduledStartTime}
                       onChange={(e) => handleInvitationChange('scheduledStartTime', e.target.value)}
@@ -1984,7 +1984,7 @@ const VisitorForm = ({
                   </div>
                   <div>
                     <Input
-                      label="End Date & Time"
+                      label={t('form.invitation.endDateTime')}
                       type="datetime-local"
                       value={invitationData.scheduledEndTime}
                       onChange={(e) => handleInvitationChange('scheduledEndTime', e.target.value)}
@@ -2000,7 +2000,7 @@ const VisitorForm = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                      Location
+                      {t('form.invitation.location')}
                     </label>
                     <AutocompleteInput
                       options={locations}
@@ -2008,12 +2008,12 @@ const VisitorForm = ({
                       onChange={(location) => handleInvitationChange('locationId', location?.id || null)}
                       getOptionLabel={(location) => location.name}
                       getOptionDescription={(location) => location.description}
-                      placeholder="Select location..."
+                      placeholder={t('form.invitation.placeholders.location')}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                      Visit Purpose
+                      {t('form.invitation.visitPurpose')}
                     </label>
                     <AutocompleteInput
                       options={visitPurposes}
@@ -2021,7 +2021,7 @@ const VisitorForm = ({
                       onChange={(purpose) => handleInvitationChange('visitPurposeId', purpose?.id || null)}
                       getOptionLabel={(purpose) => purpose.name}
                       getOptionDescription={(purpose) => purpose.description}
-                      placeholder="Select purpose..."
+                      placeholder={t('form.invitation.placeholders.visitPurpose')}
                     />
                   </div>
                 </div>
@@ -2029,20 +2029,20 @@ const VisitorForm = ({
                 {/* Message */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                    Message
+                    {t('form.invitation.message')}
                   </label>
                   <textarea
                     value={invitationData.message}
                     onChange={(e) => handleInvitationChange('message', e.target.value)}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Optional message for the visitor..."
+                    placeholder={t('form.invitation.placeholders.message')}
                   />
                 </div>
 
                 {/* Requirements */}
                 <div className="space-y-3">
-                  <h5 className="text-sm font-medium text-gray-900 dark:text-gray-100">Requirements</h5>
+                  <h5 className="text-sm font-medium text-gray-900 dark:text-gray-100">{t('form.invitation.requirements')}</h5>
                   <div className="space-y-2">
                     <label className="flex items-center gap-3">
                       <input
@@ -2051,7 +2051,7 @@ const VisitorForm = ({
                         onChange={(e) => handleInvitationChange('requiresApproval', e.target.checked)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900"
                       />
-                      <span className="text-sm text-gray-700 dark:text-gray-200">Requires approval</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-200">{t('form.invitation.requiresApproval')}</span>
                     </label>
                     <label className="flex items-center gap-3">
                       <input
@@ -2060,7 +2060,7 @@ const VisitorForm = ({
                         onChange={(e) => handleInvitationChange('requiresEscort', e.target.checked)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900"
                       />
-                      <span className="text-sm text-gray-700 dark:text-gray-200">Requires escort</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-200">{t('form.invitation.requiresEscort')}</span>
                     </label>
                   </div>
                 </div>
@@ -2075,33 +2075,33 @@ const VisitorForm = ({
   const renderReview = () => (
     <div className="space-y-8">
       <div className="text-center">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Review Information</h3>
-        <p className="text-gray-600 dark:text-gray-300">Please review all information before submitting</p>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('form.review.title')}</h3>
+        <p className="text-gray-600 dark:text-gray-300">{t('form.review.subtitle')}</p>
       </div>
 
-      {/* Basic Information Review */}
+      {/* {t('form.review.basicInfo')} Review */}
       <Card className="p-6">
         <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
           <UserIcon className="w-5 h-5" />
-          <span>Basic Information</span>
+          <span>{t('form.review.basicInfo')}</span>
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="font-medium text-gray-700 dark:text-gray-200">Name:</span>
+            <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.name')}:</span>
             <span className="ms-2 text-gray-900 dark:text-gray-100">{formData.firstName} {formData.lastName}</span>
             {formData.isVip && <StarIconSolid className="inline w-4 h-4 text-yellow-500 ms-2" />}
           </div>
           <div>
-            <span className="font-medium text-gray-700 dark:text-gray-200">Email:</span>
+            <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.email')}:</span>
             <span className="ms-2 text-gray-900 dark:text-gray-100">{formData.email}</span>
           </div>
           <div>
-            <span className="font-medium text-gray-700 dark:text-gray-200">Phone:</span>
+            <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.phone')}:</span>
             <span className="ms-2 text-gray-900 dark:text-gray-100">{formData.phoneNumber}</span>
           </div>
           <div>
-            <span className="font-medium text-gray-700 dark:text-gray-200">Company:</span>
-            <span className="ms-2 text-gray-900 dark:text-gray-100">{formData.company || 'Not specified'}</span>
+            <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.company')}:</span>
+            <span className="ms-2 text-gray-900 dark:text-gray-100">{formData.company || t('form.review.notSpecified')}</span>
           </div>
         </div>
       </Card>
@@ -2111,21 +2111,21 @@ const VisitorForm = ({
         <Card className="p-6">
           <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <PhotoIcon className="w-5 h-5" />
-            <span>Photo & Documents</span>
+            <span>{t('form.review.photoDocuments')}</span>
           </h4>
           <div className="space-y-4">
             {formData.photoFile && (
               <div>
-                <span className="font-medium text-gray-700 dark:text-gray-200">Photo:</span>
+                <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.photo')}:</span>
                 <span className="ms-2 text-gray-900 dark:text-gray-100">{formData.photoFile.name}</span>
               </div>
             )}
             {formData.documentFiles.length > 0 && (
               <div>
-                <span className="font-medium text-gray-700 dark:text-gray-200">Documents:</span>
+                <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.documents')}:</span>
                 <ul className="ms-2 mt-1 space-y-1">
                   {formData.documentFiles.map((file, index) => (
-                    <li key={index} className="text-gray-900 dark:text-gray-100 text-sm">• {file.name}</li>
+                    <li key={index} className="text-gray-900 dark:text-gray-100 text-sm">- {file.name}</li>
                   ))}
                 </ul>
               </div>
@@ -2134,23 +2134,23 @@ const VisitorForm = ({
         </Card>
       )}
 
-      {/* Preferences Review */}
+      {/* {t('form.review.preferences')} Review */}
       {(selectedLocation || selectedVisitPurpose) && (
         <Card className="p-6">
           <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <MapPinIcon className="w-5 h-5" />
-            <span>Preferences</span>
+            <span>{t('form.review.preferences')}</span>
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             {selectedLocation && (
               <div>
-                <span className="font-medium text-gray-700 dark:text-gray-200">Preferred Location:</span>
+                <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.preferredLocation')}:</span>
                 <span className="ms-2 text-gray-900 dark:text-gray-100">{selectedLocation.name}</span>
               </div>
             )}
             {selectedVisitPurpose && (
               <div>
-                <span className="font-medium text-gray-700 dark:text-gray-200">Default Visit Purpose:</span>
+                <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.defaultVisitPurpose')}:</span>
                 <span className="ms-2 text-gray-900 dark:text-gray-100">{selectedVisitPurpose.name}</span>
               </div>
             )}
@@ -2158,11 +2158,11 @@ const VisitorForm = ({
         </Card>
       )}
 
-      {/* Emergency Contacts Review */}
+      {/* {t('form.review.emergencyContacts')} Review */}
       <Card className="p-6">
         <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
           <UserGroupIcon className="w-5 h-5" />
-          <span>Emergency Contacts</span>
+          <span>{t('form.review.emergencyContacts')}</span>
         </h4>
         <div className="space-y-3">
           {formData.emergencyContacts.map((contact, index) => (
@@ -2171,12 +2171,12 @@ const VisitorForm = ({
                 <span className="font-medium text-gray-900 dark:text-gray-100">
                   {contact.firstName} {contact.lastName}
                 </span>
-                {contact.isPrimary && <Badge variant="primary" size="xs">Primary</Badge>}
+                {contact.isPrimary && <Badge variant="primary" size="xs">{t('form.emergency.primary')}</Badge>}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600 dark:text-gray-300">
-                <div>Phone: {contact.phoneNumber}</div>
-                <div>Relationship: {contact.relationship}</div>
-                {contact.email && <div>Email: {contact.email}</div>}
+                <div>{t('form.review.labels.phone')}: {contact.phoneNumber}</div>
+                <div>{t('form.review.labels.relationship')}: {contact.relationship}</div>
+                {contact.email && <div>{t('form.review.labels.email')}: {contact.email}</div>}
               </div>
             </div>
           ))}
@@ -2188,15 +2188,15 @@ const VisitorForm = ({
         <Card className="p-6">
           <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <ClipboardDocumentListIcon className="w-5 h-5" />
-            <span>Invitation Details</span>
+            <span>{t('form.review.invitationDetails')}</span>
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="font-medium text-gray-700 dark:text-gray-200">Subject:</span>
+              <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.subject')}:</span>
               <span className="ms-2 text-gray-900 dark:text-gray-100">{invitationData.subject || 'Not specified'}</span>
             </div>
             <div>
-              <span className="font-medium text-gray-700 dark:text-gray-200">Start Time:</span>
+              <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.startTime')}:</span>
               <span className="ms-2 text-gray-900 dark:text-gray-100">
                 {invitationData.scheduledStartTime 
                   ? new Date(invitationData.scheduledStartTime).toLocaleString()
@@ -2205,7 +2205,7 @@ const VisitorForm = ({
               </span>
             </div>
             <div>
-              <span className="font-medium text-gray-700 dark:text-gray-200">End Time:</span>
+              <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.endTime')}:</span>
               <span className="ms-2 text-gray-900 dark:text-gray-100">
                 {invitationData.scheduledEndTime 
                   ? new Date(invitationData.scheduledEndTime).toLocaleString()
@@ -2214,35 +2214,35 @@ const VisitorForm = ({
               </span>
             </div>
             <div>
-              <span className="font-medium text-gray-700 dark:text-gray-200">Location:</span>
+              <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.location')}:</span>
               <span className="ms-2 text-gray-900 dark:text-gray-100">
                 {locations.find(l => l.id === invitationData.locationId)?.name || 'Not specified'}
               </span>
             </div>
             <div>
-              <span className="font-medium text-gray-700 dark:text-gray-200">Purpose:</span>
+              <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.purpose')}:</span>
               <span className="ms-2 text-gray-900 dark:text-gray-100">
                 {visitPurposes.find(p => p.id === invitationData.visitPurposeId)?.name || 'Not specified'}
               </span>
             </div>
             <div>
-              <span className="font-medium text-gray-700 dark:text-gray-200">Requirements:</span>
+              <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.requirements')}:</span>
               <div className="ms-2 flex gap-3">
                 {invitationData.requiresApproval && (
-                  <Badge variant="warning" size="sm">Requires Approval</Badge>
+                  <Badge variant="warning" size="sm">{t('form.invitation.requiresApproval')}</Badge>
                 )}
                 {invitationData.requiresEscort && (
-                  <Badge variant="info" size="sm">Requires Escort</Badge>
+                  <Badge variant="info" size="sm">{t('form.invitation.requiresEscort')}</Badge>
                 )}
                 {!invitationData.requiresApproval && !invitationData.requiresEscort && (
-                  <span className="text-gray-500 dark:text-gray-400">None</span>
+                  <span className="text-gray-500 dark:text-gray-400">{t('form.review.none')}</span>
                 )}
               </div>
             </div>
           </div>
           {invitationData.message && (
             <div className="mt-4">
-              <span className="font-medium text-gray-700 dark:text-gray-200">Message:</span>
+              <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.message')}:</span>
               <p className="mt-1 text-gray-900 dark:text-gray-100 text-sm bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 p-3 rounded-lg">
                 {invitationData.message}
               </p>
@@ -2336,7 +2336,7 @@ const VisitorForm = ({
           onClick={currentStep === 0 ? onCancel : goToPreviousStep}
           disabled={loading}
         >
-          {currentStep === 0 ? 'Cancel' : 'Previous'}
+          {currentStep === 0 ? t('common:buttons.cancel') : t('common:buttons.previous')}
         </Button>
 
         <div className="flex gap-3">
@@ -2345,7 +2345,7 @@ const VisitorForm = ({
               onClick={goToNextStep}
               disabled={loading}
             >
-              Next
+              {t('common:buttons.next')}
             </Button>
           ) : (
             <Button
@@ -2354,10 +2354,10 @@ const VisitorForm = ({
               disabled={loading}
             >
               {isEdit 
-                ? 'Update Visitor' 
+                ? t('form.actions.updateVisitor') 
                 : createInvitation 
-                  ? 'Create Visitor & Invitation' 
-                  : 'Create Visitor'
+                  ? t('form.actions.createVisitorWithInvitation') 
+                  : t('form.actions.createVisitor')
               }
             </Button>
           )}
@@ -2378,7 +2378,7 @@ const VisitorForm = ({
       <Modal
         isOpen={showCreateCompanyModal}
         onClose={() => setShowCreateCompanyModal(false)}
-        title="Create New Company"
+        title={t('form.company.createModalTitle')}
       >
         <QuickCreateCompanyForm
           onSubmit={handleCreateCompany}
@@ -2392,6 +2392,8 @@ const VisitorForm = ({
 
 // Quick Create Company Form Component
 const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
+  const { t } = useTranslation(['system', 'common']);
+
   const [formState, setFormState] = useState({
     name: '',
     code: '',
@@ -2420,50 +2422,47 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Convert employeeCount to number if provided
     const submitData = {
       ...formState,
-      employeeCount: formState.employeeCount ? parseInt(formState.employeeCount) : null
+      employeeCount: formState.employeeCount ? parseInt(formState.employeeCount, 10) : null
     };
     onSubmit(submitData);
   };
 
   const tabs = [
-    { id: 'basic', label: 'Basic Info', icon: '🏢' },
-    { id: 'contact', label: 'Contact', icon: '📞' },
-    { id: 'address', label: 'Address', icon: '📍' }
+    { id: 'basic', label: t('system:companies.form.tabBasic') },
+    { id: 'contact', label: t('system:companies.form.tabContact') },
+    { id: 'address', label: t('system:companies.form.tabAddress') }
   ];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Tabs */}
-      <div className="flex border-b border-gray-200">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 px-4 py-2.5 text-sm font-medium transition-colors ${
-              activeTab === tab.id
-                ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <span className="me-1.5">{tab.icon}</span>
-            {tab.label}
-          </button>
-        ))}
+      <div className="border-b border-gray-200 overflow-x-auto custom-scrollbar">
+        <div className="inline-flex min-w-max">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors ${
+                activeTab === tab.id
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Tab Content */}
       <div className="max-h-[60vh] overflow-y-auto px-1">
-        {/* Basic Info Tab */}
         {activeTab === 'basic' && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="company-name" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Company Name <span className="text-red-500">*</span>
+                  {t('system:companies.form.companyName')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -2473,13 +2472,13 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                   onChange={handleChange}
                   required
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., Acme Corporation"
+                  placeholder={t('system:companies.form.companyNamePlaceholder')}
                 />
               </div>
 
               <div>
                 <label htmlFor="company-code" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Company Code <span className="text-red-500">*</span>
+                  {t('system:companies.form.companyCode')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -2489,7 +2488,7 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                   onChange={handleChange}
                   required
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., ACME"
+                  placeholder={t('system:companies.form.companyCodePlaceholder')}
                 />
               </div>
             </div>
@@ -2497,7 +2496,7 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="company-industry" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Industry
+                  {t('system:companies.form.industry')}
                 </label>
                 <input
                   type="text"
@@ -2506,13 +2505,13 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                   value={formState.industry}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., Technology"
+                  placeholder={t('system:companies.form.industryPlaceholder')}
                 />
               </div>
 
               <div>
                 <label htmlFor="company-employeeCount" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Employee Count
+                  {t('system:companies.form.employeeCount')}
                 </label>
                 <input
                   type="number"
@@ -2522,7 +2521,7 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                   onChange={handleChange}
                   min="1"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., 100"
+                  placeholder={t('system:companies.form.employeeCountPlaceholder')}
                 />
               </div>
             </div>
@@ -2530,7 +2529,7 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="company-website" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Website
+                  {t('system:companies.form.website')}
                 </label>
                 <input
                   type="url"
@@ -2539,13 +2538,13 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                   value={formState.website}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://example.com"
+                  placeholder={t('system:companies.form.websitePlaceholder')}
                 />
               </div>
 
               <div>
                 <label htmlFor="company-taxId" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Tax ID / Registration Number
+                  {t('system:companies.form.taxId')}
                 </label>
                 <input
                   type="text"
@@ -2554,14 +2553,14 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                   value={formState.taxId}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., 12-3456789"
+                  placeholder={t('system:companies.form.taxIdPlaceholder')}
                 />
               </div>
             </div>
 
             <div>
               <label htmlFor="company-description" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Description
+                {t('system:companies.form.descriptionLabel')}
               </label>
               <textarea
                 id="company-description"
@@ -2570,18 +2569,17 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                 onChange={handleChange}
                 rows={3}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Brief description of the company..."
+                placeholder={t('system:companies.form.descriptionPlaceholder')}
               />
             </div>
           </div>
         )}
 
-        {/* Contact Info Tab */}
         {activeTab === 'contact' && (
           <div className="space-y-4">
             <div>
               <label htmlFor="company-contactPersonName" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Contact Person Name
+                {t('system:companies.form.contactPersonName')}
               </label>
               <input
                 type="text"
@@ -2590,13 +2588,13 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                 value={formState.contactPersonName}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., John Doe"
+                placeholder={t('system:companies.form.contactPersonNamePlaceholder')}
               />
             </div>
 
             <div>
               <label htmlFor="company-email" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Contact Email
+                {t('system:companies.form.contactEmail')}
               </label>
               <input
                 type="email"
@@ -2605,13 +2603,13 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                 value={formState.email}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="contact@example.com"
+                placeholder={t('system:companies.form.contactEmailPlaceholder')}
               />
             </div>
 
             <div>
               <label htmlFor="company-phoneNumber" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Contact Phone
+                {t('system:companies.form.contactPhone')}
               </label>
               <input
                 type="tel"
@@ -2620,18 +2618,17 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                 value={formState.phoneNumber}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="+1 (555) 123-4567"
+                placeholder={t('system:companies.form.contactPhonePlaceholder')}
               />
             </div>
           </div>
         )}
 
-        {/* Address Tab */}
         {activeTab === 'address' && (
           <div className="space-y-4">
             <div>
               <label htmlFor="company-street1" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Street Address 1
+                {t('system:companies.form.street1')}
               </label>
               <input
                 type="text"
@@ -2640,13 +2637,13 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                 value={formState.street1}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., 123 Main Street"
+                placeholder={t('system:companies.form.street1Placeholder')}
               />
             </div>
 
             <div>
               <label htmlFor="company-street2" className="block text-sm font-medium text-gray-700 mb-1.5">
-                Street Address 2
+                {t('system:companies.form.street2')}
               </label>
               <input
                 type="text"
@@ -2655,14 +2652,14 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                 value={formState.street2}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Suite, Floor, Building (optional)"
+                placeholder={t('system:companies.form.street2Placeholder')}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="company-city" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  City
+                  {t('system:companies.form.city')}
                 </label>
                 <input
                   type="text"
@@ -2671,13 +2668,13 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                   value={formState.city}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., New York"
+                  placeholder={t('system:companies.form.cityPlaceholder')}
                 />
               </div>
 
               <div>
                 <label htmlFor="company-state" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  State / Province
+                  {t('system:companies.form.stateProvince')}
                 </label>
                 <input
                   type="text"
@@ -2686,7 +2683,7 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                   value={formState.state}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., NY"
+                  placeholder={t('system:companies.form.stateProvincePlaceholder')}
                 />
               </div>
             </div>
@@ -2694,7 +2691,7 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="company-postalCode" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Postal Code
+                  {t('system:companies.form.postalCode')}
                 </label>
                 <input
                   type="text"
@@ -2703,13 +2700,13 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                   value={formState.postalCode}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., 10001"
+                  placeholder={t('system:companies.form.postalCodePlaceholder')}
                 />
               </div>
 
               <div>
                 <label htmlFor="company-country" className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Country
+                  {t('system:companies.form.country')}
                 </label>
                 <input
                   type="text"
@@ -2718,7 +2715,7 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
                   value={formState.country}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., United States"
+                  placeholder={t('system:companies.form.countryPlaceholder')}
                 />
               </div>
             </div>
@@ -2726,7 +2723,6 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
         )}
       </div>
 
-      {/* Action Buttons */}
       <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
         <button
           type="button"
@@ -2734,7 +2730,7 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
           disabled={loading}
           className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Cancel
+          {t('common:buttons.cancel')}
         </button>
         <button
           type="submit"
@@ -2744,16 +2740,17 @@ const QuickCreateCompanyForm = ({ onSubmit, onCancel, loading }) => {
           {loading ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white me-2"></div>
-              Creating...
+              {t('common:buttons.loading')}
             </>
           ) : (
-            'Create Company'
+            t('system:companies.form.create')
           )}
         </button>
       </div>
     </form>
   );
 };
+
 
 // PropTypes validation
 VisitorForm.propTypes = {
@@ -2771,3 +2768,23 @@ VisitorForm.propTypes = {
 };
 
 export default VisitorForm;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

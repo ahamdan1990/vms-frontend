@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
 
@@ -64,6 +65,7 @@ import PaginationDebugger from '../../../debug/PaginationDebugger';
 
 const AuditPage = () => {
   const dispatch = useDispatch();
+  const { t, i18n } = useTranslation('system');
   const { user } = useAuth();
   const { hasPermission } = usePermissions();
 
@@ -151,25 +153,25 @@ const AuditPage = () => {
   const tabs = [
     {
       id: 'all',
-      name: 'All Logs',
+      name: t('audit.tabs.all'),
       icon: DocumentTextIcon,
       show: canRead
     },
     {
       id: 'user',
-      name: 'User Activity',
+      name: t('audit.tabs.user'),
       icon: UserIcon,
       show: canViewUserActivity
     },
     {
       id: 'system',
-      name: 'System Events',
+      name: t('audit.tabs.system'),
       icon: ComputerDesktopIcon,
       show: canViewSystemEvents
     },
     {
       id: 'security',
-      name: 'Security Events',
+      name: t('audit.tabs.security'),
       icon: ShieldCheckIcon,
       show: canViewSecurityEvents
     }
@@ -233,9 +235,9 @@ const AuditPage = () => {
         ...filters,
         includeDetails: true 
       })).unwrap();
-      toast.success(`Audit logs exported as ${format.toUpperCase()}`);
+      toast.success(t('audit.exportSuccess', { format: format.toUpperCase() }));
     } catch (error) {
-      toast.error('Failed to export audit logs');
+      toast.error(t('audit.failedExport'));
     }
   };
 
@@ -277,23 +279,32 @@ const AuditPage = () => {
   const columns = [
     {
       key: 'timestamp',
-      header: 'Timestamp',
+      header: t('audit.columns.timestamp'),
       sortable: true,
-      render: (value) => new Date(value).toLocaleString()
+      render: (value) => new Date(value).toLocaleString(i18n.language === 'ar' ? 'ar' : 'en-US')
     },
     {
       key: 'category',
-      header: 'Category',
+      header: t('audit.columns.category'),
       sortable: true,
-      render: (value) => (
-        <Badge variant="outline" size="sm">
-          {value}
-        </Badge>
-      )
+      render: (value) => {
+        const categoryLabels = {
+          Authentication: t('audit.cat_authentication'),
+          Authorization: t('audit.cat_authorization'),
+          Configuration: t('audit.cat_configuration'),
+          UserManagement: t('audit.cat_userManagement'),
+          SystemOperation: t('audit.cat_systemOperation')
+        };
+        return (
+          <Badge variant="outline" size="sm">
+            {categoryLabels[value] || value}
+          </Badge>
+        );
+      }
     },
     {
       key: 'action',
-      header: 'Action',
+      header: t('audit.columns.action'),
       sortable: true,
       render: (value) => (
         <Badge variant="primary" size="sm">
@@ -303,13 +314,13 @@ const AuditPage = () => {
     },
     {
       key: 'userName',
-      header: 'User',
+      header: t('audit.columns.user'),
       sortable: true,
-      render: (value) => value || 'System'
+      render: (value) => value || t('audit.system_label')
     },
     {
       key: 'description',
-      header: 'Description',
+      header: t('audit.columns.description'),
       render: (value) => (
         <div className="max-w-xs truncate" title={value}>
           {value}
@@ -318,7 +329,7 @@ const AuditPage = () => {
     },
     {
       key: 'severity',
-      header: 'Severity',
+      header: t('audit.columns.severity'),
       sortable: true,
       render: (value) => {
         const colors = {
@@ -327,9 +338,15 @@ const AuditPage = () => {
           'High': 'danger',
           'Critical': 'danger'
         };
+        const severityLabels = {
+          Low: t('audit.severity_low'),
+          Medium: t('audit.severity_medium'),
+          High: t('audit.severity_high'),
+          Critical: t('audit.severity_critical')
+        };
         return (
           <Badge variant={colors[value] || 'secondary'} size="sm">
-            {value}
+            {severityLabels[value] || value}
           </Badge>
         );
       }
@@ -342,9 +359,9 @@ const AuditPage = () => {
         <Card>
           <div className="text-center py-12">
             <ExclamationTriangleIcon className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('audit.accessDenied')}</h3>
             <p className="text-gray-600">
-              You don't have permission to view audit logs.
+              {t('audit.accessDeniedDesc')}
             </p>
           </div>
         </Card>
@@ -360,8 +377,8 @@ const AuditPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Audit Logs</h1>
-          <p className="text-gray-600 mt-1">View system activity and security events</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('audit.title')}</h1>
+          <p className="text-gray-600 mt-1">{t('audit.subtitle')}</p>
         </div>
         
         <div className="flex items-center gap-3">
@@ -376,7 +393,7 @@ const AuditPage = () => {
                 className="flex items-center gap-2"
               >
                 <ArrowDownTrayIcon className="h-4 w-4" />
-                Export CSV
+                {t('audit.exportCsv')}
               </Button>
               <Button
                 variant="outline"
@@ -386,7 +403,7 @@ const AuditPage = () => {
                 className="flex items-center gap-2"
               >
                 <ArrowDownTrayIcon className="h-4 w-4" />
-                Export Excel
+                {t('audit.exportExcel')}
               </Button>
             </div>
           )}
@@ -399,15 +416,15 @@ const AuditPage = () => {
             className="flex items-center gap-2"
           >
             <FunnelIcon className="h-4 w-4" />
-            Filters
+            {t('audit.filters')}
           </Button>
         </div>
       </div>
 
       {/* Tabs */}
       <Card className="p-0">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex gap-8 px-6">
+        <div className="border-b border-gray-200 overflow-x-auto custom-scrollbar">
+          <nav className="-mb-px inline-flex min-w-max gap-8 px-6">
             {visibleTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -438,38 +455,38 @@ const AuditPage = () => {
         <Card className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Input
-              label="Search"
+              label={t('audit.search')}
               type="text"
-              placeholder="Search logs..."
+              placeholder={t('audit.searchPlaceholder')}
               value={filters.searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
-              icon={MagnifyingGlassIcon}
+              leftIcon={<MagnifyingGlassIcon className="w-5 h-5" />}
             />
             
             <Select
-              label="Category"
+              label={t('audit.category')}
               value={filters.category}
               onChange={(e) => dispatch(updateFilters({ category: e.target.value }))}
               options={[
-                { value: '', label: 'All Categories' },
-                { value: 'Authentication', label: 'Authentication' },
-                { value: 'Authorization', label: 'Authorization' },
-                { value: 'Configuration', label: 'Configuration' },
-                { value: 'UserManagement', label: 'User Management' },
-                { value: 'SystemOperation', label: 'System Operations' }
+                { value: '', label: t('audit.allCategories') },
+                { value: 'Authentication', label: t('audit.cat_authentication') },
+                { value: 'Authorization', label: t('audit.cat_authorization') },
+                { value: 'Configuration', label: t('audit.cat_configuration') },
+                { value: 'UserManagement', label: t('audit.cat_userManagement') },
+                { value: 'SystemOperation', label: t('audit.cat_systemOperation') }
               ]}
             />
             
             <Select
-              label="Severity"
+              label={t('audit.severity')}
               value={filters.severity}
               onChange={(e) => dispatch(updateFilters({ severity: e.target.value }))}
               options={[
-                { value: '', label: 'All Severities' },
-                { value: 'Low', label: 'Low' },
-                { value: 'Medium', label: 'Medium' },
-                { value: 'High', label: 'High' },
-                { value: 'Critical', label: 'Critical' }
+                { value: '', label: t('audit.allSeverities') },
+                { value: 'Low', label: t('audit.severity_low') },
+                { value: 'Medium', label: t('audit.severity_medium') },
+                { value: 'High', label: t('audit.severity_high') },
+                { value: 'Critical', label: t('audit.severity_critical') }
               ]}
             />
             
@@ -479,7 +496,7 @@ const AuditPage = () => {
                 onClick={() => dispatch(resetFilters())}
                 className="w-full"
               >
-                Reset Filters
+                {t('audit.resetFilters')}
               </Button>
             </div>
           </div>
@@ -501,13 +518,13 @@ const AuditPage = () => {
           <div className="p-4">
             <div className="flex items-center gap-2 text-red-800">
               <ExclamationTriangleIcon className="h-5 w-5" />
-              <span className="font-medium">Error loading audit logs</span>
+              <span className="font-medium">{t('audit.errorLoading')}</span>
             </div>
             <p className="text-red-700 mt-1">
               {Array.isArray(currentError) 
                 ? currentError[0] 
                 : typeof currentError === 'object' 
-                  ? currentError.message || 'An error occurred'
+                  ? currentError.message || t('audit.errorLoading')
                   : currentError
               }
             </p>
@@ -519,8 +536,8 @@ const AuditPage = () => {
       {!currentLoading && currentData.length === 0 && (
         <EmptyState
           icon={DocumentTextIcon}
-          title="No audit logs found"
-          description={filters.searchTerm ? "Try adjusting your search criteria" : "No audit logs have been recorded yet"}
+          title={t('audit.emptyMessage')}
+          description={filters.searchTerm ? t('audit.emptySearch') : t('audit.emptyDesc')}
         />
       )}
 

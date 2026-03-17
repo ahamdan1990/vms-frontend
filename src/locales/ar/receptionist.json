@@ -33,7 +33,17 @@
     "openScanner": "فتح ماسح QR",
     "modalTitle": "مسح رمز QR",
     "modalDescription": "وجّه الكاميرا نحو رمز QR الخاص بالزائر",
-    "checkInSuccessful": "تم تسجيل الدخول بنجاح!"
+    "checkInSuccessful": "تم تسجيل الدخول بنجاح!",
+    "checkInFailed": "فشل تسجيل الدخول",
+    "invitationReferenceNotFound": "لم يتم العثور على دعوة بالمرجع {{reference}}.",
+    "failedLoadInvitationDetails": "فشل تحميل تفاصيل الدعوة",
+    "errorDetails": {
+      "tooEarly": "هذه الدعوة مجدولة لوقت لاحق. يُسمح بتسجيل الدخول قبل ساعتين من وقت الموعد.",
+      "expired": "انتهت صلاحية هذه الدعوة ولا يمكن استخدامها لتسجيل الدخول.",
+      "notFound": "رمز QR الممسوح لا يطابق أي دعوة في النظام.",
+      "notApproved": "يجب اعتماد هذه الدعوة قبل السماح بتسجيل الدخول.",
+      "alreadyCheckedIn": "تم تسجيل دخول هذا الزائر بالفعل."
+    }
   },
   "walkIn": {
     "sectionTitle": "تسجيل زائر حضوري",
@@ -46,7 +56,12 @@
     "photoCapturedSuccess": "تم التقاط الصورة بنجاح!",
     "photoCapturedSubtitle": "ابدأ نموذج التسجيل عندما تكون مستعداً.",
     "startRegistration": "بدء التسجيل",
-    "remove": "إزالة"
+    "remove": "إزالة",
+    "walkInDocumentDescription": "مستند هوية زيارة حضورية - {{type}}",
+    "defaultDocumentType": "هوية",
+    "walkInSubject": "زيارة حضورية - {{purpose}}",
+    "defaultPurpose": "عام",
+    "capturedPhotoAlt": "صورة الزائر الملتقطة"
   },
   "activeVisitors": {
     "noActiveVisitors": "لا يوجد زوار نشطون",
@@ -54,7 +69,8 @@
     "noActiveVisitorsTable": "لا يوجد زوار نشطون",
     "details": "التفاصيل",
     "checkIn": "تسجيل الدخول",
-    "checkOut": "تسجيل الخروج"
+    "checkOut": "تسجيل الخروج",
+    "visitorLabel": "زائر"
   },
   "documents": {
     "sectionTitle": "ماسح المستندات",
@@ -79,10 +95,15 @@
       "visas": "التأشيرات",
       "permits": "التصاريح",
       "certificates": "الشهادات"
-    }
+    },
+    "scannedDocumentName": "مستند ممسوح {{id}}",
+    "scannedByReceptionistOn": "تم مسح المستند بواسطة موظف الاستقبال في {{time}}",
+    "defaultDownloadName": "مستند",
+    "scanAlt": "مسح {{index}}"
   },
   "notifications": {
     "overdueTitle": "زوار متأخرون",
+    "overdueMessage": "تجاوز {{count}} زائر وقت المغادرة المجدول.",
     "overdueMessage_one": "تجاوز {{count}} زائر وقت المغادرة المجدول.",
     "overdueMessage_other": "تجاوز {{count}} زوار وقت المغادرة المجدول.",
     "overdueCleared": "تم حل التأخير",
@@ -126,7 +147,9 @@
     "checkOutSuccessDesc": "تم تسجيل خروج الزائر بنجاح.",
     "checkOutFailed": "فشل تسجيل الخروج",
     "validationFailed": "فشل التحقق",
-    "validationFailedSuffix": " يرجى المحاولة مرة أخرى."
+    "validationFailedSuffix": " يرجى المحاولة مرة أخرى.",
+    "photoValidationFailedDefault": "فشل التحقق من الصورة.",
+    "photoUploadFailedDefault": "فشل رفع صورة الملف الشخصي."
   },
   "walkInForm": {
     "steps": {
@@ -139,6 +162,7 @@
       "subtitle": "ابحث بالهاتف أو البريد الإلكتروني للتحقق من وجود الزائر",
       "phone": "هاتف",
       "email": "بريد إلكتروني",
+      "foundCount": "تم العثور على {{count}} زائر",
       "foundCount_one": "تم العثور على {{count}} زائر",
       "foundCount_other": "تم العثور على {{count}} زوار",
       "visitorFound": "تم العثور على الزائر",
@@ -149,9 +173,12 @@
       "createNewVisitor": "إنشاء زائر جديد",
       "skipLookup": "تخطي البحث - إنشاء زائر جديد",
       "pendingInvitationTitle": "تم اكتشاف دعوة معلقة",
+      "pendingInvitationDesc": "لدى هذا الزائر {{count}} دعوة معلقة في انتظار الموافقة.",
       "pendingInvitationDesc_one": "لدى هذا الزائر {{count}} دعوة معلقة في انتظار الموافقة.",
       "pendingInvitationDesc_other": "لدى هذا الزائر {{count}} دعوات معلقة في انتظار الموافقة.",
-      "scheduled": "مجدول: {{time}}"
+      "scheduled": "مجدول: {{time}}",
+      "phonePlaceholder": "+961 70 123 456",
+      "emailPlaceholder": "visitor@example.com"
     },
     "step2": {
       "title": "بيانات الزائر",
@@ -180,7 +207,10 @@
       "docLabel": "مستند {{number}}",
       "updateNote": "ستُحدّث التغييرات الملف الشخصي الموجود للزائر.",
       "back": "رجوع",
-      "continue": "متابعة"
+      "continue": "متابعة",
+      "noteLabel": "ملاحظة",
+      "phonePlaceholder": "+961 70 123 456",
+      "emailPlaceholder": "visitor@example.com"
     },
     "step3": {
       "title": "معلومات الزيارة",
@@ -207,7 +237,12 @@
       "submitting": "جاري المعالجة...",
       "directory": "الدليل",
       "noEmail": "لا يوجد بريد إلكتروني مسجّل",
-      "autoCreatedFromDirectory": "سيتم إنشاؤه تلقائياً من الدليل"
+      "autoCreatedFromDirectory": "سيتم إنشاؤه تلقائياً من الدليل",
+      "hostProvisioningIdentifierMissing": "لا يمكن إضافة هذا المضيف لأنه لا يوجد معرّف دليل متاح.",
+      "hostProvisioningSuccess": "أصبح {{name}} متاحاً الآن كمضيف.",
+      "hostProvisioningFailed": "فشل إضافة المضيف من الدليل.",
+      "unknownHost": "مضيف غير معروف",
+      "selectedHost": "المضيف المزيور"
     },
     "cancel": "إلغاء التسجيل الحضوري",
     "returningVisitor": "زائر متكرر",
@@ -316,5 +351,14 @@
     "enterCode": "يرجى إدخال رمز QR أو رقم الدعوة",
     "cameraError": "خطأ في الكاميرا: {{message}}",
     "cameraPermissionDenied": "تم رفض الوصول إلى الكاميرا. يرجى السماح بالوصول إلى الكاميرا."
+  },
+  "systemNotes": {
+    "walkInRegistered": "زائر حضوري - تم تسجيله بواسطة موظف الاستقبال",
+    "walkInAutoApproved": "زائر حضوري - تمت الموافقة عليه تلقائياً بواسطة موظف الاستقبال",
+    "walkInImmediateCheckIn": "زائر حضوري - تسجيل دخول فوري بواسطة موظف الاستقبال",
+    "qrCheckIn": "تسجيل دخول عبر رمز QR بواسطة موظف الاستقبال",
+    "manualConfirmationCheckIn": "تأكيد تسجيل دخول يدوي بواسطة موظف الاستقبال",
+    "quickCheckIn": "تسجيل دخول سريع بواسطة موظف الاستقبال",
+    "manualCheckOut": "تسجيل خروج يدوي بواسطة موظف الاستقبال"
   }
 }

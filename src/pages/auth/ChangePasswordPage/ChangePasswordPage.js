@@ -271,7 +271,7 @@ const ChangePasswordPage = () => {
           {/* Confirm Password */}
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-              Confirm New Password
+              {t('changePassword.confirmPassword')}
             </label>
             <div className="relative">
               <input
@@ -283,7 +283,7 @@ const ChangePasswordPage = () => {
                 className={`w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors ${
                   formErrors.confirmPassword ? 'border-red-300 dark:border-red-500' : 'border-gray-300 dark:border-gray-700'
                 }`}
-                placeholder="Confirm your new password"
+                placeholder={t('changePassword.confirmPasswordPlaceholder')}
                 disabled={isSubmitting}
               />
               <button
@@ -324,14 +324,14 @@ const ChangePasswordPage = () => {
             loading={isSubmitting}
             className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
           >
-            {isSubmitting ? 'Changing Password...' : 'Change Password'}
+            {isSubmitting ? t('changePassword.changingButton') : t('changePassword.changeButton')}
           </Button>
         </form>
 
         {/* User Info */}
         <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-800 text-center">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Signed in as: <span className="font-medium text-gray-700 dark:text-gray-200">{user?.fullName || user?.email}</span>
+            {t('changePassword.signedInAs')} <span className="font-medium text-gray-700 dark:text-gray-200">{user?.fullName || user?.email}</span>
           </p>
         </div>
       </motion.div>

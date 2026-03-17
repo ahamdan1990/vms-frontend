@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
+﻿import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import Button from '../../common/Button/Button';
 import Input from '../../common/Input/Input';
 import Select from '../../common/Select/Select';
@@ -6,12 +7,6 @@ import Switch from '../../common/Switch/Switch';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
 import { useToast } from '../../../hooks/useNotifications';
 import ldapSettingsService from '../../../services/ldapSettingsService';
-
-const roleOptions = [
-  { label: 'Staff', value: 'Staff' },
-  { label: 'Receptionist', value: 'Receptionist' },
-  { label: 'Administrator', value: 'Administrator' }
-];
 
 const buildFormState = (data = {}) => ({
   enabled: data.enabled ?? false,
@@ -29,11 +24,21 @@ const buildFormState = (data = {}) => ({
 });
 
 const LdapSettingsPanel = ({ canEdit }) => {
+  const { t } = useTranslation('system');
   const toast = useToast();
   const [formState, setFormState] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasPassword, setHasPassword] = useState(false);
+
+  const roleOptions = useMemo(
+    () => [
+      { label: t('ldap.roleStaff', { defaultValue: 'Staff' }), value: 'Staff' },
+      { label: t('ldap.roleReceptionist', { defaultValue: 'Receptionist' }), value: 'Receptionist' },
+      { label: t('ldap.roleAdministrator', { defaultValue: 'Administrator' }), value: 'Administrator' }
+    ],
+    [t]
+  );
 
   const fetchSettings = useCallback(async () => {
     setLoading(true);
@@ -41,13 +46,13 @@ const LdapSettingsPanel = ({ canEdit }) => {
       const data = await ldapSettingsService.getSettings();
       setFormState(buildFormState(data));
       setHasPassword(Boolean(data.hasPasswordConfigured));
-    } catch (error) {
-      toast.error('Failed to load LDAP settings');
+    } catch {
+      toast.error(t('ldap.failedLoad'));
       setFormState(prev => prev || buildFormState());
     } finally {
       setLoading(false);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [t, toast]);
 
   useEffect(() => {
     fetchSettings();
@@ -81,10 +86,10 @@ const LdapSettingsPanel = ({ canEdit }) => {
         handleChange('password', '');
       }
 
-      toast.success('LDAP settings saved');
+      toast.success(t('ldap.saved'));
       await fetchSettings();
-    } catch (error) {
-      toast.error('Failed to save LDAP settings');
+    } catch {
+      toast.error(t('ldap.failedSave'));
     } finally {
       setSaving(false);
     }
@@ -102,9 +107,9 @@ const LdapSettingsPanel = ({ canEdit }) => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">LDAP Settings</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{t('ldap.settingsTitle')}</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Configure LDAP/Active Directory integration parameters.
+            {t('ldap.settingsSubtitle')}
           </p>
         </div>
         <Button
@@ -112,7 +117,7 @@ const LdapSettingsPanel = ({ canEdit }) => {
           disabled={!canEdit || saving}
           icon={saving ? <LoadingSpinner size="sm" /> : null}
         >
-          Save Settings
+          {t('ldap.saveSettings')}
         </Button>
       </div>
 
@@ -122,16 +127,16 @@ const LdapSettingsPanel = ({ canEdit }) => {
             checked={formState.enabled}
             onChange={(value) => handleChange('enabled', value)}
             disabled={!canEdit}
-            label="Enable LDAP"
-            description="Toggle overall LDAP/AD integration."
+            label={t('ldap.enableLdap')}
+            description={t('ldap.enableLdapDesc')}
           />
 
           <Switch
             checked={formState.includeDirectoryUsersInHostSearch}
             onChange={(value) => handleChange('includeDirectoryUsersInHostSearch', value)}
             disabled={!canEdit}
-            label="Show Directory Users in Host Search"
-            description="Allow receptionists to search domain users even if they have not signed in yet."
+            label={t('ldap.showDirectoryUsers')}
+            description={t('ldap.showDirectoryUsersDesc')}
           />
         </div>
       </div>
@@ -139,14 +144,14 @@ const LdapSettingsPanel = ({ canEdit }) => {
       <div className="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
         <div className="grid md:grid-cols-2 gap-6">
           <Input
-            label="Server"
+            label={t('ldap.server')}
             value={formState.server}
             onChange={(e) => handleChange('server', e.target.value)}
             disabled={!canEdit}
             required
           />
           <Input
-            label="Port"
+            label={t('ldap.port')}
             type="number"
             value={formState.port}
             onChange={(e) => handleChange('port', e.target.value)}
@@ -155,27 +160,27 @@ const LdapSettingsPanel = ({ canEdit }) => {
             max={65535}
           />
           <Input
-            label="Domain"
+            label={t('ldap.domain')}
             value={formState.domain}
             onChange={(e) => handleChange('domain', e.target.value)}
             disabled={!canEdit}
           />
           <Input
-            label="Base DN"
+            label={t('ldap.baseDn')}
             value={formState.baseDn}
             onChange={(e) => handleChange('baseDn', e.target.value)}
             disabled={!canEdit}
           />
           <Input
-            label="Service Account Username"
+            label={t('ldap.serviceAccountUsername')}
             value={formState.userName}
             onChange={(e) => handleChange('userName', e.target.value)}
             disabled={!canEdit}
           />
           <Input
-            label="Service Account Password"
+            label={t('ldap.serviceAccountPassword')}
             type="password"
-            placeholder={hasPassword ? 'Leave blank to keep existing password' : 'Enter password'}
+            placeholder={hasPassword ? t('ldap.passwordPlaceholderKeep') : t('ldap.passwordPlaceholderEnter')}
             value={formState.password}
             onChange={(e) => handleChange('password', e.target.value)}
             disabled={!canEdit}
@@ -189,15 +194,15 @@ const LdapSettingsPanel = ({ canEdit }) => {
             checked={formState.autoCreateUsers}
             onChange={(value) => handleChange('autoCreateUsers', value)}
             disabled={!canEdit}
-            label="Auto-create Users on Login"
-            description="Automatically provision LDAP users the first time they sign in."
+            label={t('ldap.autoCreateUsers')}
+            description={t('ldap.autoCreateUsersDesc')}
           />
           <Switch
             checked={formState.syncProfileOnLogin}
             onChange={(value) => handleChange('syncProfileOnLogin', value)}
             disabled={!canEdit}
-            label="Sync Profile on Login"
-            description="Refresh LDAP attributes every time the user signs in."
+            label={t('ldap.syncProfile')}
+            description={t('ldap.syncProfileDesc')}
           />
         </div>
       </div>
@@ -205,9 +210,9 @@ const LdapSettingsPanel = ({ canEdit }) => {
       <div className="bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
         <div className="grid md:grid-cols-2 gap-6">
           <Select
-            label="Default Role for Imported Users"
+            label={t('ldap.defaultRole')}
             value={formState.defaultImportRole}
-            onChange={(value) => handleChange('defaultImportRole', value)}
+            onChange={(e) => handleChange('defaultImportRole', e.target.value)}
             options={roleOptions}
             disabled={!canEdit}
           />
@@ -215,8 +220,8 @@ const LdapSettingsPanel = ({ canEdit }) => {
             checked={formState.allowRoleSelectionOnImport}
             onChange={(value) => handleChange('allowRoleSelectionOnImport', value)}
             disabled={!canEdit}
-            label="Allow Role Overrides on Import"
-            description="Permit admins to assign a different role when importing directory users."
+            label={t('ldap.allowRoleOverride')}
+            description={t('ldap.allowRoleOverrideDesc')}
           />
         </div>
       </div>

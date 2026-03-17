@@ -85,8 +85,8 @@ const Input = forwardRef(({
       'ring-2': focused,
 
       // Icon padding
-      'pl-10': leftIcon,
-      'pr-10': rightIcon || rightElement || (isPassword && showPasswordToggle),
+      'ps-10': leftIcon,
+      'pe-10': rightIcon || rightElement || (isPassword && showPasswordToggle),
 
       // Variants
       'border-0 bg-gray-100 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-700 focus:ring-gray-300 dark:focus:ring-gray-600': variant === 'filled',

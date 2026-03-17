@@ -2,6 +2,7 @@
 import React from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useSelector, useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { clearToasts } from '../../store/slices/notificationSlice';
 import Toast from './Toast';
 import { XMarkIcon } from '@heroicons/react/24/outline';
@@ -15,6 +16,7 @@ const ToastContainer = ({
   maxToasts = 5,
   className = ''
 }) => {
+  const { t } = useTranslation('notifications');
   const dispatch = useDispatch();
   const toasts = useSelector(state => state.notifications.toasts);
 
@@ -53,7 +55,7 @@ const ToastContainer = ({
       className={`${getPositionClasses(position)} ${className}`}
       aria-live="assertive"
       role="region"
-      aria-label="Notifications"
+      aria-label={t('toastContainer.ariaLabel')}
       style={
         {width:'20rem'}
       }
@@ -63,16 +65,20 @@ const ToastContainer = ({
         {toasts.length > 0 && (
           <button
             onClick={() => {
-              if (toasts.length > 1 || window.confirm('Clear this notification?')) {
+              if (toasts.length > 1 || window.confirm(t('toastContainer.clearSingleConfirm'))) {
                 dispatch(clearToasts());
               }
             }}
             className="flex items-center justify-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg shadow-lg transition-colors duration-200 border border-red-700"
-            title={toasts.length > 1 ? "Clear all notifications" : "Clear notification"}
-            aria-label={`Clear ${toasts.length} notification${toasts.length > 1 ? 's' : ''}`}
+            title={toasts.length > 1 ? t('toastContainer.clearAllTitle') : t('toastContainer.clearSingleTitle')}
+            aria-label={t('toastContainer.clearAria', { count: toasts.length })}
           >
             <XMarkIcon className="w-4 h-4" />
-            <span>Clear {toasts.length > 1 ? `All (${toasts.length})` : 'Notification'}</span>
+            <span>
+              {toasts.length > 1
+                ? t('toastContainer.clearAllButton', { count: toasts.length })
+                : t('toastContainer.clearSingleButton')}
+            </span>
           </button>
         )}
 

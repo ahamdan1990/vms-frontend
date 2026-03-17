@@ -2,6 +2,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // Components
 import Modal from '../../common/Modal/Modal';
@@ -28,23 +29,30 @@ const AlternativesModal = ({
   error = null,
   originalRequest = null,
   onSelectAlternative,
-  title = 'Alternative Time Slots'
+  title
 }) => {
-  // Format the original request details
+  const { t } = useTranslation('analytics');
+
   const formatOriginalRequest = () => {
     if (!originalRequest) return '';
-    
-    const dateTime = originalRequest.originalDateTime 
+
+    const dateTime = originalRequest.originalDateTime
       ? format(parseISO(originalRequest.originalDateTime), 'PPP p')
       : '';
-    
+
     const visitors = originalRequest.expectedVisitors || 1;
-    const location = originalRequest.locationName || 'Any location';
-    
-    return `${dateTime} • ${visitors} visitor${visitors !== 1 ? 's' : ''} • ${location}`;
+    const location = originalRequest.locationName || t('capacityDashboard.alternatives.anyLocation');
+
+    return t('capacityDashboard.alternatives.requestSummary', {
+      dateTime,
+      visitors,
+      visitorLabel: visitors === 1
+        ? t('capacityDashboard.alternatives.visitorSingular')
+        : t('capacityDashboard.alternatives.visitorPlural'),
+      location
+    });
   };
 
-  // Get status badge variant
   const getStatusVariant = (alternative) => {
     if (!alternative.isRecommended) return 'neutral';
     if (alternative.availableCapacity >= alternative.maxCapacity * 0.8) return 'success';
@@ -56,60 +64,53 @@ const AlternativesModal = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={title}
+      title={title || t('capacityDashboard.alternatives.title')}
       size="lg"
       className="max-h-[80vh]"
     >
       <div className="space-y-6">
-        {/* Original Request Info */}
         {originalRequest && (
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h4 className="font-medium text-gray-900 mb-2">Requested Appointment</h4>
+            <h4 className="font-medium text-gray-900 mb-2">{t('capacityDashboard.alternatives.requestedAppointment')}</h4>
             <p className="text-sm text-gray-600">{formatOriginalRequest()}</p>
-            <p className="text-sm text-red-600 mt-1">
-              This time slot is currently at capacity or unavailable.
-            </p>
+            <p className="text-sm text-red-600 mt-1">{t('capacityDashboard.alternatives.requestUnavailable')}</p>
           </div>
         )}
 
-        {/* Loading State */}
         {loading && (
           <div className="flex justify-center py-8">
             <LoadingSpinner size="lg" />
-            <span className="ms-3 text-gray-600">Finding alternative time slots...</span>
+            <span className="ms-3 text-gray-600">{t('capacityDashboard.alternatives.finding')}</span>
           </div>
         )}
 
-        {/* Error State */}
         {error && (
           <div className="text-center py-8">
             <div className="text-red-600 mb-4">
-              <p className="font-medium">Unable to Find Alternatives</p>
+              <p className="font-medium">{t('capacityDashboard.alternatives.unableToFind')}</p>
               <p className="text-sm">{error}</p>
             </div>
           </div>
         )}
 
-        {/* Empty State */}
         {!loading && !error && alternatives.length === 0 && (
           <EmptyState
-            title="No Alternative Time Slots Found"
-            description="Unfortunately, there are no available alternative time slots that match your requirements."
+            title={t('capacityDashboard.alternatives.emptyTitle')}
+            description={t('capacityDashboard.alternatives.emptyDescription')}
             action={
               <Button variant="outline" onClick={onClose}>
-                Close
+                {t('common:buttons.close')}
               </Button>
             }
           />
         )}
 
-        {/* Alternatives List */}
         {!loading && !error && alternatives.length > 0 && (
           <div className="space-y-4">
             <h4 className="font-medium text-gray-900">
-              Available Alternatives ({alternatives.length} found)
+              {t('capacityDashboard.alternatives.availableCount', { count: alternatives.length })}
             </h4>
-            
+
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {alternatives.map((alternative, index) => (
                 <motion.div
@@ -124,24 +125,18 @@ const AlternativesModal = ({
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      {/* Date and Time */}
                       <div className="flex items-center gap-3 mb-2">
-                        <h5 className="font-medium text-gray-900">
-                          {format(parseISO(alternative.dateTime), 'PPP')}
-                        </h5>
+                        <h5 className="font-medium text-gray-900">{format(parseISO(alternative.dateTime), 'PPP')}</h5>
                         {alternative.isRecommended && (
                           <Badge variant="success" size="sm">
-                            Recommended
+                            {t('capacityDashboard.alternatives.recommended')}
                           </Badge>
                         )}
                       </div>
 
-                      {/* Time Slot Details */}
                       {alternative.timeSlotName && (
                         <div className="flex items-center gap-4 mb-2">
-                          <span className="text-sm font-medium text-gray-700">
-                            {alternative.timeSlotName}
-                          </span>
+                          <span className="text-sm font-medium text-gray-700">{alternative.timeSlotName}</span>
                           {alternative.startTime && alternative.endTime && (
                             <span className="text-sm text-gray-600">
                               {timeSlotsService.formatTimeForDisplay(alternative.startTime)} - {timeSlotsService.formatTimeForDisplay(alternative.endTime)}
@@ -150,52 +145,39 @@ const AlternativesModal = ({
                         </div>
                       )}
 
-                      {/* Capacity Information */}
                       <div className="flex items-center gap-6 text-sm">
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-600">Available:</span>
+                          <span className="text-gray-600">{t('capacityDashboard.overview.availableLabel')}</span>
                           <span className="font-medium text-green-600">
                             {alternative.availableCapacity || alternative.availableSlots}
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-600">Total Capacity:</span>
-                          <span className="font-medium text-gray-900">
-                            {alternative.maxCapacity}
-                          </span>
+                          <span className="text-gray-600">{t('capacityDashboard.alternatives.totalCapacityLabel')}</span>
+                          <span className="font-medium text-gray-900">{alternative.maxCapacity}</span>
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-600">Utilization:</span>
-                          <Badge
-                            variant={getStatusVariant(alternative)}
-                            size="sm"
-                          >
-                            {alternative.occupancyPercentage 
+                          <span className="text-gray-600">{t('capacityDashboard.overview.utilizationLabel')}</span>
+                          <Badge variant={getStatusVariant(alternative)} size="sm">
+                            {alternative.occupancyPercentage
                               ? `${alternative.occupancyPercentage}%`
-                              : `${Math.round((1 - (alternative.availableCapacity / alternative.maxCapacity)) * 100)}%`
-                            }
+                              : `${Math.round((1 - (alternative.availableCapacity / alternative.maxCapacity)) * 100)}%`}
                           </Badge>
                         </div>
                       </div>
 
-                      {/* Reason */}
-                      {alternative.reason && (
-                        <p className="text-sm text-gray-600 mt-2">
-                          {alternative.reason}
-                        </p>
-                      )}
+                      {alternative.reason && <p className="text-sm text-gray-600 mt-2">{alternative.reason}</p>}
                     </div>
 
-                    {/* Select Button */}
                     <div className="ms-4">
                       <Button
                         size="sm"
                         onClick={() => onSelectAlternative && onSelectAlternative(alternative)}
                         variant={alternative.isRecommended ? 'primary' : 'outline'}
                       >
-                        Select
+                        {t('capacityDashboard.alternatives.select')}
                       </Button>
                     </div>
                   </div>
@@ -203,33 +185,25 @@ const AlternativesModal = ({
               ))}
             </div>
 
-            {/* Help Text */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <p className="text-sm text-blue-800">
-                <strong>Tip:</strong> Recommended alternatives are sorted by availability and proximity to your requested time.
-                You can select any alternative that works for your schedule.
-              </p>
+              <p className="text-sm text-blue-800">{t('capacityDashboard.alternatives.tip')}</p>
             </div>
           </div>
         )}
 
-        {/* Modal Actions */}
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-          <Button
-            variant="outline"
-            onClick={onClose}
-          >
-            Close
+          <Button variant="outline" onClick={onClose}>
+            {t('common:buttons.close')}
           </Button>
-          
+
           {!loading && !error && alternatives.length === 0 && originalRequest && (
             <Button
               onClick={() => {
-                // Could trigger a search with broader criteria
+                // Placeholder action for a future broad search flow.
                 console.log('Search with broader criteria');
               }}
             >
-              Search Different Dates
+              {t('capacityDashboard.alternatives.searchDifferentDates')}
             </Button>
           )}
         </div>

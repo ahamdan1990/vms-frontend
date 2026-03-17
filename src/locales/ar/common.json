@@ -26,6 +26,8 @@
     "clear": "مسح",
     "dismiss": "إغلاق",
     "reApprove": "إعادة موافقة",
+    "retry": "إعادة المحاولة",
+    "select": "اختيار",
     "sending": "جارٍ الإرسال...",
     "loading": "جارٍ التحميل..."
   },
@@ -41,7 +43,9 @@
     "completed": "مكتمل",
     "inactive": "غير نشط",
     "pending": "قيد الانتظار",
-    "locked": "مقفل"
+    "locked": "مقفل",
+    "yes": "نعم",
+    "no": "لا"
   },
   "labels": {
     "name": "الاسم",
@@ -107,6 +111,15 @@
     "noResults": "لم يتم العثور على نتائج",
     "noRecords": "لم يتم العثور على سجلات"
   },
+  "autocomplete": {
+    "companyPlaceholder": "ابحث عن شركة...",
+    "searching": "جاري البحث...",
+    "verified": "موثّقة",
+    "code": "الرمز",
+    "contact": "جهة الاتصال",
+    "noCompaniesFound": "لم يتم العثور على شركات لـ \"{{term}}\"",
+    "createCompany": "إنشاء شركة جديدة"
+  },
   "alerts": {
     "title": "تنبيه",
     "success": "نجاح",
@@ -114,6 +127,14 @@
     "warning": "تحذير",
     "info": "معلومة"
   },
+  "accessDenied": {
+    "title": "تم رفض الوصول"
+  },
+  "statuses": {
+    "active": "نشط",
+    "inactive": "غير نشط"
+  },
+  "na": "غير متاح",
   "footer": {
     "copyright": "© {{year}} نظام إدارة الزوار. جميع الحقوق محفوظة.",
     "copyrightSal": "© {{year}} نظام إدارة الزوار. جميع الحقوق محفوظة لشركة سيكيوريتي إنجنيرينج SAL.",

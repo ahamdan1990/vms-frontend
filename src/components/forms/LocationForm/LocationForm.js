@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import Button from '../../common/Button/Button';
 import Input from '../../common/Input/Input';
 import Badge from '../../common/Badge/Badge';
@@ -22,13 +23,12 @@ const LocationForm = ({
   error = null,
   isEdit = false
 }) => {
+  const { t } = useTranslation('system');
   const dispatch = useDispatch();
-  
-  // Get available locations for parent selection
+
   const availableLocations = useSelector(selectActiveLocationsForDropdown);
   const locationsLoading = useSelector(selectActiveLocationsLoading);
 
-  // Form state
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -48,12 +48,10 @@ const LocationForm = ({
   const [formErrors, setFormErrors] = useState({});
   const [touched, setTouched] = useState({});
 
-  // Load available locations on mount
   useEffect(() => {
     dispatch(getActiveLocations());
   }, [dispatch]);
 
-  // Initialize form with initial data
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -74,74 +72,59 @@ const LocationForm = ({
     }
   }, [initialData]);
 
-  // Form validation
   const validateForm = () => {
     const errors = {};
 
-    // Name validation
     if (!formData.name.trim()) {
-      errors.name = 'Location name is required';
+      errors.name = t('locations.form.validation.nameRequired');
     } else if (formData.name.length < 2) {
-      errors.name = 'Location name must be at least 2 characters';
+      errors.name = t('locations.form.validation.nameMin');
     } else if (formData.name.length > 100) {
-      errors.name = 'Location name must be less than 100 characters';
+      errors.name = t('locations.form.validation.nameMax');
     }
 
-    // Code validation (optional but must be unique if provided)
     if (formData.code && !/^[A-Z0-9-_]+$/i.test(formData.code)) {
-      errors.code = 'Location code must contain only letters, numbers, hyphens, and underscores';
+      errors.code = t('locations.form.validation.codeInvalid');
     }
 
-    // Description validation
     if (formData.description && formData.description.length > 500) {
-      errors.description = 'Description must be less than 500 characters';
+      errors.description = t('locations.form.validation.descriptionMax');
     }
 
-    // Display order validation
     if (formData.displayOrder && !/^\d+$/.test(formData.displayOrder)) {
-      errors.displayOrder = 'Display order must be a number';
+      errors.displayOrder = t('locations.form.validation.displayOrderInvalid');
     }
 
-    // Capacity validation
-    if (formData.maxCapacity && (!/^\d+$/.test(formData.maxCapacity) || parseInt(formData.maxCapacity) <= 0)) {
-      errors.maxCapacity = 'Max capacity must be a positive number';
+    if (formData.maxCapacity && (!/^\d+$/.test(formData.maxCapacity) || parseInt(formData.maxCapacity, 10) <= 0)) {
+      errors.maxCapacity = t('locations.form.validation.maxCapacityInvalid');
     }
 
-    // Floor validation
     if (formData.floor && formData.floor.length > 20) {
-      errors.floor = 'Floor must be less than 20 characters';
+      errors.floor = t('locations.form.validation.floorMax');
     }
 
-    // Building validation
     if (formData.building && formData.building.length > 100) {
-      errors.building = 'Building name must be less than 100 characters';
+      errors.building = t('locations.form.validation.buildingMax');
     }
 
-    // Zone validation
     if (formData.zone && formData.zone.length > 50) {
-      errors.zone = 'Zone must be less than 50 characters';
+      errors.zone = t('locations.form.validation.zoneMax');
     }
 
-    // Hierarchy validation - prevent circular references
-    if (formData.parentLocationId && isEdit && initialData) {
-      if (formData.parentLocationId === initialData.id) {
-        errors.parentLocationId = 'A location cannot be its own parent';
-      }
-      // Additional check for circular reference would require more complex logic
+    if (formData.parentLocationId && isEdit && initialData && formData.parentLocationId === initialData.id) {
+      errors.parentLocationId = t('locations.form.validation.parentSelf');
     }
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  // Handle form field changes
   const handleChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
 
-    // Clear field error when user starts typing
     if (formErrors[field]) {
       setFormErrors(prev => ({
         ...prev,
@@ -150,7 +133,6 @@ const LocationForm = ({
     }
   };
 
-  // Handle field blur
   const handleBlur = (field) => {
     setTouched(prev => ({
       ...prev,
@@ -159,11 +141,9 @@ const LocationForm = ({
     validateForm();
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Mark all fields as touched
+
     const allFields = Object.keys(formData);
     setTouched(allFields.reduce((acc, field) => ({ ...acc, [field]: true }), {}));
 
@@ -171,7 +151,6 @@ const LocationForm = ({
       return;
     }
 
-    // Prepare submission data
     const submissionData = {
       name: formData.name,
       code: formData.code,
@@ -187,51 +166,41 @@ const LocationForm = ({
       accessLevel: formData.accessLevel || null
     };
 
-    // For edit operations, include isActive
     if (isEdit) {
       submissionData.isActive = formData.isActive;
     }
 
     try {
       await onSubmit(submissionData);
-    } catch (error) {
-      // Error handling is done by parent component
-      console.error('Form submission error:', error);
+    } catch (submitError) {
+      console.error('Form submission error:', submitError);
     }
   };
 
-  // Location type options
   const locationTypes = [
-    { value: 'Building', label: 'Building' },
-    { value: 'Floor', label: 'Floor' },
-    { value: 'Room', label: 'Room' },
-    { value: 'Zone', label: 'Zone' },
-    { value: 'Parking', label: 'Parking' },
-    { value: 'Other', label: 'Other' }
+    { value: 'Building', label: t('locations.types.building') },
+    { value: 'Floor', label: t('locations.types.floor') },
+    { value: 'Room', label: t('locations.types.room') },
+    { value: 'Zone', label: t('locations.types.zone') },
+    { value: 'Parking', label: t('locations.types.parking') },
+    { value: 'Other', label: t('locations.types.other') }
   ];
 
-  // Access level options
   const accessLevels = [
-    { value: 'Standard', label: 'Standard Access' },
-    { value: 'Medium', label: 'Medium Security' },
-    { value: 'High', label: 'High Security' },
-    { value: 'Restricted', label: 'Restricted Access' }
+    { value: 'Standard', label: t('locations.form.accessLevels.standard') },
+    { value: 'Medium', label: t('locations.form.accessLevels.medium') },
+    { value: 'High', label: t('locations.form.accessLevels.high') },
+    { value: 'Restricted', label: t('locations.form.accessLevels.restricted') }
   ];
 
-  // Filter parent locations (exclude self and children if editing)
   const getAvailableParentLocations = () => {
     if (!isEdit || !initialData) return availableLocations;
-    
-    // For editing, exclude the location itself and its descendants
-    return availableLocations.filter(location => {
-      if (location.id === initialData.id) return false;
-      // TODO: Add logic to exclude descendants
-      return true;
-    });
+
+    return availableLocations.filter(location => location.id !== initialData.id);
   };
+
   return (
     <div className="space-y-6">
-      {/* Error Display */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <div className="text-sm text-red-700">
@@ -249,42 +218,38 @@ const LocationForm = ({
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Information */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
-          
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('locations.form.sections.basicInfo')}</h3>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Location Name */}
             <Input
-              label="Location Name"
+              label={t('locations.form.fields.name')}
               type="text"
               value={formData.name}
               onChange={(e) => handleChange('name', e.target.value)}
               onBlur={() => handleBlur('name')}
               error={touched.name ? formErrors.name : undefined}
               required
-              placeholder="e.g., Conference Room A, Building 1, Floor 2"
+              placeholder={t('locations.form.placeholders.name')}
               maxLength={100}
             />
 
-            {/* Location Code */}
             <Input
-              label="Location Code"
+              label={t('locations.form.fields.code')}
               type="text"
               value={formData.code}
               onChange={(e) => handleChange('code', e.target.value.toUpperCase())}
               onBlur={() => handleBlur('code')}
               error={touched.code ? formErrors.code : undefined}
-              placeholder="e.g., CONF-A, B1-F2-R101"
+              placeholder={t('locations.form.placeholders.code')}
               maxLength={20}
-              helpText="Optional unique identifier (letters, numbers, hyphens, underscores)"
+              helpText={t('locations.form.help.code')}
             />
           </div>
 
-          {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              {t('locations.form.fields.description')}
             </label>
             <textarea
               value={formData.description}
@@ -292,36 +257,32 @@ const LocationForm = ({
               onBlur={() => handleBlur('description')}
               rows={3}
               maxLength={500}
-              placeholder="Optional description of the location..."
+              placeholder={t('locations.form.placeholders.description')}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                touched.description && formErrors.description
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-gray-300'
+                touched.description && formErrors.description ? 'border-red-300 bg-red-50' : 'border-gray-300'
               }`}
             />
             {touched.description && formErrors.description && (
               <p className="mt-1 text-sm text-red-600">{formErrors.description}</p>
             )}
-            <p className="mt-1 text-sm text-gray-500">
-              {formData.description.length}/500 characters
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {t('locations.form.descriptionCount', { count: formData.description.length })}
             </p>
           </div>
         </div>
 
-        {/* Location Type and Hierarchy */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Type and Hierarchy</h3>
-          
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('locations.form.sections.typeHierarchy')}</h3>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Location Type */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Location Type <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('locations.form.fields.locationType')} <span className="text-red-500">*</span>
               </label>
               <select
                 value={formData.locationType}
                 onChange={(e) => handleChange('locationType', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 required
               >
                 {locationTypes.map((type) => (
@@ -332,18 +293,17 @@ const LocationForm = ({
               </select>
             </div>
 
-            {/* Parent Location */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Parent Location
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('locations.form.fields.parentLocation')}
               </label>
               <select
                 value={formData.parentLocationId || ''}
-                onChange={(e) => handleChange('parentLocationId', e.target.value ? parseInt(e.target.value) : null)}
+                onChange={(e) => handleChange('parentLocationId', e.target.value ? parseInt(e.target.value, 10) : null)}
                 disabled={locationsLoading}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 dark:disabled:bg-gray-700"
               >
-                <option value="">No Parent (Root Location)</option>
+                <option value="">{t('locations.form.options.noParent')}</option>
                 {getAvailableParentLocations().map((location) => (
                   <option key={location.id} value={location.id}>
                     {location.name} ({location.locationType})
@@ -351,7 +311,7 @@ const LocationForm = ({
                 ))}
               </select>
               {locationsLoading && (
-                <p className="mt-1 text-sm text-gray-500">Loading locations...</p>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('locations.form.loadingLocations')}</p>
               )}
               {touched.parentLocationId && formErrors.parentLocationId && (
                 <p className="mt-1 text-sm text-red-600">{formErrors.parentLocationId}</p>
@@ -359,71 +319,67 @@ const LocationForm = ({
             </div>
           </div>
 
-          {/* Geographic Information */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Input
-              label="Building"
+              label={t('locations.form.fields.building')}
               type="text"
               value={formData.building}
               onChange={(e) => handleChange('building', e.target.value)}
               onBlur={() => handleBlur('building')}
               error={touched.building ? formErrors.building : undefined}
-              placeholder="e.g., Main Building, Tower A"
+              placeholder={t('locations.form.placeholders.building')}
               maxLength={100}
             />
 
             <Input
-              label="Floor"
+              label={t('locations.form.fields.floor')}
               type="text"
               value={formData.floor}
               onChange={(e) => handleChange('floor', e.target.value)}
               onBlur={() => handleBlur('floor')}
               error={touched.floor ? formErrors.floor : undefined}
-              placeholder="e.g., 1, 2, B1, Mezzanine"
+              placeholder={t('locations.form.placeholders.floor')}
               maxLength={20}
             />
 
             <Input
-              label="Zone"
+              label={t('locations.form.fields.zone')}
               type="text"
               value={formData.zone}
               onChange={(e) => handleChange('zone', e.target.value)}
               onBlur={() => handleBlur('zone')}
               error={touched.zone ? formErrors.zone : undefined}
-              placeholder="e.g., North Wing, East Side"
+              placeholder={t('locations.form.placeholders.zone')}
               maxLength={50}
             />
           </div>
         </div>
 
-        {/* Capacity and Access */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Capacity and Access Control</h3>
-          
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('locations.form.sections.capacityAccess')}</h3>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Max Capacity */}
             <Input
-              label="Maximum Capacity"
+              label={t('locations.form.fields.maxCapacity')}
               type="number"
               value={formData.maxCapacity}
               onChange={(e) => handleChange('maxCapacity', e.target.value)}
               onBlur={() => handleBlur('maxCapacity')}
               error={touched.maxCapacity ? formErrors.maxCapacity : undefined}
-              placeholder="Leave empty if no limit"
+              placeholder={t('locations.form.placeholders.maxCapacity')}
               min="1"
               max="10000"
-              helpText="Maximum number of people allowed"
+              helpText={t('locations.form.help.maxCapacity')}
             />
 
-            {/* Access Level */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Access Level
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('locations.form.fields.accessLevel')}
               </label>
               <select
                 value={formData.accessLevel}
                 onChange={(e) => handleChange('accessLevel', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 {accessLevels.map((level) => (
                   <option key={level.value} value={level.value}>
@@ -433,22 +389,20 @@ const LocationForm = ({
               </select>
             </div>
 
-            {/* Display Order */}
             <Input
-              label="Display Order"
+              label={t('locations.form.fields.displayOrder')}
               type="number"
               value={formData.displayOrder}
               onChange={(e) => handleChange('displayOrder', e.target.value)}
               onBlur={() => handleBlur('displayOrder')}
               error={touched.displayOrder ? formErrors.displayOrder : undefined}
-              placeholder="Optional sort order"
+              placeholder={t('locations.form.placeholders.displayOrder')}
               min="0"
               max="9999"
-              helpText="Lower numbers appear first"
+              helpText={t('locations.form.help.displayOrder')}
             />
           </div>
 
-          {/* Security Options */}
           <div className="space-y-3">
             <div className="flex items-center">
               <input
@@ -458,8 +412,8 @@ const LocationForm = ({
                 onChange={(e) => handleChange('requiresEscort', e.target.checked)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label htmlFor="requiresEscort" className="ms-2 block text-sm text-gray-900">
-                Requires escort for visitors
+              <label htmlFor="requiresEscort" className="ms-2 block text-sm text-gray-900 dark:text-gray-100">
+                {t('locations.form.fields.requiresEscort')}
               </label>
             </div>
 
@@ -471,88 +425,70 @@ const LocationForm = ({
                 onChange={(e) => handleChange('isActive', e.target.checked)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
-              <label htmlFor="isActive" className="ms-2 block text-sm text-gray-900">
-                Active (available for selection)
+              <label htmlFor="isActive" className="ms-2 block text-sm text-gray-900 dark:text-gray-100">
+                {t('locations.form.fields.isActive')}
               </label>
             </div>
           </div>
         </div>
 
-        {/* Preview */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Preview</h3>
-          <div className="bg-gray-50 p-4 rounded-md">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('locations.form.sections.preview')}</h3>
+          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <div className="font-medium text-gray-900">
-                  {formData.name || 'Location Name'}
+                <div className="font-medium text-gray-900 dark:text-gray-100">
+                  {formData.name || t('locations.form.preview.fallbackName')}
                   {formData.code && (
-                    <span className="ms-2 text-sm text-gray-500">({formData.code})</span>
+                    <span className="ms-2 text-sm text-gray-500 dark:text-gray-400">({formData.code})</span>
                   )}
                 </div>
-                <Badge variant="secondary" size="sm">
-                  {formData.locationType}
-                </Badge>
+                <Badge variant="secondary" size="sm">{formData.locationType}</Badge>
               </div>
-              
+
               {formData.description && (
-                <div className="text-sm text-gray-600">
-                  {formData.description}
-                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">{formData.description}</div>
               )}
-              
+
               {(formData.building || formData.floor || formData.zone) && (
-                <div className="text-xs text-gray-500">
-                  {[formData.building, formData.floor, formData.zone].filter(Boolean).join(' • ')}
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  {[formData.building, formData.floor, formData.zone].filter(Boolean).join(' - ')}
                 </div>
               )}
-              
+
               <div className="flex items-center gap-4 text-sm">
                 {formData.maxCapacity && (
                   <span className="flex items-center gap-1">
                     <UserGroupIcon className="w-4 h-4 text-gray-400" />
-                    <span>Max: {formData.maxCapacity}</span>
+                    <span>{t('locations.form.preview.maxLabel', { count: formData.maxCapacity })}</span>
                   </span>
                 )}
-                
+
                 <Badge
                   variant={formData.accessLevel === 'High' ? 'danger' : formData.accessLevel === 'Medium' ? 'warning' : 'secondary'}
                   size="sm"
                 >
-                  {formData.accessLevel} Access
+                  {t('locations.form.preview.accessBadge', { level: formData.accessLevel })}
                 </Badge>
-                
+
                 {formData.requiresEscort && (
-                  <span className="text-orange-600 text-xs font-medium">Escort Required</span>
+                  <span className="text-orange-600 text-xs font-medium">{t('locations.form.preview.escortRequired')}</span>
                 )}
-                
-                <Badge
-                  variant={formData.isActive ? 'success' : 'secondary'}
-                  size="sm"
-                >
-                  {formData.isActive ? 'Active' : 'Inactive'}
+
+                <Badge variant={formData.isActive ? 'success' : 'secondary'} size="sm">
+                  {formData.isActive ? t('locations.active') : t('locations.inactive')}
                 </Badge>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Form Actions */}
-        <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={loading}
-          >
-            Cancel
+        <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
+            {t('common:buttons.cancel')}
           </Button>
-          <Button
-            type="submit"
-            loading={loading}
-            disabled={loading || Object.keys(formErrors).length > 0}
-          >
-            {isEdit ? 'Update Location' : 'Create Location'}
+          <Button type="submit" loading={loading} disabled={loading || Object.keys(formErrors).length > 0}>
+            {isEdit ? t('locations.form.actions.update') : t('locations.form.actions.create')}
           </Button>
         </div>
       </form>
@@ -560,7 +496,6 @@ const LocationForm = ({
   );
 };
 
-// PropTypes validation
 LocationForm.propTypes = {
   initialData: PropTypes.object,
   onSubmit: PropTypes.func.isRequired,

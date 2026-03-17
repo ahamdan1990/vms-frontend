@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+﻿import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -314,7 +314,7 @@ const ConfigurationPage = () => {
               {Array.isArray(errors.listError) 
                 ? errors.listError[0] 
                 : typeof errors.listError === 'object' 
-                  ? errors.listError.message || 'An error occurred'
+                  ? errors.listError.message || t('configuration.errorOccurred')
                   : errors.listError
               }
             </p>
@@ -326,8 +326,8 @@ const ConfigurationPage = () => {
       {isLdapSelected && (
         <Card className="p-6">
           {/* Tabs */}
-          <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
-            <nav className="-mb-px flex gap-8">
+          <div className="border-b border-gray-200 dark:border-gray-700 mb-6 overflow-x-auto custom-scrollbar">
+            <nav className="-mb-px inline-flex min-w-max gap-8">
               <button
                 onClick={() => setLdapTab('settings')}
                 className={`${
@@ -462,7 +462,7 @@ const ConfigurationItem = ({
   const { t } = useTranslation('system');
   const formatValue = (value, dataType, isSensitive) => {
     if (isSensitive && !showSensitive) {
-      return '••••••••';
+      return t('configuration.maskedValue');
     }
     
     switch (dataType) {
@@ -719,16 +719,7 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
               <span className="font-medium text-gray-700 dark:text-gray-300">{t('configuration.editModal.categoryLabel')}</span>
               <span className="ms-2 text-gray-900 dark:text-gray-100">{config.category}</span>
             </div>
-            {/* <div>
-              <span className="font-medium text-gray-700">Data Type:</span>
-              <span className="ms-2 text-gray-900">{config.dataType}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-700">Current:</span>
-              <span className="ms-2 text-gray-900 font-mono">
-                {config.isSensitive ? '••••••••' : config.value}
-              </span>
-            </div> */}
+            
           </div>
           
           {config.description && (
@@ -783,3 +774,4 @@ const ConfigurationEditModal = ({ isOpen, onClose, config, onSave, loading }) =>
 };
 
 export default ConfigurationPage;
+

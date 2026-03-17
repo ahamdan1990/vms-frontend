@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { debounce } from 'lodash';
+import { useTranslation } from 'react-i18next';
 
 // Services
 import visitorService from '../../../services/visitorService';
@@ -66,6 +67,7 @@ const WalkInForm = ({
   initialPhoto = null,
   recognizedVisitor = null
 }) => {
+  const { t } = useTranslation('receptionist');
   const dispatch = useDispatch();
   const toast = useToast();
 
@@ -149,8 +151,8 @@ const WalkInForm = ({
 
       // Show a helpful message (toast is a stable function reference, safe to use)
       toast.info(
-        'Returning Visitor',
-        'Information has been pre-filled. Please verify and update if needed.',
+        t('walkInForm.returningVisitor'),
+        t('walkInForm.returningVisitorDesc'),
         { duration: 5000 }
       );
     }
@@ -291,13 +293,13 @@ const WalkInForm = ({
     const errors = {};
 
     if (!visitorData.firstName?.trim()) {
-      errors.firstName = 'First name is required';
+      errors.firstName = t('walkInForm.step2.firstNameRequired');
     }
     if (!visitorData.lastName?.trim()) {
-      errors.lastName = 'Last name is required';
+      errors.lastName = t('walkInForm.step2.lastNameRequired');
     }
     if (!visitorData.phoneNumber?.trim()) {
-      errors.phoneNumber = 'Phone number is required';
+      errors.phoneNumber = t('walkInForm.step2.phoneRequired');
     }
 
     setValidationErrors(errors);
@@ -344,7 +346,7 @@ const WalkInForm = ({
     }
 
     const fullNameCandidate = hostDetails.fullName || `${hostDetails.firstName || ''} ${hostDetails.lastName || ''}`.trim();
-    const finalName = (fullNameCandidate || '').trim() || hostDetails.email || 'Selected Host';
+    const finalName = (fullNameCandidate || '').trim() || hostDetails.email || t('walkInForm.step3.selectedHost');
 
     setVisitData(prev => ({
       ...prev,
@@ -382,7 +384,7 @@ const WalkInForm = ({
 
     const identifier = host.directoryIdentifier || host.email;
     if (!identifier) {
-      toast.error('Unable to add this host because no directory identifier is available.');
+      toast.error(t('walkInForm.step3.hostProvisioningIdentifierMissing'));
       return;
     }
 
@@ -395,10 +397,10 @@ const WalkInForm = ({
         lastName: host.lastName
       });
       applyHostSelection(ensuredHost);
-      toast.success(`${ensuredHost.fullName || ensuredHost.email} is now available as a host.`);
+      toast.success(t('walkInForm.step3.hostProvisioningSuccess', { name: ensuredHost.fullName || ensuredHost.email }));
     } catch (error) {
       console.error('❌ Failed to provision host:', error);
-      toast.error(extractErrorMessage(error, 'Failed to add host from directory.'));
+      toast.error(extractErrorMessage(error, t('walkInForm.step3.hostProvisioningFailed')));
     } finally {
       setProvisioningHostKey(null);
     }
@@ -433,10 +435,10 @@ const WalkInForm = ({
     const errors = {};
 
     if (!visitData.hostId) {
-      errors.hostId = 'Host is required';
+      errors.hostId = t('walkInForm.step3.hostRequired');
     }
     if (!visitData.locationId) {
-      errors.locationId = 'Location is required';
+      errors.locationId = t('walkInForm.step3.locationRequired');
     }
 
     setValidationErrors(errors);
@@ -532,9 +534,9 @@ const WalkInForm = ({
                   ? 'text-gray-900 dark:text-white'
                   : 'text-gray-400 dark:text-gray-500'
               }`}>
-                {step === 1 && 'Lookup'}
-                {step === 2 && 'Visitor Details'}
-                {step === 3 && 'Visit Info'}
+                {step === 1 && t('walkInForm.steps.lookup')}
+                {step === 2 && t('walkInForm.steps.visitorDetails')}
+                {step === 3 && t('walkInForm.steps.visitInfo')}
               </p>
             </div>
           </div>
@@ -558,10 +560,10 @@ const WalkInForm = ({
       <div className="text-center mb-6">
         <MagnifyingGlassIcon className="w-16 h-16 text-blue-600 dark:text-blue-400 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          Find Visitor
+          {t('walkInForm.step1.title')}
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Search by phone or email to check if visitor exists
+          {t('walkInForm.step1.subtitle')}
         </p>
       </div>
 
@@ -577,7 +579,7 @@ const WalkInForm = ({
           }}
           icon={<PhoneIcon className="w-4 h-4" />}
         >
-          Phone
+          {t('walkInForm.step1.phone')}
         </Button>
         <Button
           variant={lookupType === 'email' ? 'primary' : 'outline'}
@@ -589,7 +591,7 @@ const WalkInForm = ({
           }}
           icon={<EnvelopeIcon className="w-4 h-4" />}
         >
-          Email
+          {t('walkInForm.step1.email')}
         </Button>
       </div>
 
@@ -597,10 +599,10 @@ const WalkInForm = ({
       <div className="relative">
         <Input
           type={lookupType === 'phone' ? 'tel' : 'email'}
-          placeholder={lookupType === 'phone' ? '+961 70 123 456' : 'visitor@example.com'}
+          placeholder={lookupType === 'phone' ? t('walkInForm.step1.phonePlaceholder') : t('walkInForm.step1.emailPlaceholder')}
           value={lookupValue}
           onChange={(e) => handleLookupChange(e.target.value)}
-          icon={lookupType === 'phone' ? PhoneIcon : EnvelopeIcon}
+          leftIcon={lookupType === 'phone' ? <PhoneIcon className="w-5 h-5" /> : <EnvelopeIcon className="w-5 h-5" />}
           autoFocus
         />
         {searching && (
@@ -614,14 +616,14 @@ const WalkInForm = ({
       {searchResults.length > 0 && (
         <Card className="p-4">
           <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            Found {searchResults.length} visitor{searchResults.length > 1 ? 's' : ''}
+            {t('walkInForm.step1.foundCount', { count: searchResults.length })}
           </p>
           <div className="space-y-2">
             {searchResults.map((visitor) => (
               <button
                 key={visitor.id}
                 onClick={() => handleSelectVisitor(visitor)}
-                className="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all"
+                className="w-full text-start p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
@@ -655,7 +657,7 @@ const WalkInForm = ({
             <CheckCircleIconSolid className="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-1" />
             <div className="flex-1">
               <p className="font-medium text-gray-900 dark:text-white mb-1">
-                Visitor Found
+                {t('walkInForm.step1.visitorFound')}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {existingVisitor.firstName} {existingVisitor.lastName}
@@ -678,14 +680,14 @@ const WalkInForm = ({
                 <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
-                    Pending Invitation Detected
+                    {t('walkInForm.step1.pendingInvitationTitle')}
                   </p>
                   <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-1">
-                    This visitor has {pendingInvitations.length} pending invitation{pendingInvitations.length > 1 ? 's' : ''} awaiting approval.
+                    {t('walkInForm.step1.pendingInvitationDesc', { count: pendingInvitations.length })}
                   </p>
                   {pendingInvitations[0] && (
                     <p className="text-xs text-yellow-600 dark:text-yellow-500 mt-1">
-                      Scheduled: {new Date(pendingInvitations[0].scheduledStartTime).toLocaleString()}
+                      {t('walkInForm.step1.scheduled', { time: new Date(pendingInvitations[0].scheduledStartTime).toLocaleString() })}
                     </p>
                   )}
                 </div>
@@ -699,7 +701,7 @@ const WalkInForm = ({
               className="flex-1"
               icon={<ArrowRightIcon className="w-4 h-4" />}
             >
-              Continue with this visitor
+              {t('walkInForm.step1.continueWithVisitor')}
             </Button>
             <Button
               variant="outline"
@@ -710,7 +712,7 @@ const WalkInForm = ({
               }}
               icon={<XMarkIcon className="w-4 h-4" />}
             >
-              Clear
+              {t('walkInForm.step1.clear')}
             </Button>
           </div>
         </Card>
@@ -722,16 +724,16 @@ const WalkInForm = ({
           <div className="text-center">
             <UserIcon className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              No visitor found
+              {t('walkInForm.step1.noVisitorFound')}
             </p>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-4">
-              Create a new visitor profile for this walk-in
+              {t('walkInForm.step1.noVisitorFoundDesc')}
             </p>
             <Button
               onClick={handleCreateNewVisitor}
               icon={<ArrowRightIcon className="w-4 h-4" />}
             >
-              Create New Visitor
+              {t('walkInForm.step1.createNewVisitor')}
             </Button>
           </div>
         </Card>
@@ -745,7 +747,7 @@ const WalkInForm = ({
             onClick={handleCreateNewVisitor}
             icon={<ArrowRightIcon className="w-4 h-4" />}
           >
-            Skip Lookup - Create New Visitor
+            {t('walkInForm.step1.skipLookup')}
           </Button>
         </div>
       )}
@@ -762,10 +764,10 @@ const WalkInForm = ({
       <div className="text-center mb-6">
         <UserIcon className="w-16 h-16 text-blue-600 dark:text-blue-400 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          Visitor Details
+          {t('walkInForm.step2.title')}
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          {existingVisitor ? 'Confirm visitor information' : 'Enter visitor information'}
+          {existingVisitor ? t('walkInForm.step2.confirmInfo') : t('walkInForm.step2.enterInfo')}
         </p>
       </div>
 
@@ -775,21 +777,21 @@ const WalkInForm = ({
             <div className="relative w-full sm:w-32 h-48 sm:h-32 rounded-xl overflow-hidden bg-white shadow-inner">
               <img
                 src={initialPhoto.url}
-                alt="Captured visitor"
+                alt={t('walkIn.capturedPhotoAlt')}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-2 right-2 inline-flex items-center gap-1 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
+              <div className="absolute top-2 end-2 inline-flex items-center gap-1 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
                 <PhotoIcon className="w-4 h-4" />
-                <span>Attached</span>
+                <span>{t('walkInForm.step2.photoAttached')}</span>
               </div>
             </div>
             <div className="text-sm text-gray-700 dark:text-gray-200 space-y-1">
-              <p className="text-base font-semibold text-gray-900 dark:text-white">Visitor profile photo ready</p>
+              <p className="text-base font-semibold text-gray-900 dark:text-white">{t('walkInForm.step2.photoReady')}</p>
               <p className="text-gray-600 dark:text-gray-300">
-                Resolution: {initialPhoto.width || '--'} x {initialPhoto.height || '--'} px
+                {t('walkInForm.step2.resolution', { width: initialPhoto.width || '--', height: initialPhoto.height || '--' })}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                This picture will be stored as the visitor&apos;s profile photo. Need a retake? Go back and choose "Start with Photo Capture".
+                {t('walkInForm.step2.photoNote')}
               </p>
             </div>
           </div>
@@ -798,59 +800,59 @@ const WalkInForm = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
-          label="First Name"
-          placeholder="John"
+          label={t('walkInForm.step2.firstName')}
+          placeholder={t('walkInForm.step2.firstNamePlaceholder')}
           value={visitorData.firstName}
           onChange={(e) => handleVisitorDataChange('firstName', e.target.value)}
           error={validationErrors.firstName}
           required
-          icon={UserIcon}
+          leftIcon={<UserIcon className="w-5 h-5" />}
         />
         <Input
-          label="Last Name"
-          placeholder="Doe"
+          label={t('walkInForm.step2.lastName')}
+          placeholder={t('walkInForm.step2.lastNamePlaceholder')}
           value={visitorData.lastName}
           onChange={(e) => handleVisitorDataChange('lastName', e.target.value)}
           error={validationErrors.lastName}
           required
-          icon={UserIcon}
+          leftIcon={<UserIcon className="w-5 h-5" />}
         />
       </div>
 
       <Input
-        label="Phone Number"
+        label={t('walkInForm.step2.phoneNumber')}
         type="tel"
-        placeholder="+961 70 123 456"
+        placeholder={t('walkInForm.step2.phonePlaceholder')}
         value={visitorData.phoneNumber}
         onChange={(e) => handleVisitorDataChange('phoneNumber', e.target.value)}
         error={validationErrors.phoneNumber}
         required
-        icon={PhoneIcon}
+        leftIcon={<PhoneIcon className="w-5 h-5" />}
       />
 
       <Input
-        label="Email (Optional)"
+        label={t('walkInForm.step2.emailOptional')}
         type="email"
-        placeholder="visitor@example.com"
+        placeholder={t('walkInForm.step2.emailPlaceholder')}
         value={visitorData.email}
         onChange={(e) => handleVisitorDataChange('email', e.target.value)}
-        icon={EnvelopeIcon}
+        leftIcon={<EnvelopeIcon className="w-5 h-5" />}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
-          label="Company (Optional)"
-          placeholder="ABC Corp"
+          label={t('walkInForm.step2.companyOptional')}
+          placeholder={t('walkInForm.step2.companyPlaceholder')}
           value={visitorData.company}
           onChange={(e) => handleVisitorDataChange('company', e.target.value)}
-          icon={BuildingOfficeIcon}
+          leftIcon={<BuildingOfficeIcon className="w-5 h-5" />}
         />
         <Input
-          label="Job Title (Optional)"
-          placeholder="Manager"
+          label={t('walkInForm.step2.jobTitleOptional')}
+          placeholder={t('walkInForm.step2.jobTitlePlaceholder')}
           value={visitorData.jobTitle}
           onChange={(e) => handleVisitorDataChange('jobTitle', e.target.value)}
-          icon={UserGroupIcon}
+          leftIcon={<UserGroupIcon className="w-5 h-5" />}
         />
       </div>
 
@@ -858,7 +860,7 @@ const WalkInForm = ({
       <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
         <div className="flex items-center justify-between mb-3">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            ID Documents (Optional)
+            {t('walkInForm.step2.idDocuments')}
           </label>
           <Button
             variant="outline"
@@ -866,7 +868,7 @@ const WalkInForm = ({
             onClick={() => setShowDocumentScanner(true)}
             icon={<DocumentIcon className="w-4 h-4" />}
           >
-            Scan Document
+            {t('walkInForm.step2.scanDocument')}
           </Button>
         </div>
 
@@ -876,17 +878,17 @@ const WalkInForm = ({
               <div key={index} className="relative group">
                 <img
                   src={doc.url}
-                  alt={`Document ${index + 1}`}
+                  alt={t('documents.scanAlt', { index: index + 1 })}
                   className="w-full h-24 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
                 />
                 <button
                   onClick={() => handleRemoveDocument(index)}
-                  className="absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 end-1 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <TrashIcon className="w-3 h-3" />
                 </button>
-                <div className="absolute bottom-1 left-1 right-1 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded text-center">
-                  Doc {index + 1}
+                <div className="absolute bottom-1 start-1 end-1 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded text-center">
+                  {t('walkInForm.step2.docLabel', { number: index + 1 })}
                 </div>
               </div>
             ))}
@@ -895,7 +897,7 @@ const WalkInForm = ({
 
         {scannedDocuments.length === 0 && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            No documents scanned yet. Scan ID or other documents for verification.
+            {t('walkInForm.step2.noDocumentsScanned')}
           </p>
         )}
       </div>
@@ -903,7 +905,7 @@ const WalkInForm = ({
       {existingVisitor && (
         <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-md">
           <p className="text-sm text-blue-800 dark:text-blue-300">
-            <strong>Note:</strong> Changes will update the existing visitor profile.
+            <strong>{t('walkInForm.step2.noteLabel')}:</strong> {t('walkInForm.step2.updateNote')}
           </p>
         </div>
       )}
@@ -914,13 +916,13 @@ const WalkInForm = ({
           onClick={handleBack}
           icon={<ArrowLeftIcon className="w-4 h-4" />}
         >
-          Back
+          {t('walkInForm.step2.back')}
         </Button>
         <Button
           onClick={handleNext}
           icon={<ArrowRightIcon className="w-4 h-4" />}
         >
-          Continue
+          {t('walkInForm.step2.continue')}
         </Button>
       </div>
     </motion.div>
@@ -936,17 +938,17 @@ const WalkInForm = ({
       <div className="text-center mb-6">
         <DocumentTextIcon className="w-16 h-16 text-blue-600 dark:text-blue-400 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          Visit Information
+          {t('walkInForm.step3.title')}
         </h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Where is the visitor going and why?
+          {t('walkInForm.step3.subtitle')}
         </p>
       </div>
 
       {/* Host Search */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Visiting Host <span className="text-red-500">*</span>
+          {t('walkInForm.step3.visitingHost')} <span className="text-red-500">*</span>
         </label>
         {visitData.hostId ? (
           <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
@@ -962,16 +964,16 @@ const WalkInForm = ({
               onClick={() => setVisitData(prev => ({ ...prev, hostId: null, hostName: '' }))}
               icon={<XMarkIcon className="w-4 h-4" />}
             >
-              Change
+              {t('walkInForm.step3.change')}
             </Button>
           </div>
         ) : (
           <div className="relative">
             <Input
-              placeholder="Search host by name..."
+              placeholder={t('walkInForm.step3.searchHostPlaceholder')}
               value={hostSearchTerm}
               onChange={(e) => handleHostSearch(e.target.value)}
-              icon={MagnifyingGlassIcon}
+              leftIcon={<MagnifyingGlassIcon className="w-5 h-5" />}
               error={validationErrors.hostId}
             />
             {searchingHosts && (
@@ -983,7 +985,7 @@ const WalkInForm = ({
               <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                 {hostSearchResults.map((host, index) => {
                   const hostKey = host.id ?? host.directoryIdentifier ?? host.email ?? host.fullName ?? `host-${index}`;
-                  const displayName = host.fullName || `${host.firstName || ''} ${host.lastName || ''}`.trim() || host.email || 'Unknown Host';
+                  const displayName = host.fullName || `${host.firstName || ''} ${host.lastName || ''}`.trim() || host.email || t('walkInForm.step3.unknownHost');
                   const identifier = host.directoryIdentifier || host.email || hostKey;
                   const isDirectory = host.source === 'directory' || host.existsInSystem === false;
                   const isProvisioning = identifier && provisioningHostKey === identifier;
@@ -992,7 +994,7 @@ const WalkInForm = ({
                     <button
                       key={hostKey}
                       onClick={() => handleSelectHost(host)}
-                      className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
+                      className="w-full text-start p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
                     >
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
@@ -1006,7 +1008,7 @@ const WalkInForm = ({
                             <div className="flex items-center gap-2">
                               {isDirectory && (
                                 <Badge variant="warning" size="sm">
-                                  Directory
+                                  {t('walkInForm.step3.directory')}
                                 </Badge>
                               )}
                               {isProvisioning ? (
@@ -1017,7 +1019,7 @@ const WalkInForm = ({
                             </div>
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {host.email || 'No email on record'}
+                            {host.email || t('walkInForm.step3.noEmail')}
                           </p>
                           {host.department && (
                             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -1026,7 +1028,7 @@ const WalkInForm = ({
                           )}
                           {isDirectory && (
                             <p className="text-xs text-amber-600 dark:text-amber-400">
-                              Will be auto-created from directory
+                              {t('walkInForm.step3.autoCreatedFromDirectory')}
                             </p>
                           )}
                         </div>
@@ -1044,7 +1046,7 @@ const WalkInForm = ({
       {/* Location Select */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Location <span className="text-red-500">*</span>
+          {t('walkInForm.step3.location')} <span className="text-red-500">*</span>
         </label>
         <select
           value={visitData.locationId || ''}
@@ -1061,7 +1063,7 @@ const WalkInForm = ({
             transition-all
           `}
         >
-          <option value="">Select location...</option>
+          <option value="">{t('walkInForm.step3.selectLocation')}</option>
           {locations.map((location) => (
             <option key={location.id} value={location.id}>
               {location.name}
@@ -1078,7 +1080,7 @@ const WalkInForm = ({
       {/* Visit Purpose Select */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Visit Purpose (Optional)
+          {t('walkInForm.step3.visitPurpose')}
         </label>
         <select
           value={visitData.visitPurposeId || ''}
@@ -1090,7 +1092,7 @@ const WalkInForm = ({
             transition-all
           "
         >
-          <option value="">Select purpose... (defaults to Walk-in)</option>
+          <option value="">{t('walkInForm.step3.selectPurpose')}</option>
           {visitPurposes.map((purpose) => (
             <option key={purpose.id} value={purpose.id}>
               {purpose.name}
@@ -1102,7 +1104,7 @@ const WalkInForm = ({
       {/* Duration Select */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Expected Duration
+          {t('walkInForm.step3.expectedDuration')}
         </label>
         <select
           value={visitData.duration}
@@ -1114,23 +1116,23 @@ const WalkInForm = ({
             transition-all
           "
         >
-          <option value={30}>30 minutes</option>
-          <option value={60}>1 hour</option>
-          <option value={120}>2 hours</option>
-          <option value={240}>4 hours</option>
-          <option value={480}>Full day</option>
+          <option value={30}>{t('walkInForm.step3.duration30')}</option>
+          <option value={60}>{t('walkInForm.step3.duration60')}</option>
+          <option value={120}>{t('walkInForm.step3.duration120')}</option>
+          <option value={240}>{t('walkInForm.step3.duration240')}</option>
+          <option value={480}>{t('walkInForm.step3.duration480')}</option>
         </select>
       </div>
 
       {/* Notes */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Notes (Optional)
+          {t('walkInForm.step3.notesOptional')}
         </label>
         <textarea
           value={visitData.notes}
           onChange={(e) => handleVisitDataChange('notes', e.target.value)}
-          placeholder="Any additional information..."
+          placeholder={t('walkInForm.step3.notesPlaceholder')}
           rows={3}
           className="
             w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600
@@ -1154,14 +1156,14 @@ const WalkInForm = ({
           disabled={loading}
           icon={<ArrowLeftIcon className="w-4 h-4" />}
         >
-          Back
+          {t('walkInForm.step3.back')}
         </Button>
         <Button
           onClick={handleSubmit}
           disabled={loading}
           icon={loading ? <LoadingSpinner size="sm" /> : <CheckCircleIcon className="w-5 h-5" />}
         >
-          {loading ? 'Processing...' : 'Check In & Print Badge'}
+          {loading ? t('walkInForm.step3.submitting') : t('walkInForm.step3.submit')}
         </Button>
       </div>
     </motion.div>
@@ -1184,7 +1186,7 @@ const WalkInForm = ({
           onClick={onCancel}
           disabled={loading}
         >
-          Cancel Walk-in Registration
+          {t('walkInForm.cancel')}
         </Button>
       </div>
 

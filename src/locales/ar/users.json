@@ -47,7 +47,8 @@
     "deactivateSelected": "تعطيل المحددين",
     "deleteSelected": "حذف المحددين",
     "confirmTitle": "{{action}} المستخدمين",
-    "confirmMessage": "هل أنت متأكد من {{action}} {{count}} مستخدم؟"
+    "confirmMessage": "هل أنت متأكد من {{action}} {{count}} مستخدم؟",
+    "selected": "تم تحديد {{count}}"
   },
   "roles": {
     "Administrator": "مدير النظام",
@@ -329,5 +330,167 @@
     "language": "اللغة",
     "theme": "المظهر",
     "timeZone": "المنطقة الزمنية"
+  },
+  "form": {
+    "toasts": {
+      "departmentCreated": "تم إنشاء {{name}} بنجاح.",
+      "validationTitle": "خطأ في التحقق",
+      "validationMessage": "يرجى تصحيح أخطاء النموذج قبل الإرسال."
+    },
+    "header": {
+      "editSubtitle": "حدّث معلومات المستخدم وصلاحياته",
+      "createSubtitle": "أضف مستخدماً جديداً إلى النظام بمستوى الوصول المناسب"
+    },
+    "placeholders": {
+      "firstName": "أدخل الاسم الأول",
+      "lastName": "أدخل اسم العائلة",
+      "email": "أدخل عنوان البريد الإلكتروني",
+      "employeeId": "أدخل رقم الموظف",
+      "department": "اختر قسماً...",
+      "jobTitle": "أدخل المسمى الوظيفي",
+      "phoneNumber": "71 123 456",
+      "streetAddress": "العنوان",
+      "addressLine2": "سطر العنوان الثاني (اختياري)",
+      "city": "المدينة",
+      "postalCode": "الرمز البريدي",
+      "latitude": "33.8938",
+      "longitude": "35.5018"
+    },
+    "help": {
+      "employeeId": "اختياري: معرّف فريد للموظف",
+      "postalCode": "الرمز البريدي",
+      "latitude": "خط العرض (اختياري)",
+      "longitude": "خط الطول (اختياري)"
+    },
+    "actions": {
+      "createDepartment": "إنشاء قسم جديد",
+      "updating": "جارٍ التحديث...",
+      "creating": "جارٍ الإنشاء...",
+      "updateUser": "تحديث المستخدم",
+      "createUser": "إنشاء مستخدم"
+    },
+    "statusOptions": {
+      "suspended": "معلّق"
+    },
+    "phoneTypes": {
+      "mobile": "محمول",
+      "landline": "هاتف أرضي",
+      "unknown": "غير معروف"
+    },
+    "coordinates": {
+      "toggle": "إضافة إحداثيات موقع دقيقة"
+    },
+    "timeZones": {
+      "utc": "التوقيت العالمي UTC",
+      "eastern": "التوقيت الشرقي",
+      "central": "التوقيت المركزي",
+      "pacific": "توقيت المحيط الهادئ",
+      "london": "لندن",
+      "paris": "باريس",
+      "beirut": "توقيت بيروت (EET)",
+      "regionalGroup": "--- إقليمي ---",
+      "damascus": "دمشق",
+      "amman": "عمان",
+      "jerusalem": "القدس",
+      "istanbul": "إسطنبول",
+      "riyadh": "الرياض",
+      "dubai": "دبي",
+      "kuwait": "الكويت",
+      "internationalGroup": "--- دولي ---"
+    },
+    "accountSettings": {
+      "activeAccount": "حساب نشط",
+      "activeAccountDesc": "يمكن للمستخدم تسجيل الدخول والوصول إلى النظام",
+      "requirePasswordChange": "إلزام تغيير كلمة المرور",
+      "requirePasswordChangeDesc": "يجب على المستخدم تغيير كلمة المرور عند أول تسجيل دخول",
+      "sendWelcomeEmail": "إرسال بريد ترحيبي",
+      "sendWelcomeEmailDesc": "إرسال بريد ترحيبي مع بيانات الدخول",
+      "approvalOverride": "تجاوز موافقة الدعوات",
+      "approvalOverrideDesc": "يحدد ما إذا كانت دعوات هذا المستخدم تتطلب موافقة المسؤول، متجاوزاً الإعداد العام.",
+      "approvalOverrideDefault": "استخدام الإعداد العام (افتراضي)",
+      "approvalOverrideRequire": "يتطلب الموافقة دائماً",
+      "approvalOverrideAuto": "اعتماد تلقائي دائماً (تخطي الموافقة)"
+    },
+    "sections": {
+      "userPreferences": "التفضيلات"
+    },
+    "phoneCountryCodes": {
+      "lb": "لبنان +961",
+      "sy": "سوريا +963",
+      "jo": "الأردن +962",
+      "il": "إسرائيل +972",
+      "tr": "تركيا +90",
+      "eg": "مصر +20",
+      "sa": "السعودية +966",
+      "ae": "الإمارات +971",
+      "kw": "الكويت +965",
+      "qa": "قطر +974",
+      "us": "الولايات المتحدة +1",
+      "gb": "المملكة المتحدة +44",
+      "fr": "فرنسا +33",
+      "de": "ألمانيا +49",
+      "it": "إيطاليا +39"
+    },
+    "addressTypes": {
+      "home": "المنزل",
+      "work": "العمل",
+      "billing": "الفوترة",
+      "shipping": "الشحن",
+      "other": "أخرى"
+    },
+    "governorates": {
+      "beirut": "بيروت",
+      "mountLebanon": "جبل لبنان",
+      "northLebanon": "لبنان الشمالي",
+      "southLebanon": "لبنان الجنوبي",
+      "beqaa": "البقاع",
+      "akkar": "عكار",
+      "baalbekHermel": "بعلبك-الهرمل",
+      "nabatieh": "النبطية"
+    },
+    "countries": {
+      "lebanon": "لبنان",
+      "middleEastGroup": "--- الشرق الأوسط ---",
+      "syria": "سوريا",
+      "jordan": "الأردن",
+      "israel": "إسرائيل",
+      "turkey": "تركيا",
+      "cyprus": "قبرص",
+      "egypt": "مصر",
+      "saudiArabia": "السعودية",
+      "unitedArabEmirates": "الإمارات",
+      "kuwait": "الكويت",
+      "qatar": "قطر",
+      "bahrain": "البحرين",
+      "oman": "عُمان",
+      "iraq": "العراق",
+      "iran": "إيران",
+      "internationalGroup": "--- دولية ---",
+      "unitedStates": "الولايات المتحدة",
+      "canada": "كندا",
+      "unitedKingdom": "المملكة المتحدة",
+      "france": "فرنسا",
+      "germany": "ألمانيا",
+      "italy": "إيطاليا",
+      "australia": "أستراليا",
+      "brazil": "البرازيل",
+      "other": "أخرى"
+    },
+    "languages": {
+      "englishUs": "الإنجليزية (الولايات المتحدة)",
+      "arabicLebanon": "العربية (لبنان)",
+      "arabicStandard": "العربية (الفصحى)",
+      "englishUk": "الإنجليزية (المملكة المتحدة)",
+      "french": "الفرنسية",
+      "turkish": "التركية",
+      "spanish": "الإسبانية",
+      "german": "الألمانية",
+      "italian": "الإيطالية"
+    },
+    "themes": {
+      "light": "فاتح",
+      "dark": "داكن",
+      "auto": "تلقائي"
+    }
   }
 }

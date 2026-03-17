@@ -1,11 +1,11 @@
-// src/pages/auth/ForgotPasswordPage/ForgotPasswordPage.js
+﻿// src/pages/auth/ForgotPasswordPage/ForgotPasswordPage.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../../store/slices/uiSlice';
-import { isValidEmail } from '../../../utils/validators';
 import Input from '../../../components/common/Input/Input';
 import Button from '../../../components/common/Button/Button';
 
@@ -14,6 +14,7 @@ import Button from '../../../components/common/Button/Button';
  */
 const ForgotPasswordPage = () => {
   const dispatch = useDispatch();
+  const { t } = useTranslation('auth');
   const { forgotPassword, loading, error } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -24,25 +25,21 @@ const ForgotPasswordPage = () => {
   const [isEmailValid, setIsEmailValid] = useState(false);
 
   useEffect(() => {
-    dispatch(setPageTitle('Reset Password'));
-  }, [dispatch]);
+    dispatch(setPageTitle(t('forgotPassword.title')));
+  }, [dispatch, t]);
 
   useEffect(() => {
-    // Validate email in real-time
     if (formData.email) {
-      const emailValidation = isValidEmail(formData.email);
-      setIsEmailValid(emailValidation.isValid);
-      
-      if (!emailValidation.isValid && formData.email.length > 0) {
-        setErrors({ email: emailValidation.message });
-      } else {
-        setErrors({});
-      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const valid = emailRegex.test(formData.email.trim());
+
+      setIsEmailValid(valid);
+      setErrors(valid ? {} : { email: t('validation.emailInvalid') });
     } else {
       setIsEmailValid(false);
       setErrors({});
     }
-  }, [formData.email]);
+  }, [formData.email, t]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -55,20 +52,18 @@ const ForgotPasswordPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate email
-    const emailValidation = isValidEmail(formData.email);
-    if (!emailValidation.isValid) {
-      setErrors({ email: emailValidation.message });
+    if (!isEmailValid) {
+      setErrors({ email: t('validation.emailInvalid') });
       return;
     }
 
     try {
       const result = await forgotPassword(formData.email);
-      
+
       if (result.payload) {
         setIsSubmitted(true);
       }
-    } catch (error) {
+    } catch {
       // Error is handled by Redux
     }
   };
@@ -83,11 +78,10 @@ const ForgotPasswordPage = () => {
             transition={{ duration: 0.5 }}
             className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-8 text-center"
           >
-            {/* Success Icon */}
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
               className="mx-auto w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-6"
             >
               <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,16 +95,16 @@ const ForgotPasswordPage = () => {
               transition={{ delay: 0.3, duration: 0.5 }}
             >
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Check Your Email
+                {t('forgotPassword.successTitle')}
               </h2>
               <p className="text-gray-600 mb-6">
-                We've sent password reset instructions to:
+                {t('forgotPassword.successSentTo')}
               </p>
               <p className="text-blue-600 font-semibold bg-blue-50 rounded-lg px-4 py-2 mb-6">
                 {formData.email}
               </p>
               <p className="text-sm text-gray-500 mb-8">
-                If you don't receive the email within a few minutes, please check your spam folder or contact support.
+                {t('forgotPassword.successHint')}
               </p>
             </motion.div>
 
@@ -126,14 +120,14 @@ const ForgotPasswordPage = () => {
                 fullWidth
                 onClick={() => setIsSubmitted(false)}
               >
-                Send Another Email
+                {t('forgotPassword.sendAnotherEmail')}
               </Button>
-              
+
               <Link
                 to="/login"
                 className="block text-center text-blue-600 hover:text-blue-500 font-medium transition-colors"
               >
-                Back to Sign In
+                {t('forgotPassword.backToSignIn')}
               </Link>
             </motion.div>
           </motion.div>
@@ -144,10 +138,9 @@ const ForgotPasswordPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      {/* Background Pattern */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -top-40 -end-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -start-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
       </div>
 
       <div className="relative w-full max-w-md">
@@ -157,7 +150,6 @@ const ForgotPasswordPage = () => {
           transition={{ duration: 0.5 }}
           className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-8"
         >
-          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -170,21 +162,19 @@ const ForgotPasswordPage = () => {
               </svg>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Forgot Password?
+              {t('forgotPassword.heroTitle')}
             </h2>
             <p className="text-gray-600">
-              No worries! Enter your email and we'll send you reset instructions.
+              {t('forgotPassword.heroSubtitle')}
             </p>
           </motion.div>
 
-          {/* Form */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
           >
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Global Error */}
               {error && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -200,17 +190,16 @@ const ForgotPasswordPage = () => {
                 </motion.div>
               )}
 
-              {/* Email Field */}
               <div>
                 <Input
                   type="email"
                   name="email"
-                  label="Email Address"
-                  placeholder="Enter your email address"
+                  label={t('forgotPassword.emailLabel')}
+                  placeholder={t('forgotPassword.emailPlaceholder')}
                   value={formData.email}
                   onChange={handleChange}
                   error={errors.email}
-                  success={isEmailValid ? "Valid email address" : null}
+                  success={isEmailValid ? t('forgotPassword.emailValid') : null}
                   disabled={loading}
                   autoComplete="email"
                   autoFocus
@@ -227,7 +216,6 @@ const ForgotPasswordPage = () => {
                 />
               </div>
 
-              {/* Submit Button */}
               <Button
                 type="submit"
                 variant="primary"
@@ -237,12 +225,11 @@ const ForgotPasswordPage = () => {
                 disabled={!isEmailValid || loading}
                 className="transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
               >
-                {loading ? 'Sending Instructions...' : 'Send Reset Instructions'}
+                {loading ? t('forgotPassword.sendingInstructions') : t('forgotPassword.sendInstructions')}
               </Button>
             </form>
           </motion.div>
 
-          {/* Back to Login */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -256,12 +243,11 @@ const ForgotPasswordPage = () => {
               <svg className="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              Back to Sign In
+              {t('forgotPassword.backToSignIn')}
             </Link>
           </motion.div>
         </motion.div>
 
-        {/* Help Text */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -269,10 +255,9 @@ const ForgotPasswordPage = () => {
           className="mt-8 bg-white/60 backdrop-blur-sm rounded-xl p-6 border border-white/20"
         >
           <div className="text-center">
-            <h3 className="font-semibold text-gray-900 mb-2">Security Notice</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('forgotPassword.securityNoticeTitle')}</h3>
             <p className="text-sm text-gray-600">
-              Password reset emails are valid for 24 hours and can only be used once. 
-              If you don't receive an email, please contact your system administrator.
+              {t('forgotPassword.securityNoticeMessage')}
             </p>
           </div>
         </motion.div>

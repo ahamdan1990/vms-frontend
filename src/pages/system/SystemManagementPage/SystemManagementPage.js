@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { setPageTitle } from '../../../store/slices/uiSlice';
 
 // Components
@@ -34,6 +35,7 @@ import {
  * Central hub for all system administration tasks and monitoring
  */
 const SystemManagementPage = () => {
+  const { t } = useTranslation('system');
   const dispatch = useDispatch();
   
   // Real-time system data using SignalR
@@ -47,7 +49,7 @@ const SystemManagementPage = () => {
   } = useRealTimeDashboard({
     enableAutoRefresh: true,
     onSystemHealthUpdate: (health) => {
-      console.log('🏥 System health updated:', health);
+      console.log('System health updated:', health);
     },
     onError: (error) => {
       console.error('System management error:', error);
@@ -56,11 +58,11 @@ const SystemManagementPage = () => {
 
   // Local state for system health (parsed from real-time data)
   const [systemHealth, setSystemHealth] = useState({
-    overall: 'Loading...',
-    database: 'Loading...',
-    emailService: 'Loading...', 
-    qrGenerator: 'Loading...',
-    documentScanner: 'Loading...',
+    overall: t('common:loading.data'),
+    database: t('common:loading.data'),
+    emailService: t('common:loading.data'),
+    qrGenerator: t('common:loading.data'),
+    documentScanner: t('common:loading.data'),
     lastHealthCheck: new Date(),
     loading: true
   });
@@ -72,13 +74,13 @@ const SystemManagementPage = () => {
     visitPurposes: 0,
     timeSlots: 0,
     lastBackup: new Date(),
-    systemUptime: 'Loading...',
+    systemUptime: t('common:loading.data'),
     loading: true
   });
 
   useEffect(() => {
-    dispatch(setPageTitle('System Management'));
-  }, [dispatch]);
+    dispatch(setPageTitle(t('systemManagement.title')));
+  }, [dispatch, t]);
 
   // Fetch system health data (initial and when real-time data changes)
   useEffect(() => {
@@ -111,8 +113,8 @@ const SystemManagementPage = () => {
         if (isMounted) {
           setSystemHealth(prev => ({
             ...prev,
-            overall: 'Error',
-            database: 'Error',
+            overall: t('common:alerts.error'),
+            database: t('common:alerts.error'),
             loading: false
           }));
           setSystemStats(prev => ({
@@ -140,7 +142,7 @@ const SystemManagementPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [realTimeSystemHealth]);
+  }, [realTimeSystemHealth, t]);
 
   
   // Helper function for relative time formatting
@@ -149,10 +151,10 @@ const SystemManagementPage = () => {
     const diff = now - date;
     const hours = Math.floor(diff / (1000 * 60 * 60));
     
-    if (hours < 1) return 'just now';
-    if (hours < 24) return `${hours}h ago`;
+    if (hours < 1) return t('systemManagement.justNow');
+    if (hours < 24) return t('systemManagement.hoursAgo', { count: hours });
     const days = Math.floor(hours / 24);
-    return `${days}d ago`;
+    return t('systemManagement.daysAgo', { count: days });
   };
 
   const getHealthBadge = (status) => {
@@ -176,84 +178,84 @@ const SystemManagementPage = () => {
   const managementModules = [
     {
       id: 'configuration',
-      title: 'System Configuration',
-      description: 'Manage global system settings and preferences',
+      title: t('systemManagement.mod_configuration_title'),
+      description: t('systemManagement.mod_configuration_desc'),
       icon: Cog6ToothIcon,
       href: '/system/config',
       color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300',
-      stats: 'Last updated 2 days ago'
+      stats: t('systemManagement.mod_configuration_stats')
     },
     {
       id: 'locations',
-      title: 'Locations Management',
-      description: 'Configure office locations and building settings',
+      title: t('systemManagement.mod_locations_title'),
+      description: t('systemManagement.mod_locations_desc'),
       icon: MapPinIcon,
       href: '/system/locations',
       color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-300',
-      stats: `${systemStats.activeLocations} active locations`
+      stats: t('systemManagement.mod_locations_stats', { count: systemStats.activeLocations })
     },
     {
       id: 'visit-purposes',
-      title: 'Visit Purposes',
-      description: 'Define and manage visit categories and types',
+      title: t('systemManagement.mod_visitPurposes_title'),
+      description: t('systemManagement.mod_visitPurposes_desc'),
       icon: DocumentTextIcon,
       href: '/system/visit-purposes',
       color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300',
-      stats: `${systemStats.visitPurposes} purpose types`
+      stats: t('systemManagement.mod_visitPurposes_stats', { count: systemStats.visitPurposes })
     },
     {
       id: 'time-slots',
-      title: 'Time Slots',
-      description: 'Configure availability windows and scheduling',
+      title: t('systemManagement.mod_timeSlots_title'),
+      description: t('systemManagement.mod_timeSlots_desc'),
       icon: ClockIcon,
       href: '/system/time-slots',
       color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300',
-      stats: `${systemStats.timeSlots} time slots configured`
+      stats: t('systemManagement.mod_timeSlots_stats', { count: systemStats.timeSlots })
     },
     {
       id: 'escalation-rules',
-      title: 'Escalation Rules',
-      description: 'Configure alert escalation and notification rules',
+      title: t('systemManagement.mod_escalation_title'),
+      description: t('systemManagement.mod_escalation_desc'),
       icon: ExclamationTriangleIcon,
       href: '/system/escalation-rules',
       color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300',
-      stats: 'Alert management'
+      stats: t('systemManagement.mod_escalation_stats')
     },
     {
       id: 'users',
-      title: 'User Management',
-      description: 'Manage user accounts, roles, and permissions',
+      title: t('systemManagement.mod_users_title'),
+      description: t('systemManagement.mod_users_desc'),
       icon: UserGroupIcon,
       href: '/users',
       color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300',
-      stats: `${systemStats.totalUsers} total users`
+      stats: t('systemManagement.mod_users_stats', { count: systemStats.totalUsers })
     },
     {
       id: 'audit',
-      title: 'Audit & Monitoring',
-      description: 'View system logs and audit trails',
+      title: t('systemManagement.mod_audit_title'),
+      description: t('systemManagement.mod_audit_desc'),
       icon: ShieldCheckIcon,
       href: '/system/audit',
       color: 'bg-gray-100 text-gray-600 dark:bg-gray-800/60 dark:text-gray-200',
-      stats: 'Real-time monitoring'
+      stats: t('systemManagement.mod_audit_stats')
     },
     {
       id: 'backup',
-      title: 'Backup & Recovery',
-      description: 'Manage database backups and system recovery',
+      title: t('systemManagement.mod_backup_title'),
+      description: t('systemManagement.mod_backup_desc'),
       icon: CloudArrowUpIcon,
       href: '/system/backup',
       color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-200',
-      stats: `Last backup ${formatRelativeTime(systemStats.lastBackup)}`
+      stats: t('systemManagement.mod_backup_stats', { time: formatRelativeTime(systemStats.lastBackup) })
     },
     {
       id: 'analytics',
-      title: 'System Analytics',
-      description: 'View system performance and usage statistics',
+      title: t('systemManagement.mod_analytics_title'),
+      description: t('systemManagement.mod_analytics_desc'),
       icon: ChartBarIcon,
       href: '/analytics',
       color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-300',
-      stats: 'Live dashboard available'
+      stats: t('systemManagement.mod_analytics_stats')
     }
   ];
 
@@ -263,9 +265,9 @@ const SystemManagementPage = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">System Management</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('systemManagement.title')}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Central hub for system administration and configuration
+            {t('systemManagement.subtitle')}
           </p>
         </div>
         
@@ -274,14 +276,14 @@ const SystemManagementPage = () => {
             variant="outline"
             icon={<ArrowTopRightOnSquareIcon className="w-5 h-5" />}
           >
-            System Status
+            {t('systemManagement.systemStatus')}
           </Button>
           
           <Link to="/system/config">
             <Button
               icon={<Cog6ToothIcon className="w-5 h-5" />}
             >
-              Configuration
+              {t('systemManagement.configuration')}
             </Button>
           </Link>
         </div>
@@ -295,124 +297,41 @@ const SystemManagementPage = () => {
       >
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">System Health Overview</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('systemManagement.healthOverview')}</h3>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-green-600 dark:text-green-300 font-medium">All Systems Operational</span>
+              <span className="text-sm text-green-600 dark:text-green-300 font-medium">{t('systemManagement.allOperational')}</span>
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/60 rounded-lg border border-gray-100 dark:border-gray-700">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Database</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{t('systemManagement.database')}</span>
               {getHealthBadge(systemHealth.database)}
             </div>
             
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/60 rounded-lg border border-gray-100 dark:border-gray-700">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Email Service</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{t('systemManagement.emailService')}</span>
               {getHealthBadge(systemHealth.emailService)}
             </div>
             
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/60 rounded-lg border border-gray-100 dark:border-gray-700">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">QR Generator</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{t('systemManagement.qrGenerator')}</span>
               {getHealthBadge(systemHealth.qrGenerator)}
             </div>
             
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/60 rounded-lg border border-gray-100 dark:border-gray-700">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Document Scanner</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{t('systemManagement.documentScanner')}</span>
               {getHealthBadge(systemHealth.documentScanner)}
             </div>
           </div>
           
           <div className="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-            <span>System Uptime: {systemStats.systemUptime}</span>
-            <span>Last Health Check: {formatRelativeTime(systemHealth.lastHealthCheck)}</span>
+            <span>{t('systemManagement.uptime', { value: systemStats.systemUptime })}</span>
+            <span>{t('systemManagement.lastHealthCheck', { time: formatRelativeTime(systemHealth.lastHealthCheck) })}</span>
           </div>
         </Card>
       </motion.div>
-
-      {/* Quick Statistics */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card className="p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <UserGroupIcon className="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
-              <div className="ms-4">
-                <h3 className="text-sm font-medium text-gray-600">Total Users</h3>
-                <p className="text-2xl font-bold text-gray-900">{systemStats.totalUsers}</p>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <Card className="p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <MapPinIcon className="w-6 h-6 text-green-600" />
-                </div>
-              </div>
-              <div className="ms-4">
-                <h3 className="text-sm font-medium text-gray-600">Active Locations</h3>
-                <p className="text-2xl font-bold text-gray-900">{systemStats.activeLocations}</p>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card className="p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <DocumentTextIcon className="w-6 h-6 text-purple-600" />
-                </div>
-              </div>
-              <div className="ms-4">
-                <h3 className="text-sm font-medium text-gray-600">Visit Purposes</h3>
-                <p className="text-2xl font-bold text-gray-900">{systemStats.visitPurposes}</p>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Card className="p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <ClockIcon className="w-6 h-6 text-orange-600" />
-                </div>
-              </div>
-              <div className="ms-4">
-                <h3 className="text-sm font-medium text-gray-600">Time Slots</h3>
-                <p className="text-2xl font-bold text-gray-900">{systemStats.timeSlots}</p>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-      </div> */}
 
       {/* Management Modules */}
       <motion.div
@@ -421,7 +340,7 @@ const SystemManagementPage = () => {
         transition={{ delay: 0.6 }}
       >
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">System Management Modules</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">{t('systemManagement.modules')}</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {managementModules.map((module, index) => (
@@ -469,12 +388,12 @@ const SystemManagementPage = () => {
       >
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Recent System Activity</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('systemManagement.recentActivity')}</h3>
             <Link 
               to="/system/audit"
               className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200 transition-colors"
             >
-              View all activity →
+              {t('systemManagement.viewAllActivity')}
             </Link>
           </div>
           
@@ -509,7 +428,7 @@ const SystemManagementPage = () => {
               ))
             ) : (
               <div className="text-center py-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400">No recent activity available</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('systemManagement.noRecentActivity')}</p>
               </div>
             )}
           </div>
@@ -520,3 +439,4 @@ const SystemManagementPage = () => {
 };
 
 export default SystemManagementPage;
+

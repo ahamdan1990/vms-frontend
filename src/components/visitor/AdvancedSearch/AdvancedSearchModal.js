@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // Redux actions and selectors
 import {
@@ -34,9 +34,7 @@ import {
   UserIcon,
   BuildingOfficeIcon,
   GlobeAltIcon,
-  ShieldCheckIcon,
-  StarIcon,
-  ExclamationTriangleIcon
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 
@@ -51,6 +49,7 @@ import { extractErrorMessage } from '../../../utils/errorUtils';
  */
 const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
   const dispatch = useDispatch();
+  const { t } = useTranslation('visitors');
 
   // Redux selectors
   const isOpen = useSelector(selectShowAdvancedSearchModal);
@@ -166,22 +165,22 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
   // Helper functions for display
   const getVisitorStatusBadge = (visitor) => {
     if (visitor.isBlacklisted) {
-      return <Badge variant="danger" size="sm">Blacklisted</Badge>;
+      return <Badge variant="danger" size="sm">{t('status.blacklisted')}</Badge>;
     }
     if (visitor.isVip) {
-      return <Badge variant="warning" size="sm">VIP</Badge>;
+      return <Badge variant="warning" size="sm">{t('vipBadge')}</Badge>;
     }
     if (!visitor.isActive) {
-      return <Badge variant="secondary" size="sm">Inactive</Badge>;
+      return <Badge variant="secondary" size="sm">{t('status.inactive')}</Badge>;
     }
-    return <Badge variant="success" size="sm">Active</Badge>;
+    return <Badge variant="success" size="sm">{t('status.active')}</Badge>;
   };
 
   const formatVisitorName = (visitor) => {
     return (
       <div className="flex items-center gap-2">
         {visitor.isVip && (
-          <StarIconSolid className="w-4 h-4 text-yellow-500" title="VIP Visitor" />
+          <StarIconSolid className="w-4 h-4 text-yellow-500" title={t('vipVisitorTitle')} />
         )}
         <div>
           <div className="font-medium text-gray-900">
@@ -199,12 +198,12 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
   const columns = [
     {
       id: 'name',
-      header: 'Visitor',
+      header: t('table.columns.name'),
       cell: ({ row }) => formatVisitorName(row.original)
     },
     {
       id: 'contact',
-      header: 'Contact',
+      header: t('advancedSearchModal.table.contact'),
       cell: ({ row }) => {
         const visitor = row.original;
         return (
@@ -217,7 +216,7 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
     },
     {
       id: 'details',
-      header: 'Details',
+      header: t('advancedSearchModal.table.details'),
       cell: ({ row }) => {
         const visitor = row.original;
         return (
@@ -230,12 +229,12 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
     },
     {
       id: 'status',
-      header: 'Status',
+      header: t('table.columns.status'),
       cell: ({ row }) => getVisitorStatusBadge(row.original)
     },
     {
       id: 'lastVisit',
-      header: 'Last Visit',
+      header: t('table.columns.lastVisit'),
       cell: ({ row }) => {
         const lastVisit = row.original.lastVisitAt;
         return lastVisit ? (
@@ -243,20 +242,20 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
             {formatDateTime(lastVisit)}
           </span>
         ) : (
-          <span className="text-sm text-gray-400">Never</span>
+          <span className="text-sm text-gray-400">{t('activity.never')}</span>
         );
       }
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: t('table.columns.actions'),
       cell: ({ row }) => (
         <Button
           variant="outline"
           size="sm"
           onClick={() => handleVisitorSelect(row.original)}
         >
-          Select
+          {t('common:buttons.select')}
         </Button>
       ),
       enableSorting: false
@@ -267,7 +266,7 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Advanced Visitor Search"
+      title={t('advancedSearchModal.title')}
       size="full"
     >
       <div className="space-y-6">
@@ -285,7 +284,7 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <MagnifyingGlassIcon className="w-6 h-6 text-blue-600" />
-              <h3 className="text-lg font-medium text-gray-900">Search Criteria</h3>
+              <h3 className="text-lg font-medium text-gray-900">{t('advancedSearchModal.sections.criteria')}</h3>
             </div>
             <Button
               variant="ghost"
@@ -293,7 +292,7 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
               onClick={resetCriteria}
               icon={<XMarkIcon className="w-4 h-4" />}
             >
-              Clear All
+              {t('advancedSearchModal.actions.clearAll')}
             </Button>
           </div>
 
@@ -302,14 +301,14 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
             <div>
               <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                 <MagnifyingGlassIcon className="w-4 h-4" />
-                <span>General Search</span>
+                <span>{t('advancedSearchModal.sections.general')}</span>
               </h4>
               <Input
-                label="Search Term"
+                label={t('advancedSearchModal.fields.searchTerm')}
                 type="text"
                 value={searchCriteria.searchTerm}
                 onChange={(e) => handleCriteriaChange('searchTerm', e.target.value)}
-                placeholder="Search across all fields..."
+                placeholder={t('advancedSearchModal.placeholders.searchTerm')}
               />
             </div>
 
@@ -317,23 +316,23 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
             <div>
               <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                 <UserIcon className="w-4 h-4" />
-                <span>Personal Information</span>
+                <span>{t('advancedSearchModal.sections.personal')}</span>
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Input
-                  label="First Name"
+                  label={t('fields.firstName')}
                   type="text"
                   value={searchCriteria.firstName}
                   onChange={(e) => handleCriteriaChange('firstName', e.target.value)}
                 />
                 <Input
-                  label="Last Name"
+                  label={t('fields.lastName')}
                   type="text"
                   value={searchCriteria.lastName}
                   onChange={(e) => handleCriteriaChange('lastName', e.target.value)}
                 />
                 <Input
-                  label="Email"
+                  label={t('fields.email')}
                   type="email"
                   value={searchCriteria.email}
                   onChange={(e) => handleCriteriaChange('email', e.target.value)}
@@ -341,19 +340,19 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <Input
-                  label="Phone Number"
+                  label={t('fields.phone')}
                   type="tel"
                   value={searchCriteria.phoneNumber}
                   onChange={(e) => handleCriteriaChange('phoneNumber', e.target.value)}
                 />
                 <Input
-                  label="Nationality"
+                  label={t('fields.nationality')}
                   type="text"
                   value={searchCriteria.nationality}
                   onChange={(e) => handleCriteriaChange('nationality', e.target.value)}
                 />
                 <Input
-                  label="Government ID"
+                  label={t('advancedSearchModal.fields.governmentId')}
                   type="text"
                   value={searchCriteria.governmentId}
                   onChange={(e) => handleCriteriaChange('governmentId', e.target.value)}
@@ -365,17 +364,17 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
             <div>
               <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                 <BuildingOfficeIcon className="w-4 h-4" />
-                <span>Professional Information</span>
+                <span>{t('advancedSearchModal.sections.professional')}</span>
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  label="Company"
+                  label={t('fields.company')}
                   type="text"
                   value={searchCriteria.company}
                   onChange={(e) => handleCriteriaChange('company', e.target.value)}
                 />
                 <Input
-                  label="Job Title"
+                  label={t('fields.jobTitle')}
                   type="text"
                   value={searchCriteria.jobTitle}
                   onChange={(e) => handleCriteriaChange('jobTitle', e.target.value)}
@@ -387,68 +386,68 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
             <div>
               <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                 <ShieldCheckIcon className="w-4 h-4" />
-                <span>Status & Security</span>
+                <span>{t('advancedSearchModal.sections.statusSecurity')}</span>
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    VIP Status
+                    {t('filters.vipStatus')}
                   </label>
                   <select
                     value={searchCriteria.isVip === null ? '' : searchCriteria.isVip.toString()}
                     onChange={(e) => handleCriteriaChange('isVip', e.target.value === '' ? null : e.target.value === 'true')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">All Visitors</option>
-                    <option value="true">VIP Only</option>
-                    <option value="false">Non-VIP Only</option>
+                    <option value="">{t('filters.allVisitors')}</option>
+                    <option value="true">{t('filters.vipOnly')}</option>
+                    <option value="false">{t('filters.nonVipOnly')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Blacklist Status
+                    {t('filters.blacklistStatus')}
                   </label>
                   <select
                     value={searchCriteria.isBlacklisted === null ? '' : searchCriteria.isBlacklisted.toString()}
                     onChange={(e) => handleCriteriaChange('isBlacklisted', e.target.value === '' ? null : e.target.value === 'true')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">All Visitors</option>
-                    <option value="true">Blacklisted Only</option>
-                    <option value="false">Not Blacklisted</option>
+                    <option value="">{t('filters.allVisitors')}</option>
+                    <option value="true">{t('filters.blacklistedOnly')}</option>
+                    <option value="false">{t('filters.notBlacklisted')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Active Status
+                    {t('advancedSearchModal.fields.activeStatus')}
                   </label>
                   <select
                     value={searchCriteria.isActive.toString()}
                     onChange={(e) => handleCriteriaChange('isActive', e.target.value === 'true')}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="true">Active Only</option>
-                    <option value="false">All Visitors</option>
+                    <option value="true">{t('advancedSearchModal.options.activeOnly')}</option>
+                    <option value="false">{t('filters.allVisitors')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Security Clearance
+                    {t('fields.securityClearance')}
                   </label>
                   <select
                     value={searchCriteria.securityClearance}
                     onChange={(e) => handleCriteriaChange('securityClearance', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">All Levels</option>
-                    <option value="Standard">Standard</option>
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                    <option value="Top Secret">Top Secret</option>
+                    <option value="">{t('filters.securityLevels.all')}</option>
+                    <option value="Standard">{t('filters.securityLevels.standard')}</option>
+                    <option value="Low">{t('advancedSearchModal.options.securityLow')}</option>
+                    <option value="Medium">{t('filters.securityLevels.medium')}</option>
+                    <option value="High">{t('filters.securityLevels.high')}</option>
+                    <option value="Top Secret">{t('filters.securityLevels.topSecret')}</option>
                   </select>
                 </div>
               </div>
@@ -458,65 +457,65 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
             <div>
               <h4 className="font-medium text-gray-900 mb-4 flex items-center gap-2">
                 <GlobeAltIcon className="w-4 h-4" />
-                <span>Date Ranges</span>
+                <span>{t('advancedSearchModal.sections.dateRanges')}</span>
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Date of Birth
+                    {t('fields.dateOfBirth')}
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     <Input
                       type="date"
                       value={searchCriteria.dateOfBirthFrom}
                       onChange={(e) => handleCriteriaChange('dateOfBirthFrom', e.target.value)}
-                      placeholder="From"
+                      placeholder={t('advancedSearchModal.placeholders.from')}
                     />
                     <Input
                       type="date"
                       value={searchCriteria.dateOfBirthTo}
                       onChange={(e) => handleCriteriaChange('dateOfBirthTo', e.target.value)}
-                      placeholder="To"
+                      placeholder={t('advancedSearchModal.placeholders.to')}
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Registration Date
+                    {t('advancedSearchModal.fields.registrationDate')}
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     <Input
                       type="date"
                       value={searchCriteria.createdFrom}
                       onChange={(e) => handleCriteriaChange('createdFrom', e.target.value)}
-                      placeholder="From"
+                      placeholder={t('advancedSearchModal.placeholders.from')}
                     />
                     <Input
                       type="date"
                       value={searchCriteria.createdTo}
                       onChange={(e) => handleCriteriaChange('createdTo', e.target.value)}
-                      placeholder="To"
+                      placeholder={t('advancedSearchModal.placeholders.to')}
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Last Visit Date
+                    {t('advancedSearchModal.fields.lastVisitDate')}
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     <Input
                       type="date"
                       value={searchCriteria.lastVisitFrom}
                       onChange={(e) => handleCriteriaChange('lastVisitFrom', e.target.value)}
-                      placeholder="From"
+                      placeholder={t('advancedSearchModal.placeholders.from')}
                     />
                     <Input
                       type="date"
                       value={searchCriteria.lastVisitTo}
                       onChange={(e) => handleCriteriaChange('lastVisitTo', e.target.value)}
-                      placeholder="To"
+                      placeholder={t('advancedSearchModal.placeholders.to')}
                     />
                   </div>
                 </div>
@@ -530,14 +529,14 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
               variant="outline"
               onClick={resetCriteria}
             >
-              Clear All
+              {t('advancedSearchModal.actions.clearAll')}
             </Button>
             <Button
               onClick={handleSearch}
               loading={searchLoading}
               icon={<MagnifyingGlassIcon className="w-4 h-4" />}
             >
-              Search Visitors
+              {t('advancedSearchModal.actions.searchVisitors')}
             </Button>
           </div>
         </Card>
@@ -547,10 +546,10 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
           <Card>
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-gray-900">Search Results</h3>
+                <h3 className="text-lg font-medium text-gray-900">{t('advancedSearchModal.sections.results')}</h3>
                 {searchResults && (
                   <Badge variant="info" size="sm">
-                    {searchResults.length} result{searchResults.length !== 1 ? 's' : ''} found
+                    {t('advancedSearchModal.resultCount', { count: searchResults.length })}
                   </Badge>
                 )}
               </div>
@@ -564,15 +563,15 @@ const AdvancedSearchModal = ({ onSelectVisitor = null }) => {
               <Table
                 data={searchResults}
                 columns={columns}
-                emptyMessage="No visitors found matching your search criteria"
+                emptyMessage={t('advancedSearchModal.empty.noMatchingVisitors')}
                 className="advanced-search-results-table"
               />
             ) : hasSearched ? (
               <div className="text-center py-12">
                 <MagnifyingGlassIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No results found</h3>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">{t('advancedSearchModal.empty.noResultsTitle')}</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  Try adjusting your search criteria or clearing some filters.
+                  {t('advancedSearchModal.empty.noResultsDescription')}
                 </p>
               </div>
             ) : null}

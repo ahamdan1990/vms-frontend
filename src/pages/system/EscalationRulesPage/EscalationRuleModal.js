@@ -1,6 +1,7 @@
 // src/pages/system/EscalationRulesPage/EscalationRuleModal.js
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import Modal from '../../../components/common/Modal/Modal';
 import Button from '../../../components/common/Button/Button';
 import Input from '../../../components/common/Input/Input';
@@ -40,6 +41,7 @@ const EscalationRuleModal = ({
   mode = 'create', // 'create' | 'edit' | 'view'
   readOnly = false
 }) => {
+  const { t } = useTranslation('system');
   const [formData, setFormData] = useState(DEFAULT_ESCALATION_RULE);
 
   const [validationErrors, setValidationErrors] = useState({});
@@ -105,63 +107,63 @@ const EscalationRuleModal = ({
     const errors = {};
 
     if (!formData.ruleName.trim()) {
-      errors.ruleName = 'Rule name is required';
+      errors.ruleName = t('escalationRules.modal.validation.ruleNameRequired');
     }
 
     if (!formData.alertType) {
-      errors.alertType = 'Alert type is required';
+      errors.alertType = t('escalationRules.modal.validation.alertTypeRequired');
     }
 
     if (!formData.alertPriority) {
-      errors.alertPriority = 'Alert priority is required';
+      errors.alertPriority = t('escalationRules.modal.validation.alertPriorityRequired');
     }
 
     if (!formData.action) {
-      errors.action = 'Escalation action is required';
+      errors.action = t('escalationRules.modal.validation.actionRequired');
     }
 
     if (formData.escalationDelayMinutes < 0) {
-      errors.escalationDelayMinutes = 'Escalation delay cannot be negative';
+      errors.escalationDelayMinutes = t('escalationRules.modal.validation.delayNegative');
     }
 
     if (formData.maxAttempts < 1) {
-      errors.maxAttempts = 'Max attempts must be at least 1';
+      errors.maxAttempts = t('escalationRules.modal.validation.maxAttemptsMin');
     }
 
     if (formData.rulePriority < 1) {
-      errors.rulePriority = 'Rule priority must be at least 1';
+      errors.rulePriority = t('escalationRules.modal.validation.rulePriorityMin');
     }
 
     // Action-specific validation
     if (formData.action === 'EscalateToUser' && !formData.escalationTargetUserId) {
-      errors.escalationTargetUserId = 'Target user is required for user escalation';
+      errors.escalationTargetUserId = t('escalationRules.modal.validation.targetUserRequired');
     }
 
     if (formData.action === 'EscalateToRole' && !formData.escalationTargetRole) {
-      errors.escalationTargetRole = 'Target role is required for role escalation';
+      errors.escalationTargetRole = t('escalationRules.modal.validation.targetRoleRequired');
     }
 
     if (formData.action === 'SendEmail' && !formData.escalationEmails) {
-      errors.escalationEmails = 'Email addresses are required for email escalation';
+      errors.escalationEmails = t('escalationRules.modal.validation.emailRequired');
     } else if (formData.action === 'SendEmail' && formData.escalationEmails) {
       // Validate email format
       const emails = formData.escalationEmails.split(',').map(e => e.trim());
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       const invalidEmails = emails.filter(email => !emailRegex.test(email));
       if (invalidEmails.length > 0) {
-        errors.escalationEmails = `Invalid email format: ${invalidEmails.join(', ')}`;
+        errors.escalationEmails = t('escalationRules.modal.validation.emailInvalid', { emails: invalidEmails.join(', ') });
       }
     }
 
     if (formData.action === 'SendSMS' && !formData.escalationPhones) {
-      errors.escalationPhones = 'Phone numbers are required for SMS escalation';
+      errors.escalationPhones = t('escalationRules.modal.validation.phoneRequired');
     } else if (formData.action === 'SendSMS' && formData.escalationPhones) {
       // Basic phone number validation
       const phones = formData.escalationPhones.split(',').map(p => p.trim());
       const phoneRegex = /^\+?[\d\s\-\(\)]{10,}$/;
       const invalidPhones = phones.filter(phone => !phoneRegex.test(phone));
       if (invalidPhones.length > 0) {
-        errors.escalationPhones = `Invalid phone format: ${invalidPhones.join(', ')}`;
+        errors.escalationPhones = t('escalationRules.modal.validation.phoneInvalid', { phones: invalidPhones.join(', ') });
       }
     }
 
@@ -210,17 +212,17 @@ const EscalationRuleModal = ({
   const getActionDescription = (action) => {
     switch (action) {
       case 'EscalateToUser':
-        return 'Escalate the alert to a specific user';
+        return t('escalationRules.modal.actionDescriptions.escalateToUser');
       case 'EscalateToRole':
-        return 'Escalate the alert to all users with a specific role';
+        return t('escalationRules.modal.actionDescriptions.escalateToRole');
       case 'SendEmail':
-        return 'Send email notifications to specified addresses';
+        return t('escalationRules.modal.actionDescriptions.sendEmail');
       case 'SendSMS':
-        return 'Send SMS notifications to specified phone numbers';
+        return t('escalationRules.modal.actionDescriptions.sendSms');
       case 'CreateHighPriorityAlert':
-        return 'Create a high priority alert in the system';
+        return t('escalationRules.modal.actionDescriptions.createHighPriorityAlert');
       case 'LogCriticalEvent':
-        return 'Log the event as a critical system event';
+        return t('escalationRules.modal.actionDescriptions.logCriticalEvent');
       default:
         return '';
     }
@@ -235,14 +237,14 @@ const EscalationRuleModal = ({
         return (
           <div className="space-y-4">
             <Select
-              label="Target Role"
+              label={t('escalationRules.modal.targetRole')}
               value={formData.escalationTargetRole}
-              onChange={(value) => handleInputChange('escalationTargetRole', value)}
+              onChange={(e) => handleInputChange('escalationTargetRole', e.target.value)}
               error={validationErrors.escalationTargetRole}
               required
               disabled={readOnly}
             >
-              <option value="">Select Role</option>
+              <option value="">{t('escalationRules.modal.selectRole')}</option>
               {Object.entries(TARGET_ROLES).map(([key, value]) => (
                 <option key={key} value={key}>{value}</option>
               ))}
@@ -252,7 +254,7 @@ const EscalationRuleModal = ({
               <div className="flex items-start gap-2">
                 <InformationCircleIcon className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-blue-700">
-                  Alert will be sent to all users with the selected role.
+                  {t('escalationRules.modal.alertWillBeSent')}
                 </p>
               </div>
             </div>
@@ -264,11 +266,11 @@ const EscalationRuleModal = ({
           <div className="space-y-4">
             <Input
               type="number"
-              label="Target User ID"
+              label={t('escalationRules.modal.targetUserId')}
               value={formData.escalationTargetUserId || ''}
               onChange={(e) => handleInputChange('escalationTargetUserId', parseInt(e.target.value) || null)}
               error={validationErrors.escalationTargetUserId}
-              placeholder="Enter user ID"
+              placeholder={t('escalationRules.modal.enterUserId')}
               required
               disabled={readOnly}
             />
@@ -277,7 +279,7 @@ const EscalationRuleModal = ({
               <div className="flex items-start gap-2">
                 <InformationCircleIcon className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-amber-700">
-                  You'll need to know the specific user ID. Consider using role escalation for easier management.
+                  {t('escalationRules.modal.userIdNote')}
                 </p>
               </div>
             </div>
@@ -289,12 +291,12 @@ const EscalationRuleModal = ({
           <div className="space-y-4">
             <Input
               type="text"
-              label="Email Addresses"
+              label={t('escalationRules.modal.emailAddresses')}
               value={formData.escalationEmails}
               onChange={(e) => handleInputChange('escalationEmails', e.target.value)}
               error={validationErrors.escalationEmails}
-              placeholder="email1@company.com, email2@company.com"
-              helperText="Separate multiple email addresses with commas"
+              placeholder={t('escalationRules.modal.emailPlaceholder')}
+              helperText={t('escalationRules.modal.emailHelper')}
               required
               disabled={readOnly}
             />
@@ -306,12 +308,12 @@ const EscalationRuleModal = ({
           <div className="space-y-4">
             <Input
               type="text"
-              label="Phone Numbers"
+              label={t('escalationRules.modal.phoneNumbers')}
               value={formData.escalationPhones}
               onChange={(e) => handleInputChange('escalationPhones', e.target.value)}
               error={validationErrors.escalationPhones}
-              placeholder="+1234567890, +0987654321"
-              helperText="Separate multiple phone numbers with commas. Include country code."
+              placeholder={t('escalationRules.modal.phonePlaceholder')}
+              helperText={t('escalationRules.modal.phoneHelper')}
               required
               disabled={readOnly}
             />
@@ -333,8 +335,8 @@ const EscalationRuleModal = ({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title={`${mode === 'create' ? 'Create' : mode === 'edit' ? 'Edit' : 'View'} Escalation Rule`}
-      maxWidth="2xl"
+      title={mode === 'create' ? t('escalationRules.modal.createTitle') : mode === 'edit' ? t('escalationRules.modal.editTitle') : t('escalationRules.modal.viewTitle')}
+      size="2xl"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Error Display */}
@@ -349,57 +351,57 @@ const EscalationRuleModal = ({
 
         {/* Basic Information */}
         <Card className="p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('escalationRules.modal.basicInfo')}</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <Input
-                label="Rule Name"
+                label={t('escalationRules.modal.ruleName')}
                 value={formData.ruleName}
                 onChange={(e) => handleInputChange('ruleName', e.target.value)}
                 error={validationErrors.ruleName}
-                placeholder="Enter rule name"
+                placeholder={t('escalationRules.modal.ruleNamePlaceholder')}
                 required
                 disabled={readOnly}
               />
             </div>
 
             <Select
-              label="Alert Type"
+              label={t('escalationRules.modal.alertType')}
               value={formData.alertType}
-              onChange={(value) => handleInputChange('alertType', value)}
+              onChange={(e) => handleInputChange('alertType', e.target.value)}
               error={validationErrors.alertType}
               required
               disabled={readOnly}
             >
-              <option value="">Select Alert Type</option>
+              <option value="">{t('escalationRules.modal.selectAlertType')}</option>
               {Object.entries(mergedAlertTypes).map(([key, value]) => (
                 <option key={key} value={key}>{value}</option>
               ))}
             </Select>
 
             <Select
-              label="Alert Priority"
+              label={t('escalationRules.modal.alertPriority')}
               value={formData.alertPriority}
-              onChange={(value) => handleInputChange('alertPriority', value)}
+              onChange={(e) => handleInputChange('alertPriority', e.target.value)}
               error={validationErrors.alertPriority}
               required
               disabled={readOnly}
             >
-              <option value="">Select Priority</option>
+              <option value="">{t('escalationRules.modal.selectPriority')}</option>
               {Object.entries(mergedAlertPriorities).map(([key, value]) => (
                 <option key={key} value={key}>{value}</option>
               ))}
             </Select>
 
             <Select
-              label="Target Role (Optional)"
+              label={t('escalationRules.modal.targetRole')}
               value={formData.targetRole}
-              onChange={(value) => handleInputChange('targetRole', value)}
+              onChange={(e) => handleInputChange('targetRole', e.target.value)}
               error={validationErrors.targetRole}
               disabled={readOnly}
             >
-              <option value="">All Roles</option>
+              <option value="">{t('escalationRules.modal.allRoles')}</option>
               {Object.entries(TARGET_ROLES).map(([key, value]) => (
                 <option key={key} value={key}>{value}</option>
               ))}
@@ -407,7 +409,7 @@ const EscalationRuleModal = ({
 
             <Input
               type="number"
-              label="Escalation Delay (minutes)"
+              label={t('escalationRules.modal.escalationDelay')}
               value={formData.escalationDelayMinutes}
               onChange={(e) => handleInputChange('escalationDelayMinutes', parseInt(e.target.value) || 0)}
               error={validationErrors.escalationDelayMinutes}
@@ -420,18 +422,18 @@ const EscalationRuleModal = ({
 
         {/* Escalation Action */}
         <Card className="p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Escalation Action</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('escalationRules.modal.escalationAction')}</h3>
           
           <div className="space-y-4">
             <Select
-              label="Action"
+              label={t('escalationRules.modal.action')}
               value={formData.action}
-              onChange={handleActionChange}
+              onChange={(e) => handleActionChange(e.target.value)}
               error={validationErrors.action}
               required
               disabled={readOnly}
             >
-              <option value="">Select Action</option>
+              <option value="">{t('escalationRules.modal.selectAction')}</option>
               {Object.entries(mergedEscalationActions).map(([key, value]) => (
                 <option key={key} value={key}>{value}</option>
               ))}
@@ -456,14 +458,14 @@ const EscalationRuleModal = ({
         {/* Advanced Options */}
         <Card className="p-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900">Advanced Options</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('escalationRules.modal.advancedOptions')}</h3>
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
             >
-              {showAdvancedOptions ? 'Hide' : 'Show'} Advanced
+              {showAdvancedOptions ? t('escalationRules.modal.hideAdvanced') : t('escalationRules.modal.showAdvanced')}
             </Button>
           </div>
 
@@ -477,23 +479,23 @@ const EscalationRuleModal = ({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Input
                   type="number"
-                  label="Max Attempts"
+                  label={t('escalationRules.modal.maxAttempts')}
                   value={formData.maxAttempts}
                   onChange={(e) => handleInputChange('maxAttempts', parseInt(e.target.value) || 1)}
                   error={validationErrors.maxAttempts}
                   min="1"
-                  helperText="Number of escalation attempts before giving up"
+                  helperText={t('escalationRules.modal.maxAttemptsHelper')}
                   disabled={readOnly}
                 />
 
                 <Input
                   type="number"
-                  label="Rule Priority"
+                  label={t('escalationRules.modal.rulePriority')}
                   value={formData.rulePriority}
                   onChange={(e) => handleInputChange('rulePriority', parseInt(e.target.value) || 1)}
                   error={validationErrors.rulePriority}
                   min="1"
-                  helperText="Lower numbers have higher priority"
+                  helperText={t('escalationRules.modal.rulePriorityHelper')}
                   disabled={readOnly}
                 />
 
@@ -506,26 +508,25 @@ const EscalationRuleModal = ({
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       disabled={readOnly}
                     />
-                    <span className="text-sm font-medium text-gray-700">Enable Rule</span>
+                    <span className="text-sm font-medium text-gray-700">{t('escalationRules.modal.enableRule')}</span>
                   </label>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Configuration (JSON)
+                  {t('escalationRules.modal.configJson')}
                 </label>
                 <textarea
                   value={formData.configuration}
                   onChange={(e) => handleInputChange('configuration', e.target.value)}
-                  error={validationErrors.configuration}
-                  placeholder='{"key": "value"}'
+                  placeholder={t('escalationRules.modal.configPlaceholder')}
                   rows={3}
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                   disabled={readOnly}
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Optional JSON configuration for advanced rule settings
+                  {t('escalationRules.modal.configJsonHelper')}
                 </p>
               </div>
             </motion.div>
@@ -540,7 +541,7 @@ const EscalationRuleModal = ({
             onClick={handleClose}
             disabled={loading}
           >
-            {mode === 'view' ? 'Close' : 'Cancel'}
+            {mode === 'view' ? t('escalationRules.modal.close') : t('escalationRules.modal.cancel')}
           </Button>
           
           {mode !== 'view' && (
@@ -549,7 +550,7 @@ const EscalationRuleModal = ({
               loading={loading}
               disabled={loading}
             >
-              {mode === 'create' ? 'Create Rule' : 'Update Rule'}
+              {mode === 'create' ? t('escalationRules.modal.createRule') : t('escalationRules.modal.updateRule')}
             </Button>
           )}
         </div>

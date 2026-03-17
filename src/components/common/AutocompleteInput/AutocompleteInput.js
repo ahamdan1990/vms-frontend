@@ -1,6 +1,7 @@
 // src/components/common/AutocompleteInput/AutocompleteInput.js
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDownIcon, ChevronUpIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 const AutocompleteInput = ({
   value = null,
@@ -8,7 +9,7 @@ const AutocompleteInput = ({
   onSelect,
   onBlur,
   options = [],
-  placeholder = 'Search...',
+  placeholder = '',
   disabled = false,
   loading = false,
   error = null,
@@ -30,11 +31,14 @@ const AutocompleteInput = ({
   optionsClassName = '',
   ...inputProps
 }) => {
+  const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef(null);
   const optionsRef = useRef(null);
+
+  const resolvedPlaceholder = placeholder || `${t('buttons.search')}...`;
 
   // Get display text from value
   const getDisplayValue = (val) => {
@@ -133,7 +137,7 @@ const AutocompleteInput = ({
   };
 
   const inputClasses = `
-    relative w-full px-3 py-2 pr-10
+    relative w-full px-3 py-2 pe-10
     border border-gray-300 rounded-lg
     bg-white text-gray-900
     placeholder-gray-500
@@ -162,14 +166,14 @@ const AutocompleteInput = ({
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           onFocus={() => setIsOpen(true)}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           disabled={disabled}
           className={inputClasses}
           {...inputProps}
         />
 
         {/* Icons */}
-        <div className="absolute inset-y-0 end-0 flex items-center pr-3">
+        <div className="absolute inset-y-0 end-0 flex items-center pe-3">
           {clearable && searchTerm && searchTerm.length > 0 && !disabled && (
             <button
               type="button"
@@ -215,7 +219,7 @@ const AutocompleteInput = ({
                   type="button"
                   onClick={() => handleOptionSelect(option)}
                   className={`
-                    w-full px-3 py-2 text-left
+                    w-full px-3 py-2 text-start
                     hover:bg-gray-50 transition-colors
                     ${index === highlightedIndex ? 'bg-blue-50 text-blue-700' : 'text-gray-900'}
                     ${index === 0 ? 'rounded-t-lg' : ''}
@@ -236,7 +240,7 @@ const AutocompleteInput = ({
               ))
             ) : (
               <div className="px-3 py-2 text-gray-500 text-center">
-                No options found
+                {t('empty.noResults')}
               </div>
             )}
           </div>

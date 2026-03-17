@@ -3,6 +3,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { Scanner, useDevices } from '@yudiel/react-qr-scanner';
+import { useTranslation } from 'react-i18next';
 
 // Styles
 import './QrCodeScanner.css';
@@ -31,6 +32,8 @@ const QrCodeScanner = ({
   loading = false,
   className = ''
 }) => {
+  const { t } = useTranslation('checkin');
+
   const [scanMode, setScanMode] = useState('camera');
   const [manualCode, setManualCode] = useState('');
   const [isScanning, setIsScanning] = useState(false);
@@ -41,38 +44,28 @@ const QrCodeScanner = ({
   const [availableDevices, setAvailableDevices] = useState([]);
   const [scanStats, setScanStats] = useState({ successful: 0, failed: 0 });
   const [lastScanTime, setLastScanTime] = useState(null);
-  const [lastScannedCode, setLastScannedCode] = useState(null);
-  const [scanCooldown, setScanCooldown] = useState(false);
 
-  // Use refs for debouncing to avoid re-creating callback
   const scanCooldownRef = useRef(false);
   const lastScannedCodeRef = useRef(null);
 
-  // Get available cameras
   const devices = useDevices();
 
-  // Auto-select first camera when devices are loaded
   useEffect(() => {
     if (devices && devices.length > 0 && !selectedDevice) {
-      console.log('📷 Available cameras:', devices);
       setAvailableDevices(devices);
       setSelectedDevice(devices[0].deviceId);
-      console.log('✅ Selected camera:', devices[0].label || devices[0].deviceId);
     }
   }, [devices, selectedDevice]);
 
-  // Cleanup: Stop camera when component unmounts
   useEffect(() => {
     return () => {
-      // Stop all video tracks when unmounting
       if (isScanning) {
         const stopAllTracks = async () => {
           try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
             stream.getTracks().forEach(track => track.stop());
-            console.log('🛑 Camera stopped on unmount');
-          } catch (err) {
-            // Camera might already be stopped, ignore error
+          } catch {
+            // Ignore cleanup errors.
           }
         };
         stopAllTracks();
@@ -80,7 +73,6 @@ const QrCodeScanner = ({
     };
   }, [isScanning]);
 
-  // Audio beep on successful scan
   const playSuccessBeep = useCallback(() => {
     try {
       const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -90,7 +82,7 @@ const QrCodeScanner = ({
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      oscillator.frequency.value = 800; // Hz
+      oscillator.frequency.value = 800;
       oscillator.type = 'sine';
 
       gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
@@ -98,15 +90,14 @@ const QrCodeScanner = ({
 
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.2);
-    } catch (err) {
-      console.warn('Audio beep failed:', err);
+    } catch (beepError) {
+      console.warn('Audio beep failed:', beepError);
     }
   }, []);
 
-  // Handle manual QR code input
   const handleManualScan = async () => {
     if (!manualCode.trim()) {
-      setError('Please enter a QR code or invitation number');
+      setError(t('qrScanner.errors.enterCode'));
       return;
     }
 
@@ -114,120 +105,93 @@ const QrCodeScanner = ({
       setError(null);
       await onScan(manualCode.trim());
       playSuccessBeep();
-      setScanResult('✅ Check-in successful!');
+      setScanResult(t('qrScanner.results.checkInSuccess'));
       setScanStats(prev => ({ ...prev, successful: prev.successful + 1 }));
       setLastScanTime(new Date());
       setManualCode('');
       setTimeout(() => setScanResult(null), 3000);
-    } catch (error) {
+    } catch (scanError) {
       setScanStats(prev => ({ ...prev, failed: prev.failed + 1 }));
-      setError(error.message || 'Check-in failed');
+      setError(scanError.message || t('qrScanner.errors.checkInFailed'));
     }
   };
 
-  // Handle QR scan from camera - CORRECT format for @yudiel/react-qr-scanner
   const handleScan = useCallback(async (detectedCodes) => {
     if (detectedCodes && detectedCodes.length > 0) {
-      const code = detectedCodes[0]; // Get first detected code
+      const code = detectedCodes[0];
       const qrValue = code.rawValue;
 
-      // Prevent duplicate scans within cooldown period (3 seconds) using refs
       if (scanCooldownRef.current || qrValue === lastScannedCodeRef.current) {
         return;
       }
 
-      console.log('🎉 QR CODE DETECTED!');
-      console.log('Format:', code.format);
-      console.log('Value:', qrValue);
-
-      // Set cooldown and remember this code in both state and ref
       scanCooldownRef.current = true;
       lastScannedCodeRef.current = qrValue;
-      setScanCooldown(true);
-      setLastScannedCode(qrValue);
 
       playSuccessBeep();
-      setScanningStatus('✅ QR Code detected! Processing...');
+      setScanningStatus(t('qrScanner.scanning.detectedProcessing'));
 
       try {
         await onScan(qrValue);
-        setScanResult('✅ Check-in successful!');
+        setScanResult(t('qrScanner.results.checkInSuccess'));
         setScanStats(prev => ({ ...prev, successful: prev.successful + 1 }));
         setLastScanTime(new Date());
         setError(null);
 
-        // Pause to show success, then resume
         setTimeout(() => {
           setScanResult(null);
-          setScanningStatus('📷 Camera active - Ready for next scan');
+          setScanningStatus(t('qrScanner.scanning.readyForNext'));
           scanCooldownRef.current = false;
           lastScannedCodeRef.current = null;
-          setScanCooldown(false);
-          setLastScannedCode(null);
         }, 3000);
-      } catch (error) {
+      } catch (scanError) {
         setScanStats(prev => ({ ...prev, failed: prev.failed + 1 }));
-        setError(error.message || 'Check-in failed');
-        setScanningStatus('⚠️ Scan failed - Ready to try again');
+        setError(scanError.message || t('qrScanner.errors.checkInFailed'));
+        setScanningStatus(t('qrScanner.scanning.scanFailedRetry'));
 
-        // Keep cooldown for failed scans to prevent spam
         setTimeout(() => {
           setError(null);
-          setScanningStatus('📷 Camera active - Ready for next scan');
+          setScanningStatus(t('qrScanner.scanning.readyForNext'));
           scanCooldownRef.current = false;
           lastScannedCodeRef.current = null;
-          setScanCooldown(false);
-          setLastScannedCode(null);
         }, 3000);
       }
     }
-  }, [onScan, playSuccessBeep]);
+  }, [onScan, playSuccessBeep, t]);
 
-  // Handle scan error
-  const handleError = useCallback((error) => {
-    console.error('Scanner error:', error);
-    setError(`Camera error: ${error?.message || 'Unable to access camera'}`);
-  }, []);
+  const handleError = useCallback((scanError) => {
+    console.error('Scanner error:', scanError);
+    setError(t('qrScanner.errors.cameraError', { message: scanError?.message || t('qrScanner.errors.cameraUnavailable') }));
+  }, [t]);
 
-  // Toggle scanning
   const toggleScanning = async () => {
     if (isScanning) {
       setIsScanning(false);
       setScanningStatus('');
     } else {
-      // Request camera permission first to get proper device info
       try {
-        console.log('🔐 Requesting camera permission...');
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-
-        // Stop the stream immediately, we just needed permission
         stream.getTracks().forEach(track => track.stop());
 
-        console.log('✅ Camera permission granted');
-
-        // Now get updated device list with proper IDs
         const updatedDevices = await navigator.mediaDevices.enumerateDevices();
         const videoDevices = updatedDevices.filter(device => device.kind === 'videoinput');
 
-        console.log('📷 Updated cameras with IDs:', videoDevices);
         setAvailableDevices(videoDevices);
 
         if (videoDevices.length > 0) {
           setSelectedDevice(videoDevices[0].deviceId);
-          console.log('✅ Using camera:', videoDevices[0].label || videoDevices[0].deviceId);
         }
 
         setIsScanning(true);
-        setScanningStatus('📷 Camera active - Point QR code at camera');
+        setScanningStatus(t('qrScanner.scanning.cameraActive'));
         setError(null);
-      } catch (err) {
-        console.error('❌ Camera permission denied:', err);
-        setError('Camera permission denied. Please allow camera access.');
+      } catch (permissionError) {
+        console.error('Camera permission denied:', permissionError);
+        setError(t('qrScanner.errors.cameraPermissionDenied'));
       }
     }
   };
 
-  // Clear error when switching modes
   const handleModeChange = (mode) => {
     setScanMode(mode);
     setError(null);
@@ -240,7 +204,6 @@ const QrCodeScanner = ({
 
   return (
     <div className={`space-y-6 ${className}`}>
-      {/* Mode Selector */}
       <div className="flex items-center justify-center gap-4">
         <Button
           variant={scanMode === 'camera' ? 'primary' : 'outline'}
@@ -248,7 +211,7 @@ const QrCodeScanner = ({
           onClick={() => handleModeChange('camera')}
           icon={<CameraIcon className="w-4 h-4" />}
         >
-          Camera
+          {t('qrScanner.modes.camera')}
         </Button>
         <Button
           variant={scanMode === 'manual' ? 'primary' : 'outline'}
@@ -256,32 +219,30 @@ const QrCodeScanner = ({
           onClick={() => handleModeChange('manual')}
           icon={<DocumentTextIcon className="w-4 h-4" />}
         >
-          Manual
+          {t('qrScanner.modes.manual')}
         </Button>
       </div>
 
-      {/* Camera Scanner */}
       {scanMode === 'camera' && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="space-y-4"
         >
-          {/* Camera Selection */}
           {availableDevices.length > 1 && (
             <div className="max-w-md mx-auto">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Camera
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('qrScanner.selectCamera')}
               </label>
               <select
                 value={selectedDevice || ''}
                 onChange={(e) => setSelectedDevice(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isScanning}
               >
                 {availableDevices.map((device) => (
                   <option key={device.deviceId} value={device.deviceId}>
-                    {device.label || `Camera ${device.deviceId.substring(0, 8)}...`}
+                    {device.label || t('qrScanner.cameraFallback', { id: device.deviceId.substring(0, 8) })}
                   </option>
                 ))}
               </select>
@@ -309,7 +270,6 @@ const QrCodeScanner = ({
                       onOff: false
                     }}
                   />
-                  {/* Animated corner overlays */}
                   <div className="qr-finder-overlay">
                     <div className="qr-corner qr-corner-tl"></div>
                     <div className="qr-corner qr-corner-tr"></div>
@@ -318,31 +278,30 @@ const QrCodeScanner = ({
                   </div>
                 </div>
               ) : (
-                <div className="w-full max-w-md mx-auto bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center" style={{ minHeight: '300px' }}>
+                <div className="w-full max-w-md mx-auto bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center" style={{ minHeight: '300px' }}>
                   <div className="text-center p-8">
-                    <p className="text-base text-gray-700 font-medium mb-2">Loading cameras...</p>
+                    <p className="text-base text-gray-700 dark:text-gray-200 font-medium mb-2">{t('qrScanner.loadingCameras')}</p>
                   </div>
                 </div>
               )
             ) : (
-              <div className="w-full max-w-md mx-auto bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center" style={{ minHeight: '300px' }}>
+              <div className="w-full max-w-md mx-auto bg-gray-100 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center" style={{ minHeight: '300px' }}>
                 <div className="text-center p-8">
                   <QrCodeIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                  <p className="text-base text-gray-700 font-medium mb-2">Camera Scanner Ready</p>
-                  <p className="text-sm text-gray-600">Click "Start Scanning" to activate camera</p>
+                  <p className="text-base text-gray-700 dark:text-gray-200 font-medium mb-2">{t('qrScanner.cameraReady')}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{t('qrScanner.clickStartScanning')}</p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Scanning Status Indicator */}
           {scanningStatus && (
-            <div className="mt-4 p-3 bg-blue-50 border-2 border-blue-300 rounded-lg mx-auto max-w-md">
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-300 dark:border-blue-700 rounded-lg mx-auto max-w-md">
               <div className="flex items-center justify-center gap-2">
                 <div className="animate-pulse">
                   <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                 </div>
-                <p className="text-sm font-medium text-blue-800">{scanningStatus}</p>
+                <p className="text-sm font-medium text-blue-800 dark:text-blue-200">{scanningStatus}</p>
               </div>
               <div className="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-blue-400 via-blue-600 to-blue-400 animate-scan-line"></div>
@@ -350,9 +309,8 @@ const QrCodeScanner = ({
             </div>
           )}
 
-          {/* Tips */}
-          <div className="mt-4 text-center text-xs text-gray-600 max-w-md mx-auto">
-            <p>💡 <strong>Tips:</strong> Hold QR code steady within the finder box</p>
+          <div className="mt-4 text-center text-xs text-gray-600 dark:text-gray-300 max-w-md mx-auto">
+            <p>{t('qrScanner.tip')}</p>
           </div>
 
           <div className="flex justify-center gap-3">
@@ -361,35 +319,32 @@ const QrCodeScanner = ({
               disabled={loading}
               icon={isScanning ? <StopIcon className="w-4 h-4" /> : <CameraIcon className="w-4 h-4" />}
             >
-              {isScanning ? 'Stop Scanning' : 'Start Scanning'}
+              {isScanning ? t('qrScanner.buttons.stopScanning') : t('qrScanner.buttons.startScanning')}
             </Button>
           </div>
 
-          {/* Scan Statistics */}
           {(scanStats.successful > 0 || scanStats.failed > 0) && (
             <div className="max-w-md mx-auto mt-4">
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Session Statistics</h3>
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">{t('qrScanner.stats.sessionStatistics')}</h3>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">{scanStats.successful}</div>
-                    <div className="text-xs text-gray-500 mt-1">Successful</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('qrScanner.stats.successful')}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-red-600">{scanStats.failed}</div>
-                    <div className="text-xs text-gray-500 mt-1">Failed</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('qrScanner.stats.failed')}</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {scanStats.successful + scanStats.failed}
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">Total</div>
+                    <div className="text-2xl font-bold text-blue-600">{scanStats.successful + scanStats.failed}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('qrScanner.stats.total')}</div>
                   </div>
                 </div>
                 {lastScanTime && (
-                  <div className="mt-3 pt-3 border-t border-gray-200 text-center">
-                    <div className="text-xs text-gray-500">
-                      Last scan: {lastScanTime.toLocaleTimeString()}
+                  <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-center">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {t('qrScanner.stats.lastScan', { time: lastScanTime.toLocaleTimeString() })}
                     </div>
                   </div>
                 )}
@@ -399,7 +354,6 @@ const QrCodeScanner = ({
         </motion.div>
       )}
 
-      {/* Manual Input */}
       {scanMode === 'manual' && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -408,12 +362,12 @@ const QrCodeScanner = ({
         >
           <div className="max-w-md mx-auto">
             <Input
-              label="QR Code or Invitation Number"
+              label={t('qrScanner.manual.label')}
               type="text"
               value={manualCode}
               onChange={(e) => setManualCode(e.target.value)}
-              placeholder="Scan with hardware scanner or type manually..."
-              onKeyPress={(e) => {
+              placeholder={t('qrScanner.manual.placeholder')}
+              onKeyDown={(e) => {
                 if (e.key === 'Enter' && manualCode.trim()) {
                   handleManualScan();
                 }
@@ -422,8 +376,8 @@ const QrCodeScanner = ({
               autoFocus
             />
 
-            <div className="mt-2 text-xs text-gray-500 text-center">
-              <p>💡 Hardware QR scanners are supported - just scan and press Enter</p>
+            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+              <p>{t('qrScanner.manual.hardwareTip')}</p>
             </div>
 
             <div className="mt-4">
@@ -434,14 +388,13 @@ const QrCodeScanner = ({
                 className="w-full"
                 icon={<QrCodeIcon className="w-4 h-4" />}
               >
-                Process Check-in
+                {t('qrScanner.buttons.processCheckIn')}
               </Button>
             </div>
           </div>
         </motion.div>
       )}
 
-      {/* Error Display */}
       {error && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: -20 }}
@@ -450,7 +403,7 @@ const QrCodeScanner = ({
             scale: 1,
             y: 0,
             transition: {
-              type: "spring",
+              type: 'spring',
               stiffness: 300,
               damping: 20
             }
@@ -472,7 +425,6 @@ const QrCodeScanner = ({
         </motion.div>
       )}
 
-      {/* Success Display */}
       {scanResult && (
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
@@ -511,23 +463,17 @@ const QrCodeScanner = ({
         </motion.div>
       )}
 
-      {/* Instructions */}
-      <div className="text-center text-sm text-gray-500 max-w-md mx-auto">
+      <div className="text-center text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
         {scanMode === 'camera' ? (
-          <p>
-            Position the QR code within the finder box. Detection is automatic with beep sound.
-          </p>
+          <p>{t('qrScanner.instructions.camera')}</p>
         ) : (
-          <p>
-            Enter the QR code data or invitation number manually. You can find this on the visitor's invitation or printed badge.
-          </p>
+          <p>{t('qrScanner.instructions.manual')}</p>
         )}
       </div>
     </div>
   );
 };
 
-// PropTypes validation
 QrCodeScanner.propTypes = {
   onScan: PropTypes.func.isRequired,
   loading: PropTypes.bool,

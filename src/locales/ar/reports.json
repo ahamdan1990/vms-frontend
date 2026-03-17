@@ -9,8 +9,8 @@
     "visitorReport": "تقرير الزوار",
     "invitationReport": "تقرير الدعوات",
     "checkinReport": "تقرير تسجيل الدخول",
-    "auditReport": "تقرير المراجعة",
-    "capacityReport": "تقرير الطاقة الاستيعابية"
+    "auditReport": "تقرير التدقيق",
+    "capacityReport": "تقرير السعة"
   },
   "analytics": {
     "title": "التحليلات",
@@ -22,5 +22,111 @@
     "byLocation": "حسب الموقع",
     "byPurpose": "حسب الغرض"
   },
-  "emptyMessage": "لا توجد بيانات للفترة المحددة."
+  "emptyMessage": "لا توجد بيانات تقارير للفترة المحددة.",
+  "header": {
+    "title": "التقارير",
+    "subtitle": "تقارير وتحليلات الزوار الشاملة"
+  },
+  "tabs": {
+    "visitorReport": "تقرير الزوار",
+    "statistics": "الإحصائيات"
+  },
+  "accessDenied": {
+    "title": "تم رفض الوصول",
+    "description": "ليس لديك صلاحية للوصول إلى التقارير."
+  },
+  "actions": {
+    "refresh": "تحديث",
+    "applyFilters": "تطبيق الفلاتر",
+    "reset": "إعادة تعيين"
+  },
+  "filters": {
+    "title": "الفلاتر",
+    "hide": "إخفاء",
+    "show": "إظهار",
+    "loading": "جارٍ التحميل...",
+    "dateRange": "نطاق التاريخ",
+    "location": "الموقع",
+    "status": "الحالة",
+    "allStatuses": "كل الحالات",
+    "visitPurpose": "غرض الزيارة",
+    "host": "المضيف",
+    "department": "القسم",
+    "search": "بحث",
+    "searchPlaceholder": "اسم الزائر أو الشركة أو البريد الإلكتروني...",
+    "allLocations": "كل المواقع",
+    "allPurposes": "كل الأغراض",
+    "allHosts": "كل المضيفين",
+    "allDepartments": "كل الأقسام",
+    "quick": {
+      "checkedInOnly": "المتواجدون فقط",
+      "checkedOutOnly": "المغادرون فقط",
+      "overdueOnly": "المتأخرون فقط"
+    },
+    "statusOptions": {
+      "draft": "مسودة",
+      "submitted": "مُرسلة",
+      "underReview": "قيد المراجعة",
+      "approved": "معتمدة",
+      "rejected": "مرفوضة",
+      "cancelled": "ملغاة",
+      "expired": "منتهية",
+      "active": "نشطة",
+      "completed": "مكتملة"
+    }
+  },
+  "table": {
+    "columns": {
+      "visitorName": "اسم الزائر",
+      "host": "المضيف",
+      "location": "الموقع",
+      "purpose": "الغرض",
+      "checkIn": "تسجيل الدخول",
+      "checkOut": "تسجيل الخروج",
+      "durationMinutes": "المدة (دقيقة)",
+      "status": "الحالة"
+    },
+    "recordsTitle": "سجلات الزوار",
+    "recordsInfo": "عرض {{showing}} من أصل {{total}} سجل (الصفحة {{page}} من {{totalPages}})"
+  },
+  "summary": {
+    "totalRecords": "إجمالي السجلات",
+    "checkedIn": "متواجدون",
+    "checkedOut": "مغادرون",
+    "overdue": "متأخرون",
+    "pending": "قيد الانتظار",
+    "active": "نشط"
+  },
+  "states": {
+    "errorTitle": "خطأ أثناء تحميل التقرير",
+    "noDataTitle": "لا توجد بيانات",
+    "noDataDescription": "حاول تعديل الفلاتر لعرض النتائج."
+  },
+  "statistics": {
+    "title": "إحصائيات الزوار",
+    "export": "تصدير الإحصائيات",
+    "generate": "إنشاء الإحصائيات",
+    "emptyTitle": "لا توجد إحصائيات متاحة",
+    "emptyDescription": "اضغط الزر أعلاه لإنشاء الإحصائيات.",
+    "byLocationTitle": "حسب الموقع",
+    "topHostsTitle": "أبرز المضيفين",
+    "locationItem": "{{visitors}} زائر ({{checkedIn}} متواجد)",
+    "hostVisitors": "{{count}} زائر",
+    "cards": {
+      "totalVisitors": "إجمالي الزوار",
+      "checkInRate": "معدل تسجيل الدخول",
+      "avgDuration": "متوسط المدة",
+      "avgDurationValue": "{{value}} دقيقة",
+      "noShows": "حالات عدم الحضور"
+    }
+  },
+  "toasts": {
+    "fetchInBuildingFailed": "فشل في جلب تقرير المتواجدين داخل المبنى",
+    "exportReportSuccess": "تم تصدير التقرير بنجاح",
+    "exportReportFailed": "فشل في تصدير التقرير",
+    "fetchComprehensiveFailed": "فشل في جلب التقرير الشامل",
+    "fetchStatisticsFailed": "فشل في جلب الإحصائيات",
+    "exportStatisticsSuccess": "تم تصدير الإحصائيات بنجاح",
+    "exportStatisticsFailed": "فشل في تصدير الإحصائيات"
+  }
 }

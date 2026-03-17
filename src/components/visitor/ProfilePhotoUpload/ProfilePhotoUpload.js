@@ -1,6 +1,7 @@
 // src/components/visitor/ProfilePhotoUpload/ProfilePhotoUpload.js
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 // Components
 import Button from '../../common/Button/Button';
@@ -32,6 +33,7 @@ const ProfilePhotoUpload = ({
   maxFileSize = 5 * 1024 * 1024, // 5MB
   className = ''
 }) => {
+  const { t } = useTranslation('visitors');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -61,13 +63,21 @@ const ProfilePhotoUpload = ({
 
     // Validate file type
     if (!acceptedTypes.includes(file.type)) {
-      alert(`Invalid file type. Accepted types: ${acceptedTypes.join(', ')}`);
+      alert(
+        t('profilePhotoUpload.errors.invalidFileType', {
+          types: acceptedTypes.join(', ')
+        })
+      );
       return;
     }
 
     // Validate file size
     if (file.size > maxFileSize) {
-      alert(`File too large. Maximum size: ${(maxFileSize / (1024 * 1024)).toFixed(1)}MB`);
+      alert(
+        t('profilePhotoUpload.errors.fileTooLarge', {
+          size: (maxFileSize / (1024 * 1024)).toFixed(1)
+        })
+      );
       return;
     }
 
@@ -97,7 +107,7 @@ const ProfilePhotoUpload = ({
       setPreviewUrl(null);
     } catch (error) {
       console.error('Photo upload failed:', error);
-      alert('Failed to upload photo. Please try again.');
+      alert(t('profilePhotoUpload.errors.uploadFailed'));
     } finally {
       setUploading(false);
     }
@@ -119,7 +129,7 @@ const ProfilePhotoUpload = ({
       setShowRemoveModal(false);
     } catch (error) {
       console.error('Photo removal failed:', error);
-      alert('Failed to remove photo. Please try again.');
+      alert(t('profilePhotoUpload.errors.removeFailed'));
     }
   };
 
@@ -153,7 +163,7 @@ const ProfilePhotoUpload = ({
           {currentPhotoUrl ? (
             <img
               src={currentPhotoUrl}
-              alt="Profile"
+              alt={t('profilePhotoUpload.labels.profileAlt')}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -184,8 +194,8 @@ const ProfilePhotoUpload = ({
               e.stopPropagation();
               setShowRemoveModal(true);
             }}
-            className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
-            title="Remove photo"
+            className="absolute -top-2 -end-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
+            title={t('profilePhotoUpload.actions.removePhoto')}
           >
             <TrashIcon className="w-4 h-4" />
           </button>
@@ -195,10 +205,12 @@ const ProfilePhotoUpload = ({
       {/* Upload hint */}
       <div className="mt-2 text-center">
         <p className="text-xs text-gray-500">
-          Click or drag photo to upload
+          {t('profilePhotoUpload.hints.clickOrDrag')}
         </p>
         <p className="text-xs text-gray-400">
-          Max {(maxFileSize / (1024 * 1024)).toFixed(1)}MB
+          {t('profilePhotoUpload.hints.maxSize', {
+            size: (maxFileSize / (1024 * 1024)).toFixed(1)
+          })}
         </p>
       </div>
 
@@ -215,7 +227,7 @@ const ProfilePhotoUpload = ({
       <Modal
         isOpen={showUploadModal}
         onClose={handleUploadCancel}
-        title="Upload Profile Photo"
+        title={t('profilePhotoUpload.modals.uploadTitle')}
         size="md"
         closeOnBackdrop={!uploading}
         closeOnEscape={!uploading}
@@ -228,7 +240,7 @@ const ProfilePhotoUpload = ({
                 {previewUrl ? (
                   <img
                     src={previewUrl}
-                    alt="Preview"
+                    alt={t('profilePhotoUpload.labels.previewAlt')}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -239,11 +251,14 @@ const ProfilePhotoUpload = ({
               </div>
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Upload this photo?
+              {t('profilePhotoUpload.modals.uploadQuestion')}
             </h3>
             {selectedFile && (
               <p className="text-sm text-gray-600">
-                {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                {t('profilePhotoUpload.labels.fileInfo', {
+                  name: selectedFile.name,
+                  sizeKb: (selectedFile.size / 1024).toFixed(1)
+                })}
               </p>
             )}
           </div>
@@ -254,7 +269,7 @@ const ProfilePhotoUpload = ({
               variant="outline"
               disabled={uploading}
             >
-              Cancel
+              {t('common:buttons.cancel')}
             </Button>
             <Button
               onClick={handleUploadConfirm}
@@ -262,7 +277,7 @@ const ProfilePhotoUpload = ({
               loading={uploading}
               disabled={!selectedFile}
             >
-              Upload Photo
+              {t('profilePhotoUpload.actions.uploadPhoto')}
             </Button>
           </div>
         </div>
@@ -272,7 +287,7 @@ const ProfilePhotoUpload = ({
       <Modal
         isOpen={showRemoveModal}
         onClose={() => setShowRemoveModal(false)}
-        title="Remove Profile Photo"
+        title={t('profilePhotoUpload.modals.removeTitle')}
         size="md"
       >
         <div className="p-6">
@@ -281,10 +296,10 @@ const ProfilePhotoUpload = ({
               <TrashIcon className="h-6 w-6 text-red-600" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Remove profile photo?
+              {t('profilePhotoUpload.modals.removeQuestion')}
             </h3>
             <p className="text-sm text-gray-600">
-              This action cannot be undone. The current profile photo will be permanently removed.
+              {t('profilePhotoUpload.modals.removeDescription')}
             </p>
           </div>
 
@@ -293,14 +308,14 @@ const ProfilePhotoUpload = ({
               onClick={() => setShowRemoveModal(false)}
               variant="outline"
             >
-              Cancel
+              {t('common:buttons.cancel')}
             </Button>
             <Button
               onClick={handleRemove}
               variant="danger"
               loading={loading}
             >
-              Remove Photo
+              {t('profilePhotoUpload.actions.removePhoto')}
             </Button>
           </div>
         </div>

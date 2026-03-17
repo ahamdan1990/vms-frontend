@@ -22,5 +22,111 @@
     "byLocation": "By Location",
     "byPurpose": "By Purpose"
   },
-  "emptyMessage": "No report data available for the selected period."
+  "emptyMessage": "No report data available for the selected period.",
+  "header": {
+    "title": "Reports",
+    "subtitle": "Comprehensive visitor reports and analytics"
+  },
+  "tabs": {
+    "visitorReport": "Visitor Report",
+    "statistics": "Statistics"
+  },
+  "accessDenied": {
+    "title": "Access Denied",
+    "description": "You don't have permission to access reports."
+  },
+  "actions": {
+    "refresh": "Refresh",
+    "applyFilters": "Apply Filters",
+    "reset": "Reset"
+  },
+  "filters": {
+    "title": "Filters",
+    "hide": "Hide",
+    "show": "Show",
+    "loading": "Loading...",
+    "dateRange": "Date Range",
+    "location": "Location",
+    "status": "Status",
+    "allStatuses": "All Statuses",
+    "visitPurpose": "Visit Purpose",
+    "host": "Host",
+    "department": "Department",
+    "search": "Search",
+    "searchPlaceholder": "Visitor name, company, or email...",
+    "allLocations": "All Locations",
+    "allPurposes": "All Purposes",
+    "allHosts": "All Hosts",
+    "allDepartments": "All Departments",
+    "quick": {
+      "checkedInOnly": "Checked In Only",
+      "checkedOutOnly": "Checked Out Only",
+      "overdueOnly": "Overdue Only"
+    },
+    "statusOptions": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "underReview": "Under Review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled",
+      "expired": "Expired",
+      "active": "Active",
+      "completed": "Completed"
+    }
+  },
+  "table": {
+    "columns": {
+      "visitorName": "Visitor Name",
+      "host": "Host",
+      "location": "Location",
+      "purpose": "Purpose",
+      "checkIn": "Check-In",
+      "checkOut": "Check-Out",
+      "durationMinutes": "Duration (min)",
+      "status": "Status"
+    },
+    "recordsTitle": "Visitor Records",
+    "recordsInfo": "Showing {{showing}} of {{total}} total records (Page {{page}} of {{totalPages}})"
+  },
+  "summary": {
+    "totalRecords": "Total Records",
+    "checkedIn": "Checked In",
+    "checkedOut": "Checked Out",
+    "overdue": "Overdue",
+    "pending": "Pending",
+    "active": "Active"
+  },
+  "states": {
+    "errorTitle": "Error Loading Report",
+    "noDataTitle": "No Data Found",
+    "noDataDescription": "Try adjusting your filters to see results."
+  },
+  "statistics": {
+    "title": "Visitor Statistics",
+    "export": "Export Statistics",
+    "generate": "Generate Statistics",
+    "emptyTitle": "No Statistics Available",
+    "emptyDescription": "Click the button above to generate statistics.",
+    "byLocationTitle": "By Location",
+    "topHostsTitle": "Top Hosts",
+    "locationItem": "{{visitors}} visitors ({{checkedIn}} checked in)",
+    "hostVisitors": "{{count}} visitors",
+    "cards": {
+      "totalVisitors": "Total Visitors",
+      "checkInRate": "Check-In Rate",
+      "avgDuration": "Avg Duration",
+      "avgDurationValue": "{{value}} min",
+      "noShows": "No-Shows"
+    }
+  },
+  "toasts": {
+    "fetchInBuildingFailed": "Failed to fetch in-building report",
+    "exportReportSuccess": "Report exported successfully",
+    "exportReportFailed": "Failed to export report",
+    "fetchComprehensiveFailed": "Failed to fetch comprehensive report",
+    "fetchStatisticsFailed": "Failed to fetch statistics",
+    "exportStatisticsSuccess": "Statistics exported successfully",
+    "exportStatisticsFailed": "Failed to export statistics"
+  }
 }

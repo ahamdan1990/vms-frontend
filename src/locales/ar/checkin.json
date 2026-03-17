@@ -89,5 +89,173 @@
     "alreadyCheckedIn": "الزائر مسجّل الدخول بالفعل.",
     "expired": "انتهت صلاحية هذه الدعوة.",
     "dismiss": "إغلاق"
+  },
+  "invitationModal": {
+    "title": "تفاصيل تسجيل دخول الزائر",
+    "invitationReference": "مرجع الدعوة",
+    "visitDetailsTitle": "تفاصيل الزيارة",
+    "actions": {
+      "confirmCheckIn": "تأكيد تسجيل الدخول"
+    },
+    "status": {
+      "completed": "مكتملة",
+      "checkedIn": "تم تسجيل الدخول",
+      "approved": "معتمدة",
+      "pendingApproval": "بانتظار الموافقة",
+      "expired": "منتهية"
+    },
+    "labels": {
+      "name": "الاسم",
+      "endTime": "وقت الانتهاء"
+    },
+    "error": {
+      "title": "خطأ في تسجيل الدخول",
+      "heading": "فشل تسجيل الدخول",
+      "defaultMessage": "تعذر معالجة تسجيل الدخول حالياً."
+    },
+    "notFound": {
+      "title": "الدعوة غير موجودة",
+      "heading": "الدعوة غير موجودة",
+      "description": "رمز QR الممسوح لا يطابق أي دعوة في النظام."
+    },
+    "tooEarly": {
+      "title": "مبكر جداً - لا يمكن تسجيل الدخول",
+      "description": "هذا الزائر وصل مبكراً جداً.",
+      "scheduledTimeLabel": "الوقت المجدول:",
+      "allowedFromLabel": "تسجيل الدخول متاح من:"
+    },
+    "expired": {
+      "title": "منتهية - لا يمكن تسجيل الدخول",
+      "description": "هذه الدعوة منتهية.",
+      "scheduledEndLabel": "وقت الانتهاء المجدول:"
+    },
+    "earlyArrival": {
+      "title": "وصول مبكر",
+      "description": "وصل الزائر مبكراً!",
+      "scheduledTimeLabel": "الوقت المجدول:",
+      "allowedNotice": "يمكن تسجيل دخوله الآن، لكن يرجى إبلاغ المضيف بوصوله المبكر."
+    },
+    "lateArrival": {
+      "title": "وصول متأخر",
+      "description": "وصل الزائر متأخراً!",
+      "originalScheduleLabel": "الجدولة الأصلية:",
+      "scheduledDurationLabel": "المدة المجدولة:",
+      "whatHappensTitle": "ماذا يحدث عند تسجيل الدخول:",
+      "points": {
+        "recalculateEndTime": "سيتم إعادة احتساب وقت الانتهاء المتوقع للزائر بناءً على المدة المجدولة",
+        "adjustedNotifications": "سيتم استخدام وقت الانتهاء المعدل لإشعارات تجاوز الوقت",
+        "contactHost": "يرجى التواصل مع المضيف لتأكيد وصول الزائر"
+      }
+    },
+    "notApproved": {
+      "title": "غير معتمدة - لا يمكن تسجيل الدخول",
+      "currentStatus": "الحالة الحالية: {{status}}",
+      "description": "يجب اعتماد هذه الدعوة قبل السماح بتسجيل الدخول."
+    },
+    "alreadyCheckedIn": {
+      "title": "تم تسجيل الدخول مسبقاً",
+      "description": "تم تسجيل دخول هذا الزائر مسبقاً في {{time}}"
+    },
+    "completedVisit": {
+      "title": "الزيارة مكتملة",
+      "description": "تم تسجيل خروج هذا الزائر في {{time}}"
+    },
+    "notes": {
+      "label": "ملاحظات تسجيل الدخول (اختياري)",
+      "placeholder": "أضف أي ملاحظات حول تسجيل الدخول..."
+    }
+  },
+  "manualForm": {
+    "searchModes": {
+      "byInvitation": "حسب رقم الدعوة",
+      "byVisitor": "حسب الزائر"
+    },
+    "fields": {
+      "invitationNumber": "رقم الدعوة",
+      "searchVisitors": "بحث عن زوار",
+      "notes": "ملاحظات تسجيل الدخول (اختياري)"
+    },
+    "placeholders": {
+      "invitationNumber": "أدخل رقم الدعوة...",
+      "searchVisitors": "ابحث بالاسم أو البريد الإلكتروني أو الشركة أو الموضوع...",
+      "notes": "أضف أي ملاحظات حول عملية تسجيل الدخول..."
+    },
+    "buttons": {
+      "checkInVisitor": "تسجيل دخول الزائر"
+    },
+    "labels": {
+      "visitor": "الزائر",
+      "visitDetails": "تفاصيل الزيارة"
+    },
+    "status": {
+      "checkedIn": "تم تسجيل الدخول",
+      "approved": "معتمدة"
+    },
+    "selectedInvitation": "الدعوة المحددة",
+    "notesCount": "{{count}}/500 حرف",
+    "instructions": {
+      "byInvitation": "أدخل رقم الدعوة للبحث عن دعوة محددة.",
+      "byVisitor": "ابحث عن الزوار بالاسم أو البريد الإلكتروني أو الشركة أو موضوع الدعوة."
+    },
+    "validation": {
+      "alreadyCheckedIn": "تم تسجيل دخول هذا الزائر مسبقاً.",
+      "notApproved": "هذه الدعوة غير معتمدة لتسجيل الدخول.",
+      "outsideWindow": "هذه الدعوة خارج النافذة الزمنية المجدولة."
+    },
+    "errors": {
+      "notFound": "لم يتم العثور على الدعوة. يرجى التحقق من الرقم وإعادة المحاولة."
+    },
+    "meta": {
+      "invitationEntry": "#{{number}} - {{time}}"
+    }
+  },
+  "qrScanner": {
+    "modes": {
+      "camera": "الكاميرا",
+      "manual": "يدوي"
+    },
+    "selectCamera": "اختر الكاميرا",
+    "cameraFallback": "الكاميرا {{id}}...",
+    "loadingCameras": "جاري تحميل الكاميرات...",
+    "cameraReady": "ماسح الكاميرا جاهز",
+    "clickStartScanning": "انقر \"بدء المسح\" لتفعيل الكاميرا",
+    "tip": "نصيحة: أبقِ رمز QR ثابتاً داخل مربع الالتقاط",
+    "buttons": {
+      "stopScanning": "إيقاف المسح",
+      "startScanning": "بدء المسح",
+      "processCheckIn": "معالجة تسجيل الدخول"
+    },
+    "scanning": {
+      "cameraActive": "الكاميرا نشطة - وجّه رمز QR نحو الكاميرا",
+      "detectedProcessing": "تم اكتشاف رمز QR. جارٍ المعالجة...",
+      "readyForNext": "الكاميرا نشطة - جاهزة للمسح التالي",
+      "scanFailedRetry": "فشل المسح - جاهز لإعادة المحاولة"
+    },
+    "stats": {
+      "sessionStatistics": "إحصائيات الجلسة",
+      "successful": "ناجح",
+      "failed": "فاشل",
+      "total": "الإجمالي",
+      "lastScan": "آخر مسح: {{time}}"
+    },
+    "manual": {
+      "label": "رمز QR أو رقم الدعوة",
+      "placeholder": "امسح بالماسح الخارجي أو أدخل يدوياً...",
+      "hardwareTip": "الماسحات الخارجية لرمز QR مدعومة. فقط امسح ثم اضغط Enter."
+    },
+    "errors": {
+      "enterCode": "يرجى إدخال رمز QR أو رقم الدعوة",
+      "checkInFailed": "فشل تسجيل الدخول",
+      "cameraError": "خطأ في الكاميرا: {{message}}",
+      "cameraUnavailable": "تعذر الوصول إلى الكاميرا",
+      "cameraPermissionDenied": "تم رفض إذن الكاميرا. يرجى السماح بالوصول للكاميرا."
+    },
+    "results": {
+      "checkInSuccess": "تم تسجيل الدخول بنجاح!"
+    },
+    "instructions": {
+      "camera": "ضع رمز QR داخل مربع الالتقاط. يتم الاكتشاف تلقائياً مع صوت تنبيه.",
+      "manual": "أدخل بيانات رمز QR أو رقم الدعوة يدوياً. يمكنك العثور عليها في دعوة الزائر أو البطاقة المطبوعة."
+    }
   }
 }

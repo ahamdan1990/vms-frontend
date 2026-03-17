@@ -37,7 +37,7 @@ const MobileNavigation = ({
         type="button"
         onClick={toggleDropdown}
         className={classNames(
-          'w-full flex items-center justify-between px-4 py-3 text-left',
+          'w-full flex items-center justify-between px-4 py-3 text-start',
           'bg-white dark:bg-slate-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm',
           'hover:bg-gray-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
           'transition-colors duration-150'
@@ -69,7 +69,7 @@ const MobileNavigation = ({
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
             className={classNames(
-              'absolute top-full left-0 right-0 mt-1 z-50',
+              'absolute top-full start-0 end-0 mt-1 z-50',
               'bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg',
               'max-h-60 overflow-auto'
             )}
@@ -80,7 +80,7 @@ const MobileNavigation = ({
                 key={item.id}
                 onClick={() => handleSelect(item)}
                 className={classNames(
-                  'w-full px-4 py-3 text-left transition-colors duration-150',
+                  'w-full px-4 py-3 text-start transition-colors duration-150',
                   'flex items-center justify-between',
                   {
                     'bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-200': item.id === activeItem,

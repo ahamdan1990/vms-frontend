@@ -33,11 +33,12 @@ import timeSlotsService from '../../../services/timeSlotsService';
  * Calendar Page for visualizing and booking time slots
  */
 const CalendarPage = () => {
-  const { t } = useTranslation(['calendar', 'common']);
+  const { t, i18n } = useTranslation(['calendar', 'common']);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const toast = useToast();
   const { user: userPermissions } = usePermissions();
+  const locale = i18n.language === 'ar' ? 'ar' : 'en-US';
 
   // Redux state
   const timeSlots = useSelector(selectTimeSlotsList);
@@ -224,7 +225,7 @@ const CalendarPage = () => {
                 <div>
                   <div className="text-gray-600 mb-1">{t('calendar:modal.date')}</div>
                   <div className="font-medium text-gray-900">
-                    {selectedDate.toLocaleDateString('en-US', {
+                    {selectedDate.toLocaleDateString(locale, {
                       weekday: 'long',
                       year: 'numeric',
                       month: 'long',

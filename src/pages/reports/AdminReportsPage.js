@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { usePermissions } from '../../hooks/usePermissions';
 import {
   FunnelIcon,
@@ -54,6 +55,7 @@ import userService from '../../services/userService';
  * Comprehensive reporting interface with advanced filtering, statistics, and export capabilities
  */
 const AdminReportsPage = () => {
+  const { t, i18n } = useTranslation('reports');
   const dispatch = useDispatch();
   const { hasPermission } = usePermissions();
 
@@ -198,11 +200,33 @@ const AdminReportsPage = () => {
     }
   };
 
+  const statusTranslationKeys = {
+    Draft: 'draft',
+    Submitted: 'submitted',
+    UnderReview: 'underReview',
+    Approved: 'approved',
+    Rejected: 'rejected',
+    Cancelled: 'cancelled',
+    Expired: 'expired',
+    Active: 'active',
+    Completed: 'completed'
+  };
+
+  const getStatusLabel = (status) => {
+    const key = statusTranslationKeys[status];
+    return key ? t(`filters.statusOptions.${key}`) : status;
+  };
+
+  const formatDateTime = (value) => {
+    if (!value) return '-';
+    return new Date(value).toLocaleString(i18n.language === 'ar' ? 'ar' : 'en-US');
+  };
+
   // Table columns
   const columns = [
     {
       key: 'visitorName',
-      header: 'Visitor Name',
+      header: t('table.columns.visitorName'),
       sortable: true,
       render: (value, row) => (
         <div>
@@ -213,7 +237,7 @@ const AdminReportsPage = () => {
     },
     {
       key: 'hostName',
-      header: 'Host',
+      header: t('table.columns.host'),
       sortable: true,
       render: (value, row) => (
         <div>
@@ -224,35 +248,35 @@ const AdminReportsPage = () => {
     },
     {
       key: 'locationName',
-      header: 'Location',
+      header: t('table.columns.location'),
       sortable: true
     },
     {
       key: 'visitPurpose',
-      header: 'Purpose',
+      header: t('table.columns.purpose'),
       sortable: false
     },
     {
       key: 'checkedInAt',
-      header: 'Check-In',
+      header: t('table.columns.checkIn'),
       sortable: true,
-      render: (value, row) => row.checkedInAt ? new Date(row.checkedInAt).toLocaleString() : '-'
+      render: (value, row) => formatDateTime(row.checkedInAt)
     },
     {
       key: 'checkedOutAt',
-      header: 'Check-Out',
+      header: t('table.columns.checkOut'),
       sortable: true,
-      render: (value, row) => row.checkedOutAt ? new Date(row.checkedOutAt).toLocaleString() : '-'
+      render: (value, row) => formatDateTime(row.checkedOutAt)
     },
     {
       key: 'minutesOnSite',
-      header: 'Duration (min)',
+      header: t('table.columns.durationMinutes'),
       sortable: false,
       render: (value, row) => row.minutesOnSite || '-'
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('table.columns.status'),
       sortable: true,
       render: (value, row) => (
         <Badge
@@ -263,7 +287,7 @@ const AdminReportsPage = () => {
             'warning'
           }
         >
-          {row.status}
+          {getStatusLabel(row.status)}
         </Badge>
       )
     }
@@ -271,16 +295,16 @@ const AdminReportsPage = () => {
 
   // Tabs configuration
   const tabs = [
-    { key: 'report', label: 'Visitor Report', icon: DocumentTextIcon },
-    { key: 'statistics', label: 'Statistics', icon: ChartBarIcon }
+    { key: 'report', label: t('tabs.visitorReport'), icon: DocumentTextIcon },
+    { key: 'statistics', label: t('tabs.statistics'), icon: ChartBarIcon }
   ];
 
   if (!canGenerateReports) {
     return (
       <div className="container mx-auto px-4 py-8">
         <EmptyState
-          title="Access Denied"
-          description="You don't have permission to access reports."
+          title={t('accessDenied.title')}
+          description={t('accessDenied.description')}
           icon={FunnelIcon}
         />
       </div>
@@ -292,9 +316,9 @@ const AdminReportsPage = () => {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Reports</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('header.title')}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Comprehensive visitor reports and analytics
+            {t('header.subtitle')}
           </p>
         </div>
         <Button
@@ -304,7 +328,7 @@ const AdminReportsPage = () => {
           onClick={handleFetchReport}
           disabled={reportLoading || statsLoading}
         >
-          Refresh
+          {t('actions.refresh')}
         </Button>
       </div>
 
@@ -323,14 +347,14 @@ const AdminReportsPage = () => {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <FunnelIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Filters</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('filters.title')}</h2>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowFilters(!showFilters)}
               >
-                {showFilters ? 'Hide' : 'Show'}
+                {showFilters ? t('filters.hide') : t('filters.show')}
               </Button>
             </div>
 
@@ -339,7 +363,7 @@ const AdminReportsPage = () => {
                 {/* First Row */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <DateRangePicker
-                    label="Date Range"
+                    label={t('filters.dateRange')}
                     startDate={filters.startDate ? new Date(filters.startDate) : null}
                     endDate={filters.endDate ? new Date(filters.endDate) : null}
                     onStartDateChange={(date) => handleFilterChange('startDate', date?.toISOString())}
@@ -348,31 +372,31 @@ const AdminReportsPage = () => {
                   />
 
                   <Select
-                    label="Location"
+                    label={t('filters.location')}
                     value={filters.locationId || ''}
                     onChange={(e) => handleFilterChange('locationId', e.target.value ? parseInt(e.target.value) : null)}
                     disabled={loadingFilters}
                     options={[
-                      { value: '', label: loadingFilters ? 'Loading...' : 'All Locations' },
+                      { value: '', label: loadingFilters ? t('filters.loading') : t('filters.allLocations') },
                       ...locations.map(loc => ({ value: loc.id, label: loc.name }))
                     ]}
                   />
 
                   <Select
-                    label="Status"
+                    label={t('filters.status')}
                     value={filters.status || ''}
                     onChange={(e) => handleFilterChange('status', e.target.value || null)}
                     options={[
-                      { value: '', label: 'All Statuses' },
-                      { value: 'Draft', label: 'Draft' },
-                      { value: 'Submitted', label: 'Submitted' },
-                      { value: 'UnderReview', label: 'Under Review' },
-                      { value: 'Approved', label: 'Approved' },
-                      { value: 'Rejected', label: 'Rejected' },
-                      { value: 'Cancelled', label: 'Cancelled' },
-                      { value: 'Expired', label: 'Expired' },
-                      { value: 'Active', label: 'Active' },
-                      { value: 'Completed', label: 'Completed' }
+                      { value: '', label: t('filters.allStatuses') },
+                      { value: 'Draft', label: t('filters.statusOptions.draft') },
+                      { value: 'Submitted', label: t('filters.statusOptions.submitted') },
+                      { value: 'UnderReview', label: t('filters.statusOptions.underReview') },
+                      { value: 'Approved', label: t('filters.statusOptions.approved') },
+                      { value: 'Rejected', label: t('filters.statusOptions.rejected') },
+                      { value: 'Cancelled', label: t('filters.statusOptions.cancelled') },
+                      { value: 'Expired', label: t('filters.statusOptions.expired') },
+                      { value: 'Active', label: t('filters.statusOptions.active') },
+                      { value: 'Completed', label: t('filters.statusOptions.completed') }
                     ]}
                   />
                 </div>
@@ -380,44 +404,44 @@ const AdminReportsPage = () => {
                 {/* Second Row */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <Select
-                    label="Visit Purpose"
+                    label={t('filters.visitPurpose')}
                     value={filters.visitPurposeId || ''}
                     onChange={(e) => handleFilterChange('visitPurposeId', e.target.value ? parseInt(e.target.value) : null)}
                     disabled={loadingFilters}
                     options={[
-                      { value: '', label: loadingFilters ? 'Loading...' : 'All Purposes' },
+                      { value: '', label: loadingFilters ? t('filters.loading') : t('filters.allPurposes') },
                       ...visitPurposes.map(vp => ({ value: vp.id, label: vp.name }))
                     ]}
                   />
 
                   <Select
-                    label="Host"
+                    label={t('filters.host')}
                     value={filters.hostId || ''}
                     onChange={(e) => handleFilterChange('hostId', e.target.value ? parseInt(e.target.value) : null)}
                     disabled={loadingFilters}
                     options={[
-                      { value: '', label: loadingFilters ? 'Loading...' : 'All Hosts' },
+                      { value: '', label: loadingFilters ? t('filters.loading') : t('filters.allHosts') },
                       ...hosts.map(host => ({ value: host.id, label: `${host.firstName} ${host.lastName}` }))
                     ]}
                   />
 
                   <Select
-                    label="Department"
+                    label={t('filters.department')}
                     value={filters.department || ''}
                     onChange={(e) => handleFilterChange('department', e.target.value || null)}
                     disabled={loadingFilters}
                     options={[
-                      { value: '', label: loadingFilters ? 'Loading...' : 'All Departments' },
+                      { value: '', label: loadingFilters ? t('filters.loading') : t('filters.allDepartments') },
                       ...departments.map(dept => ({ value: dept.name, label: dept.name }))
                     ]}
                   />
 
                   <Input
-                    label="Search"
-                    placeholder="Visitor name, company, or email..."
+                    label={t('filters.search')}
+                    placeholder={t('filters.searchPlaceholder')}
                     value={filters.searchTerm || ''}
                     onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
-                    icon={<MagnifyingGlassIcon className="w-5 h-5" />}
+                    leftIcon={<MagnifyingGlassIcon className="w-5 h-5" />}
                   />
                 </div>
 
@@ -427,30 +451,30 @@ const AdminReportsPage = () => {
                     <input
                       type="checkbox"
                       checked={filters.checkedInOnly || false}
-                      onChange={(e) => handleFilterChange('checkedInOnly', e.target.checked)}
-                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-900"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">Checked In Only</span>
+                    onChange={(e) => handleFilterChange('checkedInOnly', e.target.checked)}
+                    className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-900"
+                  />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{t('filters.quick.checkedInOnly')}</span>
                   </label>
 
                   <label className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors">
                     <input
                       type="checkbox"
                       checked={filters.checkedOutOnly || false}
-                      onChange={(e) => handleFilterChange('checkedOutOnly', e.target.checked)}
-                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-900"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">Checked Out Only</span>
+                    onChange={(e) => handleFilterChange('checkedOutOnly', e.target.checked)}
+                    className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-900"
+                  />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{t('filters.quick.checkedOutOnly')}</span>
                   </label>
 
                   <label className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors">
                     <input
                       type="checkbox"
                       checked={filters.overdueOnly || false}
-                      onChange={(e) => handleFilterChange('overdueOnly', e.target.checked)}
-                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-900"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">Overdue Only</span>
+                    onChange={(e) => handleFilterChange('overdueOnly', e.target.checked)}
+                    className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-900"
+                  />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{t('filters.quick.overdueOnly')}</span>
                   </label>
                 </div>
 
@@ -462,7 +486,7 @@ const AdminReportsPage = () => {
                     disabled={reportLoading}
                     loading={reportLoading}
                   >
-                    Apply Filters
+                    {t('actions.applyFilters')}
                   </Button>
 
                   <Button
@@ -470,7 +494,7 @@ const AdminReportsPage = () => {
                     onClick={handleResetFilters}
                     icon={<XMarkIcon className="w-5 h-5" />}
                   >
-                    Reset
+                    {t('actions.reset')}
                   </Button>
 
                   {canExportReports && (
@@ -491,27 +515,27 @@ const AdminReportsPage = () => {
           {reportData?.summary && (
             <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
               <Card className="p-4">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Total Records</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{t('summary.totalRecords')}</div>
                 <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{reportData.summary.totalRecords}</div>
               </Card>
               <Card className="p-4">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Checked In</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{t('summary.checkedIn')}</div>
                 <div className="text-2xl font-bold text-green-600">{reportData.summary.totalCheckedIn}</div>
               </Card>
               <Card className="p-4">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Checked Out</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{t('summary.checkedOut')}</div>
                 <div className="text-2xl font-bold text-blue-600">{reportData.summary.totalCheckedOut}</div>
               </Card>
               <Card className="p-4">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Overdue</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{t('summary.overdue')}</div>
                 <div className="text-2xl font-bold text-red-600">{reportData.summary.totalOverdue}</div>
               </Card>
               <Card className="p-4">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Pending</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{t('summary.pending')}</div>
                 <div className="text-2xl font-bold text-yellow-600">{reportData.summary.totalPending}</div>
               </Card>
               <Card className="p-4">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Active</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">{t('summary.active')}</div>
                 <div className="text-2xl font-bold text-indigo-600">{reportData.summary.totalActive}</div>
               </Card>
             </div>
@@ -523,10 +547,14 @@ const AdminReportsPage = () => {
             {reportData?.visitors?.length > 0 && (
               <div className="mb-4 pb-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Visitor Records</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('table.recordsTitle')}</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Showing {reportData.visitors.length} of {reportData.pagination?.totalRecords || 0} total records
-                    (Page {(reportData.pagination?.pageIndex || 0) + 1} of {reportData.pagination?.totalPages || 1})
+                    {t('table.recordsInfo', {
+                      showing: reportData.visitors.length,
+                      total: reportData.pagination?.totalRecords || 0,
+                      page: (reportData.pagination?.pageIndex || 0) + 1,
+                      totalPages: reportData.pagination?.totalPages || 1
+                    })}
                   </p>
                 </div>
               </div>
@@ -538,14 +566,14 @@ const AdminReportsPage = () => {
               </div>
             ) : reportError ? (
               <EmptyState
-                title="Error Loading Report"
+                title={t('states.errorTitle')}
                 description={reportError}
                 icon={DocumentTextIcon}
               />
             ) : !reportData?.visitors?.length ? (
               <EmptyState
-                title="No Data Found"
-                description="Try adjusting your filters to see results."
+                title={t('states.noDataTitle')}
+                description={t('states.noDataDescription')}
                 icon={DocumentTextIcon}
               />
             ) : (
@@ -579,13 +607,13 @@ const AdminReportsPage = () => {
       {activeTab === 'statistics' && (
         <Card className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Visitor Statistics</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('statistics.title')}</h2>
             {canExportReports && (
               <ExportButton
                 onExport={handleExportStatistics}
                 loading={exporting}
                 disabled={!statisticsData}
-                label="Export Statistics"
+                label={t('statistics.export')}
               />
             )}
           </div>
@@ -599,19 +627,19 @@ const AdminReportsPage = () => {
               {/* Overall Statistics */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 rounded-lg border border-blue-200 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-900/20">
-                  <div className="text-sm text-blue-600 dark:text-blue-300 font-medium">Total Visitors</div>
+                  <div className="text-sm text-blue-600 dark:text-blue-300 font-medium">{t('statistics.cards.totalVisitors')}</div>
                   <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">{statisticsData.totalVisitors}</div>
                 </div>
                 <div className="p-4 rounded-lg border border-green-200 dark:border-green-900/60 bg-green-50 dark:bg-green-900/20">
-                  <div className="text-sm text-green-600 dark:text-green-300 font-medium">Check-In Rate</div>
+                  <div className="text-sm text-green-600 dark:text-green-300 font-medium">{t('statistics.cards.checkInRate')}</div>
                   <div className="text-2xl font-bold text-green-900 dark:text-green-100">{statisticsData.checkInRate?.toFixed(1)}%</div>
                 </div>
                 <div className="p-4 rounded-lg border border-purple-200 dark:border-purple-900/60 bg-purple-50 dark:bg-purple-900/20">
-                  <div className="text-sm text-purple-600 dark:text-purple-300 font-medium">Avg Duration</div>
-                  <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">{statisticsData.averageDurationMinutes} min</div>
+                  <div className="text-sm text-purple-600 dark:text-purple-300 font-medium">{t('statistics.cards.avgDuration')}</div>
+                  <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">{t('statistics.cards.avgDurationValue', { value: statisticsData.averageDurationMinutes })}</div>
                 </div>
                 <div className="p-4 rounded-lg border border-orange-200 dark:border-orange-900/60 bg-orange-50 dark:bg-orange-900/20">
-                  <div className="text-sm text-orange-600 dark:text-orange-300 font-medium">No-Shows</div>
+                  <div className="text-sm text-orange-600 dark:text-orange-300 font-medium">{t('statistics.cards.noShows')}</div>
                   <div className="text-2xl font-bold text-orange-900 dark:text-orange-100">{statisticsData.totalNoShow}</div>
                 </div>
               </div>
@@ -619,7 +647,7 @@ const AdminReportsPage = () => {
               {/* Location Breakdown */}
               {statisticsData.byLocation?.length > 0 && (
                 <div>
-                  <h3 className="text-md font-semibold text-gray-900 dark:text-gray-100 mb-3">By Location</h3>
+                  <h3 className="text-md font-semibold text-gray-900 dark:text-gray-100 mb-3">{t('statistics.byLocationTitle')}</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {statisticsData.byLocation.map((loc, idx) => (
                       <div key={idx} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900/40">
@@ -628,7 +656,7 @@ const AdminReportsPage = () => {
                           <Badge variant="info">{loc.percentage.toFixed(1)}%</Badge>
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          {loc.visitorCount} visitors ({loc.checkedInCount} checked in)
+                          {t('statistics.locationItem', { visitors: loc.visitorCount, checkedIn: loc.checkedInCount })}
                         </div>
                       </div>
                     ))}
@@ -639,12 +667,12 @@ const AdminReportsPage = () => {
               {/* Top Hosts */}
               {statisticsData.topHosts?.length > 0 && (
                 <div>
-                  <h3 className="text-md font-semibold text-gray-900 dark:text-gray-100 mb-3">Top Hosts</h3>
+                  <h3 className="text-md font-semibold text-gray-900 dark:text-gray-100 mb-3">{t('statistics.topHostsTitle')}</h3>
                   <div className="space-y-2">
                     {statisticsData.topHosts.slice(0, 5).map((host, idx) => (
                       <div key={idx} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-lg">
                         <span className="font-medium text-gray-900 dark:text-gray-100">{host.hostName}</span>
-                        <span className="text-sm text-gray-600 dark:text-gray-300">{host.visitorCount} visitors</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">{t('statistics.hostVisitors', { count: host.visitorCount })}</span>
                       </div>
                     ))}
                   </div>
@@ -653,12 +681,12 @@ const AdminReportsPage = () => {
             </div>
           ) : (
             <EmptyState
-              title="No Statistics Available"
-              description="Click the button above to generate statistics."
+              title={t('statistics.emptyTitle')}
+              description={t('statistics.emptyDescription')}
               icon={ChartBarIcon}
               action={
                 <Button onClick={handleFetchStatistics}>
-                  Generate Statistics
+                  {t('statistics.generate')}
                 </Button>
               }
             />

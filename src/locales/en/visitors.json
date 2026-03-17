@@ -195,5 +195,623 @@
     "blacklistReason": "Reason: {{reason}}",
     "recentActivity": "Recent Activity",
     "recentActivityPlaceholder": "Detailed activity logging will be available in a future update."
+  },
+  "form": {
+    "steps": {
+      "basic": {
+        "title": "Basic Information",
+        "description": "Name, contact details, and company information"
+      },
+      "photoDocs": {
+        "title": "Photo and Documents",
+        "description": "Profile photo and identification files"
+      },
+      "preferences": {
+        "title": "Preferences",
+        "description": "Default location and visit purpose"
+      },
+      "address": {
+        "title": "Address",
+        "description": "Street, city, and country details"
+      },
+      "personal": {
+        "title": "Personal Details",
+        "description": "Date of birth, IDs, and language"
+      },
+      "requirements": {
+        "title": "Requirements",
+        "description": "Dietary, accessibility, and security notes"
+      },
+      "emergency": {
+        "title": "Emergency Contacts",
+        "description": "People to contact in emergencies"
+      },
+      "invitation": {
+        "title": "Invitation",
+        "description": "Optional invitation details"
+      },
+      "review": {
+        "title": "Review",
+        "description": "Review all entered information"
+      }
+    },
+    "placeholders": {
+      "firstName": "Enter first name",
+      "lastName": "Enter last name",
+      "email": "Enter email address",
+      "phone": "Enter phone number",
+      "companySearch": "Search or select company...",
+      "jobTitle": "Enter job title"
+    },
+    "options": {
+      "phoneType": {
+        "mobile": "Mobile",
+        "landline": "Landline",
+        "unknown": "Unknown"
+      }
+    },
+    "actions": {
+      "updateVisitor": "Update Visitor",
+      "createVisitorWithInvitation": "Create Visitor & Invitation",
+      "createVisitor": "Create Visitor"
+    },
+    "company": {
+      "createButtonTitle": "Create company",
+      "createModalTitle": "Create New Company",
+      "toasts": {
+        "createdTitle": "Company created",
+        "createdMessage": "{{name}} was created successfully.",
+        "createFailedTitle": "Failed to create company",
+        "createFailedMessage": "Unable to create company. Please try again."
+      }
+    },
+    "documents": {
+      "loadingExisting": "Loading existing documents...",
+      "sensitive": "Sensitive",
+      "required": "Required",
+      "preview": "Preview",
+      "download": "Download",
+      "defaultDownloadName": "document",
+      "noneUploaded": "No documents uploaded yet.",
+      "uploadAdditional": "Upload Additional Documents",
+      "upload": "Upload Documents",
+      "uploadDescription": "Upload ID, passport, or other identification documents",
+      "profilePhotoDescription": "Selected profile photo",
+      "uploadDocumentDescription": "Selected document: {{name}}",
+      "acceptedFormats": "Accepted formats: PDF, DOC, DOCX, JPG, PNG. Max 5 files, 10MB each."
+    },
+    "preferences": {
+      "title": "Default Preferences",
+      "subtitle": "Set default location and visit purpose for faster invitation creation",
+      "preferredLocation": "Preferred Location",
+      "preferredLocationHelp": "The location this visitor typically visits",
+      "selectDefaultLocation": "Select default location...",
+      "defaultVisitPurpose": "Default Visit Purpose",
+      "defaultVisitPurposeHelp": "The typical reason for this visitor's visits",
+      "selectDefaultVisitPurpose": "Select default visit purpose...",
+      "whySetTitle": "Why set preferences?",
+      "whySetDescription": "Default preferences will be automatically selected when creating invitations for this visitor, making the invitation process faster and more consistent."
+    },
+    "address": {
+      "street1": "Street Address Line 1",
+      "street2": "Street Address Line 2",
+      "city": "City",
+      "governorate": "Governorate",
+      "selectGovernorate": "Select governorate",
+      "postalCode": "Postal Code (Optional)",
+      "postalCodeHelper": "Lebanon postal codes are optional",
+      "country": "Country",
+      "middleEastGroup": "--- Middle East ---",
+      "internationalGroup": "--- International ---",
+      "addressType": "Address Type",
+      "placeholders": {
+        "street1": "Enter street address",
+        "street2": "Apartment, suite, etc. (optional)",
+        "city": "e.g., Beirut, Tripoli, Sidon",
+        "postalCode": "e.g., 1107-2180"
+      },
+      "addressTypes": {
+        "home": "Home",
+        "work": "Work",
+        "billing": "Billing",
+        "shipping": "Shipping",
+        "other": "Other"
+      },
+      "governorates": {
+        "Beirut": "Beirut",
+        "Mount Lebanon": "Mount Lebanon",
+        "North Lebanon": "North Lebanon",
+        "South Lebanon": "South Lebanon",
+        "Beqaa": "Beqaa",
+        "Akkar": "Akkar",
+        "Baalbek-Hermel": "Baalbek-Hermel",
+        "Nabatieh": "Nabatieh"
+      },
+      "countries": {
+        "Lebanon": "Lebanon",
+        "Syria": "Syria",
+        "Jordan": "Jordan",
+        "Israel": "Israel",
+        "Turkey": "Turkey",
+        "Cyprus": "Cyprus",
+        "Egypt": "Egypt",
+        "SaudiArabia": "Saudi Arabia",
+        "UnitedArabEmirates": "United Arab Emirates",
+        "Kuwait": "Kuwait",
+        "Qatar": "Qatar",
+        "Bahrain": "Bahrain",
+        "Oman": "Oman",
+        "Iraq": "Iraq",
+        "Iran": "Iran",
+        "UnitedStates": "United States",
+        "Canada": "Canada",
+        "UnitedKingdom": "United Kingdom",
+        "France": "France",
+        "Germany": "Germany",
+        "Italy": "Italy",
+        "Australia": "Australia",
+        "Brazil": "Brazil",
+        "Other": "Other"
+      }
+    },
+    "personal": {
+      "dateOfBirth": "Date of Birth",
+      "governmentIdType": "Government ID Type",
+      "governmentIdNumber": "Government ID Number",
+      "nationality": "Nationality",
+      "preferredLanguage": "Preferred Language",
+      "externalId": "External ID",
+      "idTypes": {
+        "passport": "Passport",
+        "driverLicense": "Driver's License",
+        "nationalId": "National ID",
+        "other": "Other"
+      },
+      "languages": {
+        "english": "English",
+        "spanish": "Spanish",
+        "french": "French",
+        "german": "German",
+        "chinese": "Chinese",
+        "japanese": "Japanese",
+        "arabic": "Arabic"
+      },
+      "placeholders": {
+        "governmentId": "Enter ID number",
+        "nationality": "Enter nationality",
+        "externalId": "Employee ID, customer number, etc."
+      }
+    },
+    "requirements": {
+      "dietary": "Dietary Requirements",
+      "accessibility": "Accessibility Requirements",
+      "securityClearance": "Security Clearance",
+      "additionalNotes": "Additional Notes",
+      "placeholders": {
+        "dietary": "Any dietary restrictions, allergies, or special meal requirements...",
+        "accessibility": "Wheelchair access, hearing assistance, or other accessibility needs...",
+        "securityClearance": "Security clearance level, if applicable",
+        "additionalNotes": "Any additional information about this visitor..."
+      }
+    },
+    "emergency": {
+      "title": "Emergency Contacts",
+      "subtitle": "Emergency contacts are optional",
+      "addContact": "Add Contact",
+      "addFirstContact": "Add First Contact",
+      "contactNumber": "Contact {{count}}",
+      "primary": "Primary",
+      "relationship": "Relationship",
+      "primaryContact": "Primary Contact",
+      "emptyTitle": "No emergency contacts",
+      "emptyDescription": "You can add emergency contacts now or skip this step.",
+      "placeholders": {
+        "relationship": "e.g., Spouse, Parent, Friend",
+        "email": "Enter email (optional)"
+      }
+    },
+    "invitation": {
+      "title": "Create Invitation (Optional)",
+      "subtitle": "You can create an invitation for this visitor immediately after creating their profile",
+      "enableLabel": "Create an invitation for this visitor",
+      "enableHelp": "You can always create invitations later from the visitor's profile or the invitations page.",
+      "detailsTitle": "Invitation Details",
+      "subject": "Subject",
+      "startDateTime": "Start Date & Time",
+      "endDateTime": "End Date & Time",
+      "location": "Location",
+      "visitPurpose": "Visit Purpose",
+      "message": "Message",
+      "requirements": "Requirements",
+      "requiresApproval": "Requires approval",
+      "requiresEscort": "Requires escort",
+      "defaultSubject": "Meeting with {{name}}",
+      "submitFailed": "Failed to create invitation for this visitor.",
+      "placeholders": {
+        "subject": "Meeting with John Doe",
+        "location": "Select location...",
+        "visitPurpose": "Select purpose...",
+        "message": "Optional message for the visitor..."
+      },
+      "validation": {
+        "subjectRequired": "Subject is required",
+        "subjectMax": "Subject must be 200 characters or fewer",
+        "startRequired": "Start date and time are required",
+        "endRequired": "End date and time are required",
+        "startFuture": "Start time must be in the future",
+        "endAfterStart": "End time must be after start time",
+        "durationMin": "Invitation duration must be at least 15 minutes",
+        "durationMax": "Invitation duration cannot exceed 24 hours",
+        "locationRequired": "Location is required",
+        "purposeRequired": "Visit purpose is required",
+        "parkingInstructionsRequired": "Parking instructions are required when parking is needed",
+        "startMaxFuture": "Start date cannot be too far in the future"
+      }
+    },
+    "review": {
+      "title": "Review Information",
+      "subtitle": "Please review all information before submitting",
+      "basicInfo": "Basic Information",
+      "photoDocuments": "Photo & Documents",
+      "preferences": "Preferences",
+      "emergencyContacts": "Emergency Contacts",
+      "invitationDetails": "Invitation Details",
+      "notSpecified": "Not specified",
+      "none": "None",
+      "labels": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "company": "Company",
+        "photo": "Photo",
+        "documents": "Documents",
+        "preferredLocation": "Preferred Location",
+        "defaultVisitPurpose": "Default Visit Purpose",
+        "relationship": "Relationship",
+        "subject": "Subject",
+        "startTime": "Start Time",
+        "endTime": "End Time",
+        "location": "Location",
+        "purpose": "Purpose",
+        "requirements": "Requirements",
+        "message": "Message"
+      }
+    },
+    "validation": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email address",
+      "phoneRequired": "Phone number is required",
+      "phoneFormat": "Enter a valid phone number",
+      "phoneMinDigits": "Phone must have at least {{count}} digits",
+      "phoneMaxDigits": "Phone must not exceed 15 digits",
+      "photoMaxSize": "Photo size must be less than 5MB",
+      "documentsMax": "You can upload up to 5 documents",
+      "addressCityRequired": "City is required",
+      "addressCountryRequired": "Country is required",
+      "dateOfBirthRange": "Date of birth must be within a valid range",
+      "relationshipRequired": "Relationship is required",
+      "emailExists": "A visitor with this email already exists",
+      "governmentIdExists": "A visitor with this government ID already exists"
+    }
+  },
+  "quickCreate": {
+    "header": {
+      "description": "Enter the essentials to register this visitor. You can fill in their full profile later from the Visitors page."
+    },
+    "optional": "Optional",
+    "infoNote": "Photo, documents, address, and other details can be added from the visitor's profile page after registration.",
+    "buttons": {
+      "create": "Create Visitor",
+      "creating": "Creating..."
+    },
+    "placeholders": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john.doe@example.com",
+      "phone": "71 123 456",
+      "company": "Acme Corp",
+      "jobTitle": "Engineer"
+    },
+    "countryCodes": {
+      "lb": "+961 Lebanon",
+      "sy": "+963 Syria",
+      "jo": "+962 Jordan",
+      "il": "+972 Israel",
+      "tr": "+90 Turkey",
+      "eg": "+20 Egypt",
+      "sa": "+966 Saudi Arabia",
+      "ae": "+971 UAE",
+      "kw": "+965 Kuwait",
+      "qa": "+974 Qatar",
+      "us": "+1 United States",
+      "gb": "+44 United Kingdom",
+      "fr": "+33 France",
+      "de": "+49 Germany",
+      "it": "+39 Italy"
+    },
+    "validation": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Enter a valid email address",
+      "phoneRequired": "Phone number is required",
+      "phoneMinDigits": "Phone must have at least 7 digits ({{count}} entered)",
+      "phoneMaxDigits": "Phone must not exceed 15 digits"
+    }
+  },
+  "__tmp": "x",
+  "advancedSearchModal": {
+    "title": "Advanced Visitor Search",
+    "sections": {
+      "criteria": "Search Criteria",
+      "general": "General",
+      "personal": "Personal Information",
+      "professional": "Professional Information",
+      "statusSecurity": "Status and Security",
+      "dateRanges": "Date Ranges",
+      "results": "Search Results"
+    },
+    "actions": {
+      "clearAll": "Clear All",
+      "searchVisitors": "Search Visitors"
+    },
+    "fields": {
+      "searchTerm": "Search Term",
+      "governmentId": "Government ID",
+      "activeStatus": "Active Status",
+      "registrationDate": "Registration Date",
+      "lastVisitDate": "Last Visit Date"
+    },
+    "placeholders": {
+      "searchTerm": "Search by name, email, phone, or company...",
+      "from": "From",
+      "to": "To"
+    },
+    "options": {
+      "activeOnly": "Active Only",
+      "securityLow": "Low"
+    },
+    "table": {
+      "contact": "Contact",
+      "details": "Details"
+    },
+    "resultCount": "{{count}} result(s)",
+    "empty": {
+      "noMatchingVisitors": "No matching visitors found",
+      "noResultsTitle": "No Results",
+      "noResultsDescription": "Try adjusting the search criteria and run the search again."
+    },
+    "visitCount": "{{count}} visits",
+    "separator": "•",
+    "lastLabel": "Last",
+    "createdLabel": "Created"
+  },
+  "documentManager": {
+    "title": "Document Manager",
+    "summary": "{{total}} documents • {{selected}} selected",
+    "actions": {
+      "filters": "Filters",
+      "addDocuments": "Add Documents",
+      "deleteSelected": "Delete Selected",
+      "uploadCount": "Upload {{count}} file(s)",
+      "uploadDocuments": "Upload Documents"
+    },
+    "alerts": {
+      "fileTooLarge": "{{name}} is too large. Maximum size is {{size}}MB.",
+      "unsupportedFormat": "{{name}} has an unsupported format. Allowed: {{types}}.",
+      "partialUpload": "Uploaded {{successful}} file(s), {{failed}} failed."
+    },
+    "badges": {
+      "expired": "Expired",
+      "required": "Required",
+      "sensitive": "Sensitive"
+    },
+    "card": {
+      "meta": "{{size}} • {{date}}"
+    },
+    "empty": {
+      "title": "No Documents",
+      "dragHint": "Drag and drop files here or choose files to upload.",
+      "dropNow": "Drop files now",
+      "supported": "Supported formats: {{extensions}} (max {{size}}MB)"
+    },
+    "filters": {
+      "allTypes": "All Types"
+    },
+    "modals": {
+      "uploadTitle": "Upload Documents",
+      "uploadDescription": "Set document details before uploading.",
+      "deleteTitle": "Delete Selected Documents",
+      "deleteMessage": "Are you sure you want to delete {{count}} document(s)?"
+    },
+    "quickDrop": {
+      "prefix": "Quick upload:",
+      "clickToSelect": "click to select files"
+    },
+    "searchPlaceholder": "Search documents...",
+    "selectedCount": "{{count}} selected",
+    "types": {
+      "passport": "Passport",
+      "nationalId": "National ID",
+      "driverLicense": "Driver License",
+      "visa": "Visa",
+      "workPermit": "Work Permit",
+      "healthCertificate": "Health Certificate",
+      "backgroundCheck": "Background Check",
+      "photo": "Photo",
+      "other": "Other"
+    },
+    "upload": {
+      "fields": {
+        "title": "Title",
+        "type": "Type",
+        "description": "Description",
+        "tags": "Tags"
+      },
+      "fileMeta": "{{size}} MB • {{type}}",
+      "placeholders": {
+        "description": "Add an optional description",
+        "tags": "Comma-separated tags"
+      },
+      "unknownType": "Unknown type"
+    }
+  },
+  "emergencyContactForm": {
+    "actions": {
+      "addContact": "Add Contact",
+      "updateContact": "Update Contact"
+    },
+    "characters": "{{current}}/{{max}} characters",
+    "fields": {
+      "alternatePhone": "Alternate Phone",
+      "contactPriority": "Contact Priority",
+      "primaryEmergencyContact": "Primary Emergency Contact",
+      "relationship": "Relationship"
+    },
+    "help": {
+      "primaryContact": "The primary contact is used first in emergencies.",
+      "priority": "Priority 1 is highest and 10 is lowest."
+    },
+    "labels": {
+      "notePrefix": "Note:"
+    },
+    "placeholders": {
+      "address": "Enter address",
+      "alternatePhone": "Enter alternate phone number",
+      "email": "Enter email address",
+      "noSpecificPriority": "No specific priority",
+      "notes": "Enter additional notes",
+      "phoneNumber": "Enter phone number",
+      "relationship": "Select relationship"
+    },
+    "preview": {
+      "address": "{{value}}",
+      "email": "{{value}}",
+      "firstNameFallback": "First Name",
+      "lastNameFallback": "Last Name",
+      "phone": "{{value}}",
+      "priorityBadge": "Priority {{priority}}"
+    },
+    "priorityHighest": "(Highest)",
+    "priorityLowest": "(Lowest)",
+    "priorityOption": "Priority {{priority}} {{suffix}}",
+    "relationships": {
+      "child": "Child",
+      "colleague": "Colleague",
+      "friend": "Friend",
+      "guardian": "Guardian",
+      "neighbor": "Neighbor",
+      "other": "Other",
+      "parent": "Parent",
+      "partner": "Partner",
+      "sibling": "Sibling",
+      "spouse": "Spouse"
+    },
+    "sections": {
+      "additionalInformation": "Additional Information",
+      "contactDetails": "Contact Details",
+      "contactInformation": "Contact Information",
+      "preview": "Preview",
+      "prioritySettings": "Priority Settings"
+    },
+    "validation": {
+      "addressMax": "Address must not exceed 200 characters",
+      "alternatePhoneInvalid": "Invalid alternate phone number",
+      "emailInvalid": "Invalid email address",
+      "firstNameMax": "First name must not exceed 50 characters",
+      "firstNameMin": "First name must be at least 2 characters",
+      "firstNameRequired": "First name is required",
+      "lastNameMax": "Last name must not exceed 50 characters",
+      "lastNameMin": "Last name must be at least 2 characters",
+      "lastNameRequired": "Last name is required",
+      "notesMax": "Notes must not exceed 500 characters",
+      "phoneInvalid": "Invalid phone number",
+      "phoneRequired": "Phone number is required",
+      "primaryWarning": "An existing primary contact ({{name}}) will be replaced.",
+      "priorityRange": "Priority must be between 1 and 10",
+      "priorityTaken": "Priority {{priority}} is already used",
+      "relationshipMax": "Relationship must not exceed 50 characters",
+      "relationshipRequired": "Relationship is required"
+    }
+  },
+  "emergencyContactsList": {
+    "accessDenied": "You do not have permission to view emergency contacts.",
+    "actions": {
+      "addContact": "Add Contact",
+      "clearSelection": "Clear Selection",
+      "deleteSelected": "Delete Selected"
+    },
+    "badges": {
+      "primary": "Primary"
+    },
+    "empty": "No emergency contacts found",
+    "fields": {
+      "alternatePhone": "Alternate Phone",
+      "phoneNumber": "Phone Number",
+      "primaryContact": "Primary Contact",
+      "priority": "Priority",
+      "relationship": "Relationship"
+    },
+    "modals": {
+      "addTitle": "Add Emergency Contact",
+      "deleteMessage": "Are you sure you want to delete this contact?",
+      "deleteMessageNamed": "Are you sure you want to delete {{name}}?",
+      "deleteSelectedMessage": "Are you sure you want to delete {{count}} selected contact(s)?",
+      "deleteSelectedTitle": "Delete Selected Contacts",
+      "deleteTitle": "Delete Emergency Contact",
+      "detailsTitle": "Emergency Contact Details",
+      "editTitle": "Edit Emergency Contact"
+    },
+    "notSet": "Not set",
+    "priorityBadge": "Priority #{{priority}}",
+    "selectedCount": "{{count}} selected",
+    "stats": {
+      "completion": "Completion",
+      "missing": "Missing",
+      "primary": "Primary Contact",
+      "set": "Set",
+      "total": "Total",
+      "withPhone": "With Phone"
+    },
+    "subtitle": "Manage emergency contacts for {{name}}",
+    "table": {
+      "columns": {
+        "actions": "Actions",
+        "contactInfo": "Contact Info",
+        "priority": "Priority",
+        "relationship": "Relationship"
+      }
+    },
+    "title": "Emergency Contacts"
+  },
+  "profilePhotoUpload": {
+    "actions": {
+      "removePhoto": "Remove Photo",
+      "uploadPhoto": "Upload Photo"
+    },
+    "errors": {
+      "fileTooLarge": "File is too large. Maximum size is {{size}}MB",
+      "invalidFileType": "Invalid file type. Allowed types: {{types}}",
+      "removeFailed": "Failed to remove profile photo.",
+      "uploadFailed": "Failed to upload profile photo."
+    },
+    "hints": {
+      "clickOrDrag": "Click to select a photo or drag and drop",
+      "maxSize": "Maximum size: {{size}}MB"
+    },
+    "labels": {
+      "fileInfo": "{{name}} ({{sizeKb}} KB)",
+      "previewAlt": "Photo preview",
+      "profileAlt": "Profile photo"
+    },
+    "modals": {
+      "removeDescription": "This action cannot be undone.",
+      "removeQuestion": "Remove this profile photo?",
+      "removeTitle": "Remove Photo",
+      "uploadQuestion": "Use this image as the profile photo?",
+      "uploadTitle": "Confirm Upload"
+    }
   }
 }

@@ -428,12 +428,12 @@ const InvitationsListPage = () => {
       switch (bulkAction) {
         case 'approve':
           for (const id of selectedInvitations) {
-            await dispatch(approveInvitation({ id, comments: 'Bulk approval' })).unwrap();
+            await dispatch(approveInvitation({ id, comments: t('bulk.approvalComment') })).unwrap();
           }
           break;
         case 'reject':
           for (const id of selectedInvitations) {
-            await dispatch(rejectInvitation({ id, reason: 'Bulk rejection' })).unwrap();
+            await dispatch(rejectInvitation({ id, reason: t('bulk.rejectionReason') })).unwrap();
           }
           break;
         case 'delete':
@@ -506,7 +506,9 @@ const InvitationsListPage = () => {
       setEmailSuccess(false);
 
       await invitationService.sendQrCodeEmail(currentInvitation.id, {
-        customMessage: `Please use this QR code for your visit on ${formatters.formatDate(currentInvitation.scheduledStartTime)}.`,
+        customMessage: t('qr.emailDefaultMessage', {
+          date: formatters.formatDate(currentInvitation.scheduledStartTime)
+        }),
         includeQrImage: true
       });
 
@@ -667,7 +669,7 @@ const InvitationsListPage = () => {
         dispatch(showDeleteModal(invitation));
         break;
       case 'approve':
-        handleApproveInvitation(invitation.id, 'Quick approval');
+        handleApproveInvitation(invitation.id, t('approval.quickComment'));
         break;
       case 'approval':
         dispatch(showApprovalModal(invitation));
@@ -1474,13 +1476,18 @@ const InvitationsListPage = () => {
               {canBeApproved(currentInvitation) && (
                 <>
                   <button
-                    onClick={() => handleApproveInvitation(currentInvitation.id, normalizeStatus(currentInvitation.status) === 'rejected' ? 'Re-approved from details' : 'Approved from details')}
+                    onClick={() => handleApproveInvitation(
+                      currentInvitation.id,
+                      normalizeStatus(currentInvitation.status) === 'rejected'
+                        ? t('approval.detailsReapproved')
+                        : t('approval.detailsApproved')
+                    )}
                     className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white bg-green-600 border border-green-700 rounded-lg hover:bg-green-700 transition-colors shadow-sm whitespace-nowrap"
                     disabled={approvalLoading}
                   >
                     <CheckIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                     <span className="hidden sm:inline">{normalizeStatus(currentInvitation.status) === 'rejected' ? t('actions.reApprove') : t('actions.approve')}</span>
-                    <span className="sm:hidden">OK</span>
+                    <span className="sm:hidden">{t('actions.approveShort')}</span>
                   </button>
                   {/* Only show reject button for pending invitations, not rejected ones */}
                   {isPendingApproval(currentInvitation) && (
@@ -1509,7 +1516,7 @@ const InvitationsListPage = () => {
                 >
                   <QrCodeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">{t('tooltips.viewQrCode')}</span>
-                  <span className="sm:hidden">QR</span>
+                  <span className="sm:hidden">{t('tooltips.qrShort')}</span>
                 </button>
               )}
 
@@ -1836,7 +1843,7 @@ const InvitationsListPage = () => {
             {currentInvitation?.subject} - #{currentInvitation?.invitationNumber}
           </p>
           <p className="text-xs text-gray-500 mt-1">
-            Visitor: {currentInvitation?.visitor?.fullName}
+            {t('qr.visitor')}: {currentInvitation?.visitor?.fullName}
           </p>
         </div>
 
@@ -1876,7 +1883,7 @@ const InvitationsListPage = () => {
               <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg shadow-sm">
                 <img
                   src={`data:image/png;base64,${qrCodeImage}`}
-                  alt="QR Code"
+                  alt={t('qr.imageAlt')}
                   className="w-48 h-48 mx-auto"
                 />
               </div>

@@ -47,7 +47,8 @@
     "deactivateSelected": "Deactivate Selected",
     "deleteSelected": "Delete Selected",
     "confirmTitle": "{{action}} Users",
-    "confirmMessage": "Are you sure you want to {{action}} {{count}} user(s)?"
+    "confirmMessage": "Are you sure you want to {{action}} {{count}} user(s)?",
+    "selected": "{{count}} selected"
   },
   "roles": {
     "Administrator": "Administrator",
@@ -329,5 +330,167 @@
     "language": "Language",
     "theme": "Theme",
     "timeZone": "Time Zone"
+  },
+  "form": {
+    "toasts": {
+      "departmentCreated": "{{name}} has been created successfully.",
+      "validationTitle": "Validation Error",
+      "validationMessage": "Please fix the errors in the form before submitting."
+    },
+    "header": {
+      "editSubtitle": "Update user information and permissions",
+      "createSubtitle": "Add a new user to the system with appropriate access level"
+    },
+    "placeholders": {
+      "firstName": "Enter first name",
+      "lastName": "Enter last name",
+      "email": "Enter email address",
+      "employeeId": "Enter employee ID",
+      "department": "Select a department...",
+      "jobTitle": "Enter job title",
+      "phoneNumber": "71 123 456",
+      "streetAddress": "Building name, Street name",
+      "addressLine2": "Floor, Apartment, Unit",
+      "city": "e.g., Beirut, Tripoli, Sidon",
+      "postalCode": "e.g., 1107-2180",
+      "latitude": "33.8938",
+      "longitude": "35.5018"
+    },
+    "help": {
+      "employeeId": "Optional: Unique identifier for the employee",
+      "postalCode": "Lebanon postal codes are optional",
+      "latitude": "Beirut: ~33.8938",
+      "longitude": "Beirut: ~35.5018"
+    },
+    "actions": {
+      "createDepartment": "Create new department",
+      "updating": "Updating...",
+      "creating": "Creating...",
+      "updateUser": "Update User",
+      "createUser": "Create User"
+    },
+    "statusOptions": {
+      "suspended": "Suspended"
+    },
+    "phoneTypes": {
+      "mobile": "Mobile",
+      "landline": "Landline",
+      "unknown": "Unknown"
+    },
+    "coordinates": {
+      "toggle": "Add precise location coordinates"
+    },
+    "timeZones": {
+      "utc": "UTC",
+      "eastern": "Eastern Time",
+      "central": "Central Time",
+      "pacific": "Pacific Time",
+      "london": "London",
+      "paris": "Paris",
+      "beirut": "Beirut Time (EET)",
+      "regionalGroup": "--- Regional ---",
+      "damascus": "Damascus",
+      "amman": "Amman",
+      "jerusalem": "Jerusalem",
+      "istanbul": "Istanbul",
+      "riyadh": "Riyadh",
+      "dubai": "Dubai",
+      "kuwait": "Kuwait",
+      "internationalGroup": "--- International ---"
+    },
+    "accountSettings": {
+      "activeAccount": "Active Account",
+      "activeAccountDesc": "User can log in and access the system",
+      "requirePasswordChange": "Require Password Change",
+      "requirePasswordChangeDesc": "User must change password on first login",
+      "sendWelcomeEmail": "Send Welcome Email",
+      "sendWelcomeEmailDesc": "Send welcome email with login credentials",
+      "approvalOverride": "Invitation Approval Override",
+      "approvalOverrideDesc": "Controls whether this user invitations require admin approval, overriding the global setting.",
+      "approvalOverrideDefault": "Use global setting (default)",
+      "approvalOverrideRequire": "Always require approval",
+      "approvalOverrideAuto": "Always auto-approve (skip approval)"
+    },
+    "sections": {
+      "userPreferences": "User Preferences"
+    },
+    "phoneCountryCodes": {
+      "lb": "Lebanon +961",
+      "sy": "Syria +963",
+      "jo": "Jordan +962",
+      "il": "Israel +972",
+      "tr": "Turkey +90",
+      "eg": "Egypt +20",
+      "sa": "Saudi Arabia +966",
+      "ae": "United Arab Emirates +971",
+      "kw": "Kuwait +965",
+      "qa": "Qatar +974",
+      "us": "United States +1",
+      "gb": "United Kingdom +44",
+      "fr": "France +33",
+      "de": "Germany +49",
+      "it": "Italy +39"
+    },
+    "addressTypes": {
+      "home": "Home",
+      "work": "Work",
+      "billing": "Billing",
+      "shipping": "Shipping",
+      "other": "Other"
+    },
+    "governorates": {
+      "beirut": "Beirut",
+      "mountLebanon": "Mount Lebanon",
+      "northLebanon": "North Lebanon",
+      "southLebanon": "South Lebanon",
+      "beqaa": "Beqaa",
+      "akkar": "Akkar",
+      "baalbekHermel": "Baalbek-Hermel",
+      "nabatieh": "Nabatieh"
+    },
+    "countries": {
+      "lebanon": "Lebanon",
+      "middleEastGroup": "--- Middle East ---",
+      "syria": "Syria",
+      "jordan": "Jordan",
+      "israel": "Israel",
+      "turkey": "Turkey",
+      "cyprus": "Cyprus",
+      "egypt": "Egypt",
+      "saudiArabia": "Saudi Arabia",
+      "unitedArabEmirates": "United Arab Emirates",
+      "kuwait": "Kuwait",
+      "qatar": "Qatar",
+      "bahrain": "Bahrain",
+      "oman": "Oman",
+      "iraq": "Iraq",
+      "iran": "Iran",
+      "internationalGroup": "--- International ---",
+      "unitedStates": "United States",
+      "canada": "Canada",
+      "unitedKingdom": "United Kingdom",
+      "france": "France",
+      "germany": "Germany",
+      "italy": "Italy",
+      "australia": "Australia",
+      "brazil": "Brazil",
+      "other": "Other"
+    },
+    "languages": {
+      "englishUs": "English (US)",
+      "arabicLebanon": "Arabic (Lebanon)",
+      "arabicStandard": "Arabic (Standard)",
+      "englishUk": "English (UK)",
+      "french": "French",
+      "turkish": "Turkish",
+      "spanish": "Spanish",
+      "german": "German",
+      "italian": "Italian"
+    },
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "auto": "Auto"
+    }
   }
 }

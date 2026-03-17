@@ -94,8 +94,8 @@ const EnhancedInput = forwardRef(({
   
   // Padding adjustments for icons
   const paddingClasses = {
-    'icon-left': 'pl-10',
-    'icon-right': 'pr-10',
+    'icon-left': 'ps-10',
+    'icon-right': 'pe-10',
     'icon-both': 'px-10'
   };
 

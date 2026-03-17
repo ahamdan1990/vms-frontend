@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import {
   fetchNotifications,
   acknowledgeNotificationAsync,
@@ -55,6 +56,7 @@ const NotificationCenter = ({
   onClose,
   className = ''
 }) => {
+  const { t } = useTranslation('notifications');
   const dispatch = useDispatch();
   
   // Redux state - FIX: Extract lastSyncTime from root level, not from stats
@@ -133,10 +135,10 @@ const NotificationCenter = ({
 
   // Clear all notifications (delete from backend)
   const handleClearAll = useCallback(() => {
-    if (window.confirm('Are you sure you want to delete all notifications? This action cannot be undone.')) {
+    if (window.confirm(t('center.clearAllConfirm'))) {
       dispatch(deleteAllNotificationsAsync());
     }
-  }, [dispatch]);
+  }, [dispatch, t]);
 
   // Remove notification (delete from backend)
   const removeNotificationHandler = useCallback((notificationId) => {
@@ -158,7 +160,7 @@ const NotificationCenter = ({
         case 'acknowledge':
           await dispatch(acknowledgeNotificationAsync({ 
             notificationId: notification.id, 
-            notes: 'Acknowledged via notification center' 
+            notes: t('center.acknowledgeNote')
           })).unwrap();
           
           // Force refresh notifications after acknowledgment
@@ -207,14 +209,14 @@ const NotificationCenter = ({
     } catch (error) {
       console.error('Error handling notification action:', error);
     }
-  }, [dispatch, markAsRead, removeNotificationHandler, host]);
+  }, [dispatch, markAsRead, removeNotificationHandler, host, t]);
 
   // Enhanced acknowledge handler for direct acknowledge button
   const handleDirectAcknowledge = useCallback(async (notificationId) => {
     try {
       await dispatch(acknowledgeNotificationAsync({ 
         notificationId, 
-        notes: 'Direct acknowledgment from notification center' 
+        notes: t('center.directAcknowledgeNote')
       })).unwrap();
       
       // Force refresh notifications after acknowledgment
@@ -229,7 +231,7 @@ const NotificationCenter = ({
     } catch (error) {
       console.error('❌ Failed to acknowledge notification:', error);
     }
-  }, [dispatch, host]);
+  }, [dispatch, host, t]);
 
   // Get notification icon
   const getNotificationIcon = (type, priority) => {
@@ -302,11 +304,11 @@ const NotificationCenter = ({
   // Render filter tabs
   const renderFilterTabs = () => {
     const filters = [
-      { id: 'all', label: `All (${notifications.length})` },
-      { id: 'unread', label: `Unread (${unreadCount})` },
-      { id: 'visitors', label: 'Visitors' },
-      { id: 'security', label: 'Security' },
-      { id: 'system', label: 'System' }
+      { id: 'all', label: t('center.filters.all', { count: notifications.length }) },
+      { id: 'unread', label: t('center.filters.unread', { count: unreadCount }) },
+      { id: 'visitors', label: t('center.filters.visitors') },
+      { id: 'security', label: t('center.filters.security') },
+      { id: 'system', label: t('center.filters.system') }
     ];
 
     return (
@@ -503,7 +505,7 @@ const NotificationCenter = ({
                     ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                 }`}
-                title="List view"
+                title={t('center.view.listTitle')}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -516,7 +518,7 @@ const NotificationCenter = ({
                     ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
                 }`}
-                title="Card view"
+                title={t('center.view.cardTitle')}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -530,7 +532,7 @@ const NotificationCenter = ({
                 variant="ghost"
                 onClick={markAllAsRead}
                 icon={<CheckIcon className="w-4 h-4" />}
-                title="Mark all as read"
+                title={t('center.markAllReadTitle')}
               />
             )}
 
@@ -540,7 +542,7 @@ const NotificationCenter = ({
                 variant="ghost"
                 onClick={handleClearAll}
                 icon={<TrashIcon className="w-4 h-4" />}
-                title="Clear all notifications"
+                title={t('center.clearAllTitle')}
                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
               />
             )}
@@ -565,7 +567,7 @@ const NotificationCenter = ({
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 m-4 rounded-lg">
             <p className="text-red-600 text-sm">
-              Error loading notifications: {error}
+              {t('center.errorLoading', { error })}
             </p>
             <Button
               size="sm"
@@ -573,7 +575,7 @@ const NotificationCenter = ({
               onClick={() => dispatch(fetchNotifications())}
               className="mt-2"
             >
-              Retry
+              {t('center.retry')}
             </Button>
           </div>
         )}
@@ -581,22 +583,24 @@ const NotificationCenter = ({
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <LoadingSpinner size="lg" />
-            <span className="ms-2 text-gray-500">Loading notifications...</span>
+            <span className="ms-2 text-gray-500">{t('loading')}</span>
           </div>
         ) : filteredNotifications.length === 0 ? (
           <div className="text-center py-12">
             <BellIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <h3 className="text-sm font-medium text-gray-900 mb-1">No notifications</h3>
+            <h3 className="text-sm font-medium text-gray-900 mb-1">{t('center.emptyTitle')}</h3>
             <p className="text-sm text-gray-500">
               {filter === 'unread' 
-                ? "You're all caught up!" 
-                : `No ${filter === 'all' ? '' : filter} notifications to show`
+                ? t('allCaughtUp')
+                : t('center.emptyFilterMessage', {
+                  filter: filter === 'all' ? t('center.filters.allShort') : t(`center.filters.${filter}`)
+                })
               }
             </p>
             {!signalRConnected && !isSignalRConnected && (
               <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-yellow-600 text-xs">
-                  Real-time updates are currently unavailable. Notifications may be delayed.
+                  {t('center.realtimeUnavailable')}
                 </p>
               </div>
             )}
@@ -614,10 +618,10 @@ const NotificationCenter = ({
       <div className="p-4 border-t border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between text-xs text-gray-500">
           <div className="flex items-center gap-4">
-            <span>{filteredNotifications.length} notifications</span>
+            <span>{t('center.footerCount', { count: filteredNotifications.length })}</span>
             {/* FIX: Use lastSyncTime directly from root state, not from stats */}
             {lastSyncTime && (
-              <span>Updated: {formatters.formatRelativeTime(new Date(lastSyncTime))}</span>
+              <span>{t('center.updatedLabel')} {formatters.formatRelativeTime(new Date(lastSyncTime))}</span>
             )}
           </div>
           
@@ -627,15 +631,15 @@ const NotificationCenter = ({
               variant="ghost"
               onClick={() => dispatch(fetchNotifications())}
               icon={<ArrowPathIcon className="w-3 h-3" />}
-              title="Refresh notifications"
+              title={t('refresh')}
             />
             <Button
               size="xs"
               variant="ghost"
               icon={<ArchiveBoxIcon className="w-3 h-3" />}
-              title="View archive"
+              title={t('center.viewArchiveTitle')}
             >
-              Archive
+              {t('center.archive')}
             </Button>
           </div>
         </div>

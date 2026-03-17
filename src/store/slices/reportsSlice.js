@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import reportService from '../../services/reportService';
 import toast from 'react-hot-toast';
+import i18n from '../../i18n';
 
 /**
  * Redux slice for report management with comprehensive filtering and statistics
@@ -20,8 +21,9 @@ export const fetchInBuildingReport = createAsyncThunk(
       const data = await reportService.getInBuildingReport(params);
       return data;
     } catch (error) {
-      toast.error(error.message || 'Failed to fetch in-building report');
-      return rejectWithValue(error.message || 'Failed to fetch in-building report');
+      const message = error.message || i18n.t('reports:toasts.fetchInBuildingFailed');
+      toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -34,11 +36,12 @@ export const exportInBuildingReport = createAsyncThunk(
   async (params = {}, { rejectWithValue }) => {
     try {
       await reportService.exportInBuildingReport(params);
-      toast.success('Report exported successfully');
+      toast.success(i18n.t('reports:toasts.exportReportSuccess'));
       return true;
     } catch (error) {
-      toast.error(error.message || 'Failed to export report');
-      return rejectWithValue(error.message || 'Failed to export report');
+      const message = error.message || i18n.t('reports:toasts.exportReportFailed');
+      toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -53,8 +56,9 @@ export const fetchComprehensiveReport = createAsyncThunk(
       const data = await reportService.getComprehensiveReport(params);
       return data;
     } catch (error) {
-      toast.error(error.message || 'Failed to fetch comprehensive report');
-      return rejectWithValue(error.message || 'Failed to fetch comprehensive report');
+      const message = error.message || i18n.t('reports:toasts.fetchComprehensiveFailed');
+      toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -67,11 +71,12 @@ export const exportComprehensiveReport = createAsyncThunk(
   async (params = {}, { rejectWithValue }) => {
     try {
       await reportService.exportComprehensiveReport(params);
-      toast.success('Report exported successfully');
+      toast.success(i18n.t('reports:toasts.exportReportSuccess'));
       return true;
     } catch (error) {
-      toast.error(error.message || 'Failed to export report');
-      return rejectWithValue(error.message || 'Failed to export report');
+      const message = error.message || i18n.t('reports:toasts.exportReportFailed');
+      toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -86,8 +91,9 @@ export const fetchStatistics = createAsyncThunk(
       const data = await reportService.getStatistics(params);
       return data;
     } catch (error) {
-      toast.error(error.message || 'Failed to fetch statistics');
-      return rejectWithValue(error.message || 'Failed to fetch statistics');
+      const message = error.message || i18n.t('reports:toasts.fetchStatisticsFailed');
+      toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
@@ -100,11 +106,12 @@ export const exportStatistics = createAsyncThunk(
   async (params = {}, { rejectWithValue }) => {
     try {
       await reportService.exportStatistics(params);
-      toast.success('Statistics exported successfully');
+      toast.success(i18n.t('reports:toasts.exportStatisticsSuccess'));
       return true;
     } catch (error) {
-      toast.error(error.message || 'Failed to export statistics');
-      return rejectWithValue(error.message || 'Failed to export statistics');
+      const message = error.message || i18n.t('reports:toasts.exportStatisticsFailed');
+      toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );

@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { usePermissions } from '../../../hooks/usePermissions';
 
 // Redux actions
@@ -11,16 +12,16 @@ import {
   getCapacityOverview,
   getCapacityTrends,
   setSelectedLocationId,
-  setSelectedDateRange,
   setAutoRefresh,
   showStatisticsModal,
+  hideStatisticsModal,
   showTrendsModal,
-  clearError
+  hideTrendsModal
 } from '../../../store/slices/capacitySlice';
 
 import { getLocations } from '../../../store/slices/locationsSlice';
 
-// Import selectors
+// Selectors
 import {
   selectOccupancyData,
   selectOccupancyLoading,
@@ -30,12 +31,10 @@ import {
   selectStatisticsError,
   selectOverviewData,
   selectOverviewLoading,
-  selectOverviewError,
   selectTrendsData,
   selectTrendsLoading,
   selectTrendsError,
   selectSelectedLocationId,
-  selectSelectedDateRange,
   selectAutoRefresh,
   selectShowStatisticsModal,
   selectShowTrendsModal
@@ -55,191 +54,174 @@ import Modal from '../../../components/common/Modal/Modal';
 // Services
 import capacityService from '../../../services/capacityService';
 
-// Utils
-import { formatDistanceToNow } from 'date-fns';
-
 /**
  * Capacity Dashboard - Real-time monitoring and analytics
  */
 const CapacityDashboard = () => {
   const dispatch = useDispatch();
+  const { t, i18n } = useTranslation('analytics');
   const { user: userPermissions, report: reportPermissions } = usePermissions();
+  const locale = i18n.language === 'ar' ? 'ar' : 'en-US';
 
-  // Local state
-  const [refreshInterval, setRefreshInterval] = useState(null);
+  const [refreshInterval, setRefreshIntervalState] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // Redux state using selectors
   const occupancyData = useSelector(selectOccupancyData);
   const occupancyLoading = useSelector(selectOccupancyLoading);
   const occupancyError = useSelector(selectOccupancyError);
-  
+
   const statisticsData = useSelector(selectStatisticsData);
   const statisticsLoading = useSelector(selectStatisticsLoading);
   const statisticsError = useSelector(selectStatisticsError);
-  
+
   const overviewData = useSelector(selectOverviewData);
   const overviewLoading = useSelector(selectOverviewLoading);
-  const overviewError = useSelector(selectOverviewError);
-  
+
   const trendsData = useSelector(selectTrendsData);
   const trendsLoading = useSelector(selectTrendsLoading);
   const trendsError = useSelector(selectTrendsError);
-  
+
   const selectedLocationId = useSelector(selectSelectedLocationId);
-  const selectedDateRange = useSelector(selectSelectedDateRange);
   const autoRefresh = useSelector(selectAutoRefresh);
   const showStatisticsModalState = useSelector(selectShowStatisticsModal);
   const showTrendsModalState = useSelector(selectShowTrendsModal);
 
   const locations = useSelector(selectLocationsList);
-  const locationsLoading = useSelector(state => state.locations.loading);
+  const locationsLoading = useSelector((state) => state.locations.loading);
 
-  // Check permissions
   const canViewBasic = userPermissions.canActivate;
   const canViewReports = reportPermissions?.canGenerateAll || reportPermissions?.canExport;
 
-  // Initialize data
   useEffect(() => {
-    if (canViewBasic) {
-      dispatch(getLocations());
-      dispatch(getOccupancy({ 
-        dateTime: new Date().toISOString(),
-        locationId: selectedLocationId 
-      }));
-      dispatch(getCapacityOverview({ 
-        dateTime: new Date().toISOString() 
-      }));
-    }
+    if (!canViewBasic) return;
+
+    dispatch(getLocations());
+    dispatch(getOccupancy({
+      dateTime: new Date().toISOString(),
+      locationId: selectedLocationId
+    }));
+    dispatch(getCapacityOverview({
+      dateTime: new Date().toISOString()
+    }));
   }, [dispatch, canViewBasic, selectedLocationId]);
 
-  // Auto refresh setup
   useEffect(() => {
-    if (autoRefresh && canViewBasic) {
-      const interval = setInterval(() => {
-        dispatch(getOccupancy({ 
-          dateTime: new Date().toISOString(),
-          locationId: selectedLocationId 
-        }));
-        dispatch(getCapacityOverview({ 
-          dateTime: new Date().toISOString() 
-        }));
-      }, 30000); // Refresh every 30 seconds
-
-      setRefreshInterval(interval);
-
-      return () => {
-        if (interval) {
-          clearInterval(interval);
-        }
-      };
-    } else {
+    if (!autoRefresh || !canViewBasic) {
       if (refreshInterval) {
         clearInterval(refreshInterval);
-        setRefreshInterval(null);
+        setRefreshIntervalState(null);
       }
+      return;
     }
-  }, [autoRefresh, canViewBasic, selectedLocationId, dispatch]);
 
-  // Cleanup interval on unmount
-  useEffect(() => {
-    return () => {
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
-      }
-    };
-  }, [refreshInterval]);
-
-  // Handle location change
-  const handleLocationChange = (locationId) => {
-    dispatch(setSelectedLocationId(locationId || null));
-    
-    if (canViewBasic) {
-      dispatch(getOccupancy({ 
+    const interval = setInterval(() => {
+      dispatch(getOccupancy({
         dateTime: new Date().toISOString(),
-        locationId: locationId || null 
-      }));
-    }
-  };
-
-  // Handle date change for specific occupancy check
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-    
-    if (canViewBasic) {
-      dispatch(getOccupancy({ 
-        dateTime: new Date(date).toISOString(),
-        locationId: selectedLocationId 
-      }));
-    }
-  };
-
-  // Handle refresh
-  const handleRefresh = () => {
-    if (canViewBasic) {
-      dispatch(getOccupancy({ 
-        dateTime: new Date(selectedDate).toISOString(),
-        locationId: selectedLocationId 
-      }));
-      dispatch(getCapacityOverview({ 
-        dateTime: new Date().toISOString() 
-      }));
-    }
-  };
-
-  // Handle statistics request
-  const handleViewStatistics = () => {
-    if (canViewReports) {
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(endDate.getDate() - 30); // Last 30 days
-
-      dispatch(getStatistics({
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
         locationId: selectedLocationId
       }));
-      dispatch(showStatisticsModal());
-    }
-  };
-
-  // Handle trends request
-  const handleViewTrends = () => {
-    if (canViewReports) {
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(endDate.getDate() - 7); // Last 7 days
-
-      dispatch(getCapacityTrends({
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
-        locationId: selectedLocationId,
-        groupBy: 'day'
+      dispatch(getCapacityOverview({
+        dateTime: new Date().toISOString()
       }));
-      dispatch(showTrendsModal());
+    }, 30000);
+
+    setRefreshIntervalState(interval);
+
+    return () => clearInterval(interval);
+  }, [autoRefresh, canViewBasic, selectedLocationId, dispatch, refreshInterval]);
+
+  useEffect(() => () => {
+    if (refreshInterval) {
+      clearInterval(refreshInterval);
+    }
+  }, [refreshInterval]);
+
+  const handleLocationChange = (locationId) => {
+    const normalizedLocationId = locationId || null;
+    dispatch(setSelectedLocationId(normalizedLocationId));
+
+    if (canViewBasic) {
+      dispatch(getOccupancy({
+        dateTime: new Date().toISOString(),
+        locationId: normalizedLocationId
+      }));
     }
   };
 
-  // Location options
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+
+    if (canViewBasic) {
+      dispatch(getOccupancy({
+        dateTime: new Date(date).toISOString(),
+        locationId: selectedLocationId
+      }));
+    }
+  };
+
+  const handleRefresh = () => {
+    if (!canViewBasic) return;
+
+    dispatch(getOccupancy({
+      dateTime: new Date(selectedDate).toISOString(),
+      locationId: selectedLocationId
+    }));
+    dispatch(getCapacityOverview({
+      dateTime: new Date().toISOString()
+    }));
+  };
+
+  const handleViewStatistics = () => {
+    if (!canViewReports) return;
+
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 30);
+
+    dispatch(getStatistics({
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      locationId: selectedLocationId
+    }));
+    dispatch(showStatisticsModal());
+  };
+
+  const handleViewTrends = () => {
+    if (!canViewReports) return;
+
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 7);
+
+    dispatch(getCapacityTrends({
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      locationId: selectedLocationId,
+      groupBy: 'day'
+    }));
+    dispatch(showTrendsModal());
+  };
+
   const locationOptions = useMemo(() => [
-    { value: '', label: 'All Locations' },
-    ...locations.map(location => ({
+    { value: '', label: t('capacityDashboard.filters.allLocations') },
+    ...locations.map((location) => ({
       value: location.id.toString(),
       label: location.name
     }))
-  ], [locations]);
+  ], [locations, t]);
 
-  // Current occupancy status
-  const occupancyStatus = occupancyData 
+  const occupancyStatus = occupancyData
     ? capacityService.getOccupancyStatus(occupancyData)
     : 'unknown';
+
+  const toLocaleDate = (dateLike) => new Date(dateLike).toLocaleDateString(locale);
+  const toLocaleDateTime = (dateLike) => new Date(dateLike).toLocaleString(locale);
 
   if (!canViewBasic) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
-          <p className="text-gray-600">You don't have permission to view capacity dashboard.</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">{t('capacityDashboard.accessDeniedTitle')}</h3>
+          <p className="text-gray-600 dark:text-gray-300">{t('capacityDashboard.accessDeniedDesc')}</p>
         </div>
       </div>
     );
@@ -247,72 +229,61 @@ const CapacityDashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Capacity Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400">Real-time visitor capacity monitoring</p>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{t('capacityDashboard.title')}</h1>
+          <p className="text-gray-600 dark:text-gray-400">{t('capacityDashboard.subtitle')}</p>
         </div>
-        
+
         <div className="flex gap-3">
           <Button
             variant="outline"
             onClick={handleRefresh}
             loading={occupancyLoading || overviewLoading}
           >
-            Refresh
+            {t('capacityDashboard.buttons.refresh')}
           </Button>
-          
+
           <Button
             variant="outline"
             onClick={() => dispatch(setAutoRefresh(!autoRefresh))}
             className={autoRefresh ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-700' : ''}
           >
-            {autoRefresh ? 'Auto Refresh ON' : 'Auto Refresh OFF'}
+            {autoRefresh ? t('capacityDashboard.buttons.autoOn') : t('capacityDashboard.buttons.autoOff')}
           </Button>
         </div>
       </div>
 
-      {/* Controls */}
       <div className="bg-white dark:bg-slate-900/70 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <Select
-              label="Location"
+              label={t('capacityDashboard.filters.location')}
               value={selectedLocationId?.toString() || ''}
               onChange={(e) => handleLocationChange(e.target.value)}
               options={locationOptions}
               loading={locationsLoading}
             />
           </div>
-          
+
           <div className="flex-1">
             <Input
               type="date"
-              label="Date"
+              label={t('capacityDashboard.filters.date')}
               value={selectedDate}
               onChange={(e) => handleDateChange(e.target.value)}
               max={new Date().toISOString().split('T')[0]}
             />
           </div>
-          
+
           <div className="flex gap-2 items-end">
             {canViewReports && (
               <>
-                <Button
-                  variant="outline"
-                  onClick={handleViewStatistics}
-                  size="sm"
-                >
-                  View Statistics
+                <Button variant="outline" onClick={handleViewStatistics} size="sm">
+                  {t('capacityDashboard.buttons.viewStatistics')}
                 </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={handleViewTrends}
-                  size="sm"
-                >
-                  View Trends
+                <Button variant="outline" onClick={handleViewTrends} size="sm">
+                  {t('capacityDashboard.buttons.viewTrends')}
                 </Button>
               </>
             )}
@@ -320,7 +291,6 @@ const CapacityDashboard = () => {
         </div>
       </div>
 
-      {/* Current Occupancy Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -328,10 +298,10 @@ const CapacityDashboard = () => {
       >
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Current Occupancy</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('capacityDashboard.current.title')}</h2>
             {occupancyData?.lastUpdated && (
-              <span className="text-sm text-gray-500">
-                Updated {formatDistanceToNow(new Date(occupancyData.lastUpdated), { addSuffix: true })}
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                {t('capacityDashboard.current.updatedAt', { time: toLocaleDateTime(occupancyData.lastUpdated) })}
               </span>
             )}
           </div>
@@ -342,62 +312,62 @@ const CapacityDashboard = () => {
             </div>
           ) : occupancyError ? (
             <div className="text-center py-8">
-              <p className="text-red-600">Error: {occupancyError}</p>
-              <Button
-                variant="outline"
-                onClick={handleRefresh}
-                className="mt-4"
-              >
-                Retry
+              <p className="text-red-600 dark:text-red-300">
+                {t('capacityDashboard.current.errorPrefix')}: {occupancyError}
+              </p>
+              <Button variant="outline" onClick={handleRefresh} className="mt-4">
+                {t('capacityDashboard.buttons.retry')}
               </Button>
             </div>
           ) : occupancyData ? (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-gray-900">
+                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                   {occupancyData.currentOccupancy}
                 </div>
-                <div className="text-sm text-gray-600">Current Visitors</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">{t('capacityDashboard.current.currentVisitors')}</div>
               </div>
-              
+
               <div className="text-center">
-                <div className="text-3xl font-bold text-gray-900">
+                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                   {occupancyData.maxCapacity}
                 </div>
-                <div className="text-sm text-gray-600">Max Capacity</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">{t('capacityDashboard.current.maxCapacity')}</div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-3xl font-bold text-green-600">
                   {occupancyData.availableSlots}
                 </div>
-                <div className="text-sm text-gray-600">Available Slots</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">{t('capacityDashboard.current.availableSlots')}</div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-2xl font-bold">
                   <Badge
                     variant={
-                      occupancyStatus === 'at-capacity' ? 'error' :
-                      occupancyStatus === 'warning' ? 'warning' : 'success'
+                      occupancyStatus === 'at-capacity'
+                        ? 'error'
+                        : occupancyStatus === 'warning'
+                          ? 'warning'
+                          : 'success'
                     }
                     size="lg"
                   >
                     {occupancyData.occupancyPercentage}%
                   </Badge>
                 </div>
-                <div className="text-sm text-gray-600">Utilization</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">{t('capacityDashboard.current.utilization')}</div>
               </div>
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-600">No occupancy data available</p>
+              <p className="text-gray-600 dark:text-gray-400">{t('capacityDashboard.current.noData')}</p>
             </div>
           )}
         </Card>
       </motion.div>
 
-      {/* Overview Cards */}
       {overviewData && overviewData.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -405,8 +375,8 @@ const CapacityDashboard = () => {
           transition={{ duration: 0.3, delay: 0.1 }}
         >
           <Card className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Location Overview</h2>
-            
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{t('capacityDashboard.overview.title')}</h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {overviewData.map((location) => (
                 <div
@@ -417,31 +387,37 @@ const CapacityDashboard = () => {
                     <h3 className="font-medium text-gray-900 dark:text-white">{location.locationName}</h3>
                     <Badge
                       variant={
-                        location.isAtCapacity ? 'error' :
-                        location.isWarningLevel ? 'warning' : 'success'
+                        location.isAtCapacity
+                          ? 'error'
+                          : location.isWarningLevel
+                            ? 'warning'
+                            : 'success'
                       }
                       size="sm"
                     >
-                      {location.isAtCapacity ? 'Full' : 
-                       location.isWarningLevel ? 'Warning' : 'Available'}
+                      {location.isAtCapacity
+                        ? t('capacityDashboard.overview.statusFull')
+                        : location.isWarningLevel
+                          ? t('capacityDashboard.overview.statusWarning')
+                          : t('capacityDashboard.overview.statusAvailable')}
                     </Badge>
                   </div>
-                  
+
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Current:</span>
+                      <span className="text-gray-600 dark:text-gray-400">{t('capacityDashboard.overview.currentLabel')}</span>
                       <span className="font-medium text-gray-900 dark:text-gray-100">{location.currentOccupancy}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Capacity:</span>
+                      <span className="text-gray-600 dark:text-gray-400">{t('capacityDashboard.overview.capacityLabel')}</span>
                       <span className="font-medium text-gray-900 dark:text-gray-100">{location.maxCapacity}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Available:</span>
+                      <span className="text-gray-600 dark:text-gray-400">{t('capacityDashboard.overview.availableLabel')}</span>
                       <span className="font-medium text-green-600 dark:text-green-400">{location.availableSlots}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Utilization:</span>
+                      <span className="text-gray-600 dark:text-gray-400">{t('capacityDashboard.overview.utilizationLabel')}</span>
                       <span className="font-medium text-gray-900 dark:text-gray-100">{location.occupancyPercentage}%</span>
                     </div>
                   </div>
@@ -452,38 +428,36 @@ const CapacityDashboard = () => {
         </motion.div>
       )}
 
-      {/* Status Indicators */}
       <Card className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-6">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              <span className="text-sm text-gray-600 dark:text-gray-300">Normal</span>
+              <div className="w-3 h-3 rounded-full bg-green-500" />
+              <span className="text-sm text-gray-600 dark:text-gray-300">{t('capacityDashboard.indicators.normal')}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <span className="text-sm text-gray-600 dark:text-gray-300">Warning (80%+)</span>
+              <div className="w-3 h-3 rounded-full bg-yellow-500" />
+              <span className="text-sm text-gray-600 dark:text-gray-300">{t('capacityDashboard.indicators.warning')}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <span className="text-sm text-gray-600 dark:text-gray-300">At Capacity</span>
+              <div className="w-3 h-3 rounded-full bg-red-500" />
+              <span className="text-sm text-gray-600 dark:text-gray-300">{t('capacityDashboard.indicators.atCapacity')}</span>
             </div>
           </div>
-          
+
           {autoRefresh && (
             <div className="flex items-center gap-2 text-green-600 dark:text-green-300">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-              <span className="text-sm">Auto-refreshing every 30s</span>
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-sm">{t('capacityDashboard.indicators.autoRefreshing')}</span>
             </div>
           )}
         </div>
       </Card>
 
-      {/* Statistics Modal */}
       <Modal
         isOpen={showStatisticsModalState}
-        onClose={() => dispatch({ type: 'capacity/hideStatisticsModal' })}
-        title="Capacity Statistics"
+        onClose={() => dispatch(hideStatisticsModal())}
+        title={t('capacityDashboard.statisticsModal.title')}
         size="lg"
       >
         <div className="space-y-6">
@@ -493,13 +467,11 @@ const CapacityDashboard = () => {
             </div>
           ) : statisticsError ? (
             <div className="text-center py-8">
-              <p className="text-red-600">Error loading statistics: {statisticsError}</p>
-              <Button
-                variant="outline"
-                onClick={handleViewStatistics}
-                className="mt-4"
-              >
-                Retry
+              <p className="text-red-600 dark:text-red-300">
+                {t('capacityDashboard.statisticsModal.error')}: {statisticsError}
+              </p>
+              <Button variant="outline" onClick={handleViewStatistics} className="mt-4">
+                {t('capacityDashboard.buttons.retry')}
               </Button>
             </div>
           ) : statisticsData ? (
@@ -509,35 +481,35 @@ const CapacityDashboard = () => {
                   <div className="text-2xl font-bold text-blue-600 dark:text-blue-300">
                     {statisticsData.averageOccupancy}%
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">Average Occupancy</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">{t('capacityDashboard.statisticsModal.averageOccupancy')}</div>
                 </div>
-                
+
                 <div className="bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 p-4 rounded-lg">
                   <div className="text-2xl font-bold text-green-600 dark:text-green-300">
                     {statisticsData.peakOccupancy}%
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">Peak Occupancy</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">{t('capacityDashboard.statisticsModal.peakOccupancy')}</div>
                 </div>
-                
+
                 <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 p-4 rounded-lg">
                   <div className="text-2xl font-bold text-orange-600 dark:text-orange-300">
                     {statisticsData.totalVisitors}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-300">Total Visitors</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">{t('capacityDashboard.statisticsModal.totalVisitors')}</div>
                 </div>
               </div>
-              
+
               {statisticsData.dailyStats && (
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Daily Breakdown</h3>
+                  <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('capacityDashboard.statisticsModal.dailyBreakdown')}</h3>
                   <div className="space-y-2">
                     {statisticsData.dailyStats.map((day, index) => (
-                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-slate-900/60 rounded border border-gray-100 dark:border-gray-700">
-                        <span className="font-medium text-gray-900 dark:text-gray-100">{new Date(day.date).toLocaleDateString()}</span>
-                        <div className="flex gap-4 text-sm text-gray-700 dark:text-gray-300">
-                          <span>Visitors: {day.visitors}</span>
-                          <span>Peak: {day.peakOccupancy}%</span>
-                          <span>Avg: {day.averageOccupancy}%</span>
+                      <div key={index} className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center p-3 bg-gray-50 dark:bg-slate-900/60 rounded border border-gray-100 dark:border-gray-700">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{toLocaleDate(day.date)}</span>
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-700 dark:text-gray-300">
+                          <span>{t('capacityDashboard.statisticsModal.dayVisitors', { count: day.visitors })}</span>
+                          <span>{t('capacityDashboard.statisticsModal.dayPeak', { value: day.peakOccupancy })}</span>
+                          <span>{t('capacityDashboard.statisticsModal.dayAverage', { value: day.averageOccupancy })}</span>
                         </div>
                       </div>
                     ))}
@@ -547,17 +519,16 @@ const CapacityDashboard = () => {
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-600">No statistics available</p>
+              <p className="text-gray-600 dark:text-gray-400">{t('capacityDashboard.statisticsModal.noData')}</p>
             </div>
           )}
         </div>
       </Modal>
 
-      {/* Trends Modal */}
       <Modal
         isOpen={showTrendsModalState}
-        onClose={() => dispatch({ type: 'capacity/hideTrendsModal' })}
-        title="Capacity Trends"
+        onClose={() => dispatch(hideTrendsModal())}
+        title={t('capacityDashboard.trendsModal.title')}
         size="lg"
       >
         <div className="space-y-6">
@@ -567,57 +538,61 @@ const CapacityDashboard = () => {
             </div>
           ) : trendsError ? (
             <div className="text-center py-8">
-              <p className="text-red-600">Error loading trends: {trendsError}</p>
-              <Button
-                variant="outline"
-                onClick={handleViewTrends}
-                className="mt-4"
-              >
-                Retry
+              <p className="text-red-600 dark:text-red-300">
+                {t('capacityDashboard.trendsModal.error')}: {trendsError}
+              </p>
+              <Button variant="outline" onClick={handleViewTrends} className="mt-4">
+                {t('capacityDashboard.buttons.retry')}
               </Button>
             </div>
           ) : trendsData ? (
             <div>
               <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-4">7-Day Capacity Trends</h3>
-                
+                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('capacityDashboard.trendsModal.sevenDayTitle')}</h3>
+
                 {trendsData.summary && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-4 rounded-lg">
                       <div className="text-xl font-bold text-blue-600 dark:text-blue-300">
                         {trendsData.summary.averageTrend > 0 ? '+' : ''}{trendsData.summary.averageTrend}%
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Average Change</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('capacityDashboard.trendsModal.averageChange')}</div>
                     </div>
-                    
+
                     <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 p-4 rounded-lg">
                       <div className="text-xl font-bold text-purple-600 dark:text-purple-300">
                         {trendsData.summary.peakDay}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Busiest Day</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('capacityDashboard.trendsModal.busiestDay')}</div>
                     </div>
-                    
+
                     <div className="bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 p-4 rounded-lg">
                       <div className="text-xl font-bold text-green-600 dark:text-green-300">
                         {trendsData.summary.optimalTime}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Best Time</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">{t('capacityDashboard.trendsModal.bestTime')}</div>
                     </div>
                   </div>
                 )}
               </div>
-              
+
               {trendsData.data && (
                 <div>
-                  <h4 className="font-semibold mb-3">Daily Trends</h4>
+                  <h4 className="font-semibold mb-3 text-gray-900 dark:text-gray-100">{t('capacityDashboard.trendsModal.dailyTrends')}</h4>
                   <div className="space-y-2">
                     {trendsData.data.map((trend, index) => (
-                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-slate-900/60 rounded border border-gray-100 dark:border-gray-700">
-                        <span className="font-medium text-gray-900 dark:text-gray-100">{new Date(trend.date).toLocaleDateString()}</span>
-                        <div className="flex gap-4 text-sm text-gray-700 dark:text-gray-300">
-                          <span>Avg: {trend.averageOccupancy}%</span>
-                          <span>Peak: {trend.peakOccupancy}%</span>
-                          <span className={`font-medium ${trend.trend > 0 ? 'text-green-600 dark:text-green-400' : trend.trend < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>
+                      <div key={index} className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center p-3 bg-gray-50 dark:bg-slate-900/60 rounded border border-gray-100 dark:border-gray-700">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{toLocaleDate(trend.date)}</span>
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-700 dark:text-gray-300">
+                          <span>{t('capacityDashboard.trendsModal.avg', { value: trend.averageOccupancy })}</span>
+                          <span>{t('capacityDashboard.trendsModal.peak', { value: trend.peakOccupancy })}</span>
+                          <span className={`font-medium ${
+                            trend.trend > 0
+                              ? 'text-green-600 dark:text-green-400'
+                              : trend.trend < 0
+                                ? 'text-red-600 dark:text-red-400'
+                                : 'text-gray-600 dark:text-gray-300'
+                          }`}>
                             {trend.trend > 0 ? '+' : ''}{trend.trend}%
                           </span>
                         </div>
@@ -629,7 +604,7 @@ const CapacityDashboard = () => {
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-600">No trends data available</p>
+              <p className="text-gray-600 dark:text-gray-400">{t('capacityDashboard.trendsModal.noData')}</p>
             </div>
           )}
         </div>

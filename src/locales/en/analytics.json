@@ -58,5 +58,116 @@
   },
   "errors": {
     "loadFailed": "Failed to load analytics data. Please try again."
+  },
+  "capacityDashboard": {
+    "title": "Capacity Dashboard",
+    "subtitle": "Real-time visitor capacity monitoring",
+    "accessDeniedTitle": "Access Denied",
+    "accessDeniedDesc": "You don't have permission to view capacity dashboard.",
+    "buttons": {
+      "refresh": "Refresh",
+      "autoOn": "Auto Refresh ON",
+      "autoOff": "Auto Refresh OFF",
+      "viewStatistics": "View Statistics",
+      "viewTrends": "View Trends",
+      "retry": "Retry"
+    },
+    "filters": {
+      "location": "Location",
+      "date": "Date",
+      "allLocations": "All Locations"
+    },
+    "current": {
+      "title": "Current Occupancy",
+      "updatedAt": "Updated {{time}}",
+      "currentVisitors": "Current Visitors",
+      "maxCapacity": "Max Capacity",
+      "availableSlots": "Available Slots",
+      "utilization": "Utilization",
+      "noData": "No occupancy data available",
+      "errorPrefix": "Error",
+      "errorLoading": "Error Loading Occupancy",
+      "statusUnknown": "Unknown",
+      "capacityUtilization": "Capacity Utilization",
+      "atCapacityWarning": "At maximum capacity - no additional visitors can be accommodated.",
+      "approachingCapacityWarning": "Approaching capacity limit - only {{count}} slots remaining.",
+      "locationLabel": "Location:",
+      "timeSlotLabel": "Time Slot:",
+      "dateTimeLabel": "Date/Time:",
+      "locationFallback": "Location #{{id}}",
+      "timeSlotFallback": "Slot #{{id}}",
+      "viewDetails": "View Details",
+      "loadData": "Load Data"
+    },
+    "overview": {
+      "title": "Location Overview",
+      "statusFull": "Full",
+      "statusWarning": "Warning",
+      "statusAvailable": "Available",
+      "currentLabel": "Current:",
+      "capacityLabel": "Capacity:",
+      "availableLabel": "Available:",
+      "utilizationLabel": "Utilization:"
+    },
+    "indicators": {
+      "normal": "Normal",
+      "warning": "Warning (80%+)",
+      "atCapacity": "At Capacity",
+      "autoRefreshing": "Auto-refreshing every 30s"
+    },
+    "statisticsModal": {
+      "title": "Capacity Statistics",
+      "error": "Error loading statistics",
+      "noData": "No statistics available",
+      "averageOccupancy": "Average Occupancy",
+      "peakOccupancy": "Peak Occupancy",
+      "totalVisitors": "Total Visitors",
+      "dailyBreakdown": "Daily Breakdown",
+      "dayVisitors": "Visitors: {{count}}",
+      "dayPeak": "Peak: {{value}}%",
+      "dayAverage": "Avg: {{value}}%"
+    },
+    "trendsModal": {
+      "title": "Capacity Trends",
+      "error": "Error loading trends",
+      "noData": "No trends data available",
+      "sevenDayTitle": "7-Day Capacity Trends",
+      "averageChange": "Average Change",
+      "busiestDay": "Busiest Day",
+      "bestTime": "Best Time",
+      "dailyTrends": "Daily Trends",
+      "avg": "Avg: {{value}}%",
+      "peak": "Peak: {{value}}%"
+    },
+    "validator": {
+      "checking": "Checking capacity...",
+      "validationError": "Validation Error",
+      "available": "Available",
+      "notAvailable": "Not Available",
+      "limitedAvailability": "Limited Availability",
+      "currentLabel": "Current:",
+      "scheduledLabel": "Scheduled:",
+      "showAlternatives": "Show Alternatives",
+      "checkCapacity": "Check Capacity"
+    },
+    "alternatives": {
+      "title": "Alternative Time Slots",
+      "requestedAppointment": "Requested Appointment",
+      "requestUnavailable": "This time slot is currently at capacity or unavailable.",
+      "finding": "Finding alternative time slots...",
+      "unableToFind": "Unable to Find Alternatives",
+      "emptyTitle": "No Alternative Time Slots Found",
+      "emptyDescription": "Unfortunately, there are no available alternative time slots that match your requirements.",
+      "availableCount": "Available Alternatives ({{count}} found)",
+      "recommended": "Recommended",
+      "totalCapacityLabel": "Total Capacity:",
+      "select": "Select",
+      "tip": "Tip: Recommended alternatives are sorted by availability and proximity to your requested time. You can select any alternative that works for your schedule.",
+      "searchDifferentDates": "Search Different Dates",
+      "anyLocation": "Any location",
+      "visitorSingular": "visitor",
+      "visitorPlural": "visitors",
+      "requestSummary": "{{dateTime}} - {{visitors}} {{visitorLabel}} - {{location}}"
+    }
   }
 }

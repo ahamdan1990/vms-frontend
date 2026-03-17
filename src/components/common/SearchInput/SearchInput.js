@@ -7,13 +7,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 const SearchInput = ({
   value = '',
   onChange,
   onSearch,
   onClear,
-  placeholder = 'Search...',
+  placeholder = '',
   disabled = false,
   size = 'medium',
   debounceMs = 300,
@@ -23,11 +24,13 @@ const SearchInput = ({
   inputClassName,
   ...props
 }) => {
+  const { t } = useTranslation('common');
   const [internalValue, setInternalValue] = useState(value);
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef(null);
   const timeoutRef = useRef(null);
   const isControlled = value !== undefined;
+  const resolvedPlaceholder = placeholder || `${t('buttons.search')}...`;
 
   // Auto focus on mount if specified
   useEffect(() => {
@@ -111,14 +114,14 @@ const SearchInput = ({
       case 'small':
         return {
           container: 'text-sm',
-          input: 'py-1.5 pl-8 pr-8',
+          input: 'py-1.5 ps-8 pe-8',
           icon: 'h-4 w-4',
           clearButton: 'h-4 w-4'
         };
       case 'large':
         return {
           container: 'text-base',
-          input: 'py-3 pl-10 pr-10',
+          input: 'py-3 ps-10 pe-10',
           icon: 'h-6 w-6',
           clearButton: 'h-5 w-5'
         };
@@ -126,7 +129,7 @@ const SearchInput = ({
       default:
         return {
           container: 'text-sm',
-          input: 'py-2 pl-9 pr-9',
+          input: 'py-2 ps-9 pe-9',
           icon: 'h-5 w-5',
           clearButton: 'h-4 w-4'
         };
@@ -180,10 +183,10 @@ const SearchInput = ({
         onKeyDown={handleKeyDown}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        placeholder={placeholder}
+        placeholder={resolvedPlaceholder}
         disabled={disabled}
         className={inputClasses}
-        aria-label="Search"
+        aria-label={t('buttons.search')}
       />
       
       {/* Clear Button */}
@@ -193,7 +196,7 @@ const SearchInput = ({
           onClick={handleClear}
           disabled={disabled}
           className={clearButtonClasses}
-          aria-label="Clear search"
+          aria-label={t('buttons.clear')}
         >
           <XMarkIcon />
         </button>

@@ -1,20 +1,17 @@
-// src/components/excel/ExcelInvitationManager.js
+﻿// src/components/excel/ExcelInvitationManager.js
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Services
 import excelService from '../../services/excelService';
 
-// Components
 import Card from '../common/Card/Card';
 import Button from '../common/Button/Button';
 import Input from '../common/Input/Input';
 import Badge from '../common/Badge/Badge';
-import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
 import FileUpload from '../common/FileUpload/FileUpload';
 
-// Icons
 import {
   DocumentArrowDownIcon,
   DocumentArrowUpIcon,
@@ -25,11 +22,9 @@ import {
   UsersIcon,
   UserIcon,
   ClipboardDocumentListIcon,
-  CloudArrowUpIcon,
-  EyeIcon
+  CloudArrowUpIcon
 } from '@heroicons/react/24/outline';
 
-// Utils
 import { extractErrorMessage } from '../../utils/errorUtils';
 
 /**
@@ -38,27 +33,26 @@ import { extractErrorMessage } from '../../utils/errorUtils';
  * Provides complete workflow for Excel-based invitation management
  */
 const ExcelInvitationManager = ({
-  onInvitationProcessed = null, // Callback when invitations are created from Excel
+  onInvitationProcessed = null,
   className = ''
 }) => {
-  // State management
-  const [activeTab, setActiveTab] = useState('download'); // 'download', 'upload', 'email'
-  
-  // Download state
+  const { t } = useTranslation('invitations');
+
+  const [activeTab, setActiveTab] = useState('download');
+
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState(null);
-  
-  // Upload state
+
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const [uploadResult, setUploadResult] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [validationResult, setValidationResult] = useState(null);
-  
-  // Email state
+
   const [emailSending, setEmailSending] = useState(false);
   const [emailError, setEmailError] = useState(null);
   const [emailSuccess, setEmailSuccess] = useState(false);
+  const [lastSentEmail, setLastSentEmail] = useState('');
   const [emailData, setEmailData] = useState({
     hostName: '',
     hostEmail: '',
@@ -66,15 +60,12 @@ const ExcelInvitationManager = ({
     customMessage: ''
   });
 
-  // Handle template download
   const handleDownloadTemplate = async (multipleVisitors = true) => {
     try {
       setDownloading(true);
       setDownloadError(null);
-      
+
       await excelService.downloadInvitationTemplate(multipleVisitors);
-      
-      // Success feedback
       setTimeout(() => setDownloading(false), 1000);
     } catch (error) {
       setDownloadError(extractErrorMessage(error));
@@ -82,53 +73,48 @@ const ExcelInvitationManager = ({
     }
   };
 
-  // Handle file selection and validation
   const handleFileSelect = async (files) => {
     if (files.length === 0) return;
-    
+
     const file = files[0];
     setSelectedFile(file);
     setUploadError(null);
     setUploadResult(null);
     setValidationResult(null);
 
-    // Client-side validation
     const clientValidation = excelService.validateFileBeforeUpload(file);
     if (!clientValidation.isValid) {
       setUploadError(clientValidation.errors.join(', '));
       return;
     }
 
-    // Server-side validation
     try {
       const serverValidation = await excelService.validateExcelFile(file);
       setValidationResult(serverValidation);
-      
+
       if (!serverValidation.isValid) {
-        setUploadError(`Validation failed: ${serverValidation.errors?.join(', ') || 'Invalid file structure'}`);
+        const details = serverValidation.errors?.join(', ') || t('excel.upload.invalidStructure');
+        setUploadError(t('excel.upload.validationFailed', { details }));
       }
     } catch (error) {
-      setUploadError(`Validation failed: ${extractErrorMessage(error)}`);
+      setUploadError(t('excel.upload.validationFailed', { details: extractErrorMessage(error) }));
     }
   };
 
-  // Handle file upload and processing
   const handleFileUpload = async () => {
     if (!selectedFile) return;
 
     try {
       setUploading(true);
       setUploadError(null);
-      
+
       const result = await excelService.uploadFilledInvitation(selectedFile);
       setUploadResult(result);
-      
-      // Callback to parent component
+
       if (onInvitationProcessed) {
         onInvitationProcessed(result);
       }
-      
-      // Clear file selection
+
       setSelectedFile(null);
       setValidationResult(null);
     } catch (error) {
@@ -138,7 +124,6 @@ const ExcelInvitationManager = ({
     }
   };
 
-  // Handle email template sending
   const handleSendTemplate = async () => {
     try {
       setEmailSending(true);
@@ -146,17 +131,16 @@ const ExcelInvitationManager = ({
       setEmailSuccess(false);
 
       await excelService.sendTemplateByEmail(emailData);
+      setLastSentEmail(emailData.hostEmail);
       setEmailSuccess(true);
-      
-      // Clear form
+
       setEmailData({
         hostName: '',
         hostEmail: '',
         includeMultipleVisitors: true,
         customMessage: ''
       });
-      
-      // Clear success message after 5 seconds
+
       setTimeout(() => setEmailSuccess(false), 5000);
     } catch (error) {
       setEmailError(extractErrorMessage(error));
@@ -165,25 +149,23 @@ const ExcelInvitationManager = ({
     }
   };
 
-  // Render download tab
   const renderDownloadTab = () => (
     <div className="space-y-6">
       <div className="text-center">
         <ClipboardDocumentListIcon className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Download Invitation Templates</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('excel.download.title')}</h3>
         <p className="text-gray-600 mb-6">
-          Download Excel templates to create invitations offline. Fill out the template and upload it back to automatically create visitors and invitations.
+          {t('excel.download.description')}
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Single Visitor Template */}
         <Card className="p-6 hover:bg-gray-50 transition-colors">
           <div className="text-center">
             <UserIcon className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-gray-900 mb-2">Single Visitor</h4>
+            <h4 className="text-lg font-medium text-gray-900 mb-2">{t('excel.download.singleVisitor')}</h4>
             <p className="text-sm text-gray-600 mb-4">
-              Template for creating one invitation with one visitor
+              {t('excel.download.singleVisitorDesc')}
             </p>
             <Button
               onClick={() => handleDownloadTemplate(false)}
@@ -193,18 +175,17 @@ const ExcelInvitationManager = ({
               variant="outline"
               className="w-full"
             >
-              Download Single Visitor Template
+              {t('excel.download.singleVisitorButton')}
             </Button>
           </div>
         </Card>
 
-        {/* Multiple Visitors Template */}
         <Card className="p-6 hover:bg-gray-50 transition-colors">
           <div className="text-center">
             <UsersIcon className="w-12 h-12 text-green-500 mx-auto mb-4" />
-            <h4 className="text-lg font-medium text-gray-900 mb-2">Multiple Visitors</h4>
+            <h4 className="text-lg font-medium text-gray-900 mb-2">{t('excel.download.multipleVisitors')}</h4>
             <p className="text-sm text-gray-600 mb-4">
-              Template for creating one meeting with multiple visitors
+              {t('excel.download.multipleVisitorsDesc')}
             </p>
             <Button
               onClick={() => handleDownloadTemplate(true)}
@@ -214,23 +195,22 @@ const ExcelInvitationManager = ({
               variant="outline"
               className="w-full"
             >
-              Download Multiple Visitors Template
+              {t('excel.download.multipleVisitorsButton')}
             </Button>
           </div>
         </Card>
       </div>
 
-      {/* Download instructions */}
       <Card className="p-4 bg-blue-50 border-blue-200">
         <div className="flex items-start gap-3">
           <InformationCircleIcon className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div className="text-sm text-blue-800">
-            <h4 className="font-medium mb-1">How to use templates:</h4>
+            <h4 className="font-medium mb-1">{t('excel.download.howToUse')}</h4>
             <ol className="list-decimal list-inside space-y-1">
-              <li>Download the appropriate template</li>
-              <li>Fill in all required fields (marked in red)</li>
-              <li>Save the file and upload it using the Upload tab</li>
-              <li>Review the created invitations and approve as needed</li>
+              <li>{t('excel.download.step1')}</li>
+              <li>{t('excel.download.step2')}</li>
+              <li>{t('excel.download.step3')}</li>
+              <li>{t('excel.download.step4')}</li>
             </ol>
           </div>
         </div>
@@ -247,43 +227,40 @@ const ExcelInvitationManager = ({
     </div>
   );
 
-  // Render upload tab
   const renderUploadTab = () => (
     <div className="space-y-6">
       <div className="text-center">
         <CloudArrowUpIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Filled Template</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('excel.upload.title')}</h3>
         <p className="text-gray-600 mb-6">
-          Upload your completed Excel template to automatically create visitors and invitations.
+          {t('excel.upload.description')}
         </p>
       </div>
 
-      {/* File Upload */}
       <Card className="p-6">
         <FileUpload
           onFileSelect={handleFileSelect}
           acceptedTypes={['.xlsx']}
-          maxSize={10 * 1024 * 1024} // 10MB
+          maxSize={10 * 1024 * 1024}
           multiple={false}
-          label="Select Excel Template"
-          description="Only .xlsx files up to 10MB are accepted"
+          label={t('excel.upload.selectLabel')}
+          description={t('excel.upload.selectDescription')}
         />
       </Card>
 
-      {/* File validation results */}
       {selectedFile && (
         <Card className="p-4">
           <div className="flex items-center justify-between mb-4">
-            <h4 className="font-medium text-gray-900">Selected File</h4>
+            <h4 className="font-medium text-gray-900">{t('excel.upload.selectedFile')}</h4>
             <Badge color={validationResult?.isValid ? 'green' : uploadError ? 'red' : 'gray'}>
-              {validationResult?.isValid ? 'Valid' : uploadError ? 'Invalid' : 'Validating...'}
+              {validationResult?.isValid ? t('excel.upload.valid') : uploadError ? t('excel.upload.invalid') : t('excel.upload.validating')}
             </Badge>
           </div>
-          
+
           <div className="text-sm text-gray-600 space-y-1">
-            <p><strong>File:</strong> {selectedFile.name}</p>
-            <p><strong>Size:</strong> {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-            <p><strong>Type:</strong> {selectedFile.type}</p>
+            <p><strong>{t('excel.upload.fileName')}:</strong> {selectedFile.name}</p>
+            <p><strong>{t('excel.upload.fileSize')}:</strong> {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+            <p><strong>{t('excel.upload.fileType')}:</strong> {selectedFile.type}</p>
           </div>
 
           {validationResult?.isValid && (
@@ -295,35 +272,34 @@ const ExcelInvitationManager = ({
                 icon={<DocumentArrowUpIcon className="w-4 h-4" />}
                 className="w-full"
               >
-                {uploading ? 'Processing...' : 'Process Excel File'}
+                {uploading ? t('excel.upload.processing') : t('excel.upload.processButton')}
               </Button>
             </div>
           )}
         </Card>
       )}
 
-      {/* Upload results */}
       {uploadResult && (
         <Card className="p-4 bg-green-50 border-green-200">
           <div className="flex items-center gap-2 mb-3">
             <CheckCircleIcon className="w-5 h-5 text-green-600" />
-            <h4 className="font-medium text-green-800">Upload Successful!</h4>
+            <h4 className="font-medium text-green-800">{t('excel.upload.successTitle')}</h4>
           </div>
-          
+
           <div className="text-sm text-green-700 space-y-2">
             <p>{uploadResult.message}</p>
-            
+
             {uploadResult.summary && (
               <div className="mt-3 p-3 bg-white rounded border">
-                <h5 className="font-medium mb-2">Summary:</h5>
+                <h5 className="font-medium mb-2">{t('excel.upload.summary')}</h5>
                 <div className="grid grid-cols-2 gap-4 text-xs">
                   <div>
-                    <p>New Visitors: <strong>{uploadResult.summary.newVisitors || 0}</strong></p>
-                    <p>Existing Visitors: <strong>{uploadResult.summary.existingVisitors || 0}</strong></p>
+                    <p>{t('excel.upload.newVisitors')}: <strong>{uploadResult.summary.newVisitors || 0}</strong></p>
+                    <p>{t('excel.upload.existingVisitors')}: <strong>{uploadResult.summary.existingVisitors || 0}</strong></p>
                   </div>
                   <div>
-                    <p>Draft Invitations: <strong>{uploadResult.summary.draftInvitations || 0}</strong></p>
-                    <p>Submitted Invitations: <strong>{uploadResult.summary.submittedInvitations || 0}</strong></p>
+                    <p>{t('excel.upload.draftInvitations')}: <strong>{uploadResult.summary.draftInvitations || 0}</strong></p>
+                    <p>{t('excel.upload.submittedInvitations')}: <strong>{uploadResult.summary.submittedInvitations || 0}</strong></p>
                   </div>
                 </div>
               </div>
@@ -332,7 +308,6 @@ const ExcelInvitationManager = ({
         </Card>
       )}
 
-      {/* Upload error */}
       {uploadError && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <div className="flex items-center gap-2">
@@ -344,50 +319,46 @@ const ExcelInvitationManager = ({
     </div>
   );
 
-  // Render email tab
   const renderEmailTab = () => (
     <div className="space-y-6">
       <div className="text-center">
         <EnvelopeIcon className="w-16 h-16 text-purple-500 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Email Template to Host</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('excel.email.title')}</h3>
         <p className="text-gray-600 mb-6">
-          Send Excel templates directly to hosts via email for offline invitation creation.
+          {t('excel.email.description')}
         </p>
       </div>
 
       <Card className="p-6">
         <div className="space-y-4">
-          {/* Host Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Host Name *
+              {t('excel.email.hostNameRequired')}
             </label>
             <Input
               value={emailData.hostName}
               onChange={(e) => setEmailData(prev => ({ ...prev, hostName: e.target.value }))}
-              placeholder="Enter host full name"
+              placeholder={t('excel.email.hostNamePlaceholder')}
               required
             />
           </div>
 
-          {/* Host Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Host Email *
+              {t('excel.email.hostEmailRequired')}
             </label>
             <Input
               type="email"
               value={emailData.hostEmail}
               onChange={(e) => setEmailData(prev => ({ ...prev, hostEmail: e.target.value }))}
-              placeholder="host@company.com"
+              placeholder={t('excel.email.hostEmailPlaceholder')}
               required
             />
           </div>
 
-          {/* Template Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Template Type
+              {t('excel.email.templateType')}
             </label>
             <div className="flex items-center gap-4">
               <label className="flex items-center">
@@ -398,7 +369,7 @@ const ExcelInvitationManager = ({
                   onChange={() => setEmailData(prev => ({ ...prev, includeMultipleVisitors: false }))}
                   className="me-2"
                 />
-                Single Visitor
+                {t('excel.email.singleVisitor')}
               </label>
               <label className="flex items-center">
                 <input
@@ -408,26 +379,24 @@ const ExcelInvitationManager = ({
                   onChange={() => setEmailData(prev => ({ ...prev, includeMultipleVisitors: true }))}
                   className="me-2"
                 />
-                Multiple Visitors
+                {t('excel.email.multipleVisitors')}
               </label>
             </div>
           </div>
 
-          {/* Custom Message */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Custom Message (Optional)
+              {t('excel.email.customMessage')}
             </label>
             <textarea
               value={emailData.customMessage}
               onChange={(e) => setEmailData(prev => ({ ...prev, customMessage: e.target.value }))}
-              placeholder="Add a custom message to include in the email..."
+              placeholder={t('excel.email.customMessagePlaceholder')}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
-          {/* Send Button */}
           <Button
             onClick={handleSendTemplate}
             loading={emailSending}
@@ -435,24 +404,22 @@ const ExcelInvitationManager = ({
             icon={<EnvelopeIcon className="w-4 h-4" />}
             className="w-full"
           >
-            {emailSending ? 'Sending...' : 'Send Template via Email'}
+            {emailSending ? t('excel.email.sending') : t('excel.email.sendButton')}
           </Button>
         </div>
       </Card>
 
-      {/* Email success */}
       {emailSuccess && (
         <div className="bg-green-50 border border-green-200 rounded-md p-4">
           <div className="flex items-center gap-2">
             <CheckCircleIcon className="w-5 h-5 text-green-600" />
             <span className="text-sm text-green-700">
-              Template sent successfully to {emailData.hostEmail}!
+              {t('excel.email.sentSuccess', { email: lastSentEmail })}
             </span>
           </div>
         </div>
       )}
 
-      {/* Email error */}
       {emailError && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <div className="flex items-center gap-2">
@@ -464,27 +431,28 @@ const ExcelInvitationManager = ({
     </div>
   );
 
-  // Render tab navigation
   const renderTabNavigation = () => (
-    <div className="flex gap-1 bg-gray-100 p-1 rounded-lg mb-6">
-      {[
-        { id: 'download', label: 'Download Templates', icon: DocumentArrowDownIcon },
-        { id: 'upload', label: 'Upload & Process', icon: DocumentArrowUpIcon },
-        { id: 'email', label: 'Email Templates', icon: EnvelopeIcon }
-      ].map(tab => (
-        <button
-          key={tab.id}
-          onClick={() => setActiveTab(tab.id)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-colors ${
-            activeTab === tab.id
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-800'
-          }`}
-        >
-          <tab.icon className="w-5 h-5" />
-          <span>{tab.label}</span>
-        </button>
-      ))}
+    <div className="overflow-x-auto custom-scrollbar mb-6">
+      <div className="inline-flex min-w-full gap-1 bg-gray-100 p-1 rounded-lg">
+        {[
+          { id: 'download', label: t('excel.tabs.download'), icon: DocumentArrowDownIcon },
+          { id: 'upload', label: t('excel.tabs.upload'), icon: DocumentArrowUpIcon },
+          { id: 'email', label: t('excel.tabs.email'), icon: EnvelopeIcon }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium whitespace-nowrap transition-colors ${
+              activeTab === tab.id
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <tab.icon className="w-5 h-5" />
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 

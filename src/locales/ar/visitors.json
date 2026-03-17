@@ -196,5 +196,623 @@
     "blacklistReason": "السبب: {{reason}}",
     "recentActivity": "النشاط الأخير",
     "recentActivityPlaceholder": "سيتوفر تسجيل مفصل للنشاط في تحديث قادم."
+  },
+  "form": {
+    "steps": {
+      "basic": {
+        "title": "المعلومات الأساسية",
+        "description": "الاسم وبيانات التواصل ومعلومات الشركة"
+      },
+      "photoDocs": {
+        "title": "الصورة والمستندات",
+        "description": "صورة الملف الشخصي وملفات الهوية"
+      },
+      "preferences": {
+        "title": "التفضيلات",
+        "description": "الموقع الافتراضي وغرض الزيارة الافتراضي"
+      },
+      "address": {
+        "title": "العنوان",
+        "description": "تفاصيل الشارع والمدينة والدولة"
+      },
+      "personal": {
+        "title": "البيانات الشخصية",
+        "description": "تاريخ الميلاد والهوية واللغة"
+      },
+      "requirements": {
+        "title": "المتطلبات",
+        "description": "ملاحظات التغذية وإمكانية الوصول والأمن"
+      },
+      "emergency": {
+        "title": "جهات اتصال الطوارئ",
+        "description": "الأشخاص الذين يتم التواصل معهم عند الطوارئ"
+      },
+      "invitation": {
+        "title": "الدعوة",
+        "description": "تفاصيل الدعوة الاختيارية"
+      },
+      "review": {
+        "title": "المراجعة",
+        "description": "مراجعة جميع المعلومات المدخلة"
+      }
+    },
+    "placeholders": {
+      "firstName": "أدخل الاسم الأول",
+      "lastName": "أدخل اسم العائلة",
+      "email": "أدخل عنوان البريد الإلكتروني",
+      "phone": "أدخل رقم الهاتف",
+      "companySearch": "ابحث عن شركة أو اخترها...",
+      "jobTitle": "أدخل المسمى الوظيفي"
+    },
+    "options": {
+      "phoneType": {
+        "mobile": "محمول",
+        "landline": "هاتف أرضي",
+        "unknown": "غير معروف"
+      }
+    },
+    "actions": {
+      "updateVisitor": "تحديث الزائر",
+      "createVisitorWithInvitation": "إنشاء زائر ودعوة",
+      "createVisitor": "إنشاء زائر"
+    },
+    "company": {
+      "createButtonTitle": "إنشاء شركة",
+      "createModalTitle": "إنشاء شركة جديدة",
+      "toasts": {
+        "createdTitle": "تم إنشاء الشركة",
+        "createdMessage": "تم إنشاء {{name}} بنجاح.",
+        "createFailedTitle": "فشل إنشاء الشركة",
+        "createFailedMessage": "تعذر إنشاء الشركة. يرجى المحاولة مرة أخرى."
+      }
+    },
+    "documents": {
+      "loadingExisting": "جاري تحميل المستندات الحالية...",
+      "sensitive": "حساس",
+      "required": "مطلوب",
+      "preview": "معاينة",
+      "download": "تنزيل",
+      "defaultDownloadName": "مستند",
+      "noneUploaded": "لا توجد مستندات مرفوعة بعد.",
+      "uploadAdditional": "رفع مستندات إضافية",
+      "upload": "رفع المستندات",
+      "uploadDescription": "ارفع الهوية أو جواز السفر أو أي مستندات تعريف أخرى",
+      "profilePhotoDescription": "تم اختيار صورة الملف الشخصي",
+      "uploadDocumentDescription": "تم اختيار المستند: {{name}}",
+      "acceptedFormats": "الصيغ المقبولة: PDF وDOC وDOCX وJPG وPNG. الحد الأقصى 5 ملفات، 10 ميغابايت لكل ملف."
+    },
+    "preferences": {
+      "title": "التفضيلات الافتراضية",
+      "subtitle": "اضبط الموقع والغرض الافتراضيين لتسريع إنشاء الدعوات",
+      "preferredLocation": "الموقع المفضل",
+      "preferredLocationHelp": "الموقع الذي يزوره هذا الزائر عادةً",
+      "selectDefaultLocation": "اختر الموقع الافتراضي...",
+      "defaultVisitPurpose": "غرض الزيارة الافتراضي",
+      "defaultVisitPurposeHelp": "السبب المعتاد لزيارات هذا الزائر",
+      "selectDefaultVisitPurpose": "اختر غرض الزيارة الافتراضي...",
+      "whySetTitle": "لماذا ضبط التفضيلات؟",
+      "whySetDescription": "سيتم اختيار التفضيلات الافتراضية تلقائياً عند إنشاء دعوات لهذا الزائر، مما يجعل العملية أسرع وأكثر اتساقاً."
+    },
+    "address": {
+      "street1": "سطر العنوان 1",
+      "street2": "سطر العنوان 2",
+      "city": "المدينة",
+      "governorate": "المحافظة",
+      "selectGovernorate": "اختر المحافظة",
+      "postalCode": "الرمز البريدي (اختياري)",
+      "postalCodeHelper": "الرمز البريدي في لبنان اختياري",
+      "country": "الدولة",
+      "middleEastGroup": "--- الشرق الأوسط ---",
+      "internationalGroup": "--- دولية ---",
+      "addressType": "نوع العنوان",
+      "placeholders": {
+        "street1": "أدخل عنوان الشارع",
+        "street2": "شقة، جناح، إلخ (اختياري)",
+        "city": "مثال: بيروت، طرابلس، صيدا",
+        "postalCode": "مثال: 1107-2180"
+      },
+      "addressTypes": {
+        "home": "المنزل",
+        "work": "العمل",
+        "billing": "الفوترة",
+        "shipping": "الشحن",
+        "other": "أخرى"
+      },
+      "governorates": {
+        "Beirut": "بيروت",
+        "Mount Lebanon": "جبل لبنان",
+        "North Lebanon": "لبنان الشمالي",
+        "South Lebanon": "لبنان الجنوبي",
+        "Beqaa": "البقاع",
+        "Akkar": "عكار",
+        "Baalbek-Hermel": "بعلبك-الهرمل",
+        "Nabatieh": "النبطية"
+      },
+      "countries": {
+        "Lebanon": "لبنان",
+        "Syria": "سوريا",
+        "Jordan": "الأردن",
+        "Israel": "إسرائيل",
+        "Turkey": "تركيا",
+        "Cyprus": "قبرص",
+        "Egypt": "مصر",
+        "SaudiArabia": "المملكة العربية السعودية",
+        "UnitedArabEmirates": "الإمارات العربية المتحدة",
+        "Kuwait": "الكويت",
+        "Qatar": "قطر",
+        "Bahrain": "البحرين",
+        "Oman": "عُمان",
+        "Iraq": "العراق",
+        "Iran": "إيران",
+        "UnitedStates": "الولايات المتحدة",
+        "Canada": "كندا",
+        "UnitedKingdom": "المملكة المتحدة",
+        "France": "فرنسا",
+        "Germany": "ألمانيا",
+        "Italy": "إيطاليا",
+        "Australia": "أستراليا",
+        "Brazil": "البرازيل",
+        "Other": "أخرى"
+      }
+    },
+    "personal": {
+      "dateOfBirth": "تاريخ الميلاد",
+      "governmentIdType": "نوع الهوية الحكومية",
+      "governmentIdNumber": "رقم الهوية الحكومية",
+      "nationality": "الجنسية",
+      "preferredLanguage": "اللغة المفضلة",
+      "externalId": "معرّف خارجي",
+      "idTypes": {
+        "passport": "جواز سفر",
+        "driverLicense": "رخصة قيادة",
+        "nationalId": "هوية وطنية",
+        "other": "أخرى"
+      },
+      "languages": {
+        "english": "الإنجليزية",
+        "spanish": "الإسبانية",
+        "french": "الفرنسية",
+        "german": "الألمانية",
+        "chinese": "الصينية",
+        "japanese": "اليابانية",
+        "arabic": "العربية"
+      },
+      "placeholders": {
+        "governmentId": "أدخل رقم الهوية",
+        "nationality": "أدخل الجنسية",
+        "externalId": "رقم الموظف أو رقم العميل، إلخ"
+      }
+    },
+    "requirements": {
+      "dietary": "المتطلبات الغذائية",
+      "accessibility": "متطلبات إمكانية الوصول",
+      "securityClearance": "التصريح الأمني",
+      "additionalNotes": "ملاحظات إضافية",
+      "placeholders": {
+        "dietary": "أي قيود غذائية أو حساسية أو متطلبات وجبات خاصة...",
+        "accessibility": "وصول كرسي متحرك أو مساعدة سمعية أو احتياجات وصول أخرى...",
+        "securityClearance": "مستوى التصريح الأمني إن وُجد",
+        "additionalNotes": "أي معلومات إضافية عن هذا الزائر..."
+      }
+    },
+    "emergency": {
+      "title": "جهات اتصال الطوارئ",
+      "subtitle": "جهات اتصال الطوارئ اختيارية",
+      "addContact": "إضافة جهة اتصال",
+      "addFirstContact": "إضافة أول جهة اتصال",
+      "contactNumber": "جهة الاتصال {{count}}",
+      "primary": "أساسي",
+      "relationship": "صلة القرابة",
+      "primaryContact": "جهة الاتصال الأساسية",
+      "emptyTitle": "لا توجد جهات اتصال للطوارئ",
+      "emptyDescription": "يمكنك إضافة جهات اتصال الآن أو تخطي هذه الخطوة.",
+      "placeholders": {
+        "relationship": "مثال: زوج/زوجة، أحد الوالدين، صديق",
+        "email": "أدخل البريد الإلكتروني (اختياري)"
+      }
+    },
+    "invitation": {
+      "title": "إنشاء دعوة (اختياري)",
+      "subtitle": "يمكنك إنشاء دعوة لهذا الزائر مباشرة بعد إنشاء ملفه",
+      "enableLabel": "إنشاء دعوة لهذا الزائر",
+      "enableHelp": "يمكنك دائماً إنشاء الدعوات لاحقاً من ملف الزائر أو صفحة الدعوات.",
+      "detailsTitle": "تفاصيل الدعوة",
+      "subject": "الموضوع",
+      "startDateTime": "تاريخ ووقت البداية",
+      "endDateTime": "تاريخ ووقت النهاية",
+      "location": "الموقع",
+      "visitPurpose": "غرض الزيارة",
+      "message": "الرسالة",
+      "requirements": "المتطلبات",
+      "requiresApproval": "يتطلب موافقة",
+      "requiresEscort": "يتطلب مرافقة",
+      "defaultSubject": "اجتماع مع {{name}}",
+      "submitFailed": "فشل إنشاء دعوة لهذا الزائر.",
+      "placeholders": {
+        "subject": "اجتماع مع أحمد علي",
+        "location": "اختر الموقع...",
+        "visitPurpose": "اختر الغرض...",
+        "message": "رسالة اختيارية للزائر..."
+      },
+      "validation": {
+        "subjectRequired": "الموضوع مطلوب",
+        "subjectMax": "يجب ألا يتجاوز الموضوع 200 حرف",
+        "startRequired": "تاريخ ووقت البداية مطلوبان",
+        "endRequired": "تاريخ ووقت النهاية مطلوبان",
+        "startFuture": "يجب أن يكون وقت البداية في المستقبل",
+        "endAfterStart": "يجب أن يكون وقت النهاية بعد وقت البداية",
+        "durationMin": "يجب أن تكون مدة الدعوة 15 دقيقة على الأقل",
+        "durationMax": "لا يمكن أن تتجاوز مدة الدعوة 24 ساعة",
+        "locationRequired": "الموقع مطلوب",
+        "purposeRequired": "غرض الزيارة مطلوب",
+        "parkingInstructionsRequired": "تعليمات الموقف مطلوبة عند الحاجة إلى موقف",
+        "startMaxFuture": "لا يمكن أن يكون تاريخ البداية بعيداً جداً في المستقبل"
+      }
+    },
+    "review": {
+      "title": "مراجعة المعلومات",
+      "subtitle": "يرجى مراجعة جميع المعلومات قبل الإرسال",
+      "basicInfo": "المعلومات الأساسية",
+      "photoDocuments": "الصورة والمستندات",
+      "preferences": "التفضيلات",
+      "emergencyContacts": "جهات اتصال الطوارئ",
+      "invitationDetails": "تفاصيل الدعوة",
+      "notSpecified": "غير محدد",
+      "none": "لا يوجد",
+      "labels": {
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "phone": "الهاتف",
+        "company": "الشركة",
+        "photo": "الصورة",
+        "documents": "المستندات",
+        "preferredLocation": "الموقع المفضل",
+        "defaultVisitPurpose": "غرض الزيارة الافتراضي",
+        "relationship": "صلة القرابة",
+        "subject": "الموضوع",
+        "startTime": "وقت البداية",
+        "endTime": "وقت النهاية",
+        "location": "الموقع",
+        "purpose": "الغرض",
+        "requirements": "المتطلبات",
+        "message": "الرسالة"
+      }
+    },
+    "validation": {
+      "firstNameRequired": "الاسم الأول مطلوب",
+      "lastNameRequired": "اسم العائلة مطلوب",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "أدخل بريدًا إلكترونيًا صالحًا",
+      "phoneRequired": "رقم الهاتف مطلوب",
+      "phoneFormat": "أدخل رقم هاتف صالحًا",
+      "phoneMinDigits": "يجب أن يحتوي الهاتف على {{count}} أرقام على الأقل",
+      "phoneMaxDigits": "يجب ألا يتجاوز الهاتف 15 رقمًا",
+      "photoMaxSize": "يجب أن يكون حجم الصورة أقل من 5MB",
+      "documentsMax": "يمكنك رفع 5 مستندات كحد أقصى",
+      "addressCityRequired": "المدينة مطلوبة",
+      "addressCountryRequired": "الدولة مطلوبة",
+      "dateOfBirthRange": "يجب أن يكون تاريخ الميلاد ضمن نطاق صالح",
+      "relationshipRequired": "صلة القرابة مطلوبة",
+      "emailExists": "يوجد زائر مسجل بهذا البريد الإلكتروني",
+      "governmentIdExists": "يوجد زائر مسجل بنفس رقم الهوية"
+    }
+  },
+  "quickCreate": {
+    "header": {
+      "description": "أدخل المعلومات الأساسية لتسجيل هذا الزائر. يمكنك استكمال الملف لاحقاً من صفحة الزوار."
+    },
+    "optional": "اختياري",
+    "infoNote": "يمكن إضافة الصورة والمستندات والعنوان وباقي التفاصيل من صفحة ملف الزائر بعد التسجيل.",
+    "buttons": {
+      "create": "إنشاء زائر",
+      "creating": "جارٍ الإنشاء..."
+    },
+    "placeholders": {
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "email": "name@example.com",
+      "phone": "71 123 456",
+      "company": "اسم الشركة",
+      "jobTitle": "المسمى الوظيفي"
+    },
+    "countryCodes": {
+      "lb": "+961 لبنان",
+      "sy": "+963 سوريا",
+      "jo": "+962 الأردن",
+      "il": "+972 إسرائيل",
+      "tr": "+90 تركيا",
+      "eg": "+20 مصر",
+      "sa": "+966 السعودية",
+      "ae": "+971 الإمارات",
+      "kw": "+965 الكويت",
+      "qa": "+974 قطر",
+      "us": "+1 الولايات المتحدة",
+      "gb": "+44 المملكة المتحدة",
+      "fr": "+33 فرنسا",
+      "de": "+49 ألمانيا",
+      "it": "+39 إيطاليا"
+    },
+    "validation": {
+      "firstNameRequired": "الاسم الأول مطلوب",
+      "lastNameRequired": "اسم العائلة مطلوب",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "أدخل عنوان بريد إلكتروني صالح",
+      "phoneRequired": "رقم الهاتف مطلوب",
+      "phoneMinDigits": "يجب أن يحتوي الهاتف على 7 أرقام على الأقل (تم إدخال {{count}})",
+      "phoneMaxDigits": "يجب ألا يتجاوز الهاتف 15 رقماً"
+    }
+  },
+  "__tmp": "x",
+  "advancedSearchModal": {
+    "title": "البحث المتقدم عن الزوار",
+    "sections": {
+      "criteria": "معايير البحث",
+      "general": "عام",
+      "personal": "معلومات شخصية",
+      "professional": "معلومات مهنية",
+      "statusSecurity": "الحالة والأمان",
+      "dateRanges": "نطاقات التاريخ",
+      "results": "نتائج البحث"
+    },
+    "actions": {
+      "clearAll": "مسح الكل",
+      "searchVisitors": "البحث عن الزوار"
+    },
+    "fields": {
+      "searchTerm": "مصطلح البحث",
+      "governmentId": "رقم الهوية الحكومية",
+      "activeStatus": "الحالة النشطة",
+      "registrationDate": "تاريخ التسجيل",
+      "lastVisitDate": "تاريخ آخر زيارة"
+    },
+    "placeholders": {
+      "searchTerm": "ابحث بالاسم أو البريد أو الهاتف أو الشركة...",
+      "from": "من",
+      "to": "إلى"
+    },
+    "options": {
+      "activeOnly": "نشط فقط",
+      "securityLow": "منخفض"
+    },
+    "table": {
+      "contact": "التواصل",
+      "details": "التفاصيل"
+    },
+    "resultCount": "{{count}} نتيجة",
+    "empty": {
+      "noMatchingVisitors": "لا يوجد زوار مطابقون",
+      "noResultsTitle": "لا توجد نتائج",
+      "noResultsDescription": "جرّب تعديل معايير البحث ثم أعد المحاولة."
+    },
+    "visitCount": "{{count}} زيارة",
+    "separator": "•",
+    "lastLabel": "آخر",
+    "createdLabel": "تاريخ الإنشاء"
+  },
+  "documentManager": {
+    "title": "إدارة المستندات",
+    "summary": "{{total}} مستند • تم تحديد {{selected}}",
+    "actions": {
+      "filters": "الفلاتر",
+      "addDocuments": "إضافة مستندات",
+      "deleteSelected": "حذف المحدد",
+      "uploadCount": "رفع {{count}} ملف",
+      "uploadDocuments": "رفع مستندات"
+    },
+    "alerts": {
+      "fileTooLarge": "الملف {{name}} كبير جدًا. الحد الأقصى {{size}}MB.",
+      "unsupportedFormat": "صيغة الملف {{name}} غير مدعومة. المسموح: {{types}}.",
+      "partialUpload": "تم رفع {{successful}} ملف وفشل {{failed}}."
+    },
+    "badges": {
+      "expired": "منتهي",
+      "required": "مطلوب",
+      "sensitive": "حساس"
+    },
+    "card": {
+      "meta": "{{size}} • {{date}}"
+    },
+    "empty": {
+      "title": "لا توجد مستندات",
+      "dragHint": "اسحب الملفات هنا أو اختر ملفات للرفع.",
+      "dropNow": "أفلت الملفات الآن",
+      "supported": "الصيغ المدعومة: {{extensions}} (حتى {{size}}MB)"
+    },
+    "filters": {
+      "allTypes": "كل الأنواع"
+    },
+    "modals": {
+      "uploadTitle": "رفع المستندات",
+      "uploadDescription": "حدّد تفاصيل كل مستند قبل الرفع.",
+      "deleteTitle": "حذف المستندات المحددة",
+      "deleteMessage": "هل تريد حذف {{count}} مستند؟"
+    },
+    "quickDrop": {
+      "prefix": "رفع سريع:",
+      "clickToSelect": "انقر لاختيار الملفات"
+    },
+    "searchPlaceholder": "ابحث في المستندات...",
+    "selectedCount": "تم تحديد {{count}}",
+    "types": {
+      "passport": "جواز سفر",
+      "nationalId": "هوية وطنية",
+      "driverLicense": "رخصة قيادة",
+      "visa": "تأشيرة",
+      "workPermit": "إذن عمل",
+      "healthCertificate": "شهادة صحية",
+      "backgroundCheck": "تحقق أمني",
+      "photo": "صورة",
+      "other": "أخرى"
+    },
+    "upload": {
+      "fields": {
+        "title": "العنوان",
+        "type": "النوع",
+        "description": "الوصف",
+        "tags": "الوسوم"
+      },
+      "fileMeta": "{{size}} MB • {{type}}",
+      "placeholders": {
+        "description": "أدخل وصفًا اختياريًا",
+        "tags": "وسوم مفصولة بفواصل"
+      },
+      "unknownType": "نوع غير معروف"
+    }
+  },
+  "emergencyContactForm": {
+    "actions": {
+      "addContact": "إضافة جهة اتصال",
+      "updateContact": "تحديث جهة الاتصال"
+    },
+    "characters": "{{current}}/{{max}} حرف",
+    "fields": {
+      "alternatePhone": "هاتف بديل",
+      "contactPriority": "أولوية الاتصال",
+      "primaryEmergencyContact": "جهة اتصال الطوارئ الأساسية",
+      "relationship": "صلة القرابة"
+    },
+    "help": {
+      "primaryContact": "يتم استخدام جهة الاتصال الأساسية أولًا في حالات الطوارئ.",
+      "priority": "الأولوية 1 هي الأعلى و10 هي الأدنى."
+    },
+    "labels": {
+      "notePrefix": "ملاحظة:"
+    },
+    "placeholders": {
+      "address": "أدخل العنوان",
+      "alternatePhone": "أدخل رقم هاتف بديل",
+      "email": "أدخل البريد الإلكتروني",
+      "noSpecificPriority": "بدون أولوية محددة",
+      "notes": "أدخل ملاحظات إضافية",
+      "phoneNumber": "أدخل رقم الهاتف",
+      "relationship": "اختر صلة القرابة"
+    },
+    "preview": {
+      "address": "{{value}}",
+      "email": "{{value}}",
+      "firstNameFallback": "الاسم الأول",
+      "lastNameFallback": "اسم العائلة",
+      "phone": "{{value}}",
+      "priorityBadge": "الأولوية {{priority}}"
+    },
+    "priorityHighest": "(الأعلى)",
+    "priorityLowest": "(الأدنى)",
+    "priorityOption": "الأولوية {{priority}} {{suffix}}",
+    "relationships": {
+      "child": "ابن/ابنة",
+      "colleague": "زميل",
+      "friend": "صديق",
+      "guardian": "وصي",
+      "neighbor": "جار",
+      "other": "أخرى",
+      "parent": "والد/والدة",
+      "partner": "شريك",
+      "sibling": "أخ/أخت",
+      "spouse": "زوج/زوجة"
+    },
+    "sections": {
+      "additionalInformation": "معلومات إضافية",
+      "contactDetails": "تفاصيل التواصل",
+      "contactInformation": "معلومات جهة الاتصال",
+      "preview": "معاينة",
+      "prioritySettings": "إعدادات الأولوية"
+    },
+    "validation": {
+      "addressMax": "يجب ألا يتجاوز العنوان 200 حرف",
+      "alternatePhoneInvalid": "رقم الهاتف البديل غير صالح",
+      "emailInvalid": "البريد الإلكتروني غير صالح",
+      "firstNameMax": "يجب ألا يتجاوز الاسم الأول 50 حرفًا",
+      "firstNameMin": "يجب أن يكون الاسم الأول حرفين على الأقل",
+      "firstNameRequired": "الاسم الأول مطلوب",
+      "lastNameMax": "يجب ألا يتجاوز اسم العائلة 50 حرفًا",
+      "lastNameMin": "يجب أن يكون اسم العائلة حرفين على الأقل",
+      "lastNameRequired": "اسم العائلة مطلوب",
+      "notesMax": "يجب ألا تتجاوز الملاحظات 500 حرف",
+      "phoneInvalid": "رقم الهاتف غير صالح",
+      "phoneRequired": "رقم الهاتف مطلوب",
+      "primaryWarning": "سيتم استبدال جهة الاتصال الأساسية الحالية ({{name}}).",
+      "priorityRange": "يجب أن تكون الأولوية بين 1 و10",
+      "priorityTaken": "الأولوية {{priority}} مستخدمة بالفعل",
+      "relationshipMax": "يجب ألا تتجاوز صلة القرابة 50 حرفًا",
+      "relationshipRequired": "صلة القرابة مطلوبة"
+    }
+  },
+  "emergencyContactsList": {
+    "accessDenied": "ليس لديك صلاحية لعرض جهات اتصال الطوارئ.",
+    "actions": {
+      "addContact": "إضافة جهة اتصال",
+      "clearSelection": "إلغاء التحديد",
+      "deleteSelected": "حذف المحدد"
+    },
+    "badges": {
+      "primary": "أساسي"
+    },
+    "empty": "لا توجد جهات اتصال طوارئ",
+    "fields": {
+      "alternatePhone": "هاتف بديل",
+      "phoneNumber": "رقم الهاتف",
+      "primaryContact": "جهة اتصال أساسية",
+      "priority": "الأولوية",
+      "relationship": "صلة القرابة"
+    },
+    "modals": {
+      "addTitle": "إضافة جهة اتصال طوارئ",
+      "deleteMessage": "هل تريد حذف جهة الاتصال هذه؟",
+      "deleteMessageNamed": "هل تريد حذف جهة الاتصال {{name}}؟",
+      "deleteSelectedMessage": "هل تريد حذف {{count}} جهة اتصال محددة؟",
+      "deleteSelectedTitle": "حذف الجهات المحددة",
+      "deleteTitle": "حذف جهة الاتصال",
+      "detailsTitle": "تفاصيل جهة الاتصال",
+      "editTitle": "تعديل جهة اتصال طوارئ"
+    },
+    "notSet": "غير محدد",
+    "priorityBadge": "الأولوية #{{priority}}",
+    "selectedCount": "تم تحديد {{count}}",
+    "stats": {
+      "completion": "الاكتمال",
+      "missing": "غير محددة",
+      "primary": "جهة الاتصال الأساسية",
+      "set": "محددة",
+      "total": "الإجمالي",
+      "withPhone": "مع رقم هاتف"
+    },
+    "subtitle": "إدارة جهات اتصال الطوارئ للزائر {{name}}",
+    "table": {
+      "columns": {
+        "actions": "الإجراءات",
+        "contactInfo": "معلومات جهة الاتصال",
+        "priority": "الأولوية",
+        "relationship": "صلة القرابة"
+      }
+    },
+    "title": "جهات اتصال الطوارئ"
+  },
+  "profilePhotoUpload": {
+    "actions": {
+      "removePhoto": "إزالة الصورة",
+      "uploadPhoto": "رفع الصورة"
+    },
+    "errors": {
+      "fileTooLarge": "حجم الملف كبير جدًا. الحد الأقصى {{size}}MB",
+      "invalidFileType": "نوع الملف غير صالح. الأنواع المسموحة: {{types}}",
+      "removeFailed": "فشل إزالة صورة الملف الشخصي.",
+      "uploadFailed": "فشل رفع صورة الملف الشخصي."
+    },
+    "hints": {
+      "clickOrDrag": "انقر لاختيار صورة أو اسحبها وأفلتها",
+      "maxSize": "الحد الأقصى للحجم: {{size}}MB"
+    },
+    "labels": {
+      "fileInfo": "{{name}} ({{sizeKb}} KB)",
+      "previewAlt": "معاينة الصورة",
+      "profileAlt": "صورة الملف الشخصي"
+    },
+    "modals": {
+      "removeDescription": "لا يمكن التراجع عن هذا الإجراء.",
+      "removeQuestion": "هل تريد إزالة صورة الملف الشخصي؟",
+      "removeTitle": "إزالة الصورة",
+      "uploadQuestion": "هل تريد استخدام هذه الصورة كصورة الملف الشخصي؟",
+      "uploadTitle": "تأكيد الرفع"
+    }
   }
 }

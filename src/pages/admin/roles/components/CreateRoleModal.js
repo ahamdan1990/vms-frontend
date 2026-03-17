@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import Modal from '../../../../components/common/Modal/Modal';
 import Button from '../../../../components/common/Button/Button';
 import Input from '../../../../components/common/Input/Input';
@@ -22,17 +23,18 @@ import { useToast } from '../../../../hooks/useNotifications';
 import { CheckIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 const PRESET_COLORS = [
-  { name: 'Blue', value: '#3B82F6' },
-  { name: 'Green', value: '#10B981' },
-  { name: 'Purple', value: '#8B5CF6' },
-  { name: 'Red', value: '#EF4444' },
-  { name: 'Yellow', value: '#F59E0B' },
-  { name: 'Pink', value: '#EC4899' },
-  { name: 'Indigo', value: '#6366F1' },
-  { name: 'Gray', value: '#6B7280' }
+  { key: 'blue', value: '#3B82F6' },
+  { key: 'green', value: '#10B981' },
+  { key: 'purple', value: '#8B5CF6' },
+  { key: 'red', value: '#EF4444' },
+  { key: 'yellow', value: '#F59E0B' },
+  { key: 'pink', value: '#EC4899' },
+  { key: 'indigo', value: '#6366F1' },
+  { key: 'gray', value: '#6B7280' }
 ];
 
 const CreateRoleModal = () => {
+  const { t } = useTranslation('system');
   const dispatch = useDispatch();
   const toast = useToast();
   const isOpen = useSelector(selectShowCreateModal);
@@ -53,7 +55,7 @@ const CreateRoleModal = () => {
     hierarchyLevel: 1,
     displayOrder: 0,
     color: '#3B82F6',
-    icon: '🛡️'
+    icon: '\uD83D\uDEE1\uFE0F'
   });
 
   const [errors, setErrors] = useState({});
@@ -75,7 +77,7 @@ const CreateRoleModal = () => {
         hierarchyLevel: 1,
         displayOrder: 0,
         color: '#3B82F6',
-        icon: '🛡️'
+        icon: '\uD83D\uDEE1\uFE0F'
       });
       setErrors({});
       setCurrentTab('details');
@@ -123,31 +125,31 @@ const CreateRoleModal = () => {
     const newErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Role name is required';
+      newErrors.name = t('roles.create.validation.nameRequired');
     } else if (formData.name.length < 2 || formData.name.length > 100) {
-      newErrors.name = 'Role name must be between 2 and 100 characters';
+      newErrors.name = t('roles.create.validation.nameLengthError');
     }
 
     if (!formData.displayName.trim()) {
-      newErrors.displayName = 'Display name is required';
+      newErrors.displayName = t('roles.create.validation.displayNameRequired');
     } else if (formData.displayName.length > 150) {
-      newErrors.displayName = 'Display name cannot exceed 150 characters';
+      newErrors.displayName = t('roles.create.validation.displayNameLengthError');
     }
 
     if (formData.description && formData.description.length > 500) {
-      newErrors.description = 'Description cannot exceed 500 characters';
+      newErrors.description = t('roles.create.validation.descriptionLengthError');
     }
 
     if (formData.hierarchyLevel < 1 || formData.hierarchyLevel > 10) {
-      newErrors.hierarchyLevel = 'Hierarchy level must be between 1 and 10';
+      newErrors.hierarchyLevel = t('roles.create.validation.hierarchyLevelError');
     }
 
     if (formData.color && !/^#([A-Fa-f0-9]{6})$/.test(formData.color)) {
-      newErrors.color = 'Color must be a valid hex color (e.g., #3B82F6)';
+      newErrors.color = t('roles.create.validation.colorError');
     }
 
     if (formData.icon && formData.icon.length > 50) {
-      newErrors.icon = 'Icon cannot exceed 50 characters';
+      newErrors.icon = t('roles.create.validation.iconLengthError');
     }
 
     setErrors(newErrors);
@@ -158,7 +160,7 @@ const CreateRoleModal = () => {
     e.preventDefault();
 
     if (!validate()) {
-      toast.error('Please fix the validation errors');
+      toast.error(t('roles.create.validationError'));
       return;
     }
 
@@ -170,11 +172,11 @@ const CreateRoleModal = () => {
         permissionIds
       })).unwrap();
 
-      toast.success(`Role "${formData.displayName}" created successfully with ${permissionIds.length} permissions`);
+      toast.success(t('roles.create.createdSuccess', { name: formData.displayName, count: permissionIds.length }));
       dispatch(toggleCreateModal());
       dispatch(getRoles({ includeCounts: true }));
     } catch (error) {
-      toast.error(error?.message || 'Failed to create role');
+      toast.error(error?.message || t('roles.create.failedCreate'));
     }
   };
 
@@ -206,13 +208,13 @@ const CreateRoleModal = () => {
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Create New Role"
+      title={t('roles.create.title')}
       size="xl"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Tab Navigation */}
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex gap-8">
+        <div className="border-b border-gray-200 overflow-x-auto custom-scrollbar">
+          <nav className="-mb-px inline-flex min-w-max gap-8">
             <button
               type="button"
               onClick={() => setCurrentTab('details')}
@@ -222,7 +224,7 @@ const CreateRoleModal = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Role Details
+              {t('roles.create.roleDetails')}
             </button>
             <button
               type="button"
@@ -233,7 +235,7 @@ const CreateRoleModal = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Permissions ({selectedCount} selected)
+              {t('roles.create.permissionsTab', { count: selectedCount })}
             </button>
           </nav>
         </div>
@@ -241,35 +243,35 @@ const CreateRoleModal = () => {
         {/* Tab Content */}
         <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
           {currentTab === 'details' ? (
-            <div className="space-y-6 pr-2">
+            <div className="space-y-6 pe-2">
               {/* Role Name */}
               <Input
-                label="Role Name"
+                label={t('roles.create.roleName')}
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
                 error={errors.name}
                 required
-                placeholder="e.g., CustomAdmin"
-                helperText="Unique identifier for the role (cannot be changed later)"
+                placeholder={t('roles.create.roleName')}
+                helperText={t('roles.create.roleNameHelper')}
               />
 
               {/* Display Name */}
               <Input
-                label="Display Name"
+                label={t('roles.create.displayName')}
                 name="displayName"
                 value={formData.displayName}
                 onChange={handleChange}
                 error={errors.displayName}
                 required
-                placeholder="e.g., Custom Administrator"
-                helperText="User-friendly name shown in the UI"
+                placeholder={t('roles.create.displayName')}
+                helperText={t('roles.create.displayNameHelper')}
               />
 
               {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
+                  {t('roles.create.description')}
                 </label>
                 <textarea
                   name="description"
@@ -279,7 +281,7 @@ const CreateRoleModal = () => {
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                     errors.description ? 'border-red-500' : 'border-gray-300'
                   }`}
-                  placeholder="Describe the role's purpose and responsibilities"
+                  placeholder={t('roles.create.descriptionPlaceholder')}
                 />
                 {errors.description && (
                   <p className="mt-1 text-sm text-red-600">{errors.description}</p>
@@ -289,7 +291,7 @@ const CreateRoleModal = () => {
               {/* Hierarchy Level */}
               <Input
                 type="number"
-                label="Hierarchy Level"
+                label={t('roles.create.hierarchyLevel')}
                 name="hierarchyLevel"
                 value={formData.hierarchyLevel}
                 onChange={handleChange}
@@ -297,24 +299,24 @@ const CreateRoleModal = () => {
                 required
                 min={1}
                 max={10}
-                helperText="Level 1 = lowest access, Level 10 = highest access"
+                helperText={t('roles.create.hierarchyLevelHelper')}
               />
 
               {/* Display Order */}
               <Input
                 type="number"
-                label="Display Order"
+                label={t('roles.create.displayOrder')}
                 name="displayOrder"
                 value={formData.displayOrder}
                 onChange={handleChange}
                 error={errors.displayOrder}
-                helperText="Order in which this role appears in lists (lower numbers appear first)"
+                helperText={t('roles.create.displayOrderHelper')}
               />
 
               {/* Color */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Color
+                  {t('roles.create.color')}
                 </label>
                 <div className="flex items-center gap-3">
                   <input
@@ -341,7 +343,7 @@ const CreateRoleModal = () => {
                       onClick={() => setFormData(prev => ({ ...prev, color: color.value }))}
                       className="w-8 h-8 rounded border-2 border-gray-300 hover:border-gray-400 transition-colors"
                       style={{ backgroundColor: color.value }}
-                      title={color.name}
+                      title={color.value}
                     />
                   ))}
                 </div>
@@ -349,30 +351,30 @@ const CreateRoleModal = () => {
 
               {/* Icon */}
               <Input
-                label="Icon (Emoji or Text)"
+                label={t('roles.create.icon')}
                 name="icon"
                 value={formData.icon}
                 onChange={handleChange}
                 error={errors.icon}
-                placeholder="🛡️"
+                placeholder="\uD83D\uDEE1\uFE0F"
                 maxLength={50}
-                helperText="Emoji or short text to represent the role visually"
+                helperText={t('roles.create.iconHelper')}
               />
 
               {/* Preview */}
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-600 mb-2">Preview:</p>
+                <p className="text-sm text-gray-600 mb-2">{t('roles.create.preview')}</p>
                 <div
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium"
                   style={{ backgroundColor: formData.color }}
                 >
-                  <span className="text-xl">{formData.icon || '🛡️'}</span>
-                  <span>{formData.displayName || 'New Role'}</span>
+                  <span className="text-xl">{formData.icon || '\uD83D\uDEE1\uFE0F'}</span>
+                  <span>{formData.displayName || t('roles.create.newRole')}</span>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="space-y-4 pr-2">
+            <div className="space-y-4 pe-2">
               {/* Search and Filter */}
               <div className="flex gap-3">
                 <div className="flex-1">
@@ -380,10 +382,10 @@ const CreateRoleModal = () => {
                     <MagnifyingGlassIcon className="absolute start-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                       type="text"
-                      placeholder="Search permissions..."
+                      placeholder={t('roles.create.searchPermissions')}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full ps-9 pe-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -394,7 +396,7 @@ const CreateRoleModal = () => {
                 >
                   {categories.map((cat, index) => (
                     <option key={`category-${cat}-${index}`} value={cat}>
-                      {cat === 'all' ? 'All Categories' : cat}
+                      {cat === 'all' ? t('roles.create.allCategories') : cat}
                     </option>
                   ))}
                 </select>
@@ -406,8 +408,8 @@ const CreateRoleModal = () => {
                 </div>
               ) : filteredPermissions.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  <p className="text-sm">No permissions found</p>
-                  <p className="text-xs mt-1">Try adjusting your search or filter</p>
+                  <p className="text-sm">{t('roles.create.noPermissions')}</p>
+                  <p className="text-xs mt-1">{t('roles.create.adjustSearch')}</p>
                 </div>
               ) : (
                 filteredPermissions.map((category) => {
@@ -425,7 +427,7 @@ const CreateRoleModal = () => {
                             {category.category}
                           </h4>
                           <p className="text-xs text-gray-600">
-                            {selectedInCategory} of {categoryPermissions.length} selected
+                            {t('roles.create.selectedOf', { selected: selectedInCategory, total: categoryPermissions.length })}
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -436,7 +438,7 @@ const CreateRoleModal = () => {
                             onClick={() => handleCategorySelectAll(categoryPermissions)}
                             disabled={allSelected}
                           >
-                            Select All
+                            {t('roles.create.selectAll')}
                           </Button>
                           <Button
                             type="button"
@@ -445,7 +447,7 @@ const CreateRoleModal = () => {
                             onClick={() => handleCategoryDeselectAll(categoryPermissions)}
                             disabled={selectedInCategory === 0}
                           >
-                            Deselect All
+                            {t('roles.create.deselectAll')}
                           </Button>
                         </div>
                       </div>
@@ -460,7 +462,7 @@ const CreateRoleModal = () => {
                               type="button"
                               onClick={() => handlePermissionToggle(permission.id)}
                               className={`
-                                p-3 rounded-lg border-2 text-left transition-all
+                                p-3 rounded-lg border-2 text-start transition-all
                                 ${isSelected
                                   ? 'border-primary-500 bg-primary-50'
                                   : 'border-gray-200 bg-white hover:border-gray-300'
@@ -504,7 +506,7 @@ const CreateRoleModal = () => {
         {/* Actions */}
         <div className="flex justify-between items-center pt-4 border-t">
           <div className="text-sm text-gray-600">
-            {selectedCount} permission(s) selected
+            {t('roles.create.permissionsSelected', { count: selectedCount })}
           </div>
           <div className="flex gap-3">
             <Button
@@ -513,7 +515,7 @@ const CreateRoleModal = () => {
               onClick={handleClose}
               disabled={loading}
             >
-              Cancel
+              {t('roles.create.cancel')}
             </Button>
             {currentTab === 'permissions' && (
               <Button
@@ -521,7 +523,7 @@ const CreateRoleModal = () => {
                 variant="secondary"
                 onClick={() => setCurrentTab('details')}
               >
-                Back to Details
+                {t('roles.create.backToDetails')}
               </Button>
             )}
             <Button
@@ -529,7 +531,7 @@ const CreateRoleModal = () => {
               variant="primary"
               loading={loading}
             >
-              Create Role
+              {t('roles.create.createRole')}
             </Button>
           </div>
         </div>
@@ -539,3 +541,4 @@ const CreateRoleModal = () => {
 };
 
 export default CreateRoleModal;
+

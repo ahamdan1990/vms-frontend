@@ -102,6 +102,43 @@
     "acknowledgedAll": "{{count}} notification(s) acknowledged",
     "failed": "Bulk Action Failed"
   },
+  "center": {
+    "acknowledgeNote": "Acknowledged from notification center",
+    "archive": "Archive",
+    "clearAllConfirm": "Are you sure you want to clear all notifications?",
+    "clearAllTitle": "Clear all notifications",
+    "directAcknowledgeNote": "Quick acknowledge from notification center",
+    "emptyFilterMessage": "No notifications in {{filter}}",
+    "emptyTitle": "No notifications",
+    "errorLoading": "Error loading notifications: {{error}}",
+    "footerCount": "{{count}} notifications",
+    "markAllReadTitle": "Mark all as read",
+    "realtimeUnavailable": "Real-time updates are temporarily unavailable.",
+    "retry": "Retry",
+    "updatedLabel": "Updated:",
+    "viewArchiveTitle": "View archived notifications",
+    "view": {
+      "listTitle": "List view",
+      "cardTitle": "Card view"
+    },
+    "filters": {
+      "all": "All ({{count}})",
+      "allShort": "All",
+      "unread": "Unread ({{count}})",
+      "visitors": "Visitors",
+      "security": "Security",
+      "system": "System"
+    }
+  },
+  "toastContainer": {
+    "ariaLabel": "Toast notifications",
+    "clearSingleConfirm": "Clear this notification?",
+    "clearAllTitle": "Clear all notifications",
+    "clearSingleTitle": "Clear notification",
+    "clearAria": "Clear {{count}} notification(s)",
+    "clearAllButton": "Clear all ({{count}})",
+    "clearSingleButton": "Clear"
+  },
   "toast": {
     "refreshTitle": "Notifications Refreshed",
     "refreshMessage": "Notification list has been updated",

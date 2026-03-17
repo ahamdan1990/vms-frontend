@@ -1,24 +1,28 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import companyService from '../../../services/companyService';
 import { BuildingOfficeIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 const CompanyAutocomplete = ({
   value,
   onChange,
   onCreateNew,
-  label = 'Company',
-  placeholder = 'Search for a company...',
+  label = '',
+  placeholder = '',
   required = false,
   disabled = false,
   error = null,
   showCreateOption = true,
   className = ''
 }) => {
+  const { t } = useTranslation('common');
   const [searchTerm, setSearchTerm] = useState('');
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const resolvedLabel = label || t('labels.company');
+  const resolvedPlaceholder = placeholder || t('autocomplete.companyPlaceholder');
   
   // Initialize display value
   useEffect(() => {
@@ -153,9 +157,9 @@ const CompanyAutocomplete = ({
 
   return (
     <div className={`relative ${className}`}>
-      {label && (
+      {resolvedLabel && (
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          {label}
+          {resolvedLabel}
           {required && <span className="text-red-500 ms-1">*</span>}
         </label>
       )}
@@ -172,10 +176,10 @@ const CompanyAutocomplete = ({
           onKeyDown={handleKeyDown}
           onFocus={() => setIsOpen(true)}
           onBlur={handleBlur}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           disabled={disabled}
           className={`
-            block w-full pl-10 pr-10 py-2
+            block w-full ps-10 pe-10 py-2
             border rounded-lg
             bg-white dark:bg-gray-800
             text-gray-900 dark:text-white
@@ -204,7 +208,7 @@ const CompanyAutocomplete = ({
             {loading ? (
               <div className="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
                 <div className="inline-block w-5 h-5 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-                <span className="ms-2">Searching...</span>
+                <span className="ms-2">{t('autocomplete.searching')}</span>
               </div>
             ) : (
               <>
@@ -216,7 +220,7 @@ const CompanyAutocomplete = ({
                         type="button"
                         onClick={() => handleSelectCompany(company)}
                         className={`
-                          w-full px-4 py-3 text-left
+                          w-full px-4 py-3 text-start
                           hover:bg-gray-50 dark:hover:bg-gray-700
                           transition-colors
                           ${index === highlightedIndex ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
@@ -234,15 +238,15 @@ const CompanyAutocomplete = ({
                                 {company.name}
                               </p>
                               {company.isVerified && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
-                                  Verified
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                                  {t('autocomplete.verified')}
                                 </span>
                               )}
                             </div>
                             <div className="flex items-center gap-2 mt-1">
                               {company.code && (
                                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                                  Code: {company.code}
+                                  {t('autocomplete.code')}: {company.code}
                                 </span>
                               )}
                               {company.industry && (
@@ -253,7 +257,7 @@ const CompanyAutocomplete = ({
                             </div>
                             {company.contactPersonName && (
                               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                Contact: {company.contactPersonName}
+                                {t('autocomplete.contact')}: {company.contactPersonName}
                               </p>
                             )}
                           </div>
@@ -265,7 +269,7 @@ const CompanyAutocomplete = ({
                   <div className="px-4 py-8 text-center">
                     <BuildingOfficeIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                      No companies found for "{searchTerm}"
+                      {t('autocomplete.noCompaniesFound', { term: searchTerm })}
                     </p>
                   </div>
                 )}
@@ -276,7 +280,7 @@ const CompanyAutocomplete = ({
                     type="button"
                     onClick={handleCreateNew}
                     className={`
-                      w-full px-4 py-3 text-left
+                      w-full px-4 py-3 text-start
                       bg-gray-50 dark:bg-gray-700/50
                       hover:bg-gray-100 dark:hover:bg-gray-700
                       transition-colors
@@ -291,7 +295,7 @@ const CompanyAutocomplete = ({
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                          Create new company
+                          {t('autocomplete.createCompany')}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                           "{searchTerm}"

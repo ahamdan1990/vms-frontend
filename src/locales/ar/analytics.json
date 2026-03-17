@@ -1,12 +1,12 @@
 {
   "title": "تحليلات الزوار",
   "unifiedTitle": "التحليلات الموحدة",
-  "unifiedSubtitle": "تحليلات شاملة للزوار والطاقة الاستيعابية • آخر تحديث {{time}}",
+  "unifiedSubtitle": "تحليلات شاملة للزوار والسعة • آخر تحديث {{time}}",
   "tabs": {
     "overview": "نظرة عامة",
     "visitors": "تحليلات الزوار",
-    "capacity": "مراقبة الطاقة الاستيعابية",
-    "insights": "الرؤى التحليلية"
+    "capacity": "مراقبة السعة",
+    "insights": "الرؤى"
   },
   "buttons": {
     "refresh": "تحديث",
@@ -14,38 +14,38 @@
   },
   "cards": {
     "activeVisitors": "الزوار النشطون",
-    "activeVisitorsSubtitle": "حاليًا في المبنى",
+    "activeVisitorsSubtitle": "المتواجدون حالياً في المبنى",
     "todayVisitors": "زوار اليوم",
-    "todayVisitorsSubtitle": "تم تسجيل الدخول اليوم",
-    "capacityUtilization": "نسبة الإشغال",
+    "todayVisitorsSubtitle": "تم تسجيل دخولهم اليوم",
+    "capacityUtilization": "نسبة استخدام السعة",
     "avgVisitDuration": "متوسط مدة الزيارة",
-    "avgVisitDurationSubtitle": "متوسط الوقت المستغرق",
+    "avgVisitDurationSubtitle": "متوسط الوقت المقضي",
     "checkInRate": "معدل تسجيل الدخول",
     "checkInRateSubtitle": "عمليات تسجيل الدخول الناجحة",
-    "availableSlots": "الفترات المتاحة",
-    "availableSlotsSubtitle": "الطاقة الاستيعابية المتبقية",
+    "availableSlots": "الأماكن المتاحة",
+    "availableSlotsSubtitle": "السعة المتبقية",
     "totalVisitors": "إجمالي الزوار",
     "totalInvitations": "إجمالي الدعوات",
-    "noShowRate": "معدل الغياب"
+    "noShowRate": "معدل عدم الحضور"
   },
   "trends": {
-    "vsLastWeek": "مقارنةً بالأسبوع الماضي"
+    "vsLastWeek": "مقارنة بالأسبوع الماضي"
   },
   "insights": {
     "peakHours": "ساعات الذروة",
     "popularLocations": "المواقع الشائعة",
     "aiInsights": "رؤى مدعومة بالذكاء الاصطناعي",
     "peakBadge": "ذروة",
-    "noPeakData": "لا تتوفر بيانات ساعات الذروة بعد",
-    "noPeakDataHint": "ستظهر البيانات عند تسجيل دخول الزوار",
-    "noLocationData": "لا تتوفر بيانات المواقع بعد",
+    "noPeakData": "لا توجد بيانات لساعات الذروة حتى الآن",
+    "noPeakDataHint": "ستظهر البيانات مع تسجيل دخول الزوار",
+    "noLocationData": "لا توجد بيانات مواقع حتى الآن",
     "noLocationDataHint": "ستظهر البيانات عند إنشاء الدعوات"
   },
   "sections": {
-    "dailyVisitorTrend": "اتجاه الزوار اليومي",
+    "dailyVisitorTrend": "الاتجاه اليومي للزوار",
     "topCompanies": "أبرز الشركات",
     "topHosts": "أبرز المضيفين",
-    "busyLocations": "المواقع الأكثر ازدحامًا",
+    "busyLocations": "المواقع الأكثر ازدحاماً",
     "peakTimes": "أوقات الذروة"
   },
   "labels": {
@@ -58,5 +58,116 @@
   },
   "errors": {
     "loadFailed": "فشل تحميل بيانات التحليلات. يرجى المحاولة مرة أخرى."
+  },
+  "capacityDashboard": {
+    "title": "لوحة السعة",
+    "subtitle": "مراقبة سعة الزوار في الوقت الفعلي",
+    "accessDeniedTitle": "تم رفض الوصول",
+    "accessDeniedDesc": "ليس لديك صلاحية عرض لوحة السعة.",
+    "buttons": {
+      "refresh": "تحديث",
+      "autoOn": "التحديث التلقائي مفعل",
+      "autoOff": "التحديث التلقائي متوقف",
+      "viewStatistics": "عرض الإحصائيات",
+      "viewTrends": "عرض الاتجاهات",
+      "retry": "إعادة المحاولة"
+    },
+    "filters": {
+      "location": "الموقع",
+      "date": "التاريخ",
+      "allLocations": "كل المواقع"
+    },
+    "current": {
+      "title": "الإشغال الحالي",
+      "updatedAt": "آخر تحديث {{time}}",
+      "currentVisitors": "الزوار الحاليون",
+      "maxCapacity": "الحد الأقصى للسعة",
+      "availableSlots": "الأماكن المتاحة",
+      "utilization": "نسبة الاستخدام",
+      "noData": "لا توجد بيانات إشغال متاحة",
+      "errorPrefix": "خطأ",
+      "errorLoading": "خطأ في تحميل الإشغال",
+      "statusUnknown": "غير معروف",
+      "capacityUtilization": "استخدام السعة",
+      "atCapacityWarning": "تم الوصول إلى الحد الأقصى للسعة - لا يمكن استيعاب زوار إضافيين.",
+      "approachingCapacityWarning": "الاقتراب من حد السعة - بقي {{count}} مكان فقط.",
+      "locationLabel": "الموقع:",
+      "timeSlotLabel": "الفترة الزمنية:",
+      "dateTimeLabel": "التاريخ/الوقت:",
+      "locationFallback": "الموقع #{{id}}",
+      "timeSlotFallback": "الفترة #{{id}}",
+      "viewDetails": "عرض التفاصيل",
+      "loadData": "تحميل البيانات"
+    },
+    "overview": {
+      "title": "نظرة عامة على المواقع",
+      "statusFull": "ممتلئ",
+      "statusWarning": "تحذير",
+      "statusAvailable": "متاح",
+      "currentLabel": "الحالي:",
+      "capacityLabel": "السعة:",
+      "availableLabel": "المتاح:",
+      "utilizationLabel": "الاستخدام:"
+    },
+    "indicators": {
+      "normal": "طبيعي",
+      "warning": "تحذير (80%+)",
+      "atCapacity": "عند الحد الأقصى",
+      "autoRefreshing": "يتم التحديث التلقائي كل 30 ثانية"
+    },
+    "statisticsModal": {
+      "title": "إحصائيات السعة",
+      "error": "خطأ أثناء تحميل الإحصائيات",
+      "noData": "لا توجد إحصائيات متاحة",
+      "averageOccupancy": "متوسط الإشغال",
+      "peakOccupancy": "ذروة الإشغال",
+      "totalVisitors": "إجمالي الزوار",
+      "dailyBreakdown": "التفصيل اليومي",
+      "dayVisitors": "الزوار: {{count}}",
+      "dayPeak": "الذروة: {{value}}%",
+      "dayAverage": "المتوسط: {{value}}%"
+    },
+    "trendsModal": {
+      "title": "اتجاهات السعة",
+      "error": "خطأ أثناء تحميل الاتجاهات",
+      "noData": "لا توجد بيانات اتجاهات متاحة",
+      "sevenDayTitle": "اتجاهات السعة خلال 7 أيام",
+      "averageChange": "متوسط التغيير",
+      "busiestDay": "أكثر يوم ازدحاماً",
+      "bestTime": "أفضل وقت",
+      "dailyTrends": "الاتجاهات اليومية",
+      "avg": "المتوسط: {{value}}%",
+      "peak": "الذروة: {{value}}%"
+    },
+    "validator": {
+      "checking": "جاري التحقق من السعة...",
+      "validationError": "خطأ في التحقق",
+      "available": "متاح",
+      "notAvailable": "غير متاح",
+      "limitedAvailability": "توفر محدود",
+      "currentLabel": "الحالي:",
+      "scheduledLabel": "المجدول:",
+      "showAlternatives": "عرض البدائل",
+      "checkCapacity": "تحقق من السعة"
+    },
+    "alternatives": {
+      "title": "فترات زمنية بديلة",
+      "requestedAppointment": "الموعد المطلوب",
+      "requestUnavailable": "هذه الفترة الزمنية ممتلئة أو غير متاحة حالياً.",
+      "finding": "جارٍ البحث عن فترات زمنية بديلة...",
+      "unableToFind": "تعذر العثور على بدائل",
+      "emptyTitle": "لا توجد فترات زمنية بديلة",
+      "emptyDescription": "للأسف، لا توجد فترات زمنية بديلة متاحة تطابق متطلباتك.",
+      "availableCount": "البدائل المتاحة (تم العثور على {{count}})",
+      "recommended": "موصى به",
+      "totalCapacityLabel": "السعة الإجمالية:",
+      "select": "اختيار",
+      "tip": "نصيحة: يتم ترتيب البدائل الموصى بها حسب التوفر والقرب من الوقت المطلوب. يمكنك اختيار أي بديل يناسب جدولك.",
+      "searchDifferentDates": "البحث في تواريخ مختلفة",
+      "anyLocation": "أي موقع",
+      "visitorSingular": "زائر",
+      "visitorPlural": "زوار",
+      "requestSummary": "{{dateTime}} - {{visitors}} {{visitorLabel}} - {{location}}"
+    }
   }
 }

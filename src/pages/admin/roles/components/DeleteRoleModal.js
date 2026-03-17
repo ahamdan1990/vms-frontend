@@ -1,6 +1,7 @@
 // src/pages/admin/roles/components/DeleteRoleModal.js
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import Modal from '../../../../components/common/Modal/Modal';
 import Button from '../../../../components/common/Button/Button';
 import {
@@ -16,6 +17,7 @@ import { useToast } from '../../../../hooks/useNotifications';
  * Note: Roles are never hard-deleted from the database for audit purposes
  */
 const DeleteRoleModal = ({ isOpen, onClose }) => {
+  const { t } = useTranslation('system');
   const dispatch = useDispatch();
   const toast = useToast();
   const currentRole = useSelector(selectCurrentRole);
@@ -23,17 +25,17 @@ const DeleteRoleModal = ({ isOpen, onClose }) => {
 
   const handleDeactivate = async () => {
     if (!currentRole) {
-      toast.error('No role selected');
+      toast.error(t('roles.deactivate.noRoleSelected'));
       return;
     }
 
     if (currentRole.isSystemRole) {
-      toast.error('System roles cannot be deactivated');
+      toast.error(t('roles.deactivate.systemRoleError'));
       return;
     }
 
     if (currentRole.userCount > 0) {
-      toast.error(`Cannot deactivate role with ${currentRole.userCount} assigned user(s)`);
+      toast.error(t('roles.deactivate.usersAssignedError', { count: currentRole.userCount }));
       return;
     }
 
@@ -45,18 +47,18 @@ const DeleteRoleModal = ({ isOpen, onClose }) => {
           description: currentRole.description || '',
           displayOrder: currentRole.displayOrder || 0,
           color: currentRole.color || '#3B82F6',
-          icon: currentRole.icon || '🛡️',
+          icon: currentRole.icon || '\uD83D\uDEE1\uFE0F',
           isActive: false
         }
       })).unwrap();
 
-      toast.success(`Role "${currentRole.displayName || currentRole.name}" deactivated successfully`);
+      toast.success(t('roles.deactivate.deactivatedSuccess', { name: currentRole.displayName || currentRole.name }));
       onClose();
 
       // Refresh roles list
       dispatch(getRoles({ includeCounts: true }));
     } catch (error) {
-      toast.error(error?.message || 'Failed to deactivate role');
+      toast.error(error?.message || t('roles.deactivate.failedDeactivate'));
     }
   };
 
@@ -71,7 +73,7 @@ const DeleteRoleModal = ({ isOpen, onClose }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Deactivate Role"
+      title={t('roles.deactivate.title')}
       size="md"
     >
       <div className="space-y-4">
@@ -85,11 +87,10 @@ const DeleteRoleModal = ({ isOpen, onClose }) => {
             </div>
             <div className="ms-3">
               <h3 className="text-sm font-medium text-red-800">
-                Are you sure you want to deactivate this role?
+                {t('roles.deactivate.confirmQuestion')}
               </h3>
               <p className="mt-2 text-sm text-red-700">
-                This action will deactivate the role <strong>"{currentRole.displayName || currentRole.name}"</strong>.
-                The role will no longer be available for assignment, but historical data will be preserved.
+                {t('roles.deactivate.confirmDesc', { name: currentRole.displayName || currentRole.name })}
               </p>
             </div>
           </div>
@@ -106,10 +107,10 @@ const DeleteRoleModal = ({ isOpen, onClose }) => {
               </div>
               <div className="ms-3">
                 <h3 className="text-sm font-medium text-yellow-800">
-                  System Role Protection
+                  {t('roles.deactivate.systemRoleTitle')}
                 </h3>
                 <p className="mt-1 text-sm text-yellow-700">
-                  This is a system role and cannot be deactivated. System roles are required for core functionality.
+                  {t('roles.deactivate.systemRoleDesc')}
                 </p>
               </div>
             </div>
@@ -127,10 +128,10 @@ const DeleteRoleModal = ({ isOpen, onClose }) => {
               </div>
               <div className="ms-3">
                 <h3 className="text-sm font-medium text-yellow-800">
-                  Users Assigned
+                  {t('roles.deactivate.usersAssignedTitle')}
                 </h3>
                 <p className="mt-1 text-sm text-yellow-700">
-                  This role has <strong>{currentRole.userCount}</strong> user(s) assigned. Please reassign these users to another role before deactivating.
+                  {t('roles.deactivate.usersAssignedDesc', { count: currentRole.userCount })}
                 </p>
               </div>
             </div>
@@ -142,22 +143,22 @@ const DeleteRoleModal = ({ isOpen, onClose }) => {
           <div className="bg-gray-50 p-4 rounded-lg">
             <dl className="space-y-2 text-sm">
               <div>
-                <dt className="text-gray-500">Role Name:</dt>
+                <dt className="text-gray-500">{t('roles.deactivate.roleName')}</dt>
                 <dd className="font-medium text-gray-900">{currentRole.displayName || currentRole.name}</dd>
               </div>
               {currentRole.description && (
                 <div>
-                  <dt className="text-gray-500">Description:</dt>
+                  <dt className="text-gray-500">{t('roles.deactivate.description')}</dt>
                   <dd className="text-gray-700">{currentRole.description}</dd>
                 </div>
               )}
               <div>
-                <dt className="text-gray-500">Permissions:</dt>
-                <dd className="text-gray-700">{currentRole.permissionCount || 0} permissions assigned</dd>
+                <dt className="text-gray-500">{t('roles.deactivate.permissions')}</dt>
+                <dd className="text-gray-700">{t('roles.deactivate.permissionsValue', { count: currentRole.permissionCount || 0 })}</dd>
               </div>
               <div>
-                <dt className="text-gray-500">Users:</dt>
-                <dd className="text-gray-700">{currentRole.userCount || 0} users with this role</dd>
+                <dt className="text-gray-500">{t('roles.deactivate.users')}</dt>
+                <dd className="text-gray-700">{t('roles.deactivate.usersValue', { count: currentRole.userCount || 0 })}</dd>
               </div>
             </dl>
           </div>
@@ -166,7 +167,7 @@ const DeleteRoleModal = ({ isOpen, onClose }) => {
         {/* Note about reactivation */}
         {!isSystemRole && !hasUsers && (
           <p className="text-sm text-gray-500">
-            <strong>Note:</strong> You can reactivate this role later from the role details page.
+            {t('roles.deactivate.reactivateNote')}
           </p>
         )}
 
@@ -178,7 +179,7 @@ const DeleteRoleModal = ({ isOpen, onClose }) => {
             onClick={onClose}
             disabled={loading}
           >
-            Cancel
+            {t('roles.deactivate.cancel')}
           </Button>
           <Button
             type="button"
@@ -187,7 +188,7 @@ const DeleteRoleModal = ({ isOpen, onClose }) => {
             loading={loading}
             disabled={isSystemRole || hasUsers}
           >
-            Deactivate Role
+            {t('roles.deactivate.deactivate')}
           </Button>
         </div>
       </div>
@@ -196,3 +197,4 @@ const DeleteRoleModal = ({ isOpen, onClose }) => {
 };
 
 export default DeleteRoleModal;
+

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { usePermissions } from '../../../hooks/usePermissions';
 
 // Redux actions and selectors
@@ -40,7 +40,6 @@ import {
   selectEmergencyContactsDeleteError,
   selectHasSelectedContacts,
   selectSelectedContactsCount,
-  selectPrimaryEmergencyContact,
   selectEmergencyContactStats,
   selectEmergencyContactSummary
 } from '../../../store/selectors/emergencyContactSelectors';
@@ -63,15 +62,9 @@ import {
   EnvelopeIcon,
   UserIcon,
   ExclamationTriangleIcon,
-  CheckCircleIcon,
-  StarIcon,
   EyeIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-
-// Utils
-import formatters from '../../../utils/formatters';
-import { extractErrorMessage } from '../../../utils/errorUtils';
 
 /**
  * Emergency Contacts List Component
@@ -86,6 +79,7 @@ const EmergencyContactsList = ({
   maxHeight = null 
 }) => {
   const dispatch = useDispatch();
+  const { t } = useTranslation(['visitors', 'common']);
   const { hasPermission } = usePermissions();
 
   // Local state
@@ -115,7 +109,6 @@ const EmergencyContactsList = ({
   const deleteError = useSelector(selectEmergencyContactsDeleteError);
   const hasSelected = useSelector(selectHasSelectedContacts);
   const selectedCount = useSelector(selectSelectedContactsCount);
-  const primaryContact = useSelector(selectPrimaryEmergencyContact);
   const stats = useSelector(selectEmergencyContactStats);
   const summary = useSelector(selectEmergencyContactSummary);
 
@@ -215,12 +208,12 @@ const EmergencyContactsList = ({
   const columns = [
     {
       key: 'name',
-      header: 'Contact Information',
+      header: t('emergencyContactsList.table.columns.contactInfo'),
       sortable: true,
       render: (value, contact) => (
         <div className="flex items-center gap-3">
           {contact.isPrimary && (
-            <StarIconSolid className="w-4 h-4 text-yellow-500" title="Primary Contact" />
+            <StarIconSolid className="w-4 h-4 text-yellow-500" title={t('emergencyContactsList.badges.primary')} />
           )}
           <div className="flex-1 min-w-0">
             <div className="font-medium text-gray-900 dark:text-white">
@@ -246,24 +239,24 @@ const EmergencyContactsList = ({
     },
     {
       key: 'relationship',
-      header: 'Relationship',
+      header: t('emergencyContactsList.table.columns.relationship'),
       sortable: true,
       render: (relationship, contact) => (
         <Badge
           variant={getRelationshipBadgeVariant(relationship)}
           size="sm"
         >
-          {relationship || 'Other'}
+          {relationship || t('emergencyContactForm.relationships.other')}
         </Badge>
       )
     },
     {
       key: 'priority',
-      header: 'Priority',
+      header: t('emergencyContactsList.table.columns.priority'),
       sortable: true,
       render: (priority, contact) => {
         if (contact.isPrimary) {
-          return <Badge variant="warning" size="sm">Primary</Badge>;
+          return <Badge variant="warning" size="sm">{t('emergencyContactsList.badges.primary')}</Badge>;
         }
         return priority ? (
           <span className="text-sm text-gray-900 dark:text-white">#{priority}</span>
@@ -274,7 +267,7 @@ const EmergencyContactsList = ({
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('emergencyContactsList.table.columns.actions'),
       sortable: false,
       render: (value, contact) => (
         <div className="flex items-center gap-2">
@@ -326,9 +319,9 @@ const EmergencyContactsList = ({
       <Card className="p-6">
         <div className="text-center text-gray-500 dark:text-gray-300">
           <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">Access Denied</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">{t('common:accessDenied.title')}</h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            You don't have permission to view emergency contacts.
+            {t('emergencyContactsList.accessDenied')}
           </p>
         </div>
       </Card>
@@ -341,10 +334,10 @@ const EmergencyContactsList = ({
       {showHeader && (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Emergency Contacts</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('emergencyContactsList.title')}</h2>
             {visitorName && (
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Emergency contacts for {visitorName}
+                {t('emergencyContactsList.subtitle', { name: visitorName })}
               </p>
             )}
             {summary && (
@@ -365,7 +358,7 @@ const EmergencyContactsList = ({
                 loading={createLoading}
                 icon={<PlusIcon className="w-5 h-5" />}
               >
-                Add Emergency Contact
+                {t('emergencyContactsList.actions.addContact')}
               </Button>
             )}
           </div>
@@ -384,7 +377,7 @@ const EmergencyContactsList = ({
               </div>
               <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Contacts</dt>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('emergencyContactsList.stats.total')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">{stats.total}</dd>
                 </dl>
               </div>
@@ -400,8 +393,10 @@ const EmergencyContactsList = ({
               </div>
               <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Primary Contact</dt>
-                  <dd className="text-lg font-medium text-gray-900 dark:text-white">{stats.primary > 0 ? 'Set' : 'Missing'}</dd>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('emergencyContactsList.stats.primary')}</dt>
+                  <dd className="text-lg font-medium text-gray-900 dark:text-white">
+                    {stats.primary > 0 ? t('emergencyContactsList.stats.set') : t('emergencyContactsList.stats.missing')}
+                  </dd>
                 </dl>
               </div>
             </div>
@@ -416,7 +411,7 @@ const EmergencyContactsList = ({
               </div>
               <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">With Phone</dt>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('emergencyContactsList.stats.withPhone')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">{stats.withPhone}</dd>
                 </dl>
               </div>
@@ -432,7 +427,7 @@ const EmergencyContactsList = ({
               </div>
               <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Completion</dt>
+                  <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('emergencyContactsList.stats.completion')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-white">
                     <Badge
                       variant={stats.completionRate >= 80 ? 'success' : stats.completionRate >= 50 ? 'warning' : 'danger'}
@@ -454,14 +449,14 @@ const EmergencyContactsList = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-500 dark:text-gray-300">
-                {selectedCount} contact{selectedCount !== 1 ? 's' : ''} selected
+                {t('emergencyContactsList.selectedCount', { count: selectedCount })}
               </span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => dispatch(clearSelections())}
               >
-                Clear Selection
+                {t('emergencyContactsList.actions.clearSelection')}
               </Button>
             </div>
             
@@ -477,7 +472,7 @@ const EmergencyContactsList = ({
                   className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-500 dark:hover:bg-red-500/10"
                 >
                   <TrashIcon className="w-4 h-4 me-2" />
-                  Delete Selected
+                  {t('emergencyContactsList.actions.deleteSelected')}
                 </Button>
               </div>
             )}
@@ -496,7 +491,7 @@ const EmergencyContactsList = ({
             data={contacts}
             columns={columns}
             loading={listLoading}
-            emptyMessage="No emergency contacts found. Add emergency contacts to ensure visitor safety and compliance."
+            emptyMessage={t('emergencyContactsList.empty')}
             hover={true}
             striped={false}
             className="emergency-contacts-table"
@@ -508,7 +503,7 @@ const EmergencyContactsList = ({
       <Modal
         isOpen={isShowCreateModal}
         onClose={() => dispatch(hideCreateModal())}
-        title="Add Emergency Contact"
+        title={t('emergencyContactsList.modals.addTitle')}
         size="lg"
       >
         <EmergencyContactForm
@@ -524,7 +519,7 @@ const EmergencyContactsList = ({
       <Modal
         isOpen={isShowEditModal}
         onClose={() => dispatch(hideEditModal())}
-        title="Edit Emergency Contact"
+        title={t('emergencyContactsList.modals.editTitle')}
         size="lg"
       >
         {currentContact && (
@@ -544,7 +539,7 @@ const EmergencyContactsList = ({
       <Modal
         isOpen={!!viewContact}
         onClose={() => setViewContact(null)}
-        title="Emergency Contact Details"
+        title={t('emergencyContactsList.modals.detailsTitle')}
         size="lg"
       >
         {viewContact && (
@@ -553,13 +548,13 @@ const EmergencyContactsList = ({
               <div>
                 <div className="flex items-center gap-2">
                   {viewContact.isPrimary && (
-                    <Badge variant="warning" size="sm">Primary</Badge>
+                    <Badge variant="warning" size="sm">{t('emergencyContactsList.badges.primary')}</Badge>
                   )}
                   {viewContact.relationship && (
                     <Badge variant="secondary" size="sm">{viewContact.relationship}</Badge>
                   )}
                   {viewContact.priority && (
-                    <Badge variant="info" size="sm">Priority #{viewContact.priority}</Badge>
+                    <Badge variant="info" size="sm">{t('emergencyContactsList.priorityBadge', { priority: viewContact.priority })}</Badge>
                   )}
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-2">
@@ -575,12 +570,12 @@ const EmergencyContactsList = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                { label: 'Phone Number', value: viewContact.phoneNumber },
-                { label: 'Alternate Phone', value: viewContact.alternatePhoneNumber },
-                { label: 'Email', value: viewContact.email },
-                { label: 'Relationship', value: viewContact.relationship },
-                { label: 'Priority', value: viewContact.priority ? `#${viewContact.priority}` : 'Not set' },
-                { label: 'Primary Contact', value: viewContact.isPrimary ? 'Yes' : 'No' }
+                { label: t('emergencyContactsList.fields.phoneNumber'), value: viewContact.phoneNumber },
+                { label: t('emergencyContactsList.fields.alternatePhone'), value: viewContact.alternatePhoneNumber },
+                { label: t('fields.email'), value: viewContact.email },
+                { label: t('emergencyContactsList.fields.relationship'), value: viewContact.relationship },
+                { label: t('emergencyContactsList.fields.priority'), value: viewContact.priority ? `#${viewContact.priority}` : t('emergencyContactsList.notSet') },
+                { label: t('emergencyContactsList.fields.primaryContact'), value: viewContact.isPrimary ? t('common:status.yes') : t('common:status.no') }
               ].map((item, index) => (
                 <div
                   key={index}
@@ -590,7 +585,7 @@ const EmergencyContactsList = ({
                     {item.label}
                   </p>
                   <p className="text-sm font-medium text-gray-900 dark:text-white mt-1 break-words">
-                    {item.value || '—'}
+                    {item.value || t('common:na')}
                   </p>
                 </div>
               ))}
@@ -599,7 +594,7 @@ const EmergencyContactsList = ({
             {viewContact.address && (
               <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-900/60">
                 <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  Address
+                  {t('profile.address')}
                 </p>
                 <p className="text-sm font-medium text-gray-900 dark:text-white mt-1">
                   {viewContact.address}
@@ -610,7 +605,7 @@ const EmergencyContactsList = ({
             {viewContact.notes && (
               <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-900/60">
                 <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  Notes
+                  {t('notes.title')}
                 </p>
                 <p className="text-sm text-gray-700 dark:text-gray-200 mt-1 whitespace-pre-wrap">
                   {viewContact.notes}
@@ -626,14 +621,16 @@ const EmergencyContactsList = ({
         isOpen={isShowDeleteModal}
         onClose={() => dispatch(hideDeleteModal())}
         onConfirm={() => handleDeleteContact(false)}
-        title="Delete Emergency Contact"
+        title={t('emergencyContactsList.modals.deleteTitle')}
         message={
           currentContact
-            ? `Are you sure you want to delete ${currentContact.firstName} ${currentContact.lastName}? This will deactivate the contact but preserve historical data.`
-            : 'Are you sure you want to delete this emergency contact?'
+            ? t('emergencyContactsList.modals.deleteMessageNamed', {
+              name: `${currentContact.firstName} ${currentContact.lastName}`
+            })
+            : t('emergencyContactsList.modals.deleteMessage')
         }
-        confirmText="Delete"
-        cancelText="Cancel"
+        confirmText={t('common:buttons.delete')}
+        cancelText={t('common:buttons.cancel')}
         variant="danger"
         loading={deleteLoading}
       />
@@ -646,10 +643,10 @@ const EmergencyContactsList = ({
           setBulkAction('');
         }}
         onConfirm={handleBulkDelete}
-        title="Delete Selected Contacts"
-        message={`Are you sure you want to delete ${selectedCount} emergency contact${selectedCount !== 1 ? 's' : ''}? This will deactivate the contacts but preserve historical data.`}
-        confirmText="Delete Selected"
-        cancelText="Cancel"
+        title={t('emergencyContactsList.modals.deleteSelectedTitle')}
+        message={t('emergencyContactsList.modals.deleteSelectedMessage', { count: selectedCount })}
+        confirmText={t('emergencyContactsList.actions.deleteSelected')}
+        cancelText={t('common:buttons.cancel')}
         variant="danger"
         loading={deleteLoading}
       />
@@ -667,3 +664,4 @@ EmergencyContactsList.propTypes = {
 };
 
 export default EmergencyContactsList;
+

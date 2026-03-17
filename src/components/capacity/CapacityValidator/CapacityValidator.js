@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // Redux actions
 import {
@@ -18,9 +19,6 @@ import Button from '../../common/Button/Button';
 import Badge from '../../common/Badge/Badge';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
 import AlternativesModal from '../AlternativesModal/AlternativesModal';
-
-// Services
-import capacityService from '../../../services/capacityService';
 
 // Utils
 import { debounce } from 'lodash';
@@ -41,20 +39,17 @@ const CapacityValidator = ({
   showAlternatives = true,
   className = ''
 }) => {
+  const { t } = useTranslation('analytics');
   const dispatch = useDispatch();
-  
-  // Local state
-  const [hasValidated, setHasValidated] = useState(false);
-  const [validationTrigger, setValidationTrigger] = useState(0);
 
-  // Redux state
+  const [hasValidated, setHasValidated] = useState(false);
+
   const {
     validation,
     alternatives,
     showAlternativesModal: isAlternativesModalOpen
   } = useSelector(state => state.capacity);
 
-  // Debounced validation function
   const debouncedValidate = useCallback(
     debounce(() => {
       if (!dateTime) return;
@@ -74,7 +69,6 @@ const CapacityValidator = ({
     [locationId, timeSlotId, dateTime, expectedVisitors, isVipRequest, excludeInvitationId, dispatch]
   );
 
-  // Auto-validate when parameters change
   useEffect(() => {
     if (autoValidate && dateTime) {
       debouncedValidate();
@@ -85,20 +79,16 @@ const CapacityValidator = ({
     };
   }, [autoValidate, dateTime, debouncedValidate]);
 
-  // Manual validation trigger
   const handleManualValidation = () => {
-    setValidationTrigger(prev => prev + 1);
     debouncedValidate();
   };
 
-  // Handle validation result changes
   useEffect(() => {
     if (onValidationChange && validation.result !== null) {
       onValidationChange(validation.result);
     }
   }, [validation.result, onValidationChange]);
 
-  // Handle show alternatives
   const handleShowAlternatives = () => {
     if (!dateTime) return;
 
@@ -112,9 +102,7 @@ const CapacityValidator = ({
     dispatch(showAlternativesModal(alternativesRequest));
   };
 
-  // Handle alternative selection
   const handleSelectAlternative = (alternative) => {
-    // Emit the selected alternative back to parent
     if (onValidationChange) {
       onValidationChange({
         isAvailable: true,
@@ -122,23 +110,20 @@ const CapacityValidator = ({
         alternativeSelected: true
       });
     }
-    
+
     dispatch(hideAlternativesModal());
   };
 
-  // Clear validation when component unmounts or dateTime changes significantly
   useEffect(() => {
     return () => {
       dispatch(clearValidation());
     };
   }, [dispatch]);
 
-  // Don't render if no dateTime provided
   if (!dateTime) {
     return null;
   }
 
-  // Validation status
   const isLoading = validation.loading;
   const hasError = validation.error && validation.error.length > 0;
   const hasResult = validation.result !== null;
@@ -146,7 +131,6 @@ const CapacityValidator = ({
 
   return (
     <div className={`space-y-3 ${className}`}>
-      {/* Validation Status */}
       <AnimatePresence mode="wait">
         {isLoading && (
           <motion.div
@@ -157,7 +141,7 @@ const CapacityValidator = ({
             className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-300"
           >
             <LoadingSpinner size="sm" />
-            <span>Checking capacity...</span>
+            <span>{t('capacityDashboard.validator.checking')}</span>
           </motion.div>
         )}
 
@@ -171,7 +155,7 @@ const CapacityValidator = ({
           >
             <div className="flex items-start gap-2">
               <div className="text-red-600 dark:text-red-200 text-sm">
-                <p className="font-medium">Validation Error</p>
+                <p className="font-medium">{t('capacityDashboard.validator.validationError')}</p>
                 <ul className="mt-1 list-disc list-inside">
                   {validation.error.map((error, index) => (
                     <li key={index}>{error}</li>
@@ -190,61 +174,60 @@ const CapacityValidator = ({
             exit={{ opacity: 0, y: -10 }}
             className={`
               border rounded-lg p-4
-              ${isAvailable 
-                ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' 
-                : 'bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-700'
+              ${
+                isAvailable
+                  ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
+                  : 'bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-700'
               }
             `}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
-                {/* Status Badge */}
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge
-                    variant={isAvailable ? 'success' : 'error'}
-                    size="sm"
-                  >
-                    {isAvailable ? 'Available' : 'Not Available'}
+                  <Badge variant={isAvailable ? 'success' : 'error'} size="sm">
+                    {isAvailable
+                      ? t('capacityDashboard.validator.available')
+                      : t('capacityDashboard.validator.notAvailable')}
                   </Badge>
-                  
+
                   {validation.result.isWarningLevel && isAvailable && (
                     <Badge variant="warning" size="sm">
-                      Limited Availability
+                      {t('capacityDashboard.validator.limitedAvailability')}
                     </Badge>
                   )}
                 </div>
 
-                {/* Capacity Details */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                   <div>
                     <span className="text-gray-600 dark:text-gray-400">
-                      {validation.result.isCurrentTime ? 'Current:' : 'Scheduled:'}
+                      {validation.result.isCurrentTime
+                        ? t('capacityDashboard.validator.currentLabel')
+                        : t('capacityDashboard.validator.scheduledLabel')}
                     </span>
                     <span className="ms-1 font-medium text-gray-900 dark:text-gray-100">
                       {validation.result.currentOccupancy}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600 dark:text-gray-400">Capacity:</span>
+                    <span className="text-gray-600 dark:text-gray-400">{t('capacityDashboard.overview.capacityLabel')}</span>
                     <span className="ms-1 font-medium text-gray-900 dark:text-gray-100">
                       {validation.result.maxCapacity}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600 dark:text-gray-400">Available:</span>
+                    <span className="text-gray-600 dark:text-gray-400">{t('capacityDashboard.overview.availableLabel')}</span>
                     <span className="ms-1 font-medium text-green-600 dark:text-green-400">
                       {validation.result.availableSlots}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600 dark:text-gray-400">Utilization:</span>
+                    <span className="text-gray-600 dark:text-gray-400">{t('capacityDashboard.overview.utilizationLabel')}</span>
                     <span className="ms-1 font-medium text-gray-900 dark:text-gray-100">
                       {validation.result.occupancyPercentage}%
                     </span>
                   </div>
                 </div>
 
-                {/* Messages */}
                 {validation.result.messages && validation.result.messages.length > 0 && (
                   <div className="mt-2">
                     {validation.result.messages.map((message, index) => (
@@ -252,11 +235,10 @@ const CapacityValidator = ({
                         {message}
                       </p>
                     ))}
-                 </div>
-               )}
-             </div>
+                  </div>
+                )}
+              </div>
 
-              {/* Actions */}
               <div className="flex flex-col gap-2">
                 <Button
                   variant="ghost"
@@ -265,7 +247,7 @@ const CapacityValidator = ({
                   loading={isLoading}
                   className="text-xs"
                 >
-                  Refresh
+                  {t('capacityDashboard.buttons.refresh')}
                 </Button>
 
                 {!isAvailable && showAlternatives && (
@@ -275,7 +257,7 @@ const CapacityValidator = ({
                     onClick={handleShowAlternatives}
                     className="text-xs"
                   >
-                    Show Alternatives
+                    {t('capacityDashboard.validator.showAlternatives')}
                   </Button>
                 )}
               </div>
@@ -284,7 +266,6 @@ const CapacityValidator = ({
         )}
       </AnimatePresence>
 
-      {/* Manual Validation Button */}
       {!autoValidate && !hasValidated && (
         <Button
           variant="outline"
@@ -293,11 +274,10 @@ const CapacityValidator = ({
           loading={isLoading}
           className="w-full"
         >
-          Check Capacity
+          {t('capacityDashboard.validator.checkCapacity')}
         </Button>
       )}
 
-      {/* Alternatives Modal */}
       <AlternativesModal
         isOpen={isAlternativesModalOpen}
         onClose={() => dispatch(hideAlternativesModal())}

@@ -12,28 +12,32 @@ import {
 import Badge from '../common/Badge/Badge';
 import formatters from '../../utils/formatters';
 
+const translate = (t, key, defaultValue, options = {}) => (
+  t ? t(key, { defaultValue, ...options }) : defaultValue
+);
+
 export const parseUtcDate = (dateString) => {
   if (!dateString) return null;
   const normalized = dateString.endsWith('Z') ? dateString : `${dateString}Z`;
   return new Date(normalized);
 };
 
-export const getStatusBadge = (invitation) => {
+export const getStatusBadge = (invitation, t) => {
   if (invitation.checkedInAt && !invitation.checkedOutAt) {
-    return <Badge variant="success" size="sm">Checked In</Badge>;
+    return <Badge variant="success" size="sm">{translate(t, 'common:activeVisitors.status.checkedIn', 'Checked In')}</Badge>;
   } else if (invitation.checkedInAt && invitation.checkedOutAt) {
-    return <Badge variant="secondary" size="sm">Completed</Badge>;
+    return <Badge variant="secondary" size="sm">{translate(t, 'common:activeVisitors.status.completed', 'Completed')}</Badge>;
   } else if (invitation.status === 'Approved') {
-    return <Badge variant="warning" size="sm">Approved</Badge>;
+    return <Badge variant="warning" size="sm">{translate(t, 'common:activeVisitors.status.approved', 'Approved')}</Badge>;
   }
   return <Badge variant="info" size="sm">{invitation.status}</Badge>;
 };
 
-export const formatVisitorInfo = (invitation) => {
+export const formatVisitorInfo = (invitation, t) => {
   const visitor = invitation.visitor;
-  if (!visitor) return 'Unknown Visitor';
+  if (!visitor) return translate(t, 'common:activeVisitors.fallback.unknownVisitor', 'Unknown Visitor');
 
-  const emailValue = visitor.email?.value || visitor.email || 'No email';
+  const emailValue = visitor.email?.value || visitor.email || translate(t, 'common:activeVisitors.fallback.noEmail', 'No email');
 
   return (
     <div className="flex items-center gap-3">
@@ -42,7 +46,7 @@ export const formatVisitorInfo = (invitation) => {
       </div>
       <div>
         <div className="font-medium text-gray-900 dark:text-white">
-          {visitor.fullName || `${visitor.firstName || ''} ${visitor.lastName || ''}`.trim() || 'Unknown Visitor'}
+          {visitor.fullName || `${visitor.firstName || ''} ${visitor.lastName || ''}`.trim() || translate(t, 'common:activeVisitors.fallback.unknownVisitor', 'Unknown Visitor')}
         </div>
         <div className="text-sm text-gray-500 dark:text-gray-400">{emailValue}</div>
         {visitor.company && (
@@ -56,10 +60,10 @@ export const formatVisitorInfo = (invitation) => {
   );
 };
 
-export const formatVisitInfo = (invitation) => (
+export const formatVisitInfo = (invitation, t) => (
   <div className="space-y-1">
     <div className="font-medium text-gray-900 dark:text-white">
-      {invitation.subject || invitation.purpose || 'Visit'}
+      {invitation.subject || invitation.purpose || translate(t, 'common:activeVisitors.fallback.visit', 'Visit')}
     </div>
     <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1">
       <CalendarIcon className="w-3 h-3" />
@@ -74,13 +78,13 @@ export const formatVisitInfo = (invitation) => (
     {invitation.host?.fullName && (
       <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1">
         <UserIcon className="w-3 h-3" />
-        <span>Host: {invitation.host.fullName}</span>
+        <span>{translate(t, 'common:activeVisitors.labels.host', 'Host: {{name}}', { name: invitation.host.fullName })}</span>
       </div>
     )}
   </div>
 );
 
-export const formatCheckInStatus = (invitation) => {
+export const formatCheckInStatus = (invitation, t) => {
   if (invitation.checkedInAt && invitation.checkedOutAt) {
     const checkInTime = parseUtcDate(invitation.checkedInAt);
     const checkOutTime = parseUtcDate(invitation.checkedOutAt);
@@ -91,13 +95,13 @@ export const formatCheckInStatus = (invitation) => {
     return (
       <div className="space-y-1">
         <div className="text-sm text-gray-900 dark:text-white">
-          <strong>In:</strong> {formatters.formatTime(invitation.checkedInAt)}
+          <strong>{translate(t, 'common:activeVisitors.labels.in', 'In:')}</strong> {formatters.formatTime(invitation.checkedInAt)}
         </div>
         <div className="text-sm text-gray-900 dark:text-white">
-          <strong>Out:</strong> {formatters.formatTime(invitation.checkedOutAt)}
+          <strong>{translate(t, 'common:activeVisitors.labels.out', 'Out:')}</strong> {formatters.formatTime(invitation.checkedOutAt)}
         </div>
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          Duration: {hours}h {minutes}m
+          {translate(t, 'common:activeVisitors.labels.duration', 'Duration: {{hours}}h {{minutes}}m', { hours, minutes })}
         </div>
       </div>
     );
@@ -113,10 +117,10 @@ export const formatCheckInStatus = (invitation) => {
     return (
       <div className="space-y-1">
         <div className="text-sm text-gray-900 dark:text-white">
-          <strong>Checked in:</strong> {formatters.formatTime(invitation.checkedInAt)}
+          <strong>{translate(t, 'common:activeVisitors.labels.checkedIn', 'Checked in:')}</strong> {formatters.formatTime(invitation.checkedInAt)}
         </div>
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          Duration: {hours}h {minutes}m
+          {translate(t, 'common:activeVisitors.labels.duration', 'Duration: {{hours}}h {{minutes}}m', { hours, minutes })}
         </div>
       </div>
     );
@@ -124,12 +128,13 @@ export const formatCheckInStatus = (invitation) => {
 
   return (
     <div className="text-sm text-gray-500 dark:text-gray-400">
-      Not checked in
+      {translate(t, 'common:activeVisitors.labels.notCheckedIn', 'Not checked in')}
     </div>
   );
 };
 
 export const createActiveVisitorColumns = ({
+  t,
   onViewDetails,
   onQuickCheckIn,
   onQuickCheckOut,
@@ -138,31 +143,31 @@ export const createActiveVisitorColumns = ({
   const columns = [
     {
       key: 'visitor',
-      header: 'Visitor',
+      header: translate(t, 'common:activeVisitors.columns.visitor', 'Visitor'),
       sortable: true,
-      render: (value, invitation) => formatVisitorInfo(invitation)
+      render: (value, invitation) => formatVisitorInfo(invitation, t)
     },
     {
       key: 'visit',
-      header: 'Visit Details',
+      header: translate(t, 'common:activeVisitors.columns.visitDetails', 'Visit Details'),
       sortable: true,
-      render: (value, invitation) => formatVisitInfo(invitation)
+      render: (value, invitation) => formatVisitInfo(invitation, t)
     },
     {
       key: 'status',
-      header: 'Status',
+      header: translate(t, 'common:activeVisitors.columns.status', 'Status'),
       sortable: true,
-      render: (value, invitation) => getStatusBadge(invitation)
+      render: (value, invitation) => getStatusBadge(invitation, t)
     },
     {
       key: 'checkin_status',
-      header: 'Check-in Status',
+      header: translate(t, 'common:activeVisitors.columns.checkInStatus', 'Check-in Status'),
       sortable: false,
-      render: (value, invitation) => formatCheckInStatus(invitation)
+      render: (value, invitation) => formatCheckInStatus(invitation, t)
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: translate(t, 'common:activeVisitors.columns.actions', 'Actions'),
       width: '200px',
       sortable: false,
       render: (value, invitation) => {
@@ -175,7 +180,7 @@ export const createActiveVisitorColumns = ({
               <button
                 onClick={() => onViewDetails(invitation)}
                 className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                title="View details"
+                title={translate(t, 'common:activeVisitors.actions.viewDetails', 'View details')}
               >
                 <EyeIcon className="w-4 h-4" />
               </button>
@@ -185,7 +190,7 @@ export const createActiveVisitorColumns = ({
               <button
                 onClick={() => onQuickCheckIn(invitation)}
                 className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-200 transition-colors"
-                title="Check In"
+                title={translate(t, 'common:activeVisitors.actions.checkIn', 'Check In')}
               >
                 <ArrowRightOnRectangleIcon className="w-4 h-4" />
               </button>
@@ -195,7 +200,7 @@ export const createActiveVisitorColumns = ({
               <button
                 onClick={() => onQuickCheckOut(invitation)}
                 className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200 transition-colors"
-                title="Check Out"
+                title={translate(t, 'common:activeVisitors.actions.checkOut', 'Check Out')}
               >
                 <ArrowLeftOnRectangleIcon className="w-4 h-4" />
               </button>

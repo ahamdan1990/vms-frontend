@@ -1,13 +1,12 @@
 // src/components/checkin/InvitationDetailsModal/InvitationDetailsModal.js
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 // Components
 import Modal from '../../common/Modal/Modal';
 import Button from '../../common/Button/Button';
 import Badge from '../../common/Badge/Badge';
-import Input from '../../common/Input/Input';
 
 // Icons
 import {
@@ -17,8 +16,6 @@ import {
   MapPinIcon,
   BuildingOfficeIcon,
   CheckCircleIcon,
-  XMarkIcon,
-  ExclamationTriangleIcon,
   InformationCircleIcon,
   PhoneIcon,
   EnvelopeIcon
@@ -44,82 +41,68 @@ const InvitationDetailsModal = ({
   onConfirmCheckIn,
   loading = false
 }) => {
+  const { t } = useTranslation('checkin');
   const [notes, setNotes] = useState('');
 
   if (!isOpen) return null;
 
-  // Error state - show error dialog
   if (error) {
     return (
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title="Check-in Error"
+        title={t('invitationModal.error.title')}
         size="md"
       >
         <div className="text-center py-6">
           <ExclamationTriangleIconSolid className="mx-auto h-16 w-16 text-red-500 dark:text-red-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Check-in Failed</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('invitationModal.error.heading')}</h3>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
-            {error.message || 'Unable to process check-in at this time.'}
+            {error.message || t('invitationModal.error.defaultMessage')}
           </p>
           {error.details && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 text-left">
-              <p className="text-sm text-red-700 dark:text-red-300">
-                {error.details}
-              </p>
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 text-start">
+              <p className="text-sm text-red-700 dark:text-red-300">{error.details}</p>
             </div>
           )}
-          <Button
-            variant="primary"
-            onClick={onClose}
-            className="w-full"
-          >
-            Close
+          <Button variant="primary" onClick={onClose} className="w-full">
+            {t('common:buttons.close')}
           </Button>
         </div>
       </Modal>
     );
   }
 
-  // No invitation data - show not found
   if (!invitation) {
     return (
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title="Invitation Not Found"
+        title={t('invitationModal.notFound.title')}
         size="md"
       >
         <div className="text-center py-6">
           <InformationCircleIcon className="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Invitation Not Found</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('invitationModal.notFound.heading')}</h3>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
-            The scanned QR code does not match any invitation in the system.
+            {t('invitationModal.notFound.description')}
           </p>
-          <Button
-            variant="primary"
-            onClick={onClose}
-            className="w-full"
-          >
-            Close
+          <Button variant="primary" onClick={onClose} className="w-full">
+            {t('common:buttons.close')}
           </Button>
         </div>
       </Modal>
     );
   }
 
-  // Get visitor info
   const visitor = invitation.visitor || {};
   const host = invitation.host || {};
   const location = invitation.location || {};
   const visitPurpose = invitation.visitPurpose || {};
 
-  // Check if invitation is already checked in
   const isCheckedIn = invitation.checkedInAt && !invitation.checkedOutAt;
   const isCompleted = invitation.checkedInAt && invitation.checkedOutAt;
 
-  // Check timing issues (used for informational UI hints only — server enforces all rules)
   const now = new Date();
   const scheduledStart = new Date(invitation.scheduledStartTime);
   const scheduledEnd = new Date(invitation.scheduledEndTime);
@@ -129,32 +112,29 @@ const InvitationDetailsModal = ({
   const isEarlyButAllowed = now >= twoHoursBeforeStart && now < scheduledStart;
   const isLateButAllowed = now > scheduledEnd && invitation.status === InvitationStatus.Approved;
 
-  // Use server-provided status for all business logic decisions
   const isExpired = invitation.isExpired || invitation.status === InvitationStatus.Expired;
   const isApproved = invitation.status === InvitationStatus.Approved;
   const canCheckIn = !isCheckedIn && !isCompleted && !isTooEarly && !isExpired && isApproved;
 
-  // Get status badge
   const getStatusBadge = () => {
     if (isCompleted) {
-      return <Badge color="gray" size="sm">Completed</Badge>;
+      return <Badge color="gray" size="sm">{t('invitationModal.status.completed')}</Badge>;
     }
     if (isCheckedIn) {
-      return <Badge color="green" size="sm">Checked In</Badge>;
+      return <Badge color="green" size="sm">{t('invitationModal.status.checkedIn')}</Badge>;
     }
     if (invitation.status === InvitationStatus.Approved) {
-      return <Badge color="blue" size="sm">Approved</Badge>;
+      return <Badge color="blue" size="sm">{t('invitationModal.status.approved')}</Badge>;
     }
     if (invitation.status === InvitationStatus.Submitted || invitation.status === InvitationStatus.UnderReview) {
-      return <Badge color="yellow" size="sm">Pending Approval</Badge>;
+      return <Badge color="yellow" size="sm">{t('invitationModal.status.pendingApproval')}</Badge>;
     }
     if (invitation.status === InvitationStatus.Expired) {
-      return <Badge color="orange" size="sm">Expired</Badge>;
+      return <Badge color="orange" size="sm">{t('invitationModal.status.expired')}</Badge>;
     }
     return <Badge color="gray" size="sm">{InvitationStatusLabels[invitation.status] ?? invitation.status}</Badge>;
   };
 
-  // Handle check-in confirmation
   const handleConfirmCheckIn = () => {
     onConfirmCheckIn(invitation.invitationNumber || invitation.qrCode, notes);
   };
@@ -163,172 +143,145 @@ const InvitationDetailsModal = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Visitor Check-in Details"
+      title={t('invitationModal.title')}
       size="xl"
     >
       <div className="space-y-6">
-        {/* Header with Status */}
         <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
           <div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-              {invitation.invitationNumber}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Invitation Reference
-            </p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{invitation.invitationNumber}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('invitationModal.invitationReference')}</p>
           </div>
           {getStatusBadge()}
         </div>
 
-        {/* Too Early Warning - Cannot Check In */}
         {isTooEarly && (
           <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-800 rounded-lg p-4 flex items-start">
             <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 dark:text-red-400 me-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-red-900 dark:text-red-200 font-bold text-sm">⚠️ TOO EARLY - CANNOT CHECK IN</h4>
-              <p className="text-red-800 dark:text-red-300 text-sm mt-1 font-medium">
-                This visitor is arriving too early.
+              <h4 className="text-red-900 dark:text-red-200 font-bold text-sm">{t('invitationModal.tooEarly.title')}</h4>
+              <p className="text-red-800 dark:text-red-300 text-sm mt-1 font-medium">{t('invitationModal.tooEarly.description')}</p>
+              <p className="text-red-700 dark:text-red-300 text-sm mt-1">
+                <strong>{t('invitationModal.tooEarly.scheduledTimeLabel')}</strong> {formatters.formatDateTime(scheduledStart)}
               </p>
               <p className="text-red-700 dark:text-red-300 text-sm mt-1">
-                <strong>Scheduled time:</strong> {formatters.formatDateTime(scheduledStart)}
-              </p>
-              <p className="text-red-700 dark:text-red-300 text-sm mt-1">
-                <strong>Check-in allowed from:</strong> {formatters.formatDateTime(twoHoursBeforeStart)}
+                <strong>{t('invitationModal.tooEarly.allowedFromLabel')}</strong> {formatters.formatDateTime(twoHoursBeforeStart)}
               </p>
             </div>
           </div>
         )}
 
-        {/* Expired Warning - Cannot Check In */}
         {isExpired && (
           <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-800 rounded-lg p-4 flex items-start">
             <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 dark:text-red-400 me-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-red-900 dark:text-red-200 font-bold text-sm">⚠️ EXPIRED - CANNOT CHECK IN</h4>
-              <p className="text-red-800 dark:text-red-300 text-sm mt-1 font-medium">
-                This invitation has expired.
-              </p>
+              <h4 className="text-red-900 dark:text-red-200 font-bold text-sm">{t('invitationModal.expired.title')}</h4>
+              <p className="text-red-800 dark:text-red-300 text-sm mt-1 font-medium">{t('invitationModal.expired.description')}</p>
               <p className="text-red-700 dark:text-red-300 text-sm mt-1">
-                <strong>Scheduled end time:</strong> {formatters.formatDateTime(scheduledEnd)}
+                <strong>{t('invitationModal.expired.scheduledEndLabel')}</strong> {formatters.formatDateTime(scheduledEnd)}
               </p>
             </div>
           </div>
         )}
 
-        {/* Early Arrival Notice - Can Still Check In */}
         {isEarlyButAllowed && !isCheckedIn && !isCompleted && (
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-300 dark:border-yellow-800 rounded-lg p-4 flex items-start">
             <ClockIcon className="h-6 w-6 text-yellow-600 dark:text-yellow-400 me-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-yellow-900 dark:text-yellow-200 font-bold text-sm">🕐 EARLY ARRIVAL</h4>
-              <p className="text-yellow-800 dark:text-yellow-300 text-sm mt-1 font-medium">
-                Visitor arrived early!
-              </p>
+              <h4 className="text-yellow-900 dark:text-yellow-200 font-bold text-sm">{t('invitationModal.earlyArrival.title')}</h4>
+              <p className="text-yellow-800 dark:text-yellow-300 text-sm mt-1 font-medium">{t('invitationModal.earlyArrival.description')}</p>
               <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
-                <strong>Scheduled time:</strong> {formatters.formatDateTime(scheduledStart)}
+                <strong>{t('invitationModal.earlyArrival.scheduledTimeLabel')}</strong> {formatters.formatDateTime(scheduledStart)}
               </p>
-              <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">
-                ✅ They can be checked in now, but please notify the host that the visitor has arrived early.
-              </p>
+              <p className="text-yellow-700 dark:text-yellow-300 text-sm mt-1">{t('invitationModal.earlyArrival.allowedNotice')}</p>
             </div>
           </div>
         )}
 
-        {/* Late Arrival Notice - Can Still Check In */}
         {isLateButAllowed && !isCheckedIn && !isCompleted && (
           <div className="bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-300 dark:border-orange-800 rounded-lg p-4 flex items-start">
             <ClockIcon className="h-6 w-6 text-orange-600 dark:text-orange-400 me-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-orange-900 dark:text-orange-200 font-bold text-sm">🕐 LATE ARRIVAL</h4>
-              <p className="text-orange-800 dark:text-orange-300 text-sm mt-1 font-medium">
-                Visitor arrived late!
-              </p>
+              <h4 className="text-orange-900 dark:text-orange-200 font-bold text-sm">{t('invitationModal.lateArrival.title')}</h4>
+              <p className="text-orange-800 dark:text-orange-300 text-sm mt-1 font-medium">{t('invitationModal.lateArrival.description')}</p>
               <div className="mt-2 space-y-1">
                 <p className="text-orange-700 dark:text-orange-300 text-sm">
-                  <strong>Originally scheduled:</strong> {formatters.formatDateTime(scheduledStart)} - {formatters.formatTime(scheduledEnd)}
+                  <strong>{t('invitationModal.lateArrival.originalScheduleLabel')}</strong> {formatters.formatDateTime(scheduledStart)} - {formatters.formatTime(scheduledEnd)}
                 </p>
                 <p className="text-orange-700 dark:text-orange-300 text-sm">
-                  <strong>Scheduled duration:</strong> {formatters.formatDuration(Math.round((scheduledEnd - scheduledStart) / (1000 * 60)))}
+                  <strong>{t('invitationModal.lateArrival.scheduledDurationLabel')}</strong> {formatters.formatDuration(Math.round((scheduledEnd - scheduledStart) / (1000 * 60)))}
                 </p>
               </div>
               <div className="mt-3 bg-orange-100 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800 rounded p-3">
-                <p className="text-orange-900 dark:text-orange-200 text-sm font-medium">
-                  ℹ️ What happens when you check in:
-                </p>
+                <p className="text-orange-900 dark:text-orange-200 text-sm font-medium">{t('invitationModal.lateArrival.whatHappensTitle')}</p>
                 <ul className="mt-2 space-y-1 text-orange-800 dark:text-orange-300 text-sm list-disc list-inside">
-                  <li>Visitor's expected end time will be recalculated based on the scheduled duration</li>
-                  <li>Overstay notifications will use the adjusted end time</li>
-                  <li>Please contact the host to confirm the visitor's arrival</li>
+                  <li>{t('invitationModal.lateArrival.points.recalculateEndTime')}</li>
+                  <li>{t('invitationModal.lateArrival.points.adjustedNotifications')}</li>
+                  <li>{t('invitationModal.lateArrival.points.contactHost')}</li>
                 </ul>
               </div>
             </div>
           </div>
         )}
 
-        {/* Not Approved Warning */}
         {!isApproved && !isCheckedIn && !isCompleted && (
           <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-800 rounded-lg p-4 flex items-start">
             <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 dark:text-red-400 me-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h4 className="text-red-900 dark:text-red-200 font-bold text-sm">⚠️ NOT APPROVED - CANNOT CHECK IN</h4>
+              <h4 className="text-red-900 dark:text-red-200 font-bold text-sm">{t('invitationModal.notApproved.title')}</h4>
               <p className="text-red-800 dark:text-red-300 text-sm mt-1 font-medium">
-                Current status: <strong>{invitation.status}</strong>
+                {t('invitationModal.notApproved.currentStatus', { status: InvitationStatusLabels[invitation.status] ?? invitation.status })}
               </p>
-              <p className="text-red-700 dark:text-red-300 text-sm mt-1">
-                This invitation must be approved before check-in is allowed.
-              </p>
+              <p className="text-red-700 dark:text-red-300 text-sm mt-1">{t('invitationModal.notApproved.description')}</p>
             </div>
           </div>
         )}
 
-        {/* Already Checked In Warning */}
         {isCheckedIn && (
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start">
             <CheckCircleIconSolid className="h-5 w-5 text-blue-600 dark:text-blue-400 me-3 flex-shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-blue-900 dark:text-blue-200 font-medium text-sm">Already Checked In</h4>
+              <h4 className="text-blue-900 dark:text-blue-200 font-medium text-sm">{t('invitationModal.alreadyCheckedIn.title')}</h4>
               <p className="text-blue-700 dark:text-blue-300 text-sm mt-1">
-                This visitor has already been checked in at {formatters.formatDateTime(invitation.checkedInAt)}
+                {t('invitationModal.alreadyCheckedIn.description', { time: formatters.formatDateTime(invitation.checkedInAt) })}
               </p>
             </div>
           </div>
         )}
 
-        {/* Completed Visit Warning */}
         {isCompleted && (
           <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-start">
             <InformationCircleIcon className="h-5 w-5 text-gray-600 dark:text-gray-400 me-3 flex-shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-gray-900 dark:text-gray-200 font-medium text-sm">Visit Completed</h4>
+              <h4 className="text-gray-900 dark:text-gray-200 font-medium text-sm">{t('invitationModal.completedVisit.title')}</h4>
               <p className="text-gray-700 dark:text-gray-300 text-sm mt-1">
-                This visitor checked out at {formatters.formatDateTime(invitation.checkedOutAt)}
+                {t('invitationModal.completedVisit.description', { time: formatters.formatDateTime(invitation.checkedOutAt) })}
               </p>
             </div>
           </div>
         )}
 
-        {/* Visitor Information */}
         <div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
             <UserIcon className="h-5 w-5 me-2 text-gray-900 dark:text-white" />
-            Visitor Information
+            {t('details.visitorInfo')}
           </h3>
           <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Name</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('invitationModal.labels.name')}</p>
               <p className="text-sm font-medium text-gray-900 dark:text-white">
                 {visitor.fullName || `${visitor.firstName} ${visitor.lastName}`}
               </p>
             </div>
             {visitor.company && (
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Company</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('details.company')}</p>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">{visitor.company}</p>
               </div>
             )}
             {visitor.email && (
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('details.email')}</p>
                 <div className="flex items-center">
                   <EnvelopeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 me-1" />
                   <p className="text-sm font-medium text-gray-900 dark:text-white">{visitor.email}</p>
@@ -337,7 +290,7 @@ const InvitationDetailsModal = ({
             )}
             {visitor.phoneNumber && (
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('details.phone')}</p>
                 <div className="flex items-center">
                   <PhoneIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 me-1" />
                   <p className="text-sm font-medium text-gray-900 dark:text-white">{visitor.phoneNumber}</p>
@@ -347,15 +300,14 @@ const InvitationDetailsModal = ({
           </div>
         </div>
 
-        {/* Visit Details */}
         <div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
             <CalendarIcon className="h-5 w-5 me-2 text-gray-900 dark:text-white" />
-            Visit Details
+            {t('invitationModal.visitDetailsTitle')}
           </h3>
           <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Scheduled Time</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('details.scheduledTime')}</p>
               <div className="flex items-center">
                 <ClockIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 me-1" />
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -364,7 +316,7 @@ const InvitationDetailsModal = ({
               </div>
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">End Time</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t('invitationModal.labels.endTime')}</p>
               <div className="flex items-center">
                 <ClockIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 me-1" />
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
@@ -374,7 +326,7 @@ const InvitationDetailsModal = ({
             </div>
             {location.name && (
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Location</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('details.location')}</p>
                 <div className="flex items-center">
                   <MapPinIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 me-1" />
                   <p className="text-sm font-medium text-gray-900 dark:text-white">{location.name}</p>
@@ -383,7 +335,7 @@ const InvitationDetailsModal = ({
             )}
             {visitPurpose.name && (
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Purpose</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('details.purpose')}</p>
                 <div className="flex items-center">
                   <BuildingOfficeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 me-1" />
                   <p className="text-sm font-medium text-gray-900 dark:text-white">{visitPurpose.name}</p>
@@ -392,37 +344,31 @@ const InvitationDetailsModal = ({
             )}
             {host.fullName && (
               <div className="col-span-2">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Host</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('details.host')}</p>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">{host.fullName}</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Notes Input (only if not checked in yet) */}
         {!isCheckedIn && !isCompleted && (
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Check-in Notes (Optional)
+              {t('invitationModal.notes.label')}
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add any notes about this check-in..."
+              placeholder={t('invitationModal.notes.placeholder')}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent resize-none placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
         )}
 
-        {/* Action Buttons */}
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={loading}
-          >
-            {canCheckIn ? 'Cancel' : 'Close'}
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            {canCheckIn ? t('common:buttons.cancel') : t('common:buttons.close')}
           </Button>
           {canCheckIn && (
             <Button
@@ -432,7 +378,7 @@ const InvitationDetailsModal = ({
               icon={<CheckCircleIcon className="h-5 w-5" />}
               iconPosition="left"
             >
-              Confirm Check-in
+              {t('invitationModal.actions.confirmCheckIn')}
             </Button>
           )}
         </div>

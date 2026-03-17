@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 import { usePermissions } from '../../../hooks/usePermissions';
 
 // Redux actions and selectors
@@ -83,7 +83,7 @@ import { extractErrorMessage } from '../../../utils/errorUtils';
  */
 const LocationsListPage = () => {
   const dispatch = useDispatch();
-  const { user: currentUser } = useAuth();
+  const { t } = useTranslation('system');
   const { hasPermission } = usePermissions();
 
   // Local state
@@ -113,7 +113,7 @@ const LocationsListPage = () => {
   const stats = useSelector(selectLocationStats);
   const showCreateModalState = useSelector(selectShowCreateModal);
   const showEditModalState = useSelector(selectShowEditModal);
-  const showDeleteModal = useSelector(selectShowDeleteModal);
+  const showDeleteModalState = useSelector(selectShowDeleteModal);
   const currentLocation = useSelector(selectCurrentLocation);
   const createError = useSelector(selectLocationsCreateError);
   const updateError = useSelector(selectLocationsUpdateError);
@@ -232,9 +232,9 @@ const LocationsListPage = () => {
       case 'building':
         return <BuildingOfficeIcon className="w-4 h-4 text-blue-600" />;
       case 'floor':
-        return <div className="w-4 h-4 bg-green-600 rounded flex items-center justify-center text-white text-xs font-bold">F</div>;
+        return <div className="w-4 h-4 bg-green-600 rounded flex items-center justify-center text-white text-xs font-bold">{t('locations.typeBadge.floor')}</div>;
       case 'room':
-        return <div className="w-4 h-4 bg-purple-600 rounded flex items-center justify-center text-white text-xs font-bold">R</div>;
+        return <div className="w-4 h-4 bg-purple-600 rounded flex items-center justify-center text-white text-xs font-bold">{t('locations.typeBadge.room')}</div>;
       case 'zone':
         return <MapPinIcon className="w-4 h-4 text-orange-600" />;
       default:
@@ -274,7 +274,7 @@ const LocationsListPage = () => {
     },
     {
       key: 'name',
-      header: 'Location',
+      header: t('locations.columns.location'),
       sortable: true,
       render: (value, location) => (
         <div>
@@ -296,18 +296,18 @@ const LocationsListPage = () => {
     },
     {
       key: 'type',
-      header: 'Type & Hierarchy',
+      header: t('locations.columns.typeHierarchy'),
       sortable: true,
       render: (value, location) => (
         <div className="space-y-1">
           <div>
             <Badge variant="secondary" size="sm">
-              {location.locationType || 'General'}
+              {location.locationType || t('locations.typeGeneral')}
             </Badge>
           </div>
           {location.parentLocationName && (
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              Parent: {location.parentLocationName}
+              {t('locations.parent', { name: location.parentLocationName })}
             </div>
           )}
         </div>
@@ -315,19 +315,19 @@ const LocationsListPage = () => {
     },
     {
       key: 'capacity',
-      header: 'Capacity',
+      header: t('locations.columns.capacity'),
       sortable: true,
       render: (value, location) => (
         <div className="space-y-1">
           <div className="flex items-center gap-1">
             <UserGroupIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
             <span className="font-medium text-gray-900 dark:text-gray-100">
-              {location.maxCapacity ? `${location.maxCapacity} visitors` : 'Unlimited'}
+              {location.maxCapacity ? t('locations.visitors', { count: location.maxCapacity }) : t('locations.unlimited')}
             </span>
           </div>
           {location.currentOccupancy !== undefined && (
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              Current: {location.currentOccupancy}
+              {t('locations.current', { count: location.currentOccupancy })}
             </div>
           )}
         </div>
@@ -335,20 +335,20 @@ const LocationsListPage = () => {
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('locations.columns.status'),
       sortable: true,
       render: (value, location) => (
         <Badge 
           variant={location.isActive ? 'success' : 'secondary'}
           size="sm"
         >
-          {location.isActive ? 'Active' : 'Inactive'}
+          {location.isActive ? t('locations.active') : t('locations.inactive')}
         </Badge>
       )
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('locations.columns.actions'),
       width: '120px',
       sortable: false,
       render: (value, location) => (
@@ -356,7 +356,7 @@ const LocationsListPage = () => {
           <button
             onClick={() => handleLocationAction('view', location)}
             className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
-            title="View details"
+            title={t('common:buttons.view')}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -367,7 +367,7 @@ const LocationsListPage = () => {
             <button
               onClick={() => handleLocationAction('edit', location)}
               className="text-blue-600 hover:text-blue-900 transition-colors"
-              title="Edit location"
+              title={t('common:buttons.edit')}
             >
               <PencilIcon className="w-4 h-4" />
             </button>
@@ -376,7 +376,7 @@ const LocationsListPage = () => {
             <button
               onClick={() => handleLocationAction('delete', location)}
               className="text-red-600 hover:text-red-900 transition-colors"
-              title="Delete location"
+              title={t('common:buttons.delete')}
             >
               <TrashIcon className="w-4 h-4" />
             </button>
@@ -391,9 +391,9 @@ const LocationsListPage = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Locations</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('locations.title')}</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Manage building locations, rooms, and capacity for visitor destinations
+            {t('locations.subtitle')}
           </p>
         </div>
         <div className="mt-4 sm:mt-0 flex gap-3">
@@ -407,7 +407,7 @@ const LocationsListPage = () => {
                   : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
             >
-              Table
+              {t('locations.viewTable')}
             </button>
             <button
               onClick={() => setViewMode('tree')}
@@ -417,7 +417,7 @@ const LocationsListPage = () => {
                   : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
               }`}
             >
-              Tree
+              {t('locations.viewTree')}
             </button>
           </div>
           
@@ -427,7 +427,7 @@ const LocationsListPage = () => {
               loading={createLoading}
               icon={<PlusIcon className="w-5 h-5" />}
             >
-              Add Location
+              {t('locations.createButton')}
             </Button>
           )}
         </div>
@@ -445,7 +445,7 @@ const LocationsListPage = () => {
               </div>
               <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Total Locations</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">{t('locations.statTotal')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.total}</dd>
                 </dl>
               </div>
@@ -461,7 +461,7 @@ const LocationsListPage = () => {
               </div>
               <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Active</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">{t('locations.statActive')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.active}</dd>
                 </dl>
               </div>
@@ -477,7 +477,7 @@ const LocationsListPage = () => {
               </div>
               <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">With Capacity</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">{t('locations.statWithCapacity')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.withCapacity}</dd>
                 </dl>
               </div>
@@ -493,7 +493,7 @@ const LocationsListPage = () => {
               </div>
               <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Requires Escort</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">{t('locations.statRequiresEscort')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.requiresEscort}</dd>
                 </dl>
               </div>
@@ -507,10 +507,10 @@ const LocationsListPage = () => {
           <div className="flex-1">
             <Input
               type="text"
-              placeholder="Search locations..."
+              placeholder={t('locations.searchPlaceholder')}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              icon={<MagnifyingGlassIcon className="w-5 h-5" />}
+              leftIcon={<MagnifyingGlassIcon className="w-5 h-5" />}
             />
           </div>
           
@@ -520,7 +520,7 @@ const LocationsListPage = () => {
               onClick={() => setShowFilters(!showFilters)}
               icon={<FunnelIcon className="w-5 h-5" />}
             >
-              Filters
+              {t('locations.filters')}
             </Button>
             
             {(filters.locationType || filters.includeInactive || filters.searchTerm || filters.rootOnly) && (
@@ -528,7 +528,7 @@ const LocationsListPage = () => {
                 variant="ghost"
                 onClick={handleResetFilters}
               >
-                Clear Filters
+                {t('locations.clearFilters')}
               </Button>
             )}
           </div>
@@ -546,20 +546,20 @@ const LocationsListPage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Location Type
+                    {t('locations.locationType')}
                   </label>
                   <select
                     value={filters.locationType}
                     onChange={(e) => handleFilterChange('locationType', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500"
                   >
-                    <option value="">All Types</option>
-                    <option value="Building">Building</option>
-                    <option value="Floor">Floor</option>
-                    <option value="Room">Room</option>
-                    <option value="Zone">Zone</option>
-                    <option value="Parking">Parking</option>
-                    <option value="Other">Other</option>
+                    <option value="">{t('locations.allTypes')}</option>
+                    <option value="Building">{t('locations.types.building')}</option>
+                    <option value="Floor">{t('locations.types.floor')}</option>
+                    <option value="Room">{t('locations.types.room')}</option>
+                    <option value="Zone">{t('locations.types.zone')}</option>
+                    <option value="Parking">{t('locations.types.parking')}</option>
+                    <option value="Other">{t('locations.types.other')}</option>
                   </select>
                 </div>
 
@@ -572,7 +572,7 @@ const LocationsListPage = () => {
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
                   <label htmlFor="includeInactive" className="ms-2 block text-sm text-gray-700 dark:text-gray-300">
-                    Include inactive locations
+                    {t('locations.includeInactive')}
                   </label>
                 </div>
 
@@ -585,7 +585,7 @@ const LocationsListPage = () => {
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
                   <label htmlFor="rootOnly" className="ms-2 block text-sm text-gray-700 dark:text-gray-300">
-                    Root locations only
+                    {t('locations.rootOnly')}
                   </label>
                 </div>
 
@@ -598,7 +598,7 @@ const LocationsListPage = () => {
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
                   <label htmlFor="includeChildren" className="ms-2 block text-sm text-gray-700 dark:text-gray-300">
-                    Include child locations
+                    {t('locations.includeChildren')}
                   </label>
                 </div>
               </div>
@@ -610,7 +610,7 @@ const LocationsListPage = () => {
       {/* Type-based Statistics */}
       {stats.byType && Object.keys(stats.byType).length > 0 && (
         <Card className="p-6">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Locations by Type</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{t('locations.locationsByType')}</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {Object.entries(stats.byType).map(([type, count]) => (
               <div key={type} className="text-center">
@@ -631,14 +631,14 @@ const LocationsListPage = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                {selectedCount} location{selectedCount !== 1 ? 's' : ''} selected
+                {t('locations.bulkSelected', { count: selectedCount })}
               </span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => dispatch(clearSelections())}
               >
-                Clear Selection
+                {t('locations.clearSelection')}
               </Button>
             </div>
             
@@ -654,7 +654,7 @@ const LocationsListPage = () => {
                   className="text-red-600 dark:text-red-400 border-red-300 dark:border-red-500 hover:bg-red-50 dark:hover:bg-red-500/10"
                 >
                   <TrashIcon className="w-4 h-4 me-2" />
-                  Delete Selected
+                  {t('locations.deleteSelected')}
                 </Button>
               </div>
             )}
@@ -677,15 +677,15 @@ const LocationsListPage = () => {
               const selectedIds = Object.keys(selectedRowIds).filter(id => selectedRowIds[id]);
               dispatch(setSelectedLocations(selectedIds.map(Number)));
             }}
-            emptyMessage="No locations found"
+            emptyMessage={t('locations.emptyMessage')}
             className="locations-table"
           />
         ) : (
           <div className="p-6">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Location Hierarchy</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{t('locations.hierarchyTitle')}</h3>
             {/* Tree view component would go here */}
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-              Tree view coming soon...
+              {t('locations.treeComingSoon')}
             </div>
           </div>
         )}
@@ -698,48 +698,48 @@ const LocationsListPage = () => {
           setShowViewModal(false);
           setViewingLocation(null);
         }}
-        title="Location Details"
+        title={t('locations.details.title')}
         size="lg"
       >
         {viewingLocation && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('locations.details.name')}</label>
                 <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingLocation.name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
-                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingLocation.locationType || 'General'}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('locations.details.type')}</label>
+                <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingLocation.locationType || t('locations.typeGeneral')}</p>
               </div>
             </div>
             
             {viewingLocation.description && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('locations.details.description')}</label>
                 <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingLocation.description}</p>
               </div>
             )}
             
             {viewingLocation.address && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('locations.details.address')}</label>
                 <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingLocation.address}</p>
               </div>
             )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Capacity</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('locations.details.capacity')}</label>
                 <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                  {viewingLocation.maxCapacity ? `${viewingLocation.maxCapacity} visitors` : 'Unlimited'}
+                  {viewingLocation.maxCapacity ? t('locations.visitors', { count: viewingLocation.maxCapacity }) : t('locations.unlimited')}
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('locations.details.status')}</label>
                 <div className="mt-1">
                   <Badge variant={viewingLocation.isActive ? 'success' : 'secondary'} size="sm">
-                    {viewingLocation.isActive ? 'Active' : 'Inactive'}
+                    {viewingLocation.isActive ? t('locations.active') : t('locations.inactive')}
                   </Badge>
                 </div>
               </div>
@@ -747,16 +747,19 @@ const LocationsListPage = () => {
             
             {viewingLocation.parentLocationName && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Parent Location</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('locations.details.parentLocation')}</label>
                 <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingLocation.parentLocationName}</p>
               </div>
             )}
             
             {viewingLocation.currentOccupancy !== undefined && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Occupancy</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('locations.details.currentOccupancy')}</label>
                 <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                  {viewingLocation.currentOccupancy} / {viewingLocation.maxCapacity || '∞'} visitors
+                  {t('locations.details.occupancyValue', {
+                    current: viewingLocation.currentOccupancy,
+                    max: viewingLocation.maxCapacity || '\u221e'
+                  })}
                 </p>
               </div>
             )}
@@ -769,7 +772,7 @@ const LocationsListPage = () => {
                   setViewingLocation(null);
                 }}
               >
-                Close
+                {t('locations.details.close')}
               </Button>
               {canUpdate && (
                 <Button
@@ -778,7 +781,7 @@ const LocationsListPage = () => {
                     handleLocationAction('edit', viewingLocation);
                   }}
                 >
-                  Edit
+                  {t('locations.details.edit')}
                 </Button>
               )}
             </div>
@@ -790,7 +793,7 @@ const LocationsListPage = () => {
       <Modal
         isOpen={showCreateModalState}
         onClose={() => dispatch(hideCreateModal())}
-        title="Create Location"
+        title={t('locations.createTitle')}
         size="xl"
       >
         <LocationForm
@@ -805,7 +808,7 @@ const LocationsListPage = () => {
       <Modal
         isOpen={showEditModalState}
         onClose={() => dispatch(hideEditModal())}
-        title="Edit Location"
+        title={t('locations.editTitle')}
         size="xl"
       >
         {currentLocation && (
@@ -822,17 +825,17 @@ const LocationsListPage = () => {
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal
-        isOpen={showDeleteModal}
+        isOpen={showDeleteModalState}
         onClose={() => dispatch(hideDeleteModal())}
         onConfirm={() => handleDeleteLocation(false)}
-        title="Delete Location"
+        title={t('locations.deleteTitle')}
         message={
           currentLocation
-            ? `Are you sure you want to delete "${currentLocation.name}"? This will deactivate the location but preserve historical data. Child locations will become orphaned.`
-            : 'Are you sure you want to delete this location?'
+            ? t('locations.deleteMessage', { name: currentLocation.name })
+            : t('locations.deleteMessageGeneric')
         }
-        confirmText="Delete"
-        cancelText="Cancel"
+        confirmText={t('locations.deleteConfirm')}
+        cancelText={t('locations.cancel')}
         variant="danger"
         loading={deleteLoading}
       />
@@ -845,10 +848,10 @@ const LocationsListPage = () => {
           setBulkAction('');
         }}
         onConfirm={handleBulkDelete}
-        title="Delete Selected Locations"
-        message={`Are you sure you want to delete ${selectedCount} location${selectedCount !== 1 ? 's' : ''}? This will deactivate the locations but preserve historical data.`}
-        confirmText="Delete Selected"
-        cancelText="Cancel"
+        title={t('locations.bulkDeleteTitle')}
+        message={t('locations.bulkDeleteMessage', { count: selectedCount })}
+        confirmText={t('locations.deleteSelected')}
+        cancelText={t('locations.cancel')}
         variant="danger"
         loading={deleteLoading}
       />
@@ -858,3 +861,4 @@ const LocationsListPage = () => {
 };
 
 export default LocationsListPage;
+

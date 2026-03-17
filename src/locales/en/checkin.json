@@ -89,5 +89,173 @@
     "alreadyCheckedIn": "Visitor is already checked in.",
     "expired": "This invitation has expired.",
     "dismiss": "Dismiss"
+  },
+  "invitationModal": {
+    "title": "Visitor Check-in Details",
+    "invitationReference": "Invitation Reference",
+    "visitDetailsTitle": "Visit Details",
+    "actions": {
+      "confirmCheckIn": "Confirm Check-in"
+    },
+    "status": {
+      "completed": "Completed",
+      "checkedIn": "Checked In",
+      "approved": "Approved",
+      "pendingApproval": "Pending Approval",
+      "expired": "Expired"
+    },
+    "labels": {
+      "name": "Name",
+      "endTime": "End Time"
+    },
+    "error": {
+      "title": "Check-in Error",
+      "heading": "Check-in Failed",
+      "defaultMessage": "Unable to process check-in at this time."
+    },
+    "notFound": {
+      "title": "Invitation Not Found",
+      "heading": "Invitation Not Found",
+      "description": "The scanned QR code does not match any invitation in the system."
+    },
+    "tooEarly": {
+      "title": "Too Early - Cannot Check In",
+      "description": "This visitor is arriving too early.",
+      "scheduledTimeLabel": "Scheduled time:",
+      "allowedFromLabel": "Check-in allowed from:"
+    },
+    "expired": {
+      "title": "Expired - Cannot Check In",
+      "description": "This invitation has expired.",
+      "scheduledEndLabel": "Scheduled end time:"
+    },
+    "earlyArrival": {
+      "title": "Early Arrival",
+      "description": "Visitor arrived early!",
+      "scheduledTimeLabel": "Scheduled time:",
+      "allowedNotice": "They can be checked in now, but please notify the host that the visitor has arrived early."
+    },
+    "lateArrival": {
+      "title": "Late Arrival",
+      "description": "Visitor arrived late!",
+      "originalScheduleLabel": "Originally scheduled:",
+      "scheduledDurationLabel": "Scheduled duration:",
+      "whatHappensTitle": "What happens when you check in:",
+      "points": {
+        "recalculateEndTime": "Visitor's expected end time will be recalculated based on the scheduled duration",
+        "adjustedNotifications": "Overstay notifications will use the adjusted end time",
+        "contactHost": "Please contact the host to confirm the visitor's arrival"
+      }
+    },
+    "notApproved": {
+      "title": "Not Approved - Cannot Check In",
+      "currentStatus": "Current status: {{status}}",
+      "description": "This invitation must be approved before check-in is allowed."
+    },
+    "alreadyCheckedIn": {
+      "title": "Already Checked In",
+      "description": "This visitor has already been checked in at {{time}}"
+    },
+    "completedVisit": {
+      "title": "Visit Completed",
+      "description": "This visitor checked out at {{time}}"
+    },
+    "notes": {
+      "label": "Check-in Notes (Optional)",
+      "placeholder": "Add any notes about this check-in..."
+    }
+  },
+  "manualForm": {
+    "searchModes": {
+      "byInvitation": "By Invitation #",
+      "byVisitor": "By Visitor"
+    },
+    "fields": {
+      "invitationNumber": "Invitation Number",
+      "searchVisitors": "Search Visitors",
+      "notes": "Check-in Notes (Optional)"
+    },
+    "placeholders": {
+      "invitationNumber": "Enter invitation number...",
+      "searchVisitors": "Search by name, email, company, or subject...",
+      "notes": "Add any notes about the check-in process..."
+    },
+    "buttons": {
+      "checkInVisitor": "Check In Visitor"
+    },
+    "labels": {
+      "visitor": "Visitor",
+      "visitDetails": "Visit Details"
+    },
+    "status": {
+      "checkedIn": "Checked In",
+      "approved": "Approved"
+    },
+    "selectedInvitation": "Selected Invitation",
+    "notesCount": "{{count}}/500 characters",
+    "instructions": {
+      "byInvitation": "Enter the invitation number to search for a specific invitation.",
+      "byVisitor": "Search for visitors by name, email, company, or invitation subject."
+    },
+    "validation": {
+      "alreadyCheckedIn": "This visitor is already checked in.",
+      "notApproved": "This invitation is not approved for check-in.",
+      "outsideWindow": "This invitation is not within the scheduled time window."
+    },
+    "errors": {
+      "notFound": "Invitation not found. Please check the number and try again."
+    },
+    "meta": {
+      "invitationEntry": "#{{number}} - {{time}}"
+    }
+  },
+  "qrScanner": {
+    "modes": {
+      "camera": "Camera",
+      "manual": "Manual"
+    },
+    "selectCamera": "Select Camera",
+    "cameraFallback": "Camera {{id}}...",
+    "loadingCameras": "Loading cameras...",
+    "cameraReady": "Camera Scanner Ready",
+    "clickStartScanning": "Click \"Start Scanning\" to activate camera",
+    "tip": "Tips: Hold QR code steady within the finder box",
+    "buttons": {
+      "stopScanning": "Stop Scanning",
+      "startScanning": "Start Scanning",
+      "processCheckIn": "Process Check-in"
+    },
+    "scanning": {
+      "cameraActive": "Camera active - Point QR code at camera",
+      "detectedProcessing": "QR code detected. Processing...",
+      "readyForNext": "Camera active - Ready for next scan",
+      "scanFailedRetry": "Scan failed - Ready to try again"
+    },
+    "stats": {
+      "sessionStatistics": "Session Statistics",
+      "successful": "Successful",
+      "failed": "Failed",
+      "total": "Total",
+      "lastScan": "Last scan: {{time}}"
+    },
+    "manual": {
+      "label": "QR Code or Invitation Number",
+      "placeholder": "Scan with hardware scanner or type manually...",
+      "hardwareTip": "Hardware QR scanners are supported. Just scan and press Enter."
+    },
+    "errors": {
+      "enterCode": "Please enter a QR code or invitation number",
+      "checkInFailed": "Check-in failed",
+      "cameraError": "Camera error: {{message}}",
+      "cameraUnavailable": "Unable to access camera",
+      "cameraPermissionDenied": "Camera permission denied. Please allow camera access."
+    },
+    "results": {
+      "checkInSuccess": "Check-in successful!"
+    },
+    "instructions": {
+      "camera": "Position the QR code within the finder box. Detection is automatic with beep sound.",
+      "manual": "Enter the QR code data or invitation number manually. You can find this on the visitor invitation or printed badge."
+    }
   }
 }

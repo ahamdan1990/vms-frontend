@@ -1,7 +1,7 @@
 // src/components/forms/UserForm/UserForm.js
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { validateUserData } from '../../../utils/validators';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useToast } from '../../../hooks/useNotifications';
@@ -26,6 +26,7 @@ const UserForm = ({
   error = null,
   className = ''
 }) => {
+  const { t } = useTranslation(['users', 'system', 'common']);
 
   const { user: userPermissions, isAdmin } = usePermissions();
   const toast = useToast();
@@ -80,14 +81,14 @@ const UserForm = ({
 
   // Lebanon-specific data
   const lebaneseGovernorates = [
-    'Beirut',
-    'Mount Lebanon',
-    'North Lebanon',
-    'South Lebanon',
-    'Beqaa',
-    'Akkar',
-    'Baalbek-Hermel',
-    'Nabatieh'
+    { value: 'Beirut', key: 'beirut' },
+    { value: 'Mount Lebanon', key: 'mountLebanon' },
+    { value: 'North Lebanon', key: 'northLebanon' },
+    { value: 'South Lebanon', key: 'southLebanon' },
+    { value: 'Beqaa', key: 'beqaa' },
+    { value: 'Akkar', key: 'akkar' },
+    { value: 'Baalbek-Hermel', key: 'baalbekHermel' },
+    { value: 'Nabatieh', key: 'nabatieh' }
   ];
 
   // Reset form when user prop changes
@@ -189,7 +190,7 @@ const UserForm = ({
       setCreatingDept(true);
       const result = await departmentService.createDepartment(deptData);
 
-      toast.success('Department Created', `${deptData.name} has been created successfully.`);
+      toast.success(t('system:departments.createTitle'), t('users:form.toasts.departmentCreated', { name: deptData.name }));
 
       // Set the newly created department
       setFormData(prev => ({
@@ -199,7 +200,7 @@ const UserForm = ({
 
       setShowCreateDeptModal(false);
     } catch (error) {
-      toast.error('Creation Failed', error.response?.data?.message || 'Failed to create department');
+      toast.error(t('users:notifications.createError'), error.response?.data?.message || t('system:departments.failedCreate'));
     } finally {
       setCreatingDept(false);
     }
@@ -223,8 +224,8 @@ const UserForm = ({
       
       // Show validation error notification
       toast.error(
-        'Validation Error',
-        'Please fix the errors in the form before submitting.'
+        t('users:form.toasts.validationTitle'),
+        t('users:form.toasts.validationMessage')
       );
       return;
     }
@@ -237,15 +238,18 @@ const UserForm = ({
       
       // Show success notification
       toast.success(
-        isEditing ? 'User Updated' : 'User Created',
+        isEditing ? t('users:notifications.updateSuccess') : t('users:notifications.createSuccess'),
         isEditing 
-          ? `${formData.firstName} ${formData.lastName} has been updated successfully.`
-          : `${formData.firstName} ${formData.lastName} has been created successfully.${formData.sendWelcomeEmail ? ' Welcome email sent.' : ''}`,
+          ? t('users:notifications.updateSuccessBody', { name: `${formData.firstName} ${formData.lastName}` })
+          : t('users:notifications.createSuccessBody', {
+            name: `${formData.firstName} ${formData.lastName}`,
+            emailNote: formData.sendWelcomeEmail ? t('users:notifications.welcomeEmailSent') : ''
+          }),
         {
           duration: 6000,
           actions: isEditing ? [] : [
             {
-              label: 'Create Another',
+              label: t('users:actions.createAnother'),
               onClick: () => {
                 // Reset form for creating another user
                 setFormData({
@@ -287,16 +291,16 @@ const UserForm = ({
 
     } catch (error) {
       // Error handling with notification
-      const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred';
+      const errorMessage = error.response?.data?.message || error.message || t('errors:serverError.message');
       
       toast.error(
-        isEditing ? 'Update Failed' : 'Creation Failed',
+        isEditing ? t('users:notifications.updateError') : t('users:notifications.createError'),
         errorMessage,
         {
           persistent: true,
           actions: [
             {
-              label: 'Try Again',
+              label: t('common:buttons.retry'),
               onClick: () => handleSubmit(e),
               dismissOnClick: true
             }
@@ -339,12 +343,12 @@ const UserForm = ({
         {/* Header */}
         <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {isEditing ? 'Edit User' : 'Create New User'}
+            {isEditing ? t('users:modals.editTitle') : t('users:modals.createTitle')}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             {isEditing
-              ? 'Update user information and permissions'
-              : 'Add a new user to the system with appropriate access level'
+              ? t('users:form.header.editSubtitle')
+              : t('users:form.header.createSubtitle')
             }
           </p>
         </div>
@@ -371,7 +375,7 @@ const UserForm = ({
             <svg className="w-5 h-5 text-blue-500 dark:text-blue-400 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            Personal Information
+            {t('users:profile.personalInfo')}
           </h4>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -384,8 +388,8 @@ const UserForm = ({
               <Input
                 type="text"
                 name="firstName"
-                label="First Name"
-                placeholder="Enter first name"
+                label={t('users:fields.firstName')}
+                placeholder={t('users:form.placeholders.firstName')}
                 value={formData.firstName}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -405,8 +409,8 @@ const UserForm = ({
               <Input
                 type="text"
                 name="lastName"
-                label="Last Name"
-                placeholder="Enter last name"
+                label={t('users:fields.lastName')}
+                placeholder={t('users:form.placeholders.lastName')}
                 value={formData.lastName}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -427,8 +431,8 @@ const UserForm = ({
               <Input
                 type="email"
                 name="email"
-                label="Email Address"
-                placeholder="Enter email address"
+                label={t('users:fields.email')}
+                placeholder={t('users:form.placeholders.email')}
                 value={formData.email}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -452,7 +456,7 @@ const UserForm = ({
               className="md:col-span-2"
             >
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Phone Number
+                {t('users:fields.phoneNumber')}
               </label>
               
               <div className="flex gap-2">
@@ -465,21 +469,21 @@ const UserForm = ({
                   disabled={isLoading}
                   className="w-32 px-3 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="961">🇱🇧 +961</option>
-                  <option value="963">🇸🇾 +963</option>
-                  <option value="962">🇯🇴 +962</option>
-                  <option value="972">🇮🇱 +972</option>
-                  <option value="90">🇹🇷 +90</option>
-                  <option value="20">🇪🇬 +20</option>
-                  <option value="966">🇸🇦 +966</option>
-                  <option value="971">🇦🇪 +971</option>
-                  <option value="965">🇰🇼 +965</option>
-                  <option value="974">🇶🇦 +974</option>
-                  <option value="1">🇺🇸 +1</option>
-                  <option value="44">🇬🇧 +44</option>
-                  <option value="33">🇫🇷 +33</option>
-                  <option value="49">🇩🇪 +49</option>
-                  <option value="39">🇮🇹 +39</option>
+                  <option value="961">{t('users:form.phoneCountryCodes.lb')}</option>
+                  <option value="963">{t('users:form.phoneCountryCodes.sy')}</option>
+                  <option value="962">{t('users:form.phoneCountryCodes.jo')}</option>
+                  <option value="972">{t('users:form.phoneCountryCodes.il')}</option>
+                  <option value="90">{t('users:form.phoneCountryCodes.tr')}</option>
+                  <option value="20">{t('users:form.phoneCountryCodes.eg')}</option>
+                  <option value="966">{t('users:form.phoneCountryCodes.sa')}</option>
+                  <option value="971">{t('users:form.phoneCountryCodes.ae')}</option>
+                  <option value="965">{t('users:form.phoneCountryCodes.kw')}</option>
+                  <option value="974">{t('users:form.phoneCountryCodes.qa')}</option>
+                  <option value="1">{t('users:form.phoneCountryCodes.us')}</option>
+                  <option value="44">{t('users:form.phoneCountryCodes.gb')}</option>
+                  <option value="33">{t('users:form.phoneCountryCodes.fr')}</option>
+                  <option value="49">{t('users:form.phoneCountryCodes.de')}</option>
+                  <option value="39">{t('users:form.phoneCountryCodes.it')}</option>
                 </select>
 
                 {/* Phone Number Input */}
@@ -487,7 +491,7 @@ const UserForm = ({
                   <Input
                     type="tel"
                     name="phoneNumber"
-                    placeholder="71 123 456"
+                    placeholder={t('users:form.placeholders.phoneNumber')}
                     value={formData.phoneNumber || ''}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -511,9 +515,9 @@ const UserForm = ({
                   disabled={isLoading}
                   className="w-32 px-3 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="Mobile">📱 Mobile</option>
-                  <option value="Landline">☎️ Landline</option>
-                  <option value="Unknown">❓ Unknown</option>
+                  <option value="Mobile">{t('users:form.phoneTypes.mobile')}</option>
+                  <option value="Landline">{t('users:form.phoneTypes.landline')}</option>
+                  <option value="Unknown">{t('users:form.phoneTypes.unknown')}</option>
                 </select>
               </div>
               
@@ -535,7 +539,7 @@ const UserForm = ({
             <svg className="w-5 h-5 text-green-500 dark:text-green-400 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h8z" />
             </svg>
-            Work Information
+            {t('users:detail.workInfo')}
           </h4>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -546,7 +550,7 @@ const UserForm = ({
               transition={{ delay: 0.3, duration: 0.3 }}
             >
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Role <span className="text-red-500">*</span>
+                {t('users:fields.role')} <span className="text-red-500">*</span>
               </label>
               <select
                 name="role"
@@ -581,14 +585,14 @@ const UserForm = ({
               <Input
                 type="text"
                 name="employeeId"
-                label="Employee ID"
-                placeholder="Enter employee ID"
+                label={t('users:fields.employeeId')}
+                placeholder={t('users:form.placeholders.employeeId')}
                 value={formData.employeeId || ''}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={touchedFields.has('employeeId') ? errors.employeeId : null}
                 disabled={isLoading}
-                helperText="Optional: Unique identifier for the employee"
+                helperText={t('users:form.help.employeeId')}
               />
             </motion.div>
 
@@ -601,7 +605,7 @@ const UserForm = ({
               <div className="flex items-end gap-2">
                 <div className="flex-1">
                   <DepartmentSelect
-                    label="Department"
+                    label={t('users:fields.department')}
                     value={formData.departmentId}
                     onChange={(value) => {
                       setFormData(prev => ({
@@ -613,7 +617,7 @@ const UserForm = ({
                         setErrors(prev => ({ ...prev, department: null }));
                       }
                     }}
-                    placeholder="Select a department..."
+                    placeholder={t('users:form.placeholders.department')}
                     error={touchedFields.has('department') ? errors.department : null}
                     disabled={isLoading}
                     showHierarchy={true}
@@ -624,7 +628,7 @@ const UserForm = ({
                   onClick={() => setShowCreateDeptModal(true)}
                   disabled={isLoading}
                   className="h-[42px] px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Create new department"
+                  title={t('users:form.actions.createDepartment')}
                 >
                   <PlusIcon className="w-5 h-5" />
                 </button>
@@ -640,8 +644,8 @@ const UserForm = ({
               <Input
                 type="text"
                 name="jobTitle"
-                label="Job Title"
-                placeholder="Enter job title"
+                label={t('users:fields.jobTitle')}
+                placeholder={t('users:form.placeholders.jobTitle')}
                 value={formData.jobTitle || ''}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -655,7 +659,7 @@ const UserForm = ({
         {/* Status Field - ADD THIS */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Status <span className="text-red-500">*</span>
+            {t('users:fields.status')} <span className="text-red-500">*</span>
           </label>
           <select
             name="status"
@@ -665,9 +669,9 @@ const UserForm = ({
             disabled={isLoading}
             className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-            <option value="Suspended">Suspended</option>
+            <option value="Active">{t('common:statuses.active')}</option>
+            <option value="Inactive">{t('common:statuses.inactive')}</option>
+            <option value="Suspended">{t('users:form.statusOptions.suspended')}</option>
           </select>
           {touchedFields.has('status') && errors.status && (
             <p className="text-red-600 text-sm mt-1">{errors.status}</p>
@@ -681,12 +685,12 @@ const UserForm = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            Address Information
+            {t('users:profile.addressInfo')}
           </h4>
 
           {/* Address Type Selector */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Address Type</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t('users:profile.fields.addressType')}</label>
             <select
               name="addressType"
               value={formData.addressType || ''}
@@ -695,11 +699,11 @@ const UserForm = ({
               disabled={isLoading}
               className="w-full md:w-48 px-3 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="Home">🏠 Home</option>
-              <option value="Work">🏢 Work</option>
-              <option value="Billing">💳 Billing</option>
-              <option value="Shipping">📦 Shipping</option>
-              <option value="Other">📍 Other</option>
+              <option value="Home">{t('users:form.addressTypes.home')}</option>
+              <option value="Work">{t('users:form.addressTypes.work')}</option>
+              <option value="Billing">{t('users:form.addressTypes.billing')}</option>
+              <option value="Shipping">{t('users:form.addressTypes.shipping')}</option>
+              <option value="Other">{t('users:form.addressTypes.other')}</option>
             </select>
           </div>
 
@@ -707,8 +711,8 @@ const UserForm = ({
             <Input
               type="text"
               name="street1"
-              label="Street Address"
-              placeholder="Building name, Street name"
+              label={t('users:profile.fields.streetAddress')}
+              placeholder={t('users:form.placeholders.streetAddress')}
               value={formData.street1 || ''}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -719,8 +723,8 @@ const UserForm = ({
             <Input
               type="text"
               name="street2"
-              label="Additional Address (Optional)"
-              placeholder="Floor, Apartment, Unit"
+              label={t('users:profile.fields.addressLine2')}
+              placeholder={t('users:form.placeholders.addressLine2')}
               value={formData.street2 || ''}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -731,8 +735,8 @@ const UserForm = ({
             <Input
               type="text"
               name="city"
-              label="City"
-              placeholder="e.g., Beirut, Tripoli, Sidon"
+              label={t('users:profile.fields.city')}
+              placeholder={t('users:form.placeholders.city')}
               value={formData.city || ''}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -742,9 +746,7 @@ const UserForm = ({
 
             {/* Lebanese Governorates */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Governorate
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('users:profile.fields.governorate')}</label>
               <select
                 name="governorate"
                 value={formData.governorate || ''}
@@ -753,10 +755,10 @@ const UserForm = ({
                 disabled={isLoading}
                 className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">Select Governorate</option>
-                {lebaneseGovernorates.map(governorate => (
-                  <option key={governorate} value={governorate}>
-                    {governorate}
+                <option value="">{t('users:profile.fields.selectGovernorate')}</option>
+                {lebaneseGovernorates.map((governorate) => (
+                  <option key={governorate.value} value={governorate.value}>
+                    {t(`users:form.governorates.${governorate.key}`)}
                   </option>
                 ))}
               </select>
@@ -768,21 +770,19 @@ const UserForm = ({
             <Input
               type="text"
               name="postalCode"
-              label="Postal Code (Optional)"
-              placeholder="e.g., 1107-2180"
+              label={t('users:profile.fields.postalCode')}
+              placeholder={t('users:form.placeholders.postalCode')}
               value={formData.postalCode || ''}
               onChange={handleChange}
               onBlur={handleBlur}
               error={touchedFields.has('postalCode') ? errors.postalCode : null}
               disabled={isLoading}
-              helperText="Lebanon postal codes are optional"
+              helperText={t('users:form.help.postalCode')}
             />
 
             {/* Enhanced Country Selector - Lebanon and Region First */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Country
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('users:profile.fields.country')}</label>
               <select
                 name="country"
                 value={formData.country || ''}
@@ -791,32 +791,32 @@ const UserForm = ({
                 disabled={isLoading}
                 className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="Lebanon">🇱🇧 Lebanon</option>
-                <option value="">--- Middle East ---</option>
-                <option value="Syria">🇸🇾 Syria</option>
-                <option value="Jordan">🇯🇴 Jordan</option>
-                <option value="Israel">🇮🇱 Israel</option>
-                <option value="Turkey">🇹🇷 Turkey</option>
-                <option value="Cyprus">🇨🇾 Cyprus</option>
-                <option value="Egypt">🇪🇬 Egypt</option>
-                <option value="Saudi Arabia">🇸🇦 Saudi Arabia</option>
-                <option value="United Arab Emirates">🇦🇪 United Arab Emirates</option>
-                <option value="Kuwait">🇰🇼 Kuwait</option>
-                <option value="Qatar">🇶🇦 Qatar</option>
-                <option value="Bahrain">🇧🇭 Bahrain</option>
-                <option value="Oman">🇴🇲 Oman</option>
-                <option value="Iraq">🇮🇶 Iraq</option>
-                <option value="Iran">🇮🇷 Iran</option>
-                <option value="">--- International ---</option>
-                <option value="United States">🇺🇸 United States</option>
-                <option value="Canada">🇨🇦 Canada</option>
-                <option value="United Kingdom">🇬🇧 United Kingdom</option>
-                <option value="France">🇫🇷 France</option>
-                <option value="Germany">🇩🇪 Germany</option>
-                <option value="Italy">🇮🇹 Italy</option>
-                <option value="Australia">🇦🇺 Australia</option>
-                <option value="Brazil">🇧🇷 Brazil</option>
-                <option value="Other">🌍 Other</option>
+                <option value="Lebanon">{t('users:form.countries.lebanon')}</option>
+                <option value="" disabled>{t('users:form.countries.middleEastGroup')}</option>
+                <option value="Syria">{t('users:form.countries.syria')}</option>
+                <option value="Jordan">{t('users:form.countries.jordan')}</option>
+                <option value="Israel">{t('users:form.countries.israel')}</option>
+                <option value="Turkey">{t('users:form.countries.turkey')}</option>
+                <option value="Cyprus">{t('users:form.countries.cyprus')}</option>
+                <option value="Egypt">{t('users:form.countries.egypt')}</option>
+                <option value="Saudi Arabia">{t('users:form.countries.saudiArabia')}</option>
+                <option value="United Arab Emirates">{t('users:form.countries.unitedArabEmirates')}</option>
+                <option value="Kuwait">{t('users:form.countries.kuwait')}</option>
+                <option value="Qatar">{t('users:form.countries.qatar')}</option>
+                <option value="Bahrain">{t('users:form.countries.bahrain')}</option>
+                <option value="Oman">{t('users:form.countries.oman')}</option>
+                <option value="Iraq">{t('users:form.countries.iraq')}</option>
+                <option value="Iran">{t('users:form.countries.iran')}</option>
+                <option value="" disabled>{t('users:form.countries.internationalGroup')}</option>
+                <option value="United States">{t('users:form.countries.unitedStates')}</option>
+                <option value="Canada">{t('users:form.countries.canada')}</option>
+                <option value="United Kingdom">{t('users:form.countries.unitedKingdom')}</option>
+                <option value="France">{t('users:form.countries.france')}</option>
+                <option value="Germany">{t('users:form.countries.germany')}</option>
+                <option value="Italy">{t('users:form.countries.italy')}</option>
+                <option value="Australia">{t('users:form.countries.australia')}</option>
+                <option value="Brazil">{t('users:form.countries.brazil')}</option>
+                <option value="Other">{t('users:form.countries.other')}</option>
               </select>
               {touchedFields.has('country') && errors.country && (
                 <p className="text-red-600 text-sm mt-1">{errors.country}</p>
@@ -834,7 +834,8 @@ const UserForm = ({
                 onChange={handleChange}
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <span className="text-sm text-gray-700">Add precise location coordinates</span>
+              <span className="text-sm text-gray-700">{t('users:form.coordinates.toggle')}</span>
+              
             </label>
             
             {formData.enableCoordinates && (
@@ -842,28 +843,28 @@ const UserForm = ({
                 <Input
                   type="number"
                   name="latitude"
-                  label="Latitude"
-                  placeholder="33.8938"
+                  label={t('users:profile.fields.latitude')}
+                  placeholder={t('users:form.placeholders.latitude')}
                   step="any"
                   value={formData.latitude || ''}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   error={touchedFields.has('latitude') ? errors.latitude : null}
                   disabled={isLoading}
-                  helperText="Beirut: ~33.8938"
+                  helperText={t('users:form.help.latitude')}
                 />
                 <Input
                   type="number"
                   name="longitude"
-                  label="Longitude"
-                  placeholder="35.5018"
+                  label={t('users:profile.fields.longitude')}
+                  placeholder={t('users:form.placeholders.longitude')}
                   step="any"
                   value={formData.longitude || ''}
                   onChange={handleChange}
                   onBlur={handleBlur}
                   error={touchedFields.has('longitude') ? errors.longitude : null}
                   disabled={isLoading}
-                  helperText="Beirut: ~35.5018"
+                  helperText={t('users:form.help.longitude')}
                 />
               </div>
             )}
@@ -876,13 +877,13 @@ const UserForm = ({
             <svg className="w-5 h-5 text-indigo-500 dark:text-indigo-400 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
             </svg>
-            User Preferences
+            {t('users:form.sections.userPreferences')}
           </h4>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Time Zone - Lebanon First */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Time Zone</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t('users:fields.timeZone')}</label>
               <select
                 name="timeZone"
                 value={formData.timeZone || ''}
@@ -891,28 +892,28 @@ const UserForm = ({
                 disabled={isLoading}
                 className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="Asia/Beirut">🇱🇧 Beirut Time (EET)</option>
-                <option value="">--- Regional ---</option>
-                <option value="Asia/Damascus">🇸🇾 Damascus</option>
-                <option value="Asia/Amman">🇯🇴 Amman</option>
-                <option value="Asia/Jerusalem">🇮🇱 Jerusalem</option>
-                <option value="Europe/Istanbul">🇹🇷 Istanbul</option>
-                <option value="Asia/Riyadh">🇸🇦 Riyadh</option>
-                <option value="Asia/Dubai">🇦🇪 Dubai</option>
-                <option value="Asia/Kuwait">🇰🇼 Kuwait</option>
-                <option value="">--- International ---</option>
-                <option value="UTC">UTC</option>
-                <option value="America/New_York">Eastern Time</option>
-                <option value="America/Chicago">Central Time</option>
-                <option value="America/Los_Angeles">Pacific Time</option>
-                <option value="Europe/London">London</option>
-                <option value="Europe/Paris">Paris</option>
+                <option value="Asia/Beirut">{t('users:form.timeZones.beirut')}</option>
+                <option value="" disabled>{t('users:form.timeZones.regionalGroup')}</option>
+                <option value="Asia/Damascus">{t('users:form.timeZones.damascus')}</option>
+                <option value="Asia/Amman">{t('users:form.timeZones.amman')}</option>
+                <option value="Asia/Jerusalem">{t('users:form.timeZones.jerusalem')}</option>
+                <option value="Europe/Istanbul">{t('users:form.timeZones.istanbul')}</option>
+                <option value="Asia/Riyadh">{t('users:form.timeZones.riyadh')}</option>
+                <option value="Asia/Dubai">{t('users:form.timeZones.dubai')}</option>
+                <option value="Asia/Kuwait">{t('users:form.timeZones.kuwait')}</option>
+                <option value="" disabled>{t('users:form.timeZones.internationalGroup')}</option>
+                <option value="UTC">{t('users:form.timeZones.utc')}</option>
+                <option value="America/New_York">{t('users:form.timeZones.eastern')}</option>
+                <option value="America/Chicago">{t('users:form.timeZones.central')}</option>
+                <option value="America/Los_Angeles">{t('users:form.timeZones.pacific')}</option>
+                <option value="Europe/London">{t('users:form.timeZones.london')}</option>
+                <option value="Europe/Paris">{t('users:form.timeZones.paris')}</option>
               </select>
             </div>
 
             {/* Language - Arabic and English Priority */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Language</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t('users:fields.language')}</label>
               <select
                 name="language"
                 value={formData.language || ''}
@@ -921,20 +922,20 @@ const UserForm = ({
                 disabled={isLoading}
                 className="block w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
               >
-                <option value="en-US">🇺🇸 English (US)</option>
-                <option value="ar-LB">🇱🇧 Arabic (Lebanon)</option>
-                <option value="ar-SA">🇸🇦 Arabic (Standard)</option>
-                <option value="en-GB">🇬🇧 English (UK)</option>
-                <option value="fr-FR">🇫🇷 French</option>
-                <option value="tr-TR">🇹🇷 Turkish</option>
-                <option value="es-ES">🇪🇸 Spanish</option>
-                <option value="de-DE">🇩🇪 German</option>
-                <option value="it-IT">🇮🇹 Italian</option>
+                <option value="en-US">{t('users:form.languages.englishUs')}</option>
+                <option value="ar-LB">{t('users:form.languages.arabicLebanon')}</option>
+                <option value="ar-SA">{t('users:form.languages.arabicStandard')}</option>
+                <option value="en-GB">{t('users:form.languages.englishUk')}</option>
+                <option value="fr-FR">{t('users:form.languages.french')}</option>
+                <option value="tr-TR">{t('users:form.languages.turkish')}</option>
+                <option value="es-ES">{t('users:form.languages.spanish')}</option>
+                <option value="de-DE">{t('users:form.languages.german')}</option>
+                <option value="it-IT">{t('users:form.languages.italian')}</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Theme</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{t('users:fields.theme')}</label>
               <select
                 name="theme"
                 value={formData.theme || ''}
@@ -943,9 +944,9 @@ const UserForm = ({
                 disabled={isLoading}
                 className="block w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="light">☀️ Light</option>
-                <option value="dark">🌙 Dark</option>
-                <option value="auto">🔄 Auto</option>
+                <option value="light">{t('users:form.themes.light')}</option>
+                <option value="dark">{t('users:form.themes.dark')}</option>
+                <option value="auto">{t('users:form.themes.auto')}</option>
               </select>
             </div>
           </div>
@@ -958,7 +959,7 @@ const UserForm = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            Account Settings
+            {t('users:profile.accountInfo')}
           </h4>
 
           <div className="space-y-4">
@@ -978,8 +979,8 @@ const UserForm = ({
                   className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                 />
                 <div>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">Active Account</span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">User can log in and access the system</p>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">{t('users:form.accountSettings.activeAccount')}</span>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t('users:form.accountSettings.activeAccountDesc')}</p>
                 </div>
               </label>
             </motion.div>
@@ -1001,8 +1002,8 @@ const UserForm = ({
                     className="h-4 w-4 text-blue-600 dark:text-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">Require Password Change</span>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">User must change password on first login</p>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{t('users:form.accountSettings.requirePasswordChange')}</span>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{t('users:form.accountSettings.requirePasswordChangeDesc')}</p>
                   </div>
                 </label>
               </motion.div>
@@ -1025,8 +1026,8 @@ const UserForm = ({
                     className="h-4 w-4 text-blue-600 dark:text-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">Send Welcome Email</span>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Send welcome email with login credentials</p>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{t('users:form.accountSettings.sendWelcomeEmail')}</span>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{t('users:form.accountSettings.sendWelcomeEmailDesc')}</p>
                   </div>
                 </label>
               </motion.div>
@@ -1041,9 +1042,9 @@ const UserForm = ({
               >
                 <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
                   <div className="mb-2">
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">Invitation Approval Override</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{t('users:form.accountSettings.approvalOverride')}</span>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                      Controls whether this user's invitations require admin approval, overriding the global setting.
+                      {t('users:form.accountSettings.approvalOverrideDesc')}
                     </p>
                   </div>
                   <select
@@ -1059,9 +1060,9 @@ const UserForm = ({
                     disabled={isLoading}
                     className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                   >
-                    <option value="null">Use global setting (default)</option>
-                    <option value="true">Always require approval</option>
-                    <option value="false">Always auto-approve (skip approval)</option>
+                    <option value="null">{t('users:form.accountSettings.approvalOverrideDefault')}</option>
+                    <option value="true">{t('users:form.accountSettings.approvalOverrideRequire')}</option>
+                    <option value="false">{t('users:form.accountSettings.approvalOverrideAuto')}</option>
                   </select>
                 </div>
               </motion.div>
@@ -1083,7 +1084,7 @@ const UserForm = ({
             disabled={isLoading}
             className="transition-all duration-200"
           >
-            Cancel
+            {t('common:buttons.cancel')}
           </Button>
           
           <Button
@@ -1094,8 +1095,8 @@ const UserForm = ({
             className="transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
           >
             {isLoading 
-              ? (isEditing ? 'Updating...' : 'Creating...') 
-              : (isEditing ? 'Update User' : 'Create User')
+              ? (isEditing ? t('users:form.actions.updating') : t('users:form.actions.creating'))
+              : (isEditing ? t('users:form.actions.updateUser') : t('users:form.actions.createUser'))
             }
           </Button>
         </motion.div>
@@ -1105,7 +1106,7 @@ const UserForm = ({
       <Modal
         isOpen={showCreateDeptModal}
         onClose={() => setShowCreateDeptModal(false)}
-        title="Create New Department"
+        title={t('system:departments.createTitle')}
       >
         <QuickCreateDepartmentForm
           onSubmit={handleCreateDepartment}
@@ -1119,6 +1120,7 @@ const UserForm = ({
 
 // Quick Create Department Form Component
 const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
+  const { t } = useTranslation(['system', 'common']);
   const [formState, setFormState] = useState({
     name: '',
     code: '',
@@ -1149,8 +1151,8 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
   };
 
   const tabs = [
-    { id: 'basic', label: 'Basic Info', icon: '🏢' },
-    { id: 'contact', label: 'Contact', icon: '📞' }
+    { id: 'basic', label: t('system:departments.form.tabBasic'), icon: '🏢' },
+    { id: 'contact', label: t('system:departments.form.tabContact'), icon: '📞' }
   ];
 
   return (
@@ -1182,7 +1184,7 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Department Name <span className="text-red-500">*</span>
+                  {t('system:departments.form.departmentName')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -1191,13 +1193,13 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
                   value={formState.name}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., Human Resources"
+                  placeholder={t('system:departments.form.departmentNamePlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Department Code <span className="text-red-500">*</span>
+                  {t('system:departments.form.departmentCode')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -1206,7 +1208,7 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
                   value={formState.code}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., HR"
+                  placeholder={t('system:departments.form.departmentCodePlaceholder')}
                 />
               </div>
             </div>
@@ -1214,7 +1216,7 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Budget
+                  {t('system:departments.form.budget')}
                 </label>
                 <input
                   type="number"
@@ -1224,13 +1226,13 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
                   min="0"
                   step="0.01"
                   className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., 50000"
+                  placeholder={t('system:departments.form.budgetPlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                  Display Order
+                  {t('system:departments.form.displayOrder')}
                 </label>
                 <input
                   type="number"
@@ -1239,14 +1241,14 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
                   onChange={handleChange}
                   min="0"
                   className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="0"
+                  placeholder={t('system:departments.form.displayOrderPlaceholder')}
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Description
+                {t('system:departments.form.description')}
               </label>
               <textarea
                 name="description"
@@ -1254,7 +1256,7 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
                 onChange={handleChange}
                 rows="3"
                 className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Brief description of the department..."
+                placeholder={t('system:departments.form.descriptionPlaceholder')}
               />
             </div>
           </div>
@@ -1265,7 +1267,7 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Department Email
+                {t('system:departments.form.departmentEmail')}
               </label>
               <input
                 type="email"
@@ -1273,13 +1275,13 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
                 value={formState.email}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="department@example.com"
+                placeholder={t('system:departments.form.departmentEmailPlaceholder')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Department Phone
+                {t('system:departments.form.departmentPhone')}
               </label>
               <input
                 type="tel"
@@ -1287,13 +1289,13 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
                 value={formState.phone}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="+1 (555) 123-4567"
+                placeholder={t('system:departments.form.departmentPhonePlaceholder')}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                Location / Office
+                {t('system:departments.form.locationOffice')}
               </label>
               <input
                 type="text"
@@ -1301,7 +1303,7 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
                 value={formState.location}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., Building A, Floor 3"
+                placeholder={t('system:departments.form.locationPlaceholder')}
               />
             </div>
           </div>
@@ -1311,10 +1313,10 @@ const QuickCreateDepartmentForm = ({ onSubmit, onCancel, loading }) => {
       {/* Action Buttons */}
       <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
         <Button variant="secondary" onClick={onCancel} type="button" disabled={loading}>
-          Cancel
+          {t('common:buttons.cancel')}
         </Button>
         <Button type="submit" loading={loading} disabled={!formState.name.trim() || !formState.code.trim()}>
-          Create Department
+          {t('system:departments.createTitle')}
         </Button>
       </div>
     </form>

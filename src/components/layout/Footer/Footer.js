@@ -1,6 +1,7 @@
-// src/components/layout/Footer/Footer.js
+﻿// src/components/layout/Footer/Footer.js
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
 
@@ -8,6 +9,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
  * Professional Footer Component with role-based links
  */
 const Footer = () => {
+  const { t, i18n } = useTranslation('common');
   const { isAuthenticated, userRole } = useAuth();
   const { navigationAccess } = usePermissions();
   const canManageSystem = navigationAccess?.showSystem;
@@ -27,12 +29,12 @@ const Footer = () => {
                 </svg>
               </div>
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                © {currentYear} Visitor Management System. All rights reserved.
+                {t('footer.copyright', { year: currentYear })}
               </span>
             </div>
             <div className="mt-2 md:mt-0">
               <p className="text-xs text-gray-500 dark:text-gray-500">
-                Secure • Reliable • Professional
+                {t('footer.tagline')}
               </p>
             </div>
           </div>
@@ -43,22 +45,22 @@ const Footer = () => {
 
   const quickLinks = [
     {
-      name: 'Help Center',
+      name: t('footer.helpCenter'),
       href: '/help',
       show: true
     },
     {
-      name: 'System Status',
-      href: '/system/status', 
+      name: t('footer.systemStatus'),
+      href: '/system/status',
       show: canManageSystem
     },
     {
-      name: 'Reports',
+      name: t('footer.reports'),
       href: '/reports',
       show: canViewReports
     },
     {
-      name: 'Privacy Policy',
+      name: t('footer.privacyPolicy'),
       href: '/privacy',
       show: true
     }
@@ -79,10 +81,10 @@ const Footer = () => {
               <span className="text-lg font-semibold text-gray-900 dark:text-white">VMS</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Streamlined visitor management with advanced security features and real-time monitoring.
+              {t('footer.description')}
             </p>
             <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-500">
-              <span>Role:</span>
+              <span>{t('footer.role')}</span>
               <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 rounded-full font-medium">
                 {userRole}
               </span>
@@ -92,7 +94,7 @@ const Footer = () => {
           {/* Quick Links */}
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
-              Quick Links
+              {t('footer.quickLinks')}
             </h3>
             <ul className="space-y-2">
               {quickLinks.map((link) => (
@@ -111,24 +113,24 @@ const Footer = () => {
           {/* System Information */}
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
-              System Info
+              {t('footer.systemInfo')}
             </h3>
             <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <div className="flex items-center justify-between">
-                <span>Version:</span>
+                <span>{t('footer.version')}</span>
                 <span className="font-medium text-gray-900 dark:text-gray-200">v1.0.0</span>
               </div>
               <div className="flex items-center justify-between">
-                <span>Status:</span>
+                <span>{t('footer.status')}</span>
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full"></div>
-                  <span className="font-medium text-green-600 dark:text-green-400">Online</span>
+                  <span className="font-medium text-green-600 dark:text-green-400">{t('footer.online')}</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span>Last Updated:</span>
+                <span>{t('footer.lastUpdated')}</span>
                 <span className="font-medium text-gray-900 dark:text-gray-200">
-                  {new Date().toLocaleDateString()}
+                  {new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar' : 'en-US')}
                 </span>
               </div>
             </div>
@@ -138,13 +140,12 @@ const Footer = () => {
         <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              © {currentYear} Visitor Management System. All rights reserved for Security Engineering SAL.
+              {t('footer.copyrightSal', { year: currentYear })}
             </p>
             <div className="mt-2 md:mt-0 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-              {/* <span>Built by Security Engineering </span> */}
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 bg-green-500 dark:bg-green-400 rounded-full animate-pulse"></div>
-                <span>Secure Connection</span>
+                <span>{t('footer.secureConnection')}</span>
               </div>
             </div>
           </div>

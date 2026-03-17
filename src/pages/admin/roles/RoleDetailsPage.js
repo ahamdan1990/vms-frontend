@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // Redux
 import {
@@ -11,7 +12,6 @@ import {
   selectCurrentRole,
   selectRolesLoading,
   selectPermissionLoading,
-  selectRolesError,
   clearCurrentRole
 } from '../../../store/slices/rolesSlice';
 
@@ -25,14 +25,12 @@ import {
 import Button from '../../../components/common/Button/Button';
 import Card from '../../../components/common/Card/Card';
 import Badge from '../../../components/common/Badge/Badge';
-import Tooltip from '../../../components/common/Tooltip/Tooltip';
 
 // Icons
 import {
   ArrowLeftIcon,
   ShieldCheckIcon,
   CheckIcon,
-  XMarkIcon,
   MagnifyingGlassIcon,
   FunnelIcon
 } from '@heroicons/react/24/outline';
@@ -45,6 +43,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
  * Role Details Page - View and manage permissions for a specific role
  */
 const RoleDetailsPage = () => {
+  const { t } = useTranslation('system');
   const { roleId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -57,7 +56,6 @@ const RoleDetailsPage = () => {
   const loading = useSelector(selectRolesLoading);
   const permissionsLoading = useSelector(selectPermissionsLoading);
   const permissionUpdating = useSelector(selectPermissionLoading);
-  const error = useSelector(selectRolesError);
 
   // Local state
   const [selectedPermissions, setSelectedPermissions] = useState(new Set());
@@ -126,16 +124,16 @@ const RoleDetailsPage = () => {
       await dispatch(updateRolePermissions({
         roleId: parseInt(roleId),
         permissionIds: Array.from(selectedPermissions),
-        reason: 'Updated permissions via Role Details page'
+        reason: t('roles.details.permissionUpdateReason', { name: role.displayName || role.name })
       })).unwrap();
 
-      toast.success('Role permissions updated successfully');
+      toast.success(t('roles.details.permissionsUpdated'));
       setHasChanges(false);
 
       // Reload role to get updated data
       dispatch(getRoleById(roleId));
     } catch (error) {
-      toast.error(error?.message || 'Failed to update permissions');
+      toast.error(error?.message || t('roles.details.failedUpdate'));
     }
   };
 
@@ -181,13 +179,13 @@ const RoleDetailsPage = () => {
           <Card>
             <div className="text-center py-12">
               <ShieldCheckIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">Role not found</h3>
+              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{t('roles.details.roleNotFound')}</h3>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                The role you're looking for doesn't exist or has been deleted.
+                {t('roles.details.roleNotFoundDesc')}
               </p>
               <div className="mt-6">
                 <Button onClick={() => navigate('/admin/roles')}>
-                  Back to Roles
+                  {t('roles.details.backToRoles')}
                 </Button>
               </div>
             </div>
@@ -208,7 +206,7 @@ const RoleDetailsPage = () => {
           className="mb-4"
         >
           <ArrowLeftIcon className="w-4 h-4 me-2" />
-          Back to Roles
+          {t('roles.details.backToRoles')}
         </Button>
 
         <div className="flex items-center justify-between">
@@ -230,10 +228,10 @@ const RoleDetailsPage = () => {
               <p className="text-gray-600 dark:text-gray-300 mt-1">{role.description}</p>
               <div className="flex items-center gap-2 mt-2">
                 <Badge variant={role.isActive ? 'success' : 'gray'}>
-                  {role.isActive ? 'Active' : 'Inactive'}
+                  {role.isActive ? t('roles.active') : t('roles.inactive')}
                 </Badge>
                 {role.isSystemRole && (
-                  <Badge variant="info">System Role</Badge>
+                  <Badge variant="info">{t('roles.systemRole')}</Badge>
                 )}
               </div>
             </div>
@@ -248,7 +246,7 @@ const RoleDetailsPage = () => {
                     onClick={handleCancelChanges}
                     disabled={permissionUpdating}
                   >
-                    Cancel
+                    {t('roles.details.cancel')}
                   </Button>
                   <Button
                     variant="primary"
@@ -256,7 +254,7 @@ const RoleDetailsPage = () => {
                     isLoading={permissionUpdating}
                   >
                     <CheckIcon className="w-4 h-4 me-2" />
-                    Save Changes
+                    {t('roles.details.saveChanges')}
                   </Button>
                 </>
               ) : (
@@ -265,7 +263,7 @@ const RoleDetailsPage = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                   <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                    Click on permission cards below to edit
+                    {t('roles.details.clickToEdit')}
                   </span>
                 </div>
               )}
@@ -277,21 +275,21 @@ const RoleDetailsPage = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <Card>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Total Permissions</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{t('roles.details.totalPermissions')}</p>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {selectedPermissions.size}
           </p>
         </Card>
         <Card>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Users with Role</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{t('roles.details.usersWithRole')}</p>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{role.userCount || 0}</p>
         </Card>
         <Card>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Hierarchy Level</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{t('roles.details.hierarchyLevel')}</p>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{role.hierarchyLevel || 1}</p>
         </Card>
         <Card>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Display Order</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{t('roles.details.displayOrder')}</p>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{role.displayOrder || 0}</p>
         </Card>
       </div>
@@ -304,10 +302,10 @@ const RoleDetailsPage = () => {
               <MagnifyingGlassIcon className="absolute start-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
-                placeholder="Search permissions..."
+                placeholder={t('roles.details.searchPermissions')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
+                className="w-full ps-10 pe-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
               />
             </div>
           </div>
@@ -319,7 +317,7 @@ const RoleDetailsPage = () => {
             >
               {categories.map((cat, index) => (
                 <option key={`category-${index}-${cat}`} value={cat}>
-                  {cat === 'all' ? 'All Categories' : cat}
+                  {cat === 'all' ? t('roles.details.allCategories') : cat}
                 </option>
               ))}
             </select>
@@ -336,7 +334,7 @@ const RoleDetailsPage = () => {
             </div>
             <div className="ms-3">
               <p className="text-sm text-yellow-700 dark:text-yellow-200">
-                This is a system role. Permissions cannot be modified directly. Only display properties can be edited.
+                {t('roles.details.systemRoleWarning')}
               </p>
             </div>
           </div>
@@ -360,7 +358,7 @@ const RoleDetailsPage = () => {
                     {category.category}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {selectedCount} of {categoryPermissions.length} selected
+                    {t('roles.details.selectedOf', { selected: selectedCount, total: categoryPermissions.length })}
                   </p>
                 </div>
                 {canManagePermissions && !role.isSystemRole && (
@@ -371,7 +369,7 @@ const RoleDetailsPage = () => {
                       onClick={() => handleCategorySelectAll(categoryPermissions)}
                       disabled={allSelected}
                     >
-                      Select All
+                      {t('roles.details.selectAll')}
                     </Button>
                     <Button
                       variant="outline"
@@ -379,7 +377,7 @@ const RoleDetailsPage = () => {
                       onClick={() => handleCategoryDeselectAll(categoryPermissions)}
                       disabled={selectedCount === 0}
                     >
-                      Deselect All
+                      {t('roles.details.deselectAll')}
                     </Button>
                   </div>
                 )}
@@ -396,7 +394,7 @@ const RoleDetailsPage = () => {
                       onClick={() => handlePermissionToggle(permission.id)}
                       disabled={isDisabled}
                       className={`
-                        p-3 rounded-lg border-2 text-left transition-all
+                        p-3 rounded-lg border-2 text-start transition-all
                         ${isSelected
                           ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/20'
                           : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-500'
@@ -439,9 +437,9 @@ const RoleDetailsPage = () => {
         <Card>
           <div className="text-center py-12">
             <FunnelIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No permissions found</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{t('roles.details.noPermissions')}</h3>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Try adjusting your search or filter criteria.
+              {t('roles.details.noPermissionsDesc')}
             </p>
           </div>
         </Card>

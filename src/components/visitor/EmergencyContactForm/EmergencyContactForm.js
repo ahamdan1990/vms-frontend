@@ -1,6 +1,7 @@
 // src/components/visitor/EmergencyContactForm/EmergencyContactForm.js
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import Button from '../../common/Button/Button';
 import Input from '../../common/Input/Input';
 import Badge from '../../common/Badge/Badge';
@@ -21,8 +22,8 @@ const EmergencyContactForm = ({
   isEdit = false,
   existingContacts = []
 }) => {
-  
-  // Form state
+  const { t } = useTranslation(['visitors', 'common']);
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -39,7 +40,6 @@ const EmergencyContactForm = ({
   const [formErrors, setFormErrors] = useState({});
   const [touched, setTouched] = useState({});
 
-  // Initialize form with initial data
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -57,106 +57,91 @@ const EmergencyContactForm = ({
     }
   }, [initialData]);
 
-  // Form validation
   const validateForm = () => {
     const errors = {};
 
-    // First name validation
     if (!formData.firstName.trim()) {
-      errors.firstName = 'First name is required';
+      errors.firstName = t('emergencyContactForm.validation.firstNameRequired');
     } else if (formData.firstName.length < 2) {
-      errors.firstName = 'First name must be at least 2 characters';
+      errors.firstName = t('emergencyContactForm.validation.firstNameMin');
     } else if (formData.firstName.length > 50) {
-      errors.firstName = 'First name must be less than 50 characters';
+      errors.firstName = t('emergencyContactForm.validation.firstNameMax');
     }
 
-    // Last name validation
     if (!formData.lastName.trim()) {
-      errors.lastName = 'Last name is required';
+      errors.lastName = t('emergencyContactForm.validation.lastNameRequired');
     } else if (formData.lastName.length < 2) {
-      errors.lastName = 'Last name must be at least 2 characters';
+      errors.lastName = t('emergencyContactForm.validation.lastNameMin');
     } else if (formData.lastName.length > 50) {
-      errors.lastName = 'Last name must be less than 50 characters';
+      errors.lastName = t('emergencyContactForm.validation.lastNameMax');
     }
 
-    // Relationship validation
     if (!formData.relationship.trim()) {
-      errors.relationship = 'Relationship is required';
+      errors.relationship = t('emergencyContactForm.validation.relationshipRequired');
     } else if (formData.relationship.length > 50) {
-      errors.relationship = 'Relationship must be less than 50 characters';
+      errors.relationship = t('emergencyContactForm.validation.relationshipMax');
     }
 
-    // Phone number validation
     if (!formData.phoneNumber.trim()) {
-      errors.phoneNumber = 'Phone number is required';
+      errors.phoneNumber = t('emergencyContactForm.validation.phoneRequired');
     } else if (!/^[\+]?[\d\s\-\(\)]{10,}$/.test(formData.phoneNumber.replace(/\s/g, ''))) {
-      errors.phoneNumber = 'Please enter a valid phone number';
+      errors.phoneNumber = t('emergencyContactForm.validation.phoneInvalid');
     }
 
-    // Alternate phone number validation (optional)
     if (formData.alternatePhoneNumber && !/^[\+]?[\d\s\-\(\)]{10,}$/.test(formData.alternatePhoneNumber.replace(/\s/g, ''))) {
-      errors.alternatePhoneNumber = 'Please enter a valid alternate phone number';
+      errors.alternatePhoneNumber = t('emergencyContactForm.validation.alternatePhoneInvalid');
     }
 
-    // Email validation (optional)
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
+      errors.email = t('emergencyContactForm.validation.emailInvalid');
     }
 
-    // Priority validation (optional)
     if (formData.priority) {
       const priority = parseInt(formData.priority, 10);
       if (isNaN(priority) || priority < 1 || priority > 10) {
-        errors.priority = 'Priority must be a number between 1 and 10';
+        errors.priority = t('emergencyContactForm.validation.priorityRange');
       } else {
-        // Check if priority is already taken by another contact
-        const priorityTaken = existingContacts.some(contact => 
-          contact.priority === priority && 
+        const priorityTaken = existingContacts.some(contact =>
+          contact.priority === priority &&
           (!isEdit || contact.id !== initialData?.id)
         );
         if (priorityTaken) {
-          errors.priority = `Priority ${priority} is already assigned to another contact`;
+          errors.priority = t('emergencyContactForm.validation.priorityTaken', { priority });
         }
       }
     }
 
-    // Primary contact validation
     if (formData.isPrimary) {
-      const existingPrimary = existingContacts.find(contact => 
-        contact.isPrimary && 
+      const existingPrimary = existingContacts.find(contact =>
+        contact.isPrimary &&
         (!isEdit || contact.id !== initialData?.id)
       );
       if (existingPrimary) {
-        // This is just a warning, not an error
-        errors._primaryWarning = `${existingPrimary.firstName} ${existingPrimary.lastName} is currently the primary contact. Setting this contact as primary will remove the primary status from the existing contact.`;
+        errors._primaryWarning = t('emergencyContactForm.validation.primaryWarning', {
+          name: `${existingPrimary.firstName} ${existingPrimary.lastName}`
+        });
       }
     }
 
-    // Notes validation
     if (formData.notes && formData.notes.length > 500) {
-      errors.notes = 'Notes must be less than 500 characters';
+      errors.notes = t('emergencyContactForm.validation.notesMax');
     }
 
-    // Address validation
     if (formData.address && formData.address.length > 200) {
-      errors.address = 'Address must be less than 200 characters';
+      errors.address = t('emergencyContactForm.validation.addressMax');
     }
 
     setFormErrors(errors);
-    
-    // Filter out warnings from validation
     const actualErrors = Object.keys(errors).filter(key => !key.startsWith('_'));
     return actualErrors.length === 0;
   };
 
-  // Handle form field changes
   const handleChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
 
-    // Clear field error when user starts typing
     if (formErrors[field]) {
       setFormErrors(prev => ({
         ...prev,
@@ -165,7 +150,6 @@ const EmergencyContactForm = ({
     }
   };
 
-  // Handle field blur
   const handleBlur = (field) => {
     setTouched(prev => ({
       ...prev,
@@ -174,11 +158,8 @@ const EmergencyContactForm = ({
     validateForm();
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Mark all fields as touched
     const allFields = Object.keys(formData);
     setTouched(allFields.reduce((acc, field) => ({ ...acc, [field]: true }), {}));
 
@@ -186,7 +167,6 @@ const EmergencyContactForm = ({
       return;
     }
 
-    // Prepare submission data
     const submissionData = {
       ...formData,
       priority: formData.priority ? parseInt(formData.priority, 10) : null
@@ -194,34 +174,31 @@ const EmergencyContactForm = ({
 
     try {
       await onSubmit(submissionData);
-    } catch (error) {
-      // Error handling is done by parent component
-      console.error('Form submission error:', error);
+    } catch (submissionError) {
+      console.error('Form submission error:', submissionError);
     }
   };
 
-  // Relationship options
   const relationships = [
-    'Spouse',
-    'Partner',
-    'Parent',
-    'Child',
-    'Sibling',
-    'Friend',
-    'Colleague',
-    'Neighbor',
-    'Guardian',
-    'Other'
+    { value: 'Spouse', label: t('emergencyContactForm.relationships.spouse') },
+    { value: 'Partner', label: t('emergencyContactForm.relationships.partner') },
+    { value: 'Parent', label: t('emergencyContactForm.relationships.parent') },
+    { value: 'Child', label: t('emergencyContactForm.relationships.child') },
+    { value: 'Sibling', label: t('emergencyContactForm.relationships.sibling') },
+    { value: 'Friend', label: t('emergencyContactForm.relationships.friend') },
+    { value: 'Colleague', label: t('emergencyContactForm.relationships.colleague') },
+    { value: 'Neighbor', label: t('emergencyContactForm.relationships.neighbor') },
+    { value: 'Guardian', label: t('emergencyContactForm.relationships.guardian') },
+    { value: 'Other', label: t('emergencyContactForm.relationships.other') }
   ];
 
-  // Get available priorities
   const getAvailablePriorities = () => {
     const usedPriorities = existingContacts
       .filter(c => c.id !== initialData?.id && c.priority)
       .map(c => c.priority);
-    
+
     const available = [];
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= 10; i += 1) {
       if (!usedPriorities.includes(i)) {
         available.push(i);
       }
@@ -233,7 +210,6 @@ const EmergencyContactForm = ({
 
   return (
     <div className="space-y-6 text-gray-900 dark:text-gray-100">
-      {/* Error Display */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4 dark:bg-red-900/30 dark:border-red-700">
           <div className="text-sm text-red-700 dark:text-red-200">
@@ -250,24 +226,21 @@ const EmergencyContactForm = ({
         </div>
       )}
 
-      {/* Primary Warning */}
       {formErrors._primaryWarning && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 dark:bg-yellow-900/30 dark:border-yellow-600">
           <div className="text-sm text-yellow-700 dark:text-yellow-200">
-            <strong>Note:</strong> {formErrors._primaryWarning}
+            <strong>{t('emergencyContactForm.labels.notePrefix')}</strong> {formErrors._primaryWarning}
           </div>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Information */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Contact Information</h3>
-          
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('emergencyContactForm.sections.contactInformation')}</h3>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* First Name */}
             <Input
-              label="First Name"
+              label={t('fields.firstName')}
               type="text"
               value={formData.firstName}
               onChange={(e) => handleChange('firstName', e.target.value)}
@@ -277,9 +250,8 @@ const EmergencyContactForm = ({
               maxLength={50}
             />
 
-            {/* Last Name */}
             <Input
-              label="Last Name"
+              label={t('fields.lastName')}
               type="text"
               value={formData.lastName}
               onChange={(e) => handleChange('lastName', e.target.value)}
@@ -290,10 +262,9 @@ const EmergencyContactForm = ({
             />
           </div>
 
-          {/* Relationship */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-              Relationship <span className="text-red-500">*</span>
+              {t('emergencyContactForm.fields.relationship')} <span className="text-red-500">*</span>
             </label>
             <select
               value={formData.relationship}
@@ -306,10 +277,10 @@ const EmergencyContactForm = ({
               } text-gray-900 dark:text-gray-100`}
               required
             >
-              <option value="">Select relationship...</option>
-              {relationships.map((rel) => (
-                <option key={rel} value={rel}>
-                  {rel}
+              <option value="">{t('emergencyContactForm.placeholders.relationship')}</option>
+              {relationships.map((relationship) => (
+                <option key={relationship.value} value={relationship.value}>
+                  {relationship.label}
                 </option>
               ))}
             </select>
@@ -319,50 +290,45 @@ const EmergencyContactForm = ({
           </div>
         </div>
 
-        {/* Contact Details */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Contact Details</h3>
-          
+          <h3 className="text-lg font-medium text-gray-900">{t('emergencyContactForm.sections.contactDetails')}</h3>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Phone Number */}
             <Input
-              label="Phone Number"
+              label={t('fields.phone')}
               type="tel"
               value={formData.phoneNumber}
               onChange={(e) => handleChange('phoneNumber', e.target.value)}
               onBlur={() => handleBlur('phoneNumber')}
               error={touched.phoneNumber ? formErrors.phoneNumber : undefined}
               required
-              placeholder="+1 (555) 123-4567"
+              placeholder={t('emergencyContactForm.placeholders.phoneNumber')}
             />
 
-            {/* Alternate Phone Number */}
             <Input
-              label="Alternate Phone Number"
+              label={t('emergencyContactForm.fields.alternatePhone')}
               type="tel"
               value={formData.alternatePhoneNumber}
               onChange={(e) => handleChange('alternatePhoneNumber', e.target.value)}
               onBlur={() => handleBlur('alternatePhoneNumber')}
               error={touched.alternatePhoneNumber ? formErrors.alternatePhoneNumber : undefined}
-              placeholder="+1 (555) 987-6543"
+              placeholder={t('emergencyContactForm.placeholders.alternatePhone')}
             />
           </div>
 
-          {/* Email */}
           <Input
-            label="Email Address"
+            label={t('fields.email')}
             type="email"
             value={formData.email}
             onChange={(e) => handleChange('email', e.target.value)}
             onBlur={() => handleBlur('email')}
             error={touched.email ? formErrors.email : undefined}
-            placeholder="contact@example.com"
+            placeholder={t('emergencyContactForm.placeholders.email')}
           />
 
-          {/* Address */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Address
+              {t('profile.address')}
             </label>
             <textarea
               value={formData.address}
@@ -370,7 +336,7 @@ const EmergencyContactForm = ({
               onBlur={() => handleBlur('address')}
               rows={3}
               maxLength={200}
-              placeholder="Street address, city, state, zip code..."
+              placeholder={t('emergencyContactForm.placeholders.address')}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                 touched.address && formErrors.address
                   ? 'border-red-300 bg-red-50 dark:border-red-500 dark:bg-red-900/20'
@@ -381,20 +347,18 @@ const EmergencyContactForm = ({
               <p className="mt-1 text-sm text-red-600">{formErrors.address}</p>
             )}
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {formData.address.length}/200 characters
+              {t('emergencyContactForm.characters', { current: formData.address.length, max: 200 })}
             </p>
           </div>
         </div>
 
-        {/* Priority and Settings */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Priority Settings</h3>
-          
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('emergencyContactForm.sections.prioritySettings')}</h3>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Priority */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Contact Priority
+                {t('emergencyContactForm.fields.contactPriority')}
               </label>
               <select
                 value={formData.priority}
@@ -406,10 +370,17 @@ const EmergencyContactForm = ({
                     : 'border-gray-300 dark:border-gray-600 dark:bg-slate-900/60'
                 } text-gray-900 dark:text-gray-100`}
               >
-                <option value="">No specific priority</option>
+                <option value="">{t('emergencyContactForm.placeholders.noSpecificPriority')}</option>
                 {availablePriorities.map((priority) => (
                   <option key={priority} value={priority}>
-                    Priority {priority} {priority === 1 ? '(Highest)' : priority === 10 ? '(Lowest)' : ''}
+                    {t('emergencyContactForm.priorityOption', {
+                      priority,
+                      suffix: priority === 1
+                        ? t('emergencyContactForm.priorityHighest')
+                        : priority === 10
+                          ? t('emergencyContactForm.priorityLowest')
+                          : ''
+                    })}
                   </option>
                 ))}
               </select>
@@ -417,11 +388,10 @@ const EmergencyContactForm = ({
                 <p className="mt-1 text-sm text-red-600">{formErrors.priority}</p>
               )}
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Lower numbers indicate higher priority for contact during emergencies
+                {t('emergencyContactForm.help.priority')}
               </p>
             </div>
 
-            {/* Primary Contact */}
             <div className="flex items-start gap-3 pt-6">
               <div className="flex items-center h-5">
                 <input
@@ -439,23 +409,22 @@ const EmergencyContactForm = ({
                   ) : (
                     <StarIcon className="w-4 h-4 text-gray-400" />
                   )}
-                  <span>Primary Emergency Contact</span>
+                  <span>{t('emergencyContactForm.fields.primaryEmergencyContact')}</span>
                 </label>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  This contact will be called first in case of emergency
+                  {t('emergencyContactForm.help.primaryContact')}
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Notes */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Additional Information</h3>
-          
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('emergencyContactForm.sections.additionalInformation')}</h3>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-              Notes
+              {t('notes.title')}
             </label>
             <textarea
               value={formData.notes}
@@ -463,7 +432,7 @@ const EmergencyContactForm = ({
               onBlur={() => handleBlur('notes')}
               rows={3}
               maxLength={500}
-              placeholder="Any additional information about this contact..."
+              placeholder={t('emergencyContactForm.placeholders.notes')}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                 touched.notes && formErrors.notes
                   ? 'border-red-300 bg-red-50 dark:border-red-500 dark:bg-red-900/20'
@@ -474,21 +443,20 @@ const EmergencyContactForm = ({
               <p className="mt-1 text-sm text-red-600">{formErrors.notes}</p>
             )}
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              {formData.notes.length}/500 characters
+              {t('emergencyContactForm.characters', { current: formData.notes.length, max: 500 })}
             </p>
           </div>
         </div>
 
-        {/* Preview */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Preview</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">{t('emergencyContactForm.sections.preview')}</h3>
           <div className="bg-gray-50 dark:bg-slate-900/60 p-4 rounded-md border border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2 mb-2">
               {formData.isPrimary && (
                 <StarIconSolid className="w-4 h-4 text-yellow-500" />
               )}
               <div className="font-medium text-gray-900 dark:text-white">
-                {formData.firstName || 'First'} {formData.lastName || 'Last'}
+                {formData.firstName || t('emergencyContactForm.preview.firstNameFallback')} {formData.lastName || t('emergencyContactForm.preview.lastNameFallback')}
               </div>
               {formData.relationship && (
                 <Badge variant="secondary" size="sm">
@@ -497,25 +465,24 @@ const EmergencyContactForm = ({
               )}
               {formData.priority && (
                 <Badge variant="info" size="sm">
-                  Priority #{formData.priority}
+                  {t('emergencyContactForm.preview.priorityBadge', { priority: formData.priority })}
                 </Badge>
               )}
             </div>
             <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
               {formData.phoneNumber && (
-                <div>📞 {formData.phoneNumber}</div>
+                <div>{t('emergencyContactForm.preview.phone', { value: formData.phoneNumber })}</div>
               )}
               {formData.email && (
-                <div>✉️ {formData.email}</div>
+                <div>{t('emergencyContactForm.preview.email', { value: formData.email })}</div>
               )}
               {formData.address && (
-                <div>🏠 {formData.address}</div>
+                <div>{t('emergencyContactForm.preview.address', { value: formData.address })}</div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Form Actions */}
         <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
           <Button
             type="button"
@@ -523,14 +490,14 @@ const EmergencyContactForm = ({
             onClick={onCancel}
             disabled={loading}
           >
-            Cancel
+            {t('common:buttons.cancel')}
           </Button>
           <Button
             type="submit"
             loading={loading}
             disabled={loading || Object.keys(formErrors).filter(key => !key.startsWith('_')).length > 0}
           >
-            {isEdit ? 'Update Contact' : 'Add Contact'}
+            {isEdit ? t('emergencyContactForm.actions.updateContact') : t('emergencyContactForm.actions.addContact')}
           </Button>
         </div>
       </form>
@@ -538,7 +505,6 @@ const EmergencyContactForm = ({
   );
 };
 
-// PropTypes validation
 EmergencyContactForm.propTypes = {
   initialData: PropTypes.object,
   onSubmit: PropTypes.func.isRequired,

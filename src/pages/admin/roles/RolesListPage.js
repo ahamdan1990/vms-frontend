@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // Redux actions and selectors
 import {
@@ -50,6 +51,7 @@ import DeleteRoleModal from './components/DeleteRoleModal';
  * Roles List Page - Displays and manages all system and custom roles
  */
 const RolesListPage = () => {
+  const { t } = useTranslation('system');
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const toast = useToast();
@@ -139,12 +141,12 @@ const RolesListPage = () => {
                     variant={role.isActive ? 'success' : 'gray'}
                     size="sm"
                   >
-                    {role.isActive ? 'Active' : 'Inactive'}
+                    {role.isActive ? t('roles.active') : t('roles.inactive')}
                   </Badge>
                   {isSystemRole && (
                     <Badge variant="info" size="sm">
                       <LockClosedIcon className="w-3 h-3 me-1" />
-                      System Role
+                      {t('roles.systemRole')}
                     </Badge>
                   )}
                 </div>
@@ -152,57 +154,57 @@ const RolesListPage = () => {
             </div>
 
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              {role.description || 'No description available'}
+              {role.description || t('roles.noDescription')}
             </p>
 
             <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-300">
-              <Tooltip content="Number of permissions assigned to this role">
+              <Tooltip content={t('roles.permissions')}>
                 <div className="flex items-center gap-2">
                   <KeyIcon className="w-4 h-4" />
                   <span className="font-medium">{role.permissionCount || 0}</span>
-                  <span>Permissions</span>
+                  <span>{t('roles.permissions')}</span>
                 </div>
               </Tooltip>
-              <Tooltip content="Number of users with this role">
+              <Tooltip content={t('roles.users')}>
                 <div className="flex items-center gap-2">
                   <UsersIcon className="w-4 h-4" />
                   <span className="font-medium">{role.userCount || 0}</span>
-                  <span>Users</span>
+                  <span>{t('roles.users')}</span>
                 </div>
               </Tooltip>
               <div className="flex items-center gap-2">
-                <span className="text-gray-500 dark:text-gray-400">Level:</span>
+                <span className="text-gray-500 dark:text-gray-400">{t('roles.level')}</span>
                 <span className="font-medium">{role.hierarchyLevel || 1}</span>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col gap-2 ms-4">
-            <Tooltip content="View and manage role details">
+            <Tooltip content={t('roles.viewTooltip')}>
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={() => handleViewRole(role)}
               >
-                View
+                {t('roles.view')}
               </Button>
             </Tooltip>
 
             {canUpdate && (
-              <Tooltip content={isSystemRole ? "Edit display properties only" : "Edit role details"}>
+              <Tooltip content={isSystemRole ? t('roles.editTooltip') : t('roles.editTooltipFull')}>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handleEditRole(role)}
                 >
                   <PencilIcon className="w-4 h-4 me-1" />
-                  Edit
+                  {t('roles.edit')}
                 </Button>
               </Tooltip>
             )}
 
             {canDelete && !isSystemRole && (
-              <Tooltip content="Deactivate role">
+              <Tooltip content={t('roles.deactivateTooltip')}>
                 <Button
                   variant="outline"
                   size="sm"
@@ -210,7 +212,7 @@ const RolesListPage = () => {
                   className="text-red-600 hover:text-red-700 hover:border-red-600 dark:text-red-400 dark:hover:text-red-300 dark:hover:border-red-400"
                 >
                   <TrashIcon className="w-4 h-4 me-1" />
-                  Delete
+                  {t('roles.delete')}
                 </Button>
               </Tooltip>
             )}
@@ -226,9 +228,9 @@ const RolesListPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Role Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('roles.title')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Manage system and custom roles with their permissions
+            {t('roles.subtitle')}
           </p>
         </div>
 
@@ -238,7 +240,7 @@ const RolesListPage = () => {
             onClick={() => dispatch(toggleCreateModal())}
           >
             <PlusIcon className="w-5 h-5 me-2" />
-            Create Role
+            {t('roles.createButton')}
           </Button>
         )}
       </div>
@@ -248,7 +250,7 @@ const RolesListPage = () => {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Total Roles</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t('roles.totalRoles')}</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{roles.length}</p>
             </div>
             <ShieldCheckIcon className="w-12 h-12 text-blue-500 opacity-20" />
@@ -258,7 +260,7 @@ const RolesListPage = () => {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">System Roles</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t('roles.systemRoles')}</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{systemRoles.length}</p>
             </div>
             <LockClosedIcon className="w-12 h-12 text-green-500 opacity-20" />
@@ -268,7 +270,7 @@ const RolesListPage = () => {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Custom Roles</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t('roles.customRoles')}</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{customRoles.length}</p>
             </div>
             <Cog6ToothIcon className="w-12 h-12 text-purple-500 opacity-20" />
@@ -278,12 +280,12 @@ const RolesListPage = () => {
 
       {/* Tabs */}
       <div className="mb-6">
-        <div className="border-b border-gray-200 dark:border-gray-700">
-          <nav className="-mb-px flex gap-8">
+        <div className="border-b border-gray-200 dark:border-gray-700 overflow-x-auto custom-scrollbar">
+          <nav className="-mb-px inline-flex min-w-max gap-8">
             {[
-              { key: 'all', label: 'All Roles', count: roles.length },
-              { key: 'system', label: 'System Roles', count: systemRoles.length },
-              { key: 'custom', label: 'Custom Roles', count: customRoles.length }
+              { key: 'all', label: t('roles.tabs.all'), count: roles.length },
+              { key: 'system', label: t('roles.tabs.system'), count: systemRoles.length },
+              { key: 'custom', label: t('roles.tabs.custom'), count: customRoles.length }
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -315,11 +317,11 @@ const RolesListPage = () => {
         <Card>
           <div className="text-center py-12">
             <ShieldCheckIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No roles found</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{t('roles.emptyMessage')}</h3>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {activeTab === 'custom'
-                ? 'Create a custom role to get started.'
-                : 'No roles available in this category.'}
+                ? t('roles.emptyCustom')
+                : t('roles.emptyCategory')}
             </p>
             {canCreate && activeTab === 'custom' && (
               <div className="mt-6">
@@ -328,7 +330,7 @@ const RolesListPage = () => {
                   onClick={() => dispatch(toggleCreateModal())}
                 >
                   <PlusIcon className="w-5 h-5 me-2" />
-                  Create Custom Role
+                  {t('roles.createCustomRole')}
                 </Button>
               </div>
             )}

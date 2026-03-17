@@ -54,7 +54,9 @@
     "reject": "Reject",
     "cancel": "Cancel",
     "delete": "Delete",
-    "clearSelection": "Clear Selection"
+    "clearSelection": "Clear Selection",
+    "approvalComment": "Bulk approval",
+    "rejectionReason": "Bulk rejection"
   },
   "actions": {
     "view": "View",
@@ -68,7 +70,8 @@
     "assignToReview": "Assign to Review",
     "approveReject": "Approve/Reject",
     "createInvitation": "Create Invitation",
-    "reset": "Reset"
+    "reset": "Reset",
+    "approveShort": "OK"
   },
   "type": {
     "single": "Single",
@@ -87,7 +90,8 @@
     "reApproveInvitation": "Re-approve invitation",
     "rejectInvitation": "Reject invitation",
     "viewQrCode": "View QR Code",
-    "deleteInvitation": "Delete invitation"
+    "deleteInvitation": "Delete invitation",
+    "qrShort": "QR"
   },
   "modals": {
     "createTitle": "Create Invitation",
@@ -142,7 +146,10 @@
     "reasonPlaceholder": "Please provide a reason for rejection...",
     "characterCount": "{{count}}/{{max}} characters",
     "approveButton": "Approve Invitation",
-    "rejectButton": "Reject Invitation"
+    "rejectButton": "Reject Invitation",
+    "quickComment": "Quick approval",
+    "detailsApproved": "Approved from details",
+    "detailsReapproved": "Re-approved from details"
   },
   "qr": {
     "title": "QR Code for Invitation",
@@ -155,9 +162,11 @@
     "sendingButton": "Sending...",
     "sentSuccess": "QR code sent successfully to {{email}}!",
     "emailError": "Email Error: {{error}}",
+    "emailDefaultMessage": "Please use this QR code for your visit on {{date}}.",
     "willSendTo": "Will be sent to: {{email}}",
     "noEmailAddress": "No email address available for this visitor",
-    "visitor": "Visitor"
+    "visitor": "Visitor",
+    "imageAlt": "Invitation QR code"
   },
   "confirmBulk": {
     "title": "{{action}} Invitations",
@@ -170,7 +179,8 @@
     "deleteFailed": "Failed to delete invitation.",
     "approveFailed": "Failed to approve invitation.",
     "rejectFailed": "Failed to reject invitation.",
-    "qrFailed": "Failed to load QR code."
+    "qrFailed": "Failed to load QR code.",
+    "createLocationFailed": "Failed to create location. Please try again."
   },
   "unknownVisitor": "Unknown Visitor",
   "unknownHost": "Unknown Host",
@@ -224,6 +234,7 @@
       "startDateTimeHint": "Select both date and time for visit start",
       "endDateTime": "End Date & Time",
       "endDateTimeHint": "Select both date and time for visit end",
+      "dateTimePlaceholder": "YYYY-MM-DDTHH:MM",
       "searchVisitorPlaceholder": "Search for a visitor...",
       "searchGroupVisitorPlaceholder": "Search and add visitors to group...",
       "totalVisitorCountPlaceholder": "Total number of expected visitors"
@@ -237,6 +248,12 @@
     "visitDuration": "Visit Duration: {{hours}} hours",
     "quickTimePresets": "Quick Time Presets:",
     "pastTimeNote": "Past times will automatically use tomorrow's date",
+    "presets": {
+      "morningOneHour": "9:00 AM - 10:00 AM",
+      "lateMorningTwoHours": "10:00 AM - 12:00 PM",
+      "afternoonOneHour": "2:00 PM - 3:00 PM",
+      "afternoonTwoHours": "3:00 PM - 5:00 PM"
+    },
     "timeSlots": {
       "loading": "(Loading...)",
       "noSlots": "No time slots available for the selected date and location. You can still proceed without selecting a time slot.",
@@ -351,7 +368,9 @@
       "newVisitors": "New Visitors",
       "existingVisitors": "Existing Visitors",
       "draftInvitations": "Draft Invitations",
-      "submittedInvitations": "Submitted Invitations"
+      "submittedInvitations": "Submitted Invitations",
+      "validationFailed": "Validation failed: {{details}}",
+      "invalidStructure": "Invalid file structure"
     },
     "email": {
       "title": "Email Template to Host",

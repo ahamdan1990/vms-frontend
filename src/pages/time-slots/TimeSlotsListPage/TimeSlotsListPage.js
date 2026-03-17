@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { usePermissions } from '../../../hooks/usePermissions';
 
 // Icons
@@ -93,6 +94,7 @@ import { extractErrorMessage } from '../../../utils/errorUtils';
  * Time Slots Management Page with comprehensive CRUD operations
  */
 const TimeSlotsListPage = () => {
+  const { t, i18n } = useTranslation('system');
   const dispatch = useDispatch();
   const { user: userPermissions } = usePermissions();
   const toast = useToast();
@@ -183,11 +185,11 @@ const TimeSlotsListPage = () => {
   const handleCreateTimeSlot = async (timeSlotData) => {
     try {
       await dispatch(createTimeSlot(timeSlotData)).unwrap();
-      toast.success('Success', 'Time slot created successfully');
+      toast.success(t('common:alerts.success'), t('timeSlots.createSuccess'));
       dispatch(getTimeSlots(filters)); // Refresh list
     } catch (error) {
       const errorMessage = extractErrorMessage(error);
-      toast.error('Error', `Failed to create time slot: ${errorMessage}`);
+      toast.error(t('common:alerts.error'), t('timeSlots.failedCreate', { error: errorMessage }));
     }
   };
 
@@ -198,11 +200,11 @@ const TimeSlotsListPage = () => {
         id: currentTimeSlot.id, 
         timeSlotData 
       })).unwrap();
-      toast.success('Success', 'Time slot updated successfully');
+      toast.success(t('common:alerts.success'), t('timeSlots.updateSuccess'));
       dispatch(getTimeSlots(filters)); // Refresh list
     } catch (error) {
       const errorMessage = extractErrorMessage(error);
-      toast.error('Error', `Failed to update time slot: ${errorMessage}`);
+      toast.error(t('common:alerts.error'), t('timeSlots.failedUpdate', { error: errorMessage }));
     }
   };
 
@@ -213,12 +215,17 @@ const TimeSlotsListPage = () => {
         id: currentTimeSlot.id, 
         hardDelete 
       })).unwrap();
-      toast.success('Success', `Time slot ${hardDelete ? 'permanently deleted' : 'deactivated'} successfully`);
+      toast.success(
+        t('common:alerts.success'),
+        t('timeSlots.deleteSuccess', {
+          action: hardDelete ? t('timeSlots.deletedPermanently') : t('timeSlots.deactivated')
+        })
+      );
       dispatch(hideDeleteModal());
       dispatch(getTimeSlots(filters)); // Refresh list
     } catch (error) {
       const errorMessage = extractErrorMessage(error);
-      toast.error('Error', `Failed to delete time slot: ${errorMessage}`);
+      toast.error(t('common:alerts.error'), t('timeSlots.failedDelete', { error: errorMessage }));
     }
   };
 
@@ -232,14 +239,14 @@ const TimeSlotsListPage = () => {
           dispatch(deleteTimeSlot({ id, hardDelete: false })).unwrap()
         );
         await Promise.all(promises);
-        toast.success('Success', `${selectedTimeSlots.length} time slots deactivated`);
+        toast.success(t('common:alerts.success'), t('timeSlots.bulkDeactivated', { count: selectedTimeSlots.length }));
       }
       
       dispatch(clearSelections());
       dispatch(getTimeSlots(filters)); // Refresh list
     } catch (error) {
       const errorMessage = extractErrorMessage(error);
-      toast.error('Error', `Bulk action failed: ${errorMessage}`);
+      toast.error(t('common:alerts.error'), t('timeSlots.bulkFailed', { error: errorMessage }));
     } finally {
       setShowBulkConfirm(false);
       setBulkAction('');
@@ -248,16 +255,16 @@ const TimeSlotsListPage = () => {
 
   // Helper function to get day names from active days string
   const getActiveDayNames = useCallback((activeDaysString) => {
-    if (!activeDaysString) return 'None';
-    
+    if (!activeDaysString) return t('timeSlots.daysNone');
+
     const dayNames = {
-      1: 'Monday',
-      2: 'Tuesday', 
-      3: 'Wednesday',
-      4: 'Thursday',
-      5: 'Friday',
-      6: 'Saturday',
-      7: 'Sunday'
+      1: new Intl.DateTimeFormat(i18n.language === 'ar' ? 'ar' : 'en-US', { weekday: 'long' }).format(new Date(Date.UTC(2024, 0, 1))),
+      2: new Intl.DateTimeFormat(i18n.language === 'ar' ? 'ar' : 'en-US', { weekday: 'long' }).format(new Date(Date.UTC(2024, 0, 2))),
+      3: new Intl.DateTimeFormat(i18n.language === 'ar' ? 'ar' : 'en-US', { weekday: 'long' }).format(new Date(Date.UTC(2024, 0, 3))),
+      4: new Intl.DateTimeFormat(i18n.language === 'ar' ? 'ar' : 'en-US', { weekday: 'long' }).format(new Date(Date.UTC(2024, 0, 4))),
+      5: new Intl.DateTimeFormat(i18n.language === 'ar' ? 'ar' : 'en-US', { weekday: 'long' }).format(new Date(Date.UTC(2024, 0, 5))),
+      6: new Intl.DateTimeFormat(i18n.language === 'ar' ? 'ar' : 'en-US', { weekday: 'long' }).format(new Date(Date.UTC(2024, 0, 6))),
+      7: new Intl.DateTimeFormat(i18n.language === 'ar' ? 'ar' : 'en-US', { weekday: 'long' }).format(new Date(Date.UTC(2024, 0, 7)))
     };
     
     try {
@@ -268,13 +275,13 @@ const TimeSlotsListPage = () => {
         .sort((a, b) => a - b)
         .map(day => dayNames[day])
         .filter(Boolean);
-        
-      return days.length > 0 ? days.join(', ') : 'None';
+
+      return days.length > 0 ? days.join(', ') : t('timeSlots.daysNone');
     } catch (error) {
       console.error('Error parsing active days:', error);
-      return 'Invalid format';
+      return t('timeSlots.daysInvalidFormat');
     }
-  }, []);
+  }, [i18n.language, t]);
 
   // Handle check availability
   const handleCheckAvailability = () => {
@@ -316,18 +323,18 @@ const TimeSlotsListPage = () => {
 
   // Location options for filter
   const locationOptions = useMemo(() => [
-    { value: '', label: 'All Locations' },
+    { value: '', label: t('timeSlots.allLocations') },
     ...locations.map(location => ({
       value: location.id.toString(),
       label: location.name
     }))
-  ], [locations]);
+  ], [locations, t]);
 
   // Table columns configuration
   const columns = useMemo(() => [
     {
       key: 'name',
-      header: 'Time Slot',
+      header: t('timeSlots.columns.timeSlot'),
       sortable: true,
       render: (value, timeSlot) => (
         <div>
@@ -346,7 +353,7 @@ const TimeSlotsListPage = () => {
     },
     {
       key: 'timeRange',
-      header: 'Time Range',
+      header: t('timeSlots.columns.timeRange'),
       sortable: true,
       render: (value, timeSlot) => (
         <div className="space-y-1">
@@ -359,32 +366,31 @@ const TimeSlotsListPage = () => {
             </span>
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            Duration: {timeSlotsService.calculateDuration(timeSlot.startTime, timeSlot.endTime)} min
+            {t('timeSlots.duration', { count: timeSlotsService.calculateDuration(timeSlot.startTime, timeSlot.endTime) })}
           </div>
         </div>
       )
     },
     {
       key: 'capacity',
-      header: 'Capacity',
+      header: t('timeSlots.columns.capacity'),
       sortable: true,
       render: (value, timeSlot) => (
         <div className="space-y-2">
           <div className="flex items-center justify-center gap-2">
             <Badge variant="info" size="sm">
-              {timeSlot.maxVisitors} max
+              {t('timeSlots.max', { count: timeSlot.maxVisitors })}
             </Badge>
           </div>
           {timeSlot.bufferMinutes > 0 && (
             <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-              +{timeSlot.bufferMinutes}min buffer
+              {t('timeSlots.buffer', { count: timeSlot.bufferMinutes })}
             </div>
           )}
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
             <div
               className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
               style={{ width: '0%' }}
-              title="Current utilization (live data not implemented)"
             />
           </div>
         </div>
@@ -392,7 +398,7 @@ const TimeSlotsListPage = () => {
     },
     {
       key: 'activeDays',
-      header: 'Active Days',
+      header: t('timeSlots.columns.activeDays'),
       sortable: false,
       render: (value, timeSlot) => (
         <div className="space-y-1">
@@ -409,20 +415,20 @@ const TimeSlotsListPage = () => {
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('timeSlots.columns.status'),
       sortable: true,
       render: (value, timeSlot) => (
         <Badge 
           variant={timeSlot.isActive ? 'success' : 'secondary'}
           size="sm"
         >
-          {timeSlot.isActive ? 'Active' : 'Inactive'}
+          {timeSlot.isActive ? t('timeSlots.active') : t('timeSlots.inactive')}
         </Badge>
       )
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('timeSlots.columns.actions'),
       width: '120px',
       sortable: false,
       render: (value, timeSlot) => (
@@ -430,7 +436,7 @@ const TimeSlotsListPage = () => {
           <button
             onClick={() => handleTimeSlotAction('view', timeSlot)}
             className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
-            title="View details"
+            title={t('common:buttons.view')}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -440,7 +446,7 @@ const TimeSlotsListPage = () => {
           <button
             onClick={() => handleTimeSlotAction('availability', timeSlot)}
             className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 transition-colors"
-            title="Check availability"
+            title={t('timeSlots.checkAvailability')}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -450,7 +456,7 @@ const TimeSlotsListPage = () => {
             <button
               onClick={() => handleTimeSlotAction('edit', timeSlot)}
               className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-              title="Edit time slot"
+              title={t('common:buttons.edit')}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -461,7 +467,7 @@ const TimeSlotsListPage = () => {
             <button
               onClick={() => handleTimeSlotAction('delete', timeSlot)}
               className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
-              title="Delete time slot"
+              title={t('common:buttons.delete')}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -471,14 +477,14 @@ const TimeSlotsListPage = () => {
         </div>
       )
     }
-  ], [selectedTimeSlots, canEdit, canDelete, handleTimeSlotAction]);
+  ], [canEdit, canDelete, handleTimeSlotAction, t]);
   
   if (!canRead) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
         <div className="text-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 max-w-md">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Access Denied</h3>
-          <p className="text-gray-600 dark:text-gray-400">You don't have permission to view time slots.</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">{t('timeSlots.accessDenied')}</h3>
+          <p className="text-gray-600 dark:text-gray-400">{t('timeSlots.accessDeniedDesc')}</p>
         </div>
       </div>
     );
@@ -490,8 +496,8 @@ const TimeSlotsListPage = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Time Slots</h1>
-          <p className="text-gray-600 dark:text-gray-400">Manage time slots for visitor appointments</p>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{t('timeSlots.title')}</h1>
+          <p className="text-gray-600 dark:text-gray-400">{t('timeSlots.subtitle')}</p>
         </div>
         
         <div className="flex gap-3">
@@ -499,7 +505,7 @@ const TimeSlotsListPage = () => {
             variant="outline"
             onClick={() => dispatch(showAvailabilityModal())}
           >
-            Check Availability
+            {t('timeSlots.checkAvailability')}
           </Button>
           
           {canCreate && (
@@ -507,7 +513,7 @@ const TimeSlotsListPage = () => {
               onClick={() => dispatch(showCreateModal())}
               loading={createLoading}
             >
-              Add Time Slot
+              {t('timeSlots.createButton')}
             </Button>
           )}
         </div>
@@ -518,7 +524,7 @@ const TimeSlotsListPage = () => {
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <Input
-              placeholder="Search time slots..."
+              placeholder={t('timeSlots.searchPlaceholder')}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="w-full"
@@ -538,8 +544,8 @@ const TimeSlotsListPage = () => {
               value={filters.activeOnly ? 'true' : 'false'}
               onChange={(e) => handleFilterChange({ activeOnly: e.target.value === 'true' })}
               options={[
-                { value: 'true', label: 'Active Only' },
-                { value: 'false', label: 'All Time Slots' }
+                { value: 'true', label: t('timeSlots.activeOnly') },
+                { value: 'false', label: t('timeSlots.allTimeSlots') }
               ]}
               className="w-36"
             />
@@ -551,7 +557,7 @@ const TimeSlotsListPage = () => {
                 setSearchInput('');
               }}
             >
-              Reset
+              {t('timeSlots.reset')}
             </Button>
           </div>
         </div>
@@ -562,7 +568,9 @@ const TimeSlotsListPage = () => {
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-blue-700 dark:text-blue-200">
-              {selectedTimeSlots.length} time slot{selectedTimeSlots.length !== 1 ? 's' : ''} selected
+              {t('timeSlots.bulkSelected', {
+                count: selectedTimeSlots.length
+              })}
             </span>
             
             <div className="flex gap-2">
@@ -576,7 +584,7 @@ const TimeSlotsListPage = () => {
                   }}
                   className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 >
-                  Deactivate Selected
+                  {t('timeSlots.deactivateSelected')}
                 </Button>
               )}
               
@@ -585,7 +593,7 @@ const TimeSlotsListPage = () => {
                 size="sm"
                 onClick={() => dispatch(clearSelections())}
               >
-                Clear Selection
+                {t('timeSlots.clearSelection')}
               </Button>
             </div>
           </div>
@@ -596,13 +604,13 @@ const TimeSlotsListPage = () => {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         {listError ? (
           <div className="p-6 text-center">
-            <p className="text-red-600">Error loading time slots: {listError}</p>
+            <p className="text-red-600">{t('timeSlots.errorLoading', { error: listError })}</p>
             <Button
               variant="outline"
               onClick={() => dispatch(getTimeSlots(filters))}
               className="mt-4"
             >
-              Retry
+              {t('timeSlots.retry')}
             </Button>
           </div>
         ) : (
@@ -616,7 +624,7 @@ const TimeSlotsListPage = () => {
             onSort={handleSort}
             sortBy={filters.sortBy}
             sortDirection={filters.sortDirection}
-            emptyMessage="No time slots found"
+            emptyMessage={t('timeSlots.emptyMessage')}
           />
         )}
 
@@ -640,7 +648,7 @@ const TimeSlotsListPage = () => {
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => dispatch(hideCreateModal())}
-        title="Create Time Slot"
+        title={t('timeSlots.createTitle')}
         size="xl"
       >
         <TimeSlotForm
@@ -648,7 +656,7 @@ const TimeSlotsListPage = () => {
           onCancel={() => dispatch(hideCreateModal())}
           loading={createLoading}
           error={createError}
-          submitText="Create Time Slot"
+          submitText={t('timeSlots.createTitle')}
         />
       </Modal>
 
@@ -656,7 +664,7 @@ const TimeSlotsListPage = () => {
       <Modal
         isOpen={isEditModalOpen}
         onClose={() => dispatch(hideEditModal())}
-        title="Edit Time Slot"
+        title={t('timeSlots.editTitle')}
         size="xl"
       >
         {currentTimeSlot && (
@@ -666,7 +674,7 @@ const TimeSlotsListPage = () => {
             onCancel={() => dispatch(hideEditModal())}
             loading={updateLoading}
             error={updateError}
-            submitText="Update Time Slot"
+            submitText={t('timeSlots.editTitle')}
           />
         )}
       </Modal>
@@ -676,13 +684,13 @@ const TimeSlotsListPage = () => {
         isOpen={isDeleteModalOpen}
         onClose={() => dispatch(hideDeleteModal())}
         onConfirm={() => handleDeleteTimeSlot(false)}
-        title="Deactivate Time Slot"
+        title={t('timeSlots.deactivateTitle')}
         message={
           currentTimeSlot
-            ? `Are you sure you want to deactivate "${currentTimeSlot.name}"? This will make it unavailable for new appointments but won't affect existing ones.`
-            : 'Are you sure you want to deactivate this time slot?'
+            ? t('timeSlots.deactivateMessage', { name: currentTimeSlot.name })
+            : t('timeSlots.deactivateMessageGeneric')
         }
-        confirmText="Deactivate"
+        confirmText={t('timeSlots.deactivateConfirm')}
         variant="warning"
         loading={deleteLoading}
       />
@@ -691,21 +699,21 @@ const TimeSlotsListPage = () => {
       <Modal
         isOpen={isAvailabilityModalOpen}
         onClose={() => dispatch(hideAvailabilityModal())}
-        title="Check Time Slot Availability"
+        title={t('timeSlots.availabilityTitle')}
         size="lg"
       >
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               type="date"
-              label="Date"
+              label={t('timeSlots.dateLabel')}
               value={availabilityDate}
               onChange={(e) => setAvailabilityDate(e.target.value)}
               min={new Date().toISOString().split('T')[0]}
             />
             
             <Select
-              label="Location"
+              label={t('timeSlots.locationLabel')}
               value={filters.locationId || ''}
               onChange={(e) => handleFilterChange({ locationId: e.target.value || null })}
               options={locationOptions}
@@ -719,13 +727,13 @@ const TimeSlotsListPage = () => {
             disabled={!availabilityDate}
             className="w-full"
           >
-            Check Availability
+            {t('timeSlots.checkButton')}
           </Button>
 
           {/* Available Slots Results */}
           {availableSlotsList && availableSlotsList.length > 0 && (
             <div className="space-y-4">
-              <h4 className="font-medium text-gray-900 dark:text-gray-100">Available Time Slots</h4>
+              <h4 className="font-medium text-gray-900 dark:text-gray-100">{t('timeSlots.availableSlots')}</h4>
               <div className="grid gap-3">
                 {availableSlotsList.map((slot) => (
                   <div
@@ -744,15 +752,15 @@ const TimeSlotsListPage = () => {
                       </div>
                     </div>
                     
-                    <div className="text-right">
+                    <div className="text-end">
                       <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                        {slot.availableSlots} / {slot.maxVisitors} available
+                        {t('timeSlots.availableOf', { available: slot.availableSlots, max: slot.maxVisitors })}
                       </div>
                       <Badge
                         variant={slot.isAvailable ? 'success' : 'error'}
                         size="sm"
                       >
-                        {slot.isAvailable ? 'Available' : 'Full'}
+                        {slot.isAvailable ? t('timeSlots.available') : t('timeSlots.full')}
                       </Badge>
                     </div>
                   </div>
@@ -763,15 +771,15 @@ const TimeSlotsListPage = () => {
 
           {availableSlotsError && (
             <div className="text-center py-4">
-              <p className="text-red-600 dark:text-red-400">Error: {availableSlotsError}</p>
+              <p className="text-red-600 dark:text-red-400">{t('timeSlots.errorLoading', { error: availableSlotsError })}</p>
             </div>
           )}
 
           {!availableSlotsLoading && (!availableSlotsList || availableSlotsList.length === 0) && availabilityDate && (
             <div className="text-center py-8">
               <EmptyState
-                title="No Available Time Slots"
-                description="No time slots are available for the selected date and location."
+                title={t('timeSlots.noAvailableSlots')}
+                description={t('timeSlots.noAvailableDesc')}
               />
             </div>
           )}
@@ -785,21 +793,21 @@ const TimeSlotsListPage = () => {
           setShowViewModal(false);
           setViewingTimeSlot(null);
         }}
-        title="Time Slot Details"
+        title={t('timeSlots.details.title')}
         size="lg"
       >
         {viewingTimeSlot && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('timeSlots.details.name')}</label>
                 <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingTimeSlot.name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('timeSlots.details.status')}</label>
                 <div className="mt-1">
                   <Badge variant={viewingTimeSlot.isActive ? 'success' : 'secondary'} size="sm">
-                    {viewingTimeSlot.isActive ? 'Active' : 'Inactive'}
+                    {viewingTimeSlot.isActive ? t('timeSlots.active') : t('timeSlots.inactive')}
                   </Badge>
                 </div>
               </div>
@@ -807,22 +815,22 @@ const TimeSlotsListPage = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Time Range</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('timeSlots.details.timeRange')}</label>
                 <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
                   {timeSlotsService.formatTimeForDisplay(viewingTimeSlot.startTime)} - {timeSlotsService.formatTimeForDisplay(viewingTimeSlot.endTime)}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Duration: {timeSlotsService.calculateDuration(viewingTimeSlot.startTime, viewingTimeSlot.endTime)} minutes
+                  {t('timeSlots.details.duration', { count: timeSlotsService.calculateDuration(viewingTimeSlot.startTime, viewingTimeSlot.endTime) })}
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Capacity</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('timeSlots.details.capacity')}</label>
                 <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                  {viewingTimeSlot.maxVisitors} visitors maximum
+                  {t('timeSlots.details.maxVisitors', { count: viewingTimeSlot.maxVisitors })}
                 </p>
                 {viewingTimeSlot.bufferMinutes > 0 && (
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Buffer time: {viewingTimeSlot.bufferMinutes} minutes
+                    {t('timeSlots.details.bufferTime', { count: viewingTimeSlot.bufferMinutes })}
                   </p>
                 )}
               </div>
@@ -830,13 +838,13 @@ const TimeSlotsListPage = () => {
             
             {viewingTimeSlot.locationName && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('timeSlots.details.location')}</label>
                 <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingTimeSlot.locationName}</p>
               </div>
             )}
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Active Days</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('timeSlots.details.activeDays')}</label>
               <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
                 {getActiveDayNames(viewingTimeSlot.activeDays)}
               </p>
@@ -844,7 +852,7 @@ const TimeSlotsListPage = () => {
             
             {viewingTimeSlot.displayOrder !== undefined && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Display Order</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('timeSlots.details.displayOrder')}</label>
                 <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">{viewingTimeSlot.displayOrder}</p>
               </div>
             )}
@@ -857,7 +865,7 @@ const TimeSlotsListPage = () => {
                   setViewingTimeSlot(null);
                 }}
               >
-                Close
+                {t('timeSlots.details.close')}
               </Button>
               <Button
                 variant="outline"
@@ -866,7 +874,7 @@ const TimeSlotsListPage = () => {
                   handleTimeSlotAction('availability', viewingTimeSlot);
                 }}
               >
-                Check Availability
+                {t('timeSlots.details.checkAvailability')}
               </Button>
               {canEdit && (
                 <Button
@@ -875,7 +883,7 @@ const TimeSlotsListPage = () => {
                     handleTimeSlotAction('edit', viewingTimeSlot);
                   }}
                 >
-                  Edit
+                  {t('timeSlots.details.edit')}
                 </Button>
               )}
             </div>
@@ -888,9 +896,12 @@ const TimeSlotsListPage = () => {
         isOpen={showBulkConfirm}
         onClose={() => setShowBulkConfirm(false)}
         onConfirm={handleBulkAction}
-        title="Confirm Bulk Action"
-        message={`Are you sure you want to ${bulkAction} ${selectedTimeSlots.length} time slot${selectedTimeSlots.length !== 1 ? 's' : ''}?`}
-        confirmText="Confirm"
+        title={t('timeSlots.bulkConfirmTitle')}
+        message={t('timeSlots.bulkConfirmMessage', {
+          action: bulkAction,
+          count: selectedTimeSlots.length
+        })}
+        confirmText={t('timeSlots.bulkConfirm')}
         variant="warning"
       />
     </div>

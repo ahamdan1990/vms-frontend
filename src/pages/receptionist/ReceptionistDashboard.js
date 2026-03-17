@@ -36,7 +36,6 @@ import NotificationEventHandler from '../../services/signalr/handlers/Notificati
 // Components
 import Card from '../../components/common/Card/Card';
 import Button from '../../components/common/Button/Button';
-import Input from '../../components/common/Input/Input';
 import Badge from '../../components/common/Badge/Badge';
 import Modal from '../../components/common/Modal/Modal';
 import Table from '../../components/common/Table/Table';
@@ -55,18 +54,13 @@ import {
   QrCodeIcon,
   ClockIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon,
   EyeIcon,
   UsersIcon,
   CameraIcon,
   DocumentTextIcon,
   ArrowRightOnRectangleIcon,
   ArrowLeftOnRectangleIcon,
-  PhoneIcon,
-  EnvelopeIcon,
   XCircleIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
   ArrowDownTrayIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
@@ -75,8 +69,6 @@ import {
   ClockIcon as ClockIconSolid
 } from '@heroicons/react/24/solid';
 
-// Utils
-import formatters from '../../utils/formatters';
 import { extractErrorMessage } from '../../utils/errorUtils';
 import {
   createActiveVisitorColumns,
@@ -380,7 +372,7 @@ const ReceptionistDashboard = () => {
       const errorMessage = error.response?.data?.errors?.[0] ||
                           error.response?.data?.message ||
                           error.message ||
-                          'Failed to validate the photo.';
+                          t('receptionist:toasts.photoValidationFailedDefault');
 
       toast.error(
         t('receptionist:toasts.validationFailed'),
@@ -483,7 +475,7 @@ const ReceptionistDashboard = () => {
           const errorMessage = photoError.response?.data?.errors?.[0] ||
                               photoError.response?.data?.message ||
                               photoError.message ||
-                              'Failed to upload the profile photo.';
+                              t('receptionist:toasts.photoUploadFailedDefault');
 
           // Note: "No face detected" errors should NOT happen here since we validate
           // the photo before accepting it. This is just a safety net.
@@ -501,8 +493,10 @@ const ReceptionistDashboard = () => {
         try {
           for (const doc of walkInData.scannedDocuments) {
             await visitorDocumentService.uploadVisitorDocument(visitor.id, doc.file || doc.blob, {
-              description: `Walk-in ID document - ${doc.documentType || 'ID'}`,
-              documentType: doc.documentType || 'ID',
+              description: t('receptionist:walkIn.walkInDocumentDescription', {
+                type: doc.documentType || t('receptionist:walkIn.defaultDocumentType')
+              }),
+              documentType: doc.documentType || t('receptionist:walkIn.defaultDocumentType'),
               isSensitive: true,
               isRequired: false
             });
@@ -530,21 +524,23 @@ const ReceptionistDashboard = () => {
         hostId,
         visitPurposeId: visitPurposeId || null,
         locationId: locationId || null,
-        subject: `Walk-in Visit - ${visitData.visitPurposeName || 'General'}`,
+        subject: t('receptionist:walkIn.walkInSubject', {
+          purpose: visitData.visitPurposeName || t('receptionist:walkIn.defaultPurpose')
+        }),
         type: 'walkin',  // Identify walk-ins with distinct type
         expectedVisitorCount: 1,
         scheduledStartTime: new Date().toISOString(),
         scheduledEndTime: new Date(Date.now() + visitData.duration * 60 * 1000).toISOString(),
         requiresApproval: false, // Walk-ins bypass approval
         submitForApproval: false,
-        notes: visitData.notes || 'Walk-in visitor - registered by receptionist'
+        notes: visitData.notes || t('receptionist:systemNotes.walkInRegistered')
       });
       
       // Step 4: Auto-approve (receptionist has permission)
       try {
         await invitationService.approveInvitation(
           invitation.id,
-          'Walk-in visitor - auto-approved by receptionist'
+          t('receptionist:systemNotes.walkInAutoApproved')
         );
       } catch (approvalError) {
         console.warn('Could not auto-approve walk-in:', approvalError);
@@ -556,7 +552,7 @@ const ReceptionistDashboard = () => {
       try {
         checkInResult = await dispatch(checkInInvitation({
           invitationReference: invitation.invitationNumber || invitation.id.toString(),
-          notes: 'Walk-in visitor - immediate check-in by receptionist'
+          notes: t('receptionist:systemNotes.walkInImmediateCheckIn')
         })).unwrap();
       } catch (checkInError) {
         console.error('Check-in failed:', checkInError);
@@ -634,12 +630,12 @@ const ReceptionistDashboard = () => {
       try {
         const result = await dispatch(checkInInvitation({
           invitationReference: qrData,
-          notes: 'QR Code Check-in by receptionist'
+          notes: t('receptionist:systemNotes.qrCheckIn')
         })).unwrap();
 
         toast.success(
           t('receptionist:toasts.checkInSuccessful'),
-          t('receptionist:toasts.checkInSuccessDesc', { name: result?.visitor?.fullName || 'Visitor' }),
+          t('receptionist:toasts.checkInSuccessDesc', { name: result?.visitor?.fullName || t('receptionist:activeVisitors.visitorLabel') }),
           { duration: 5000 }
         );
 
@@ -658,7 +654,7 @@ const ReceptionistDashboard = () => {
         } catch (fetchError) {
           setInvitationDetailsData(null);
           setInvitationDetailsError({
-            message: errorMessage || 'Check-in failed',
+            message: errorMessage || t('receptionist:scanner.checkInFailed'),
             details: getErrorDetails(errorMessage)
           });
         }
@@ -678,8 +674,8 @@ const ReceptionistDashboard = () => {
           setShowInvitationDetailsModal(true);
         } else {
           setInvitationDetailsError({
-            message: 'Invitation Not Found',
-            details: 'The scanned QR code does not match any invitation in the system.'
+            message: t('receptionist:invitationModal.notFoundTitle'),
+            details: t('receptionist:invitationModal.notFoundDesc')
           });
           setShowInvitationDetailsModal(true);
         }
@@ -689,12 +685,12 @@ const ReceptionistDashboard = () => {
 
         if (error.response?.status === 404 || errorMessage?.includes('not found')) {
           setInvitationDetailsError({
-            message: `Invitation with reference '${qrData}' not found.`,
-            details: 'The scanned QR code does not match any invitation in the system.'
+            message: t('receptionist:scanner.invitationReferenceNotFound', { reference: qrData }),
+            details: t('receptionist:invitationModal.notFoundDesc')
           });
         } else {
           setInvitationDetailsError({
-            message: errorMessage || 'Failed to load invitation details',
+            message: errorMessage || t('receptionist:scanner.failedLoadInvitationDetails'),
             details: getErrorDetails(errorMessage)
           });
         }
@@ -710,15 +706,15 @@ const ReceptionistDashboard = () => {
     if (!errorMessage) return null;
 
     if (errorMessage.includes('too early') || errorMessage.includes('scheduled for')) {
-      return 'This invitation is scheduled for a future time. Check-in is allowed starting 2 hours before the scheduled time.';
+      return t('receptionist:scanner.errorDetails.tooEarly');
     } else if (errorMessage.includes('expired') || errorMessage.includes('scheduled to end')) {
-      return 'This invitation has expired and can no longer be used for check-in.';
+      return t('receptionist:scanner.errorDetails.expired');
     } else if (errorMessage.includes('not found') || errorMessage.includes('404')) {
-      return 'The scanned QR code does not match any invitation in the system.';
+      return t('receptionist:scanner.errorDetails.notFound');
     } else if (errorMessage.includes('Only approved invitations') || errorMessage.includes('not been approved') || errorMessage.includes('not approved')) {
-      return 'This invitation must be approved before check-in is allowed.';
+      return t('receptionist:scanner.errorDetails.notApproved');
     } else if (errorMessage.includes('already checked in')) {
-      return 'This visitor has already been checked in.';
+      return t('receptionist:scanner.errorDetails.alreadyCheckedIn');
     }
     return null;
   };
@@ -728,7 +724,7 @@ const ReceptionistDashboard = () => {
     try {
       const result = await dispatch(checkInInvitation({
         invitationReference,
-        notes: notes || 'Manual confirmation check-in by receptionist'
+        notes: notes || t('receptionist:systemNotes.manualConfirmationCheckIn')
       })).unwrap();
 
       setShowInvitationDetailsModal(false);
@@ -737,7 +733,7 @@ const ReceptionistDashboard = () => {
 
       toast.success(
         t('receptionist:toasts.checkInSuccessful'),
-        t('receptionist:toasts.checkInSuccessDesc', { name: result?.visitor?.fullName || 'Visitor' }),
+        t('receptionist:toasts.checkInSuccessDesc', { name: result?.visitor?.fullName || t('receptionist:activeVisitors.visitorLabel') }),
         { duration: 5000 }
       );
 
@@ -755,10 +751,10 @@ const ReceptionistDashboard = () => {
     try {
       await dispatch(checkInInvitation({
         invitationReference: invitation.invitationNumber || invitation.id?.toString(),
-        notes: 'Quick check-in by receptionist'
+        notes: t('receptionist:systemNotes.quickCheckIn')
       })).unwrap();
 
-      toast.success(t('receptionist:toasts.checkInSuccessful'), t('receptionist:toasts.checkInSuccessDesc', { name: 'Visitor' }));
+      toast.success(t('receptionist:toasts.checkInSuccessful'), t('receptionist:toasts.checkInSuccessDesc', { name: t('receptionist:activeVisitors.visitorLabel') }));
       loadDashboardData();
       dispatch(getActiveInvitations());
     } catch (error) {
@@ -771,7 +767,7 @@ const ReceptionistDashboard = () => {
     try {
       await dispatch(checkOutInvitation({
         id,
-        notes: 'Manual check-out by receptionist'
+        notes: t('receptionist:systemNotes.manualCheckOut')
       })).unwrap();
 
       toast.success(t('receptionist:toasts.checkOutSuccessful'), t('receptionist:toasts.checkOutSuccessDesc'));
@@ -802,10 +798,10 @@ const ReceptionistDashboard = () => {
             await visitorDocumentService.uploadVisitorDocument(
               selectedVisitorForDocs.id,
               file,
-              `Scanned Document ${Date.now()}`,
+              t('receptionist:documents.scannedDocumentName', { id: Date.now() }),
               doc.type || 'Other',
               {
-                description: `Document scanned by receptionist on ${doc.timestamp.toLocaleString()}`,
+                description: t('receptionist:documents.scannedByReceptionistOn', { time: doc.timestamp.toLocaleString() }),
                 isSensitive: false,
                 isRequired: false,
                 tags: 'scanned,receptionist'
@@ -870,7 +866,7 @@ const ReceptionistDashboard = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = doc.originalFileName || doc.fileName || 'document';
+      link.download = doc.originalFileName || doc.fileName || t('receptionist:documents.defaultDownloadName');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -881,6 +877,7 @@ const ReceptionistDashboard = () => {
   };
 
   const activeVisitorsColumns = createActiveVisitorColumns({
+    t,
     onViewDetails: (invitation) => handleToggleVisitorDetails(invitation.visitor?.id),
     onQuickCheckIn: handleQuickCheckIn,
     onQuickCheckOut: (invitation) => handleCheckOut(invitation.id),
@@ -957,7 +954,7 @@ const ReceptionistDashboard = () => {
               <ClockIconSolid className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Expected Visitors</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('receptionist:stats.expectedVisitors')}</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{todayStats.expectedVisitors}</p>
             </div>
           </div>
@@ -975,7 +972,7 @@ const ReceptionistDashboard = () => {
               <CheckCircleIconSolid className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Checked In</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('receptionist:stats.checkedIn')}</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{todayStats.checkedIn}</p>
             </div>
           </div>
@@ -993,7 +990,7 @@ const ReceptionistDashboard = () => {
               <UsersIcon className="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Check-out</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('receptionist:stats.pendingCheckOut')}</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{todayStats.pendingCheckOut}</p>
             </div>
           </div>
@@ -1011,7 +1008,7 @@ const ReceptionistDashboard = () => {
               <UserPlusIcon className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Walk-ins Today</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('receptionist:stats.walkInsToday')}</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{todayStats.walkIns}</p>
             </div>
           </div>
@@ -1029,7 +1026,7 @@ const ReceptionistDashboard = () => {
               <ClockIcon className={`w-6 h-6 ${todayStats.overdueVisitors > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-300'}`} />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Overdue Visitors</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('receptionist:stats.overdueVisitors')}</p>
               <p className={`text-2xl font-bold ${todayStats.overdueVisitors > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
                 {todayStats.overdueVisitors}
               </p>
@@ -1045,11 +1042,11 @@ const ReceptionistDashboard = () => {
     <div className="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
       <nav className="-mb-px flex min-w-max gap-4">
         {[
-          { id: 'overview', label: 'Overview', icon: EyeIcon },
-          { id: 'scanner', label: 'QR Scanner', icon: QrCodeIcon },
-          { id: 'walk-in', label: 'Walk-in Registration', icon: UserPlusIcon },
-          { id: 'active', label: `Active Visitors (${todayStats.pendingCheckOut})`, icon: UsersIcon },
-          { id: 'documents', label: 'Documents', icon: DocumentTextIcon }
+          { id: 'overview', label: t('receptionist:tabs.overview'), icon: EyeIcon },
+          { id: 'scanner', label: t('receptionist:tabs.scanner'), icon: QrCodeIcon },
+          { id: 'walk-in', label: t('receptionist:tabs.walkIn'), icon: UserPlusIcon },
+          { id: 'active', label: t('receptionist:tabs.active', { count: todayStats.pendingCheckOut }), icon: UsersIcon },
+          { id: 'documents', label: t('receptionist:tabs.documents'), icon: DocumentTextIcon }
         ].map(tab => (
           <button
             key={tab.id}
@@ -1075,8 +1072,8 @@ const ReceptionistDashboard = () => {
       {/* Header */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Receptionist Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400">Manage visitor check-ins, walk-in registrations, and daily operations</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('receptionist:dashboard.title')}</h1>
+          <p className="text-gray-600 dark:text-gray-400">{t('receptionist:dashboard.subtitle')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Button
@@ -1087,7 +1084,7 @@ const ReceptionistDashboard = () => {
             }}
             icon={<ArrowRightOnRectangleIcon className="w-4 h-4" />}
           >
-            Refresh
+            {t('receptionist:dashboard.refresh')}
           </Button>
           {canExportInBuildingReport && (
             <Button
@@ -1095,7 +1092,7 @@ const ReceptionistDashboard = () => {
               loading={exportingReport}
               icon={<ArrowDownTrayIcon className="w-4 h-4" />}
             >
-              Export Who's In Building
+              {t('receptionist:dashboard.exportInBuilding')}
             </Button>
           )}
         </div>
@@ -1118,35 +1115,35 @@ const ReceptionistDashboard = () => {
             className="space-y-6"
           >
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+              <h2 className="text-xl font-semibold mb-4">{t('receptionist:overview.quickActions')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Button
                   onClick={() => setActiveTab('scanner')}
                   icon={<QrCodeIcon className="w-5 h-5" />}
                   className="h-20"
                 >
-                  Scan QR Code
+                  {t('receptionist:overview.scanQrCode')}
                 </Button>
                 <Button
                   onClick={() => setActiveTab('walk-in')}
                   icon={<UserPlusIcon className="w-5 h-5" />}
                   className="h-20"
                 >
-                  Register Walk-in
+                  {t('receptionist:overview.registerWalkIn')}
                 </Button>
                 <Button
                   onClick={() => setActiveTab('documents')}
                   icon={<DocumentTextIcon className="w-5 h-5" />}
                   className="h-20"
                 >
-                  Scan Documents
+                  {t('receptionist:overview.scanDocuments')}
                 </Button>
                 <Button
                   onClick={() => setActiveTab('active')}
                   icon={<UsersIcon className="w-5 h-5" />}
                   className="h-20"
                 >
-                  View Active Visitors
+                  {t('receptionist:overview.viewActiveVisitors')}
                 </Button>
               </div>
             </Card>
@@ -1163,9 +1160,9 @@ const ReceptionistDashboard = () => {
             <Card className="p-6">
               <div className="text-center py-12">
                 <QrCodeIcon className="w-24 h-24 text-gray-400 dark:text-gray-500 mx-auto mb-6" />
-                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">QR Code Scanner</h2>
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">{t('receptionist:scanner.title')}</h2>
                 <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-md mx-auto">
-                  Scan visitor QR codes for quick check-in. Click the button below to open the scanner.
+                  {t('receptionist:scanner.description')}
                 </p>
 
                 {/* Auto/Manual Check-in Mode Toggle */}
@@ -1178,7 +1175,7 @@ const ReceptionistDashboard = () => {
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                     <span className="text-sm text-gray-700 dark:text-gray-300">
-                      Auto Check-in Mode
+                      {t('receptionist:scanner.autoCheckInMode')}
                     </span>
                   </label>
                 </div>
@@ -1189,7 +1186,7 @@ const ReceptionistDashboard = () => {
                   size="lg"
                   className="mx-auto"
                 >
-                  Open QR Scanner
+                  {t('receptionist:scanner.openScanner')}
                 </Button>
 
                 {scanError && (
@@ -1199,7 +1196,7 @@ const ReceptionistDashboard = () => {
                 )}
                 {scanResult && (
                   <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md max-w-md mx-auto">
-                    <p className="text-green-600 dark:text-green-300">Check-in successful!</p>
+                    <p className="text-green-600 dark:text-green-300">{t('receptionist:scanner.checkInSuccessful')}</p>
                   </div>
                 )}
               </div>
@@ -1215,13 +1212,13 @@ const ReceptionistDashboard = () => {
             exit={{ opacity: 0, y: -20 }}
           >
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Walk-in Visitor Registration</h2>
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">{t('receptionist:walkIn.sectionTitle')}</h2>
 
               {showCameraCapture ? (
                 <div>
                   <div className="mb-4">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Capture Visitor Photo</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Take a photo of the visitor for their profile</p>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('receptionist:walkIn.captureTitle')}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{t('receptionist:walkIn.captureSubtitle')}</p>
                   </div>
                   <CameraCapture
                     onPhotoCapture={handlePhotoCapture}
@@ -1235,8 +1232,8 @@ const ReceptionistDashboard = () => {
               ) : !showWalkInForm ? (
                 <div className="text-center py-8">
                   <UserPlusIcon className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">Register a Walk-in Visitor</h3>
-                  <p className="text-gray-500 dark:text-gray-400 mb-6">Quick 3-step registration for unscheduled visitors</p>
+                  <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">{t('receptionist:walkIn.registerTitle')}</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-6">{t('receptionist:walkIn.registerSubtitle')}</p>
 
                   {/* Walk-in registration options */}
                   <div className="space-y-4 max-w-md mx-auto">
@@ -1246,7 +1243,7 @@ const ReceptionistDashboard = () => {
                       icon={<CameraIcon className="w-5 h-5" />}
                       className="w-full"
                     >
-                      Start with Photo Capture
+                      {t('receptionist:walkIn.startWithPhoto')}
                     </Button>
 
                     {/* Skip photo and go to form */}
@@ -1256,7 +1253,7 @@ const ReceptionistDashboard = () => {
                       icon={<DocumentTextIcon className="w-5 h-5" />}
                       className="w-full"
                     >
-                      Skip Photo - Start Registration
+                      {t('receptionist:walkIn.skipPhoto')}
                     </Button>
                   </div>
 
@@ -1268,13 +1265,13 @@ const ReceptionistDashboard = () => {
                           <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-700 ring-2 ring-white shadow">
                             <img
                               src={capturedPhoto.url}
-                              alt="Captured visitor photo"
+                              alt={t('receptionist:walkIn.capturedPhotoAlt')}
                               className="w-full h-full object-cover"
                             />
                           </div>
-                          <div className="text-left">
-                            <p className="text-sm font-semibold text-green-800 dark:text-green-300">Photo captured successfully!</p>
-                            <p className="text-xs text-green-600 dark:text-green-400">Start the registration form when you are ready.</p>
+                          <div className="text-start">
+                            <p className="text-sm font-semibold text-green-800 dark:text-green-300">{t('receptionist:walkIn.photoCapturedSuccess')}</p>
+                            <p className="text-xs text-green-600 dark:text-green-400">{t('receptionist:walkIn.photoCapturedSubtitle')}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -1283,7 +1280,7 @@ const ReceptionistDashboard = () => {
                             onClick={handleStartRegistrationWithPhoto}
                             icon={<DocumentTextIcon className="w-4 h-4" />}
                           >
-                            Start Registration
+                            {t('receptionist:walkIn.startRegistration')}
                           </Button>
                           <Button
                             size="sm"
@@ -1291,7 +1288,7 @@ const ReceptionistDashboard = () => {
                             onClick={() => setCapturedPhoto(null)}
                             icon={<XCircleIcon className="w-4 h-4" />}
                           >
-                            Remove
+                            {t('receptionist:walkIn.remove')}
                           </Button>
                         </div>
                       </div>
@@ -1338,16 +1335,16 @@ const ReceptionistDashboard = () => {
                     <Table
                       data={activeInvitationsFromRedux}
                       columns={activeVisitorsColumns}
-                      emptyMessage="No active visitors"
+                      emptyMessage={t('receptionist:activeVisitors.noActiveVisitorsTable')}
                     />
                   </div>
                 )
               ) : (
                 <div className="text-center py-12">
                   <UserIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No active visitors</h3>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">{t('receptionist:activeVisitors.noActiveVisitors')}</h3>
                   <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Visitors will appear here when they check in.
+                    {t('receptionist:activeVisitors.noActiveVisitorsDesc')}
                   </p>
                 </div>
               )}
@@ -1358,7 +1355,7 @@ const ReceptionistDashboard = () => {
               <Modal
                 isOpen={!!expandedVisitorId}
                 onClose={() => setExpandedVisitorId(null)}
-                title="Visitor Documents"
+                title={t('receptionist:documents.visitorDocuments')}
                 size="lg"
               >
                 <div className="p-4">
@@ -1389,10 +1386,10 @@ const ReceptionistDashboard = () => {
                             </div>
                             <div className="flex items-center gap-1">
                               {doc.isSensitive && (
-                                <Badge variant="warning" size="xs">Sensitive</Badge>
+                                <Badge variant="warning" size="xs">{t('receptionist:documents.sensitive')}</Badge>
                               )}
                               {doc.isRequired && (
-                                <Badge variant="info" size="xs">Required</Badge>
+                                <Badge variant="info" size="xs">{t('receptionist:documents.required')}</Badge>
                               )}
                             </div>
                           </div>
@@ -1402,14 +1399,14 @@ const ReceptionistDashboard = () => {
                               className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
                             >
                               <EyeIcon className="w-3.5 h-3.5" />
-                              <span>Preview</span>
+                              <span>{t('receptionist:documents.preview')}</span>
                             </button>
                             <button
                               onClick={() => handleDownloadDocument(expandedVisitorId, doc)}
                               className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                             >
                               <ArrowDownTrayIcon className="w-3.5 h-3.5" />
-                              <span>Download</span>
+                              <span>{t('receptionist:documents.download')}</span>
                             </button>
                           </div>
                         </div>
@@ -1418,7 +1415,7 @@ const ReceptionistDashboard = () => {
                   ) : (
                     <div className="text-center py-8">
                       <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">No documents available for this visitor.</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{t('receptionist:documents.noDocuments')}</p>
                     </div>
                   )}
                 </div>
@@ -1435,16 +1432,16 @@ const ReceptionistDashboard = () => {
             exit={{ opacity: 0, y: -20 }}
           >
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Document Scanner</h2>
+              <h2 className="text-xl font-semibold mb-4">{t('receptionist:documents.sectionTitle')}</h2>
               
               {showDocumentScanner ? (
                 <div>
                   <div className="mb-4">
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Scan Visitor Documents</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">{t('receptionist:documents.scanScannerTitle')}</h3>
                     <p className="text-sm text-gray-600">
                       {selectedVisitorForDocs 
-                        ? `Scanning documents for ${selectedVisitorForDocs.fullName}` 
-                        : 'Scan documents that will be saved locally'
+                        ? t('receptionist:documents.scanningFor', { name: selectedVisitorForDocs.fullName })
+                        : t('receptionist:documents.scanningLocal')
                       }
                     </p>
                   </div>
@@ -1460,9 +1457,9 @@ const ReceptionistDashboard = () => {
               ) : (
                 <div className="text-center py-8">
                   <DocumentTextIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-700 mb-2">Scan Visitor Documents</h3>
+                  <h3 className="text-lg font-medium text-gray-700 mb-2">{t('receptionist:documents.scanTitle')}</h3>
                   <p className="text-gray-500 mb-6">
-                    Use your device camera to scan visitor documents like IDs, passports, or other required paperwork
+                    {t('receptionist:documents.scanSubtitle')}
                   </p>
                   
                   <div className="space-y-4 max-w-md mx-auto">
@@ -1471,13 +1468,19 @@ const ReceptionistDashboard = () => {
                       icon={<DocumentTextIcon className="w-5 h-5" />}
                       className="w-full"
                     >
-                      Start Document Scanning
+                      {t('receptionist:documents.startScanning')}
                     </Button>
                     
                     <div className="text-sm text-gray-600">
-                      <p className="mb-2"><strong>Supported document types:</strong></p>
+                      <p className="mb-2"><strong>{t('receptionist:documents.supportedTypes')}</strong></p>
                       <div className="flex flex-wrap gap-2 justify-center">
-                        {['ID Cards', 'Passports', 'Visas', 'Permits', 'Certificates'].map(type => (
+                        {[
+                          t('receptionist:documents.types.idCards'),
+                          t('receptionist:documents.types.passports'),
+                          t('receptionist:documents.types.visas'),
+                          t('receptionist:documents.types.permits'),
+                          t('receptionist:documents.types.certificates')
+                        ].map(type => (
                           <Badge key={type} color="gray" size="sm">{type}</Badge>
                         ))}
                       </div>
@@ -1488,21 +1491,21 @@ const ReceptionistDashboard = () => {
                   {scannedDocuments.length > 0 && (
                     <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-md">
                       <h4 className="font-medium text-blue-900 mb-2">
-                        Recent Scans ({scannedDocuments.length})
+                        {t('receptionist:documents.recentScans', { count: scannedDocuments.length })}
                       </h4>
                       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                         {scannedDocuments.slice(0, 6).map((doc, index) => (
                           <div key={doc.id} className="relative">
                             <img 
                               src={doc.url} 
-                              alt={`Scan ${index + 1}`}
+                              alt={t('receptionist:documents.scanAlt', { index: index + 1 })}
                               className="w-full h-16 object-cover rounded border cursor-pointer hover:opacity-75"
                               onClick={() => window.open(doc.url, '_blank')}
                             />
                             <Badge 
                               color="blue" 
                               size="xs" 
-                              className="absolute bottom-0 right-0 transform translate-x-1 translate-y-1"
+                              className="absolute bottom-0 end-0 transform translate-x-1 translate-y-1"
                             >
                               {index + 1}
                             </Badge>
@@ -1511,7 +1514,7 @@ const ReceptionistDashboard = () => {
                       </div>
                       {scannedDocuments.length > 6 && (
                         <p className="text-xs text-blue-600 mt-2">
-                          +{scannedDocuments.length - 6} more documents
+                          {t('receptionist:documents.moreDocuments', { count: scannedDocuments.length - 6 })}
                         </p>
                       )}
                     </div>
@@ -1528,12 +1531,12 @@ const ReceptionistDashboard = () => {
         <Modal
           isOpen={showScannerModal}
           onClose={() => setShowScannerModal(false)}
-          title="Scan QR Code"
+          title={t('receptionist:scanner.modalTitle')}
           size="lg"
         >
           <div className="text-center">
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              Point your camera at the visitor's QR code
+              {t('receptionist:scanner.modalDescription')}
             </p>
             <QrCodeScanner
               key={showScannerModal ? 'scanner-open' : 'scanner-closed'}

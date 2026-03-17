@@ -26,6 +26,8 @@
     "clear": "Clear",
     "dismiss": "Dismiss",
     "reApprove": "Re-approve",
+    "retry": "Retry",
+    "select": "Select",
     "sending": "Sending...",
     "loading": "Loading..."
   },
@@ -41,7 +43,9 @@
     "completed": "Completed",
     "inactive": "Inactive",
     "pending": "Pending",
-    "locked": "Locked"
+    "locked": "Locked",
+    "yes": "Yes",
+    "no": "No"
   },
   "labels": {
     "name": "Name",
@@ -107,6 +111,15 @@
     "noResults": "No results found",
     "noRecords": "No records found"
   },
+  "autocomplete": {
+    "companyPlaceholder": "Search for a company...",
+    "searching": "Searching...",
+    "verified": "Verified",
+    "code": "Code",
+    "contact": "Contact",
+    "noCompaniesFound": "No companies found for \"{{term}}\"",
+    "createCompany": "Create new company"
+  },
   "alerts": {
     "title": "Alert",
     "success": "Success",
@@ -114,6 +127,14 @@
     "warning": "Warning",
     "info": "Information"
   },
+  "accessDenied": {
+    "title": "Access Denied"
+  },
+  "statuses": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "na": "N/A",
   "footer": {
     "copyright": "© {{year}} Visitor Management System. All rights reserved.",
     "copyrightSal": "© {{year}} Visitor Management System. All rights reserved for Security Engineering SAL.",

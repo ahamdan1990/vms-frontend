@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 import { usePermissions } from '../../../hooks/usePermissions';
 
 // Redux actions and selectors
@@ -77,7 +77,7 @@ import { extractErrorMessage } from '../../../utils/errorUtils';
  */
 const VisitPurposesListPage = () => {
   const dispatch = useDispatch();
-  const { user: currentUser } = useAuth();
+  const { t } = useTranslation('system');
   const { hasPermission } = usePermissions();
 
   // Local state
@@ -239,7 +239,7 @@ const VisitPurposesListPage = () => {
     },
     {
       key: 'name',
-      header: 'Purpose Name',
+      header: t('visitPurposes.columns.purposeName'),
       sortable: true,
       render: (value, purpose) => (
         <div>
@@ -252,7 +252,7 @@ const VisitPurposesListPage = () => {
     },
     {
       key: 'requirements',
-      header: 'Requirements',
+      header: t('visitPurposes.columns.requirements'),
       sortable: false,
       render: (value, purpose) => (
         <div className="space-y-1">
@@ -261,13 +261,13 @@ const VisitPurposesListPage = () => {
               variant={purpose.requiresApproval ? 'warning' : 'success'}
               size="sm"
             >
-              {purpose.requiresApproval ? 'Approval Required' : 'No Approval'}
+              {purpose.requiresApproval ? t('visitPurposes.approvalRequired') : t('visitPurposes.noApproval')}
             </Badge>
           </div>
           {purpose.requiresEscort && (
             <div>
               <Badge variant="info" size="sm">
-                Escort Required
+                {t('visitPurposes.escortRequired')}
               </Badge>
             </div>
           )}
@@ -276,16 +276,16 @@ const VisitPurposesListPage = () => {
     },
     {
       key: 'usage',
-      header: 'Usage',
+      header: t('visitPurposes.columns.usage'),
       sortable: true,
       render: (value, purpose) => (
         <div className="space-y-1">
           <div className="text-sm font-medium text-gray-900 dark:text-gray-300">
-            {purpose.usageCount || 0} invitations
+            {t('visitPurposes.invitations', { count: purpose.usageCount || 0 })}
           </div>
           {purpose.lastUsed && (
             <div className="text-sm text-gray-500">
-              Last used: {formatters.relativeTime(purpose.lastUsed)}
+              {t('visitPurposes.lastUsed', { time: formatters.relativeTime(purpose.lastUsed) })}
             </div>
           )}
         </div>
@@ -293,20 +293,20 @@ const VisitPurposesListPage = () => {
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('visitPurposes.columns.status'),
       sortable: true,
       render: (value, purpose) => (
         <Badge 
           variant={purpose.isActive ? 'success' : 'secondary'}
           size="sm"
         >
-          {purpose.isActive ? 'Active' : 'Inactive'}
+          {purpose.isActive ? t('visitPurposes.active') : t('visitPurposes.inactive')}
         </Badge>
       )
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('visitPurposes.columns.actions'),
       width: '120px',
       sortable: false,
       render: (value, purpose) => (
@@ -314,7 +314,7 @@ const VisitPurposesListPage = () => {
           <button
             onClick={() => handlePurposeAction('view', purpose)}
             className="text-gray-600 hover:text-gray-900 transition-colors"
-            title="View details"
+            title={t('common:buttons.view')}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -325,7 +325,7 @@ const VisitPurposesListPage = () => {
             <button
               onClick={() => handlePurposeAction('edit', purpose)}
               className="text-blue-600 hover:text-blue-900 transition-colors"
-              title="Edit purpose"
+              title={t('common:buttons.edit')}
             >
               <PencilIcon className="w-4 h-4" />
             </button>
@@ -334,7 +334,7 @@ const VisitPurposesListPage = () => {
             <button
               onClick={() => handlePurposeAction('delete', purpose)}
               className="text-red-600 hover:text-red-900 transition-colors"
-              title="Delete purpose"
+              title={t('common:buttons.delete')}
             >
               <TrashIcon className="w-4 h-4" />
             </button>
@@ -348,9 +348,9 @@ const VisitPurposesListPage = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Visit Purposes</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('visitPurposes.title')}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Manage visit purpose categories for invitation workflows
+            {t('visitPurposes.subtitle')}
           </p>
         </div>
         <div className="mt-4 sm:mt-0 flex gap-3">
@@ -360,7 +360,7 @@ const VisitPurposesListPage = () => {
               loading={createLoading}
               icon={<PlusIcon className="w-5 h-5" />}
             >
-              Add Purpose
+              {t('visitPurposes.createButton')}
             </Button>
           )}
         </div>
@@ -378,7 +378,7 @@ const VisitPurposesListPage = () => {
               </div>
               <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Total</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">{t('visitPurposes.statTotal')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.total}</dd>
                 </dl>
               </div>
@@ -394,7 +394,7 @@ const VisitPurposesListPage = () => {
               </div>
               <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Active</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">{t('visitPurposes.statActive')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.active}</dd>
                 </dl>
               </div>
@@ -410,7 +410,7 @@ const VisitPurposesListPage = () => {
               </div>
               <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Inactive</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">{t('visitPurposes.statInactive')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.inactive}</dd>
                 </dl>
               </div>
@@ -426,7 +426,7 @@ const VisitPurposesListPage = () => {
               </div>
               <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">Approval Required</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">{t('visitPurposes.statApprovalRequired')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.requiresApproval}</dd>
                 </dl>
               </div>
@@ -442,7 +442,7 @@ const VisitPurposesListPage = () => {
               </div>
               <div className="ms-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">No Approval</dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate dark:text-gray-400">{t('visitPurposes.statNoApproval')}</dt>
                   <dd className="text-lg font-medium text-gray-900 dark:text-gray-300">{stats.noApprovalRequired}</dd>
                 </dl>
               </div>
@@ -456,10 +456,10 @@ const VisitPurposesListPage = () => {
           <div className="flex-1">
             <Input
               type="text"
-              placeholder="Search visit purposes..."
+              placeholder={t('visitPurposes.searchPlaceholder')}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              icon={<MagnifyingGlassIcon className="w-5 h-5" />}
+              leftIcon={<MagnifyingGlassIcon className="w-5 h-5" />}
             />
           </div>
           
@@ -469,7 +469,7 @@ const VisitPurposesListPage = () => {
               onClick={() => setShowFilters(!showFilters)}
               icon={<FunnelIcon className="w-5 h-5" />}
             >
-              Filters
+              {t('visitPurposes.filters')}
             </Button>
             
             {(filters.requiresApproval !== null || filters.includeInactive || filters.searchTerm) && (
@@ -477,7 +477,7 @@ const VisitPurposesListPage = () => {
                 variant="ghost"
                 onClick={handleResetFilters}
               >
-                Clear Filters
+                {t('visitPurposes.clearFilters')}
               </Button>
             )}
           </div>
@@ -495,7 +495,7 @@ const VisitPurposesListPage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 ">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
-                    Approval Requirement
+                    {t('visitPurposes.approvalRequirement')}
                   </label>
                   <select
                     value={filters.requiresApproval === null ? '' : filters.requiresApproval.toString()}
@@ -505,9 +505,9 @@ const VisitPurposesListPage = () => {
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">All</option>
-                    <option value="true">Required</option>
-                    <option value="false">Not Required</option>
+                    <option value="">{t('visitPurposes.all')}</option>
+                    <option value="true">{t('visitPurposes.required')}</option>
+                    <option value="false">{t('visitPurposes.notRequired')}</option>
                   </select>
                 </div>
 
@@ -520,7 +520,7 @@ const VisitPurposesListPage = () => {
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <label htmlFor="includeInactive" className="ms-2 block text-sm text-gray-700 dark:text-gray-300">
-                    Include inactive purposes
+                    {t('visitPurposes.includeInactive')}
                   </label>
                 </div>
               </div>
@@ -535,14 +535,14 @@ const VisitPurposesListPage = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-500">
-                {selectedCount} purpose{selectedCount !== 1 ? 's' : ''} selected
+                {t('visitPurposes.bulkSelected', { count: selectedCount })}
               </span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => dispatch(clearSelections())}
               >
-                Clear Selection
+                {t('visitPurposes.clearSelection')}
               </Button>
             </div>
             
@@ -558,7 +558,7 @@ const VisitPurposesListPage = () => {
                   className="text-red-600 border-red-300 hover:bg-red-50"
                 >
                   <TrashIcon className="w-4 h-4 me-2" />
-                  Delete Selected
+                  {t('visitPurposes.deleteSelected')}
                 </Button>
               </div>
             )}
@@ -580,7 +580,7 @@ const VisitPurposesListPage = () => {
               const selectedIds = Object.keys(selectedRowIds).filter(id => selectedRowIds[id]);
               dispatch(setSelectedVisitPurposes(selectedIds.map(Number)));
             }}
-            emptyMessage="No visit purposes found"
+            emptyMessage={t('visitPurposes.emptyMessage')}
             className="visit-purposes-table"
           />
         )}
@@ -593,21 +593,21 @@ const VisitPurposesListPage = () => {
           setShowViewModal(false);
           setViewingPurpose(null);
         }}
-        title="Visit Purpose Details"
+        title={t('visitPurposes.details.title')}
         size="lg"
       >
         {viewingPurpose && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('visitPurposes.details.name')}</label>
                 <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">{viewingPurpose.name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <label className="block text-sm font-medium text-gray-700">{t('visitPurposes.details.status')}</label>
                 <div className="mt-1">
                   <Badge variant={viewingPurpose.isActive ? 'success' : 'secondary'} size="sm">
-                    {viewingPurpose.isActive ? 'Active' : 'Inactive'}
+                    {viewingPurpose.isActive ? t('visitPurposes.active') : t('visitPurposes.inactive')}
                   </Badge>
                 </div>
               </div>
@@ -615,35 +615,37 @@ const VisitPurposesListPage = () => {
             
             {viewingPurpose.description && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('visitPurposes.details.description')}</label>
                 <p className="mt-1 text-sm text-gray-900 dark:text-gray-300">{viewingPurpose.description}</p>
               </div>
             )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Requires Approval</label>
+                <label className="block text-sm font-medium text-gray-700">{t('visitPurposes.details.requiresApproval')}</label>
                 <p className="mt-1 text-sm text-gray-900">
-                  {viewingPurpose.requiresApproval ? 'Yes' : 'No'}
+                  {viewingPurpose.requiresApproval ? t('visitPurposes.details.yes') : t('visitPurposes.details.no')}
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Requires Escort</label>
+                <label className="block text-sm font-medium text-gray-700">{t('visitPurposes.details.requiresEscort')}</label>
                 <p className="mt-1 text-sm text-gray-900">
-                  {viewingPurpose.requiresEscort ? 'Yes' : 'No'}
+                  {viewingPurpose.requiresEscort ? t('visitPurposes.details.yes') : t('visitPurposes.details.no')}
                 </p>
               </div>
             </div>
             
             {viewingPurpose.usageCount !== undefined && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Usage Statistics</label>
+                <label className="block text-sm font-medium text-gray-700">{t('visitPurposes.details.usageStats')}</label>
                 <p className="mt-1 text-sm text-gray-900">
-                  Used in {viewingPurpose.usageCount || 0} invitation{(viewingPurpose.usageCount || 0) !== 1 ? 's' : ''}
+                  {t('visitPurposes.details.usedIn', {
+                    count: viewingPurpose.usageCount || 0
+                  })}
                 </p>
                 {viewingPurpose.lastUsed && (
                   <p className="text-sm text-gray-500">
-                    Last used: {formatters.relativeTime(viewingPurpose.lastUsed)}
+                    {t('visitPurposes.details.lastUsed', { time: formatters.relativeTime(viewingPurpose.lastUsed) })}
                   </p>
                 )}
               </div>
@@ -657,7 +659,7 @@ const VisitPurposesListPage = () => {
                   setViewingPurpose(null);
                 }}
               >
-                Close
+                {t('visitPurposes.details.close')}
               </Button>
               {canUpdate && (
                 <Button
@@ -666,7 +668,7 @@ const VisitPurposesListPage = () => {
                     handlePurposeAction('edit', viewingPurpose);
                   }}
                 >
-                  Edit
+                  {t('visitPurposes.details.edit')}
                 </Button>
               )}
             </div>
@@ -678,7 +680,7 @@ const VisitPurposesListPage = () => {
       <Modal
         isOpen={showCreateModalState}
         onClose={() => dispatch(hideCreateModal())}
-        title="Create Visit Purpose"
+        title={t('visitPurposes.createTitle')}
         size="lg"
       >
         <VisitPurposeForm
@@ -693,7 +695,7 @@ const VisitPurposesListPage = () => {
       <Modal
         isOpen={showEditModalState}
         onClose={() => dispatch(hideEditModal())}
-        title="Edit Visit Purpose"
+        title={t('visitPurposes.editTitle')}
         size="lg"
       >
         {currentPurpose && (
@@ -713,14 +715,14 @@ const VisitPurposesListPage = () => {
         isOpen={showDeleteModalState}
         onClose={() => dispatch(hideDeleteModal())}
         onConfirm={() => handleDeletePurpose(false)}
-        title="Delete Visit Purpose"
+        title={t('visitPurposes.deleteTitle')}
         message={
           currentPurpose
-            ? `Are you sure you want to delete "${currentPurpose.name}"? This will deactivate the purpose but preserve historical data.`
-            : 'Are you sure you want to delete this visit purpose?'
+            ? t('visitPurposes.deleteMessage', { name: currentPurpose.name })
+            : t('visitPurposes.deleteMessageGeneric')
         }
-        confirmText="Delete"
-        cancelText="Cancel"
+        confirmText={t('visitPurposes.deleteConfirm')}
+        cancelText={t('visitPurposes.cancel')}
         variant="danger"
         loading={deleteLoading}
       />
@@ -733,10 +735,10 @@ const VisitPurposesListPage = () => {
           setBulkAction('');
         }}
         onConfirm={handleBulkDelete}
-        title="Delete Selected Purposes"
-        message={`Are you sure you want to delete ${selectedCount} visit purpose${selectedCount !== 1 ? 's' : ''}? This will deactivate the purposes but preserve historical data.`}
-        confirmText="Delete Selected"
-        cancelText="Cancel"
+        title={t('visitPurposes.bulkDeleteTitle')}
+        message={t('visitPurposes.bulkDeleteMessage', { count: selectedCount })}
+        confirmText={t('visitPurposes.deleteSelected')}
+        cancelText={t('visitPurposes.cancel')}
         variant="danger"
         loading={deleteLoading}
       />

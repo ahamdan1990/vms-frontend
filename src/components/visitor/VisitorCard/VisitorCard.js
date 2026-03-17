@@ -2,6 +2,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // Constants
 import { VISITOR_ROUTES } from '../../../constants/routeConstants';
@@ -47,6 +48,7 @@ const VisitorCard = ({
   className = ''
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation('visitors');
 
   // Handle view visitor
   const handleView = () => {
@@ -59,7 +61,7 @@ const VisitorCard = ({
       return (
         <Badge variant="danger" size="sm">
           <ShieldExclamationIcon className="w-3 h-3 me-1" />
-          Blacklisted
+          {t('status.blacklisted')}
         </Badge>
       );
     }
@@ -67,13 +69,13 @@ const VisitorCard = ({
       return (
         <Badge variant="success" size="sm">
           <StarIconSolid className="w-3 h-3 me-1" />
-          VIP
+          {t('vipBadge')}
         </Badge>
       );
     }
     return (
       <Badge variant="info" size="sm">
-        Standard
+        {t('status.standard')}
       </Badge>
     );
   };
@@ -96,7 +98,7 @@ const VisitorCard = ({
     <div className={`relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md dark:hover:shadow-lg transition-all duration-200 ${variantClasses[variant]} ${className} ${selected ? 'ring-2 ring-blue-500 dark:ring-blue-400 border-blue-500 dark:border-blue-400 bg-blue-50/30 dark:bg-blue-900/20' : ''}`}>
       {/* Selection Checkbox */}
       {showSelection && (
-        <div className={`absolute ${variant === 'default' ? 'top-3 right-3' : 'top-4 left-4'} z-10`}>
+        <div className={`absolute ${variant === 'default' ? 'top-3 end-3' : 'top-4 start-4'} z-10`}>
           <label className="flex items-center justify-center cursor-pointer group">
             <input
               type="checkbox"
@@ -171,11 +173,11 @@ const VisitorCard = ({
 
             {/* Additional Info */}
             <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center justify-center gap-3 mb-3">
-              <span>{visitor.visitCount} visits</span>
+              <span>{t('advancedSearchModal.visitCount', { count: visitor.visitCount })}</span>
               {visitor.lastVisitDate && (
                 <>
-                  <span>•</span>
-                  <span>Last: {formatDate(visitor.lastVisitDate)}</span>
+                  <span>{t('advancedSearchModal.separator')}</span>
+                  <span>{t('advancedSearchModal.lastLabel', { date: formatDate(visitor.lastVisitDate) })}</span>
                 </>
               )}
             </div>
@@ -188,7 +190,7 @@ const VisitorCard = ({
                   variant="ghost"
                   size="sm"
                   className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                  title="View details"
+                  title={t('actions.view')}
                 >
                   <EyeIcon className="w-4 h-4" />
                 </Button>
@@ -199,7 +201,7 @@ const VisitorCard = ({
                     variant="ghost"
                     size="sm"
                     className="text-green-400 hover:text-green-600 dark:text-green-500 dark:hover:text-green-400"
-                    title="Create invitation"
+                    title={t('actions.createInvitation')}
                   >
                     <PlusCircleIcon className="w-4 h-4" />
                   </Button>
@@ -211,7 +213,7 @@ const VisitorCard = ({
                     variant="ghost"
                     size="sm"
                     className="text-blue-400 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
-                    title="Edit visitor"
+                    title={t('actions.edit')}
                   >
                     <PencilIcon className="w-4 h-4" />
                   </Button>
@@ -223,7 +225,7 @@ const VisitorCard = ({
                     variant="ghost"
                     size="sm"
                     className="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400"
-                    title="Delete visitor"
+                    title={t('actions.delete')}
                   >
                     <TrashIcon className="w-4 h-4" />
                   </Button>
@@ -311,7 +313,7 @@ const VisitorCard = ({
                     variant="ghost"
                     size="sm"
                     className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                    title="View details"
+                    title={t('actions.view')}
                   >
                     <EyeIcon className="w-4 h-4" />
                   </Button>
@@ -322,7 +324,7 @@ const VisitorCard = ({
                       variant="ghost"
                       size="sm"
                       className="text-green-400 hover:text-green-600 dark:text-green-500 dark:hover:text-green-400"
-                      title="Create invitation"
+                      title={t('actions.createInvitation')}
                     >
                       <PlusCircleIcon className="w-4 h-4" />
                     </Button>
@@ -334,7 +336,7 @@ const VisitorCard = ({
                       variant="ghost"
                       size="sm"
                       className="text-blue-400 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
-                      title="Edit visitor"
+                      title={t('actions.edit')}
                     >
                       <PencilIcon className="w-4 h-4" />
                     </Button>
@@ -346,7 +348,7 @@ const VisitorCard = ({
                       variant="ghost"
                       size="sm"
                       className="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400"
-                      title="Delete visitor"
+                      title={t('actions.delete')}
                     >
                       <TrashIcon className="w-4 h-4" />
                     </Button>
@@ -372,7 +374,7 @@ const VisitorCard = ({
                   className="bg-blue-600 hover:bg-blue-700 text-white flex-1 min-w-[140px]"
                 >
                   <PlusCircleIcon className="w-4 h-4 me-1" />
-                  Create Invitation
+                  {t('actions.createInvitation')}
                 </Button>
               )}
 
@@ -384,7 +386,7 @@ const VisitorCard = ({
                   className={visitor.isVip ? "bg-yellow-500 hover:bg-yellow-600 text-white flex-1 min-w-[120px]" : "flex-1 min-w-[120px]"}
                 >
                   <StarIconOutline className="w-4 h-4 me-1" />
-                  {visitor.isVip ? 'Remove VIP' : 'Make VIP'}
+                  {visitor.isVip ? t('actions.removeVip') : t('actions.markVip')}
                 </Button>
               )}
 
@@ -396,14 +398,14 @@ const VisitorCard = ({
                   className={visitor.isBlacklisted ? "bg-red-500 hover:bg-red-600 text-white flex-1 min-w-[140px]" : "text-red-600 border-red-200 flex-1 min-w-[140px]"}
                 >
                   <ShieldExclamationIcon className="w-4 h-4 me-1" />
-                  {visitor.isBlacklisted ? 'Remove Blacklist' : 'Blacklist'}
+                  {visitor.isBlacklisted ? t('actions.removeBlacklist') : t('actions.blacklist')}
                 </Button>
               )}
             </div>
 
             {/* Created Date - Centered */}
             <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-              Created {formatDate(visitor.createdOn)}
+              {t('advancedSearchModal.createdLabel', { date: formatDate(visitor.createdOn) })}
             </div>
           </div>
         </div>
@@ -441,3 +443,4 @@ const VisitorCard = ({
 // };
 
 export default VisitorCard;
+

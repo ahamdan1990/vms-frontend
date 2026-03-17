@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import Modal from '../../../../components/common/Modal/Modal';
 import Button from '../../../../components/common/Button/Button';
 import Input from '../../../../components/common/Input/Input';
@@ -25,17 +26,18 @@ import { useToast } from '../../../../hooks/useNotifications';
 import { CheckIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 const PRESET_COLORS = [
-  { name: 'Blue', value: '#3B82F6' },
-  { name: 'Green', value: '#10B981' },
-  { name: 'Purple', value: '#8B5CF6' },
-  { name: 'Red', value: '#EF4444' },
-  { name: 'Yellow', value: '#F59E0B' },
-  { name: 'Pink', value: '#EC4899' },
-  { name: 'Indigo', value: '#6366F1' },
-  { name: 'Gray', value: '#6B7280' }
+  { key: 'blue', value: '#3B82F6' },
+  { key: 'green', value: '#10B981' },
+  { key: 'purple', value: '#8B5CF6' },
+  { key: 'red', value: '#EF4444' },
+  { key: 'yellow', value: '#F59E0B' },
+  { key: 'pink', value: '#EC4899' },
+  { key: 'indigo', value: '#6366F1' },
+  { key: 'gray', value: '#6B7280' }
 ];
 
 const EditRoleModal = () => {
+  const { t } = useTranslation('system');
   const dispatch = useDispatch();
   const toast = useToast();
   const isOpen = useSelector(selectShowEditModal);
@@ -57,7 +59,7 @@ const EditRoleModal = () => {
     description: '',
     displayOrder: 0,
     color: '#3B82F6',
-    icon: '🛡️',
+    icon: '\uD83D\uDEE1\uFE0F',
     isActive: true
   });
 
@@ -78,7 +80,7 @@ const EditRoleModal = () => {
         description: currentRole.description || '',
         displayOrder: currentRole.displayOrder || 0,
         color: currentRole.color || '#3B82F6',
-        icon: currentRole.icon || '🛡️',
+        icon: currentRole.icon || '\uD83D\uDEE1\uFE0F',
         isActive: currentRole.isActive !== undefined ? currentRole.isActive : true
       });
       setErrors({});
@@ -120,21 +122,21 @@ const EditRoleModal = () => {
     const newErrors = {};
 
     if (!formData.displayName.trim()) {
-      newErrors.displayName = 'Display name is required';
+      newErrors.displayName = t('roles.edit.validation.displayNameRequired');
     } else if (formData.displayName.length > 150) {
-      newErrors.displayName = 'Display name cannot exceed 150 characters';
+      newErrors.displayName = t('roles.edit.validation.displayNameLengthError');
     }
 
     if (formData.description && formData.description.length > 500) {
-      newErrors.description = 'Description cannot exceed 500 characters';
+      newErrors.description = t('roles.edit.validation.descriptionLengthError');
     }
 
     if (formData.color && !/^#([A-Fa-f0-9]{6})$/.test(formData.color)) {
-      newErrors.color = 'Color must be a valid hex color (e.g., #3B82F6)';
+      newErrors.color = t('roles.edit.validation.colorError');
     }
 
     if (formData.icon && formData.icon.length > 50) {
-      newErrors.icon = 'Icon cannot exceed 50 characters';
+      newErrors.icon = t('roles.edit.validation.iconLengthError');
     }
 
     setErrors(newErrors);
@@ -167,12 +169,12 @@ const EditRoleModal = () => {
     e.preventDefault();
 
     if (!validate()) {
-      toast.error('Please fix the validation errors');
+      toast.error(t('roles.edit.validationError'));
       return;
     }
 
     if (!currentRole) {
-      toast.error('No role selected');
+      toast.error(t('roles.edit.noRoleSelected'));
       return;
     }
 
@@ -196,12 +198,12 @@ const EditRoleModal = () => {
         await dispatch(updateRolePermissions({
           roleId: currentRole.id,
           permissionIds: currentPermissionIds,
-          reason: `Updated permissions for role "${formData.displayName}"`
+          reason: t('roles.edit.permissionUpdateReason', { name: formData.displayName })
         })).unwrap();
 
-        toast.success(`Role "${formData.displayName}" updated with ${currentPermissionIds.length} permissions`);
+        toast.success(t('roles.edit.updatedSuccess', { name: formData.displayName, count: currentPermissionIds.length }));
       } else {
-        toast.success(`Role "${formData.displayName}" updated successfully`);
+        toast.success(t('roles.edit.updatedSuccessSimple', { name: formData.displayName }));
       }
 
       dispatch(toggleEditModal());
@@ -209,7 +211,7 @@ const EditRoleModal = () => {
       // Refresh roles list
       dispatch(getRoles({ includeCounts: true }));
     } catch (error) {
-      toast.error(error?.message || 'Failed to update role');
+      toast.error(error?.message || t('roles.edit.failedUpdate'));
     }
   };
 
@@ -246,13 +248,13 @@ const EditRoleModal = () => {
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title={`Edit Role: ${currentRole.name}`}
+      title={t('roles.edit.title', { name: currentRole.name })}
       size="xl"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Tab Navigation */}
-        <div className="border-b border-gray-200 dark:border-gray-700">
-          <nav className="-mb-px flex gap-8">
+        <div className="border-b border-gray-200 dark:border-gray-700 overflow-x-auto custom-scrollbar">
+          <nav className="-mb-px inline-flex min-w-max gap-8">
             <button
               type="button"
               onClick={() => setCurrentTab('details')}
@@ -262,7 +264,7 @@ const EditRoleModal = () => {
                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-100 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
-              Role Details
+              {t('roles.edit.roleDetails')}
             </button>
             <button
               type="button"
@@ -273,7 +275,7 @@ const EditRoleModal = () => {
                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-100 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
-              Permissions ({selectedCount} selected)
+              {t('roles.edit.permissionsTab', { count: selectedCount })}
             </button>
           </nav>
         </div>
@@ -281,7 +283,7 @@ const EditRoleModal = () => {
         {/* Tab Content */}
         <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
           {currentTab === 'details' ? (
-            <div className="space-y-6 pr-2">
+            <div className="space-y-6 pe-2">
               {/* System Role Warning */}
               {isSystemRole && (
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
@@ -293,10 +295,10 @@ const EditRoleModal = () => {
                     </div>
                     <div className="ms-3">
                       <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                        System Role - Limited Editing
+                        {t('roles.edit.systemRoleWarning')}
                       </h3>
                       <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-100">
-                        System roles have restricted editing. You can only modify display properties (name, description, color, icon).
+                        {t('roles.edit.systemRoleDesc')}
                       </p>
                     </div>
                   </div>
@@ -306,7 +308,7 @@ const EditRoleModal = () => {
               {/* Role Name (Read-only) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Role Name (Cannot be changed)
+                  {t('roles.edit.roleNameReadonly')}
                 </label>
                 <input
                   type="text"
@@ -318,20 +320,20 @@ const EditRoleModal = () => {
 
               {/* Display Name */}
               <Input
-                label="Display Name"
+                label={t('roles.edit.displayName')}
                 name="displayName"
                 value={formData.displayName}
                 onChange={handleChange}
                 error={errors.displayName}
                 required
-                placeholder="e.g., Custom Administrator"
-                helperText="User-friendly name shown in the UI"
+                placeholder={t('roles.edit.displayName')}
+                helperText={t('roles.edit.displayNameHelper')}
               />
 
               {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Description
+                  {t('roles.edit.description')}
                 </label>
                 <textarea
                   name="description"
@@ -343,7 +345,7 @@ const EditRoleModal = () => {
                       ? 'border-red-500 dark:border-red-400 bg-red-50 dark:bg-red-900/20'
                       : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'
                   }`}
-                  placeholder="Describe the role's purpose and responsibilities"
+                  placeholder={t('roles.edit.descriptionPlaceholder')}
                 />
                 {errors.description && (
                   <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.description}</p>
@@ -353,18 +355,18 @@ const EditRoleModal = () => {
               {/* Display Order */}
               <Input
                 type="number"
-                label="Display Order"
+                label={t('roles.edit.displayOrder')}
                 name="displayOrder"
                 value={formData.displayOrder}
                 onChange={handleChange}
                 error={errors.displayOrder}
-                helperText="Order in which this role appears in lists (lower numbers appear first)"
+                helperText={t('roles.edit.displayOrderHelper')}
               />
 
               {/* Color */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Color
+                  {t('roles.edit.color')}
                 </label>
                 <div className="flex items-center gap-3">
                   <input
@@ -391,7 +393,7 @@ const EditRoleModal = () => {
                       onClick={() => setFormData(prev => ({ ...prev, color: color.value }))}
                       className="w-8 h-8 rounded border-2 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-400 transition-colors"
                       style={{ backgroundColor: color.value }}
-                      title={color.name}
+                      title={color.value}
                     />
                   ))}
                 </div>
@@ -399,14 +401,14 @@ const EditRoleModal = () => {
 
               {/* Icon */}
               <Input
-                label="Icon (Emoji or Text)"
+                label={t('roles.edit.icon')}
                 name="icon"
                 value={formData.icon}
                 onChange={handleChange}
                 error={errors.icon}
-                placeholder="🛡️"
+                placeholder="\uD83D\uDEE1\uFE0F"
                 maxLength={50}
-                helperText="Emoji or short text to represent the role visually"
+                helperText={t('roles.edit.iconHelper')}
               />
 
               {/* Active Status */}
@@ -420,29 +422,29 @@ const EditRoleModal = () => {
                   className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                 />
                 <label htmlFor="isActive" className="ms-2 block text-sm text-gray-700 dark:text-gray-200">
-                  Active (Uncheck to deactivate this role)
+                  {t('roles.edit.activeLabel')}
                 </label>
               </div>
 
               {/* Preview */}
               <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Preview:</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{t('roles.edit.preview')}</p>
                 <div
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white font-medium"
                   style={{ backgroundColor: formData.color }}
                 >
-                  <span className="text-xl">{formData.icon || '🛡️'}</span>
-                  <span>{formData.displayName || 'Role Name'}</span>
+                  <span className="text-xl">{formData.icon || '\uD83D\uDEE1\uFE0F'}</span>
+                  <span>{formData.displayName || currentRole.name}</span>
                   {!formData.isActive && (
                     <span className="text-xs bg-white bg-opacity-30 px-2 py-0.5 rounded dark:text-white">
-                      Inactive
+                      {t('roles.edit.inactive')}
                     </span>
                   )}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="space-y-4 pr-2">
+            <div className="space-y-4 pe-2">
               {/* Search and Filter */}
               <div className="flex gap-3">
                 <div className="flex-1">
@@ -450,10 +452,10 @@ const EditRoleModal = () => {
                     <MagnifyingGlassIcon className="absolute start-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
                     <input
                       type="text"
-                      placeholder="Search permissions..."
+                      placeholder={t('roles.edit.searchPermissions')}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent"
+                      className="w-full ps-9 pe-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -464,7 +466,7 @@ const EditRoleModal = () => {
                 >
                   {categories.map((cat, index) => (
                     <option key={`category-${cat}-${index}`} value={cat}>
-                      {cat === 'all' ? 'All Categories' : cat}
+                      {cat === 'all' ? t('roles.edit.allCategories') : cat}
                     </option>
                   ))}
                 </select>
@@ -476,8 +478,8 @@ const EditRoleModal = () => {
                 </div>
               ) : filteredPermissions.length === 0 ? (
                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <p className="text-sm">No permissions found</p>
-                  <p className="text-xs mt-1">Try adjusting your search or filter</p>
+                  <p className="text-sm">{t('roles.edit.noPermissions')}</p>
+                  <p className="text-xs mt-1">{t('roles.edit.adjustSearch')}</p>
                 </div>
               ) : (
                 filteredPermissions.map((category) => {
@@ -495,7 +497,7 @@ const EditRoleModal = () => {
                             {category.category}
                           </h4>
                           <p className="text-xs text-gray-600 dark:text-gray-400">
-                            {selectedInCategory} of {categoryPermissions.length} selected
+                            {t('roles.edit.selectedOf', { selected: selectedInCategory, total: categoryPermissions.length })}
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -506,7 +508,7 @@ const EditRoleModal = () => {
                             onClick={() => handleCategorySelectAll(categoryPermissions)}
                             disabled={allSelected}
                           >
-                            Select All
+                            {t('roles.edit.selectAll')}
                           </Button>
                           <Button
                             type="button"
@@ -515,7 +517,7 @@ const EditRoleModal = () => {
                             onClick={() => handleCategoryDeselectAll(categoryPermissions)}
                             disabled={selectedInCategory === 0}
                           >
-                            Deselect All
+                            {t('roles.edit.deselectAll')}
                           </Button>
                         </div>
                       </div>
@@ -530,7 +532,7 @@ const EditRoleModal = () => {
                               type="button"
                               onClick={() => handlePermissionToggle(permission.id)}
                               className={`
-                                p-3 rounded-lg border-2 text-left transition-all
+                                p-3 rounded-lg border-2 text-start transition-all
                                 ${isSelected
                                   ? 'border-primary-500 bg-primary-50 dark:border-primary-400 dark:bg-primary-900/20'
                                   : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-500'
@@ -574,7 +576,7 @@ const EditRoleModal = () => {
         {/* Actions */}
         <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            {selectedCount} permission(s) selected
+            {t('roles.edit.permissionsSelected', { count: selectedCount })}
           </div>
           <div className="flex gap-3">
             <Button
@@ -583,7 +585,7 @@ const EditRoleModal = () => {
               onClick={handleClose}
               disabled={loading || permissionUpdateLoading}
             >
-              Cancel
+              {t('roles.edit.cancel')}
             </Button>
             {currentTab === 'permissions' && (
               <Button
@@ -591,7 +593,7 @@ const EditRoleModal = () => {
                 variant="secondary"
                 onClick={() => setCurrentTab('details')}
               >
-                Back to Details
+                {t('roles.edit.backToDetails')}
               </Button>
             )}
             <Button
@@ -599,7 +601,7 @@ const EditRoleModal = () => {
               variant="primary"
               loading={loading || permissionUpdateLoading}
             >
-              Update Role
+              {t('roles.edit.updateRole')}
             </Button>
           </div>
         </div>
@@ -609,3 +611,4 @@ const EditRoleModal = () => {
 };
 
 export default EditRoleModal;
+

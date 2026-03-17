@@ -581,7 +581,7 @@ const InvitationForm = ({
       setLocationCreating(false);
     } catch (error) {
       console.error('Failed to create location:', error);
-      setLocationError(error.message || 'Failed to create location. Please try again.');
+      setLocationError(error.message || t('errors.createLocationFailed'));
       setLocationCreating(false);
     }
   };
@@ -989,7 +989,7 @@ const InvitationForm = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Message
+                {t('form.fields.message')}
               </label>
               <textarea
                 value={formData.message}
@@ -997,7 +997,7 @@ const InvitationForm = ({
                 onBlur={() => handleBlur('message')}
                 rows={3}
                 maxLength={1000}
-                placeholder="Additional details about the visit..."
+                placeholder={t('form.fields.messagePlaceholder')}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 ${
                   touched.message && formErrors.message
                     ? 'border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20 text-gray-900 dark:text-gray-100'
@@ -1008,7 +1008,7 @@ const InvitationForm = ({
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.message}</p>
               )}
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {formData.message.length}/1000 characters
+                {t('form.charCount', { current: formData.message.length, max: 1000 })}
               </p>
             </div>
           </div>
@@ -1018,19 +1018,19 @@ const InvitationForm = ({
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-6">
             <CalendarIcon className="w-6 h-6 text-blue-600" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Schedule</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('form.sections.schedule')}</h3>
           </div>
 
           <div className="mb-4 p-3 bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-700 rounded-md">
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              📅 <strong>Date & Time Selection:</strong> Click on the date field to select a date, then click on the time portion to set the specific time for your visit.
+              📅 <strong>{t('form.dateTimeInfo')}</strong>
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Input
-                label="Start Date & Time"
+                label={t('form.fields.startDateTime')}
                 type="datetime-local"
                 value={formData.scheduledStartTime}
                 onChange={(e) => handleChange('scheduledStartTime', e.target.value)}
@@ -1039,16 +1039,16 @@ const InvitationForm = ({
                 min={new Date().toISOString().slice(0, 16)} // Prevent past dates
                 // Removed step constraint for maximum flexibility
                 required
-                placeholder="YYYY-MM-DDTHH:MM"
+                placeholder={t('form.fields.dateTimePlaceholder')}
               />
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Select both date and time for visit start
+                {t('form.fields.startDateTimeHint')}
               </p>
             </div>
 
             <div>
               <Input
-                label="End Date & Time"
+                label={t('form.fields.endDateTime')}
                 type="datetime-local"
                 value={formData.scheduledEndTime}
                 onChange={(e) => handleChange('scheduledEndTime', e.target.value)}
@@ -1057,46 +1057,46 @@ const InvitationForm = ({
                 min={formData.scheduledStartTime || new Date().toISOString().slice(0, 16)} // Must be after start time
                 // Removed step constraint for maximum flexibility
                 required
-                placeholder="YYYY-MM-DDTHH:MM"
+                placeholder={t('form.fields.dateTimePlaceholder')}
               />
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Select both date and time for visit end
+                {t('form.fields.endDateTimeHint')}
               </p>
             </div>
           </div>
 
           {/* Quick Time Presets */}
           <div className="mt-4">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Quick Time Presets:</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Past times will automatically use tomorrow's date</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{t('form.quickTimePresets')}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{t('form.pastTimeNote')}</p>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => setPresetTime(9, 1)}
                 className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
               >
-                9:00 AM - 10:00 AM
+                {t('form.presets.morningOneHour')}
               </button>
               <button
                 type="button"
                 onClick={() => setPresetTime(10, 2)}
                 className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
               >
-                10:00 AM - 12:00 PM
+                {t('form.presets.lateMorningTwoHours')}
               </button>
               <button
                 type="button"
                 onClick={() => setPresetTime(14, 1)}
                 className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
               >
-                2:00 PM - 3:00 PM
+                {t('form.presets.afternoonOneHour')}
               </button>
               <button
                 type="button"
                 onClick={() => setPresetTime(15, 2)}
                 className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
               >
-                3:00 PM - 5:00 PM
+                {t('form.presets.afternoonTwoHours')}
               </button>
             </div>
           </div>
@@ -1106,7 +1106,7 @@ const InvitationForm = ({
               <div className="flex items-center gap-2">
                 <ClockIcon className="w-4 h-4 text-blue-600" />
                 <span className="text-sm font-medium text-blue-900 dark:text-blue-200">
-                  Visit Duration: {getVisitDuration()} hours
+                  {t('form.visitDuration', { hours: getVisitDuration() })}
                 </span>
               </div>
             </div>
@@ -1118,22 +1118,22 @@ const InvitationForm = ({
           <Card className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <ClockIcon className="w-6 h-6 text-blue-600" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Available Time Slots</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('form.sections.availableTimeSlots')}</h3>
               {loadingTimeSlots && (
-                <span className="text-sm text-gray-500 dark:text-gray-400">(Loading...)</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{t('form.timeSlots.loading')}</span>
               )}
             </div>
 
             {!loadingTimeSlots && availableTimeSlots.length === 0 && (
               <div className="text-sm text-gray-500 dark:text-gray-400 p-4 bg-gray-50 dark:bg-slate-900/60 rounded-md">
-                No time slots available for the selected date and location. You can still proceed without selecting a time slot.
+                {t('form.timeSlots.noSlots')}
               </div>
             )}
 
             {!loadingTimeSlots && availableTimeSlots.length > 0 && (
               <div className="space-y-3">
                 <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-                  Select a time slot for your visit (optional):
+                  {t('form.timeSlots.selectOptional')}
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {availableTimeSlots.map((slot) => {
@@ -1150,7 +1150,7 @@ const InvitationForm = ({
                         onClick={() => !isFull && handleTimeSlotSelect(isSelected ? null : slot)}
                         disabled={isFull}
                         className={`
-                          p-4 rounded-lg border-2 text-left transition-all
+                          p-4 rounded-lg border-2 text-start transition-all
                           ${isSelected
                             ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-500/10'
                             : isFull
@@ -1165,17 +1165,17 @@ const InvitationForm = ({
                         </div>
                           {isSelected && (
                             <span className="px-2 py-1 text-xs font-medium bg-blue-500 text-white rounded">
-                              Selected
+                              {t('form.timeSlots.selected')}
                             </span>
                           )}
                           {isFull && !isSelected && (
                             <span className="px-2 py-1 text-xs font-medium bg-red-500 text-white rounded">
-                              Full
+                              {t('form.timeSlots.full')}
                             </span>
                           )}
                           {isLimited && !isSelected && !isFull && (
                             <span className="px-2 py-1 text-xs font-medium bg-yellow-500 text-white rounded">
-                              Limited
+                              {t('form.timeSlots.limited')}
                             </span>
                           )}
                         </div>
@@ -1186,11 +1186,11 @@ const InvitationForm = ({
                           <span className={`
                             ${isFull ? 'text-red-600' : isLimited ? 'text-yellow-600' : 'text-green-600'}
                           `}>
-                            {availableSpots} of {slot.maxVisitors} spots available
+                            {t('form.timeSlots.spotsAvailable', { available: availableSpots, max: slot.maxVisitors })}
                           </span>
                           {slot.bufferMinutes > 0 && (
                             <span className="text-gray-500 dark:text-gray-400">
-                              {slot.bufferMinutes}min buffer
+                              {t('form.timeSlots.bufferMinutes', { minutes: slot.bufferMinutes })}
                             </span>
                           )}
                         </div>
@@ -1201,7 +1201,11 @@ const InvitationForm = ({
                 {selectedTimeSlot && (
                   <div className="mt-3 p-3 bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-700 rounded-md">
                     <p className="text-sm text-blue-900 dark:text-blue-100">
-                      <strong>Selected:</strong> {selectedTimeSlot.name} ({timeSlotsService.formatTimeForDisplay(selectedTimeSlot.startTime)} - {timeSlotsService.formatTimeForDisplay(selectedTimeSlot.endTime)})
+                      {t('form.timeSlots.selectedInfo', {
+                        name: selectedTimeSlot.name,
+                        start: timeSlotsService.formatTimeForDisplay(selectedTimeSlot.startTime),
+                        end: timeSlotsService.formatTimeForDisplay(selectedTimeSlot.endTime)
+                      })}
                     </p>
                   </div>
                 )}
@@ -1215,7 +1219,7 @@ const InvitationForm = ({
           <Card className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <ShieldCheckIcon className="w-6 h-6 text-blue-600" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Capacity Check</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('form.sections.capacityCheck')}</h3>
             </div>
 
             <CapacityValidator
@@ -1237,7 +1241,7 @@ const InvitationForm = ({
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-6">
             <ShieldCheckIcon className="w-6 h-6 text-blue-600" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Requirements & Access</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('form.sections.requirementsAccess')}</h3>
           </div>
 
           <div className="space-y-4">
@@ -1251,8 +1255,8 @@ const InvitationForm = ({
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">Requires Approval</span>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Must be approved before visit</p>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{t('form.fields.requiresApproval')}</span>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('form.fields.requiresApprovalHint')}</p>
                   </div>
                 </label>
 
@@ -1264,8 +1268,8 @@ const InvitationForm = ({
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">Requires Escort</span>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Visitor must be escorted at all times</p>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{t('form.fields.requiresEscort')}</span>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('form.fields.requiresEscortHint')}</p>
                   </div>
                 </label>
 
@@ -1277,8 +1281,8 @@ const InvitationForm = ({
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">Requires Badge</span>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Visitor badge will be printed</p>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{t('form.fields.requiresBadge')}</span>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('form.fields.requiresBadgeHint')}</p>
                   </div>
                 </label>
               </div>
@@ -1292,8 +1296,8 @@ const InvitationForm = ({
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                   />
                     <div>
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">Needs Parking</span>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Visitor requires parking space</p>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">{t('form.fields.needsParking')}</span>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{t('form.fields.needsParkingHint')}</p>
                     </div>
                   </label>
 
@@ -1306,8 +1310,8 @@ const InvitationForm = ({
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
                     />
                       <div>
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">Submit for Approval</span>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Submit immediately after saving</p>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">{t('form.fields.submitForApproval')}</span>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{t('form.fields.submitForApprovalHint')}</p>
                       </div>
                     </label>
                 )}
@@ -1316,21 +1320,21 @@ const InvitationForm = ({
 
             {formData.needsParking && (
               <Input
-                label="Parking Instructions"
+                label={t('form.fields.parkingInstructions')}
                 type="text"
                 value={formData.parkingInstructions}
                 onChange={(e) => handleChange('parkingInstructions', e.target.value)}
                 onBlur={() => handleBlur('parkingInstructions')}
                 error={touched.parkingInstructions ? formErrors.parkingInstructions : undefined}
                 maxLength={200}
-                placeholder="Parking lot A, visitor spaces 1-10"
+                placeholder={t('form.fields.parkingInstructionsPlaceholder')}
                 required={formData.needsParking}
               />
             )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Special Instructions
+                {t('form.fields.specialInstructions')}
               </label>
               <textarea
                 value={formData.specialInstructions}
@@ -1338,7 +1342,7 @@ const InvitationForm = ({
                 onBlur={() => handleBlur('specialInstructions')}
                 rows={3}
                 maxLength={500}
-                placeholder="Any special requirements or instructions for the visit..."
+                placeholder={t('form.fields.specialInstructionsPlaceholder')}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 ${
                   touched.specialInstructions && formErrors.specialInstructions
                     ? 'border-red-300 dark:border-red-500 bg-red-50 dark:bg-red-900/20 text-gray-900 dark:text-gray-100'
@@ -1349,7 +1353,7 @@ const InvitationForm = ({
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.specialInstructions}</p>
               )}
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {formData.specialInstructions.length}/500 characters
+                {t('form.charCount', { current: formData.specialInstructions.length, max: 500 })}
               </p>
             </div>
           </div>
@@ -1361,7 +1365,7 @@ const InvitationForm = ({
             <div className="flex items-start gap-3">
               <ExclamationCircleIcon className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5" />
               <div>
-                <h4 className="text-sm font-medium text-red-800 dark:text-red-200">Capacity Issue</h4>
+                <h4 className="text-sm font-medium text-red-800 dark:text-red-200">{t('form.capacityIssue')}</h4>
                 <p className="text-sm text-red-700 dark:text-red-300 mt-1">{formErrors.capacity}</p>
               </div>
             </div>
@@ -1376,21 +1380,21 @@ const InvitationForm = ({
             onClick={onCancel}
             disabled={loading}
           >
-            Cancel
+            {t('form.buttons.cancel')}
           </Button>
           <Button
             type="submit"
             loading={loading}
             disabled={loading || Object.keys(formErrors).length > 0}
           >
-            {isEdit ? 'Update Invitation' : 'Create Invitation'}
+            {isEdit ? t('form.buttons.update') : t('form.buttons.create')}
           </Button>
         </div>
 
         {/* Debug info for development */}
         {process.env.NODE_ENV === 'development' && Object.keys(formErrors).length > 0 && (
           <div className="mt-4 bg-red-50 border border-red-200 dark:bg-red-900/30 dark:border-red-700 rounded p-3 text-sm text-red-700 dark:text-red-300">
-            <strong>Form Validation Errors ({Object.keys(formErrors).length}):</strong>
+            <strong>{t('form.validationErrors', { count: Object.keys(formErrors).length })}</strong>
             <ul className="list-disc list-inside mt-2 space-y-1">
               {Object.entries(formErrors).map(([field, error]) => (
                 <li key={field}>
@@ -1406,7 +1410,7 @@ const InvitationForm = ({
       <Modal
         isOpen={showLocationModal}
         onClose={handleCloseLocationModal}
-        title="Create New Location"
+        title={t('modals.createNewLocation')}
         size="lg"
       >
         <LocationForm
@@ -1422,7 +1426,7 @@ const InvitationForm = ({
       <Modal
         isOpen={showVisitorModal}
         onClose={handleCloseVisitorModal}
-        title="Add New Visitor"
+        title={t('modals.addNewVisitor')}
         size="md"
       >
         <VisitorQuickCreateForm

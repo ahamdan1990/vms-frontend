@@ -2,6 +2,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // Components
 import Button from '../../common/Button/Button';
@@ -23,10 +24,7 @@ import {
   EyeIcon,
   CloudArrowDownIcon,
   XMarkIcon,
-  FolderIcon,
-  CalendarIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon
+  FolderIcon
 } from '@heroicons/react/24/outline';
 
 // Utils
@@ -49,6 +47,7 @@ const DocumentManager = ({
   allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.doc', '.docx'],
   className = ''
 }) => {
+  const { t } = useTranslation('visitors');
   // Local state
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
@@ -77,6 +76,35 @@ const DocumentManager = ({
     return matchesSearch && matchesType;
   });
 
+  const getDocumentTypeKey = (type) => {
+    switch (type) {
+      case 'Passport':
+        return 'passport';
+      case 'National ID':
+        return 'nationalId';
+      case 'Driver License':
+        return 'driverLicense';
+      case 'Visa':
+        return 'visa';
+      case 'Work Permit':
+        return 'workPermit';
+      case 'Health Certificate':
+        return 'healthCertificate';
+      case 'Background Check':
+        return 'backgroundCheck';
+      case 'Photo':
+        return 'photo';
+      case 'Other':
+      default:
+        return 'other';
+    }
+  };
+
+  const getDocumentTypeLabel = (type) =>
+    t(`documentManager.types.${getDocumentTypeKey(type)}`, {
+      defaultValue: type || t('documentManager.types.other')
+    });
+
   // Group documents by type
   const groupedDocuments = filteredDocuments.reduce((groups, doc) => {
     const type = doc.documentType || 'Other';
@@ -92,14 +120,24 @@ const DocumentManager = ({
     const validFiles = Array.from(files).filter(file => {
       // Validate file size
       if (file.size > maxFileSize) {
-        alert(`File "${file.name}" is too large. Maximum size is ${Math.floor(maxFileSize / (1024 * 1024))}MB.`);
+        alert(
+          t('documentManager.alerts.fileTooLarge', {
+            name: file.name,
+            size: Math.floor(maxFileSize / (1024 * 1024))
+          })
+        );
         return false;
       }
       
       // Validate file extension
       const extension = '.' + file.name.split('.').pop().toLowerCase();
       if (!allowedExtensions.includes(extension)) {
-        alert(`File "${file.name}" has an unsupported format. Allowed types: ${allowedExtensions.join(', ')}`);
+        alert(
+          t('documentManager.alerts.unsupportedFormat', {
+            name: file.name,
+            types: allowedExtensions.join(', ')
+          })
+        );
         return false;
       }
       
@@ -197,7 +235,7 @@ const DocumentManager = ({
         if (onRefresh) onRefresh();
       } else if (failed > 0) {
         // Some failed
-        alert(`Uploaded ${successful} documents successfully. ${failed} failed.`);
+        alert(t('documentManager.alerts.partialUpload', { successful, failed }));
       }
     } catch (error) {
       console.error('Upload failed:', error);
@@ -229,14 +267,6 @@ const DocumentManager = ({
     }
   };
 
-  // Get document icon
-  const getDocumentIcon = (doc) => {
-    if (doc.documentType === 'Photo' || doc.contentType?.startsWith('image/')) {
-      return PhotoIcon;
-    }
-    return DocumentTextIcon;
-  };
-
   // Get document type stats
   const typeStats = allowedTypes.reduce((stats, type) => {
     stats[type] = documents.filter(doc => doc.documentType === type).length;
@@ -251,9 +281,12 @@ const DocumentManager = ({
           <div className="flex items-center gap-3">
             <FolderIcon className="w-6 h-6 text-blue-500" />
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Documents</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('documentManager.title')}</h3>
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                {documents.length} documents • {selectedDocuments.length} selected
+                {t('documentManager.summary', {
+                  total: documents.length,
+                  selected: selectedDocuments.length
+                })}
               </p>
             </div>
           </div>
@@ -266,7 +299,7 @@ const DocumentManager = ({
               className={showFilters ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300' : 'dark:text-gray-200'}
             >
               <FunnelIcon className="w-4 h-4 me-1" />
-              Filters
+              {t('documentManager.actions.filters')}
             </Button>
             
             <Button
@@ -275,7 +308,7 @@ const DocumentManager = ({
               size="sm"
             >
               <PlusIcon className="w-4 h-4 me-1" />
-              Add Documents
+              {t('documentManager.actions.addDocuments')}
             </Button>
           </div>
         </div>
@@ -293,10 +326,10 @@ const DocumentManager = ({
                 <div className="flex-1">
                   <Input
                     type="text"
-                    placeholder="Search documents..."
+                    placeholder={t('documentManager.searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    icon={<MagnifyingGlassIcon className="w-4 h-4" />}
+                    leftIcon={<MagnifyingGlassIcon className="w-4 h-4" />}
                     size="sm"
                   />
                 </div>
@@ -306,10 +339,10 @@ const DocumentManager = ({
                   onChange={(e) => setSelectedType(e.target.value)}
                   className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-slate-900/60 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                 >
-                  <option value="">All Types</option>
+                  <option value="">{t('documentManager.filters.allTypes')}</option>
                   {allowedTypes.map(type => (
                     <option key={type} value={type}>
-                      {type} ({typeStats[type] || 0})
+                      {getDocumentTypeLabel(type)} ({typeStats[type] || 0})
                     </option>
                   ))}
                 </select>
@@ -319,7 +352,7 @@ const DocumentManager = ({
               {selectedDocuments.length > 0 && (
                 <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-900/40">
                   <span className="text-sm text-blue-800 dark:text-blue-100">
-                    {selectedDocuments.length} document{selectedDocuments.length !== 1 ? 's' : ''} selected
+                    {t('documentManager.selectedCount', { count: selectedDocuments.length })}
                   </span>
                   <div className="flex gap-2">
                     <Button
@@ -327,7 +360,7 @@ const DocumentManager = ({
                       variant="ghost"
                       size="xs"
                     >
-                      Clear
+                      {t('common:buttons.clear')}
                     </Button>
                     <Button
                       onClick={() => setShowDeleteModal(true)}
@@ -336,7 +369,7 @@ const DocumentManager = ({
                       className="text-red-600 border-red-200"
                     >
                       <TrashIcon className="w-3 h-3 me-1" />
-                      Delete Selected
+                      {t('documentManager.actions.deleteSelected')}
                     </Button>
                   </div>
                 </div>
@@ -365,19 +398,22 @@ const DocumentManager = ({
             onDrop={handleDrop}
           >
             <CloudArrowUpIcon className={`w-12 h-12 mx-auto mb-4 ${dragOver ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500'}`} />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No documents uploaded</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('documentManager.empty.title')}</h3>
             <p className="text-gray-600 dark:text-gray-300 mb-4">
-              {dragOver ? 'Drop files here to upload' : 'Drag and drop files here, or click to select'}
+              {dragOver ? t('documentManager.empty.dropNow') : t('documentManager.empty.dragHint')}
             </p>
             <Button
               onClick={() => fileInputRef.current?.click()}
               variant="primary"
             >
               <PlusIcon className="w-4 h-4 me-2" />
-              Upload Documents
+              {t('documentManager.actions.uploadDocuments')}
             </Button>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-              Supported: {allowedExtensions.join(', ')} • Max {Math.floor(maxFileSize / (1024 * 1024))}MB per file
+              {t('documentManager.empty.supported', {
+                extensions: allowedExtensions.join(', '),
+                size: Math.floor(maxFileSize / (1024 * 1024))
+              })}
             </p>
           </div>
         ) : (
@@ -398,7 +434,7 @@ const DocumentManager = ({
                   <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-2xl border-2 border-blue-500">
                     <CloudArrowUpIcon className="w-16 h-16 text-blue-500 mx-auto mb-4" />
                     <p className="text-xl font-semibold text-blue-900 dark:text-blue-200 text-center">
-                      Drop files to upload
+                      {t('documentManager.empty.dropNow')}
                     </p>
                   </div>
                 </motion.div>
@@ -411,7 +447,7 @@ const DocumentManager = ({
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200 flex items-center">
                     <DocumentTextIcon className="w-4 h-4 me-2" />
-                    {type} ({docs.length})
+                    {getDocumentTypeLabel(type)} ({docs.length})
                   </h4>
                 </div>
                 
@@ -445,12 +481,12 @@ const DocumentManager = ({
               onDrop={handleDrop}
             >
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                Drop more files here or{' '}
+                {t('documentManager.quickDrop.prefix')}{' '}
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="text-blue-600 hover:text-blue-700 underline dark:text-blue-300 dark:hover:text-blue-200"
                 >
-                  click to select
+                  {t('documentManager.quickDrop.clickToSelect')}
                 </button>
               </p>
             </div>
@@ -472,18 +508,18 @@ const DocumentManager = ({
       <Modal
         isOpen={showUploadModal}
         onClose={() => !uploading && setShowUploadModal(false)}
-        title="Upload Documents"
+        title={t('documentManager.modals.uploadTitle')}
         size="xl"
       >
         <div className="p-6">
           <div className="mb-4">
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Review and configure your documents before uploading.
+              {t('documentManager.modals.uploadDescription')}
             </p>
           </div>
 
           <div className="space-y-4 max-h-96 overflow-y-auto">
-            {uploadQueue.map((item, index) => (
+            {uploadQueue.map((item) => (
               <UploadQueueItem
                 key={item.id}
                 item={item}
@@ -506,7 +542,7 @@ const DocumentManager = ({
               variant="outline"
               disabled={uploading}
             >
-              Cancel
+              {t('common:buttons.cancel')}
             </Button>
             <Button
               onClick={handleProcessUploads}
@@ -514,7 +550,7 @@ const DocumentManager = ({
               loading={uploading}
               disabled={uploadQueue.length === 0}
             >
-              Upload {uploadQueue.length} Document{uploadQueue.length !== 1 ? 's' : ''}
+              {t('documentManager.actions.uploadCount', { count: uploadQueue.length })}
             </Button>
           </div>
         </div>
@@ -538,10 +574,10 @@ const DocumentManager = ({
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleBulkDelete}
-        title="Delete Documents"
-        message={`Are you sure you want to delete ${selectedDocuments.length} document${selectedDocuments.length !== 1 ? 's' : ''}? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('documentManager.modals.deleteTitle')}
+        message={t('documentManager.modals.deleteMessage', { count: selectedDocuments.length })}
+        confirmText={t('common:buttons.delete')}
+        cancelText={t('common:buttons.cancel')}
         variant="danger"
       />
     </div>
@@ -560,6 +596,7 @@ const DocumentCard = ({
   onDelete, 
   showActions = true 
 }) => {
+  const { t } = useTranslation('visitors');
   const Icon = document.documentType === 'Photo' ? PhotoIcon : DocumentTextIcon;
   
   return (
@@ -567,7 +604,7 @@ const DocumentCard = ({
       selected ? 'ring-2 ring-blue-500 border-blue-500 dark:border-blue-400' : 'border-gray-200 dark:border-gray-700'
     }`}>
       {/* Selection Checkbox */}
-      <div className="absolute top-2 left-2">
+      <div className="absolute top-2 start-2">
         <input
           type="checkbox"
           checked={selected}
@@ -577,18 +614,18 @@ const DocumentCard = ({
       </div>
 
       {/* Document Info */}
-      <div className="pl-6">
+      <div className="ps-6">
         <div className="flex items-start justify-between mb-3">
           <Icon className="w-6 h-6 text-blue-500 flex-shrink-0" />
           <div className="flex gap-1 ms-2">
             {document.isSensitive && (
-              <Badge variant="warning" size="xs">Sensitive</Badge>
+              <Badge variant="warning" size="xs">{t('documentManager.badges.sensitive')}</Badge>
             )}
             {document.isRequired && (
-              <Badge variant="info" size="xs">Required</Badge>
+              <Badge variant="info" size="xs">{t('documentManager.badges.required')}</Badge>
             )}
             {document.isExpired && (
-              <Badge variant="danger" size="xs">Expired</Badge>
+              <Badge variant="danger" size="xs">{t('documentManager.badges.expired')}</Badge>
             )}
           </div>
         </div>
@@ -598,7 +635,10 @@ const DocumentCard = ({
         </h4>
         
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-          {document.formattedFileSize} • {formatDate(document.createdOn)}
+          {t('documentManager.card.meta', {
+            size: document.formattedFileSize,
+            date: formatDate(document.createdOn)
+          })}
         </p>
 
         {document.description && (
@@ -617,7 +657,7 @@ const DocumentCard = ({
               className="flex-1"
             >
               <EyeIcon className="w-3 h-3 me-1" />
-              View
+              {t('common:buttons.view')}
             </Button>
             
             <Button
@@ -627,7 +667,7 @@ const DocumentCard = ({
               className="flex-1"
             >
               <CloudArrowDownIcon className="w-3 h-3 me-1" />
-              Download
+              {t('common:buttons.download')}
             </Button>
             
             <Button
@@ -649,7 +689,31 @@ const DocumentCard = ({
  * Upload Queue Item Component
  */
 const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
+  const { t } = useTranslation('visitors');
   const Icon = item.documentType === 'Photo' ? PhotoIcon : DocumentTextIcon;
+  const getDocumentTypeKey = (type) => {
+    switch (type) {
+      case 'Passport':
+        return 'passport';
+      case 'National ID':
+        return 'nationalId';
+      case 'Driver License':
+        return 'driverLicense';
+      case 'Visa':
+        return 'visa';
+      case 'Work Permit':
+        return 'workPermit';
+      case 'Health Certificate':
+        return 'healthCertificate';
+      case 'Background Check':
+        return 'backgroundCheck';
+      case 'Photo':
+        return 'photo';
+      case 'Other':
+      default:
+        return 'other';
+    }
+  };
 
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white dark:bg-slate-900/70">
@@ -674,7 +738,7 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
             <div>
               <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-                Document Title *
+                {t('documentManager.upload.fields.title')}
               </label>
               <Input
                 type="text"
@@ -687,7 +751,7 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
 
             <div>
               <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-                Document Type *
+                {t('documentManager.upload.fields.type')}
               </label>
               <select
                 value={item.documentType}
@@ -695,33 +759,35 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
                 className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-slate-900/60 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
               >
                 {allowedTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                  <option key={type} value={type}>
+                    {t(`documentManager.types.${getDocumentTypeKey(type)}`, { defaultValue: type })}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div className="md:col-span-2">
               <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-                Description
+                {t('documentManager.upload.fields.description')}
               </label>
               <Input
                 type="text"
                 value={item.description}
                 onChange={(e) => onChange({ description: e.target.value })}
-                placeholder="Optional description..."
+                placeholder={t('documentManager.upload.placeholders.description')}
                 size="sm"
               />
             </div>
 
             <div>
               <label className="block font-medium text-gray-700 dark:text-gray-200 mb-1">
-                Tags
+                {t('documentManager.upload.fields.tags')}
               </label>
               <Input
                 type="text"
                 value={item.tags}
                 onChange={(e) => onChange({ tags: e.target.value })}
-                placeholder="Comma-separated tags..."
+                placeholder={t('documentManager.upload.placeholders.tags')}
                 size="sm"
               />
             </div>
@@ -734,7 +800,7 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
                   onChange={(e) => onChange({ isSensitive: e.target.checked })}
                   className="rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 me-2"
                 />
-                <span className="text-sm text-gray-700 dark:text-gray-200">Sensitive</span>
+                <span className="text-sm text-gray-700 dark:text-gray-200">{t('documentManager.badges.sensitive')}</span>
               </label>
               
               <label className="flex items-center">
@@ -744,14 +810,16 @@ const UploadQueueItem = ({ item, allowedTypes, onChange, onRemove }) => {
                   onChange={(e) => onChange({ isRequired: e.target.checked })}
                   className="rounded border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-900 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 me-2"
                 />
-                <span className="text-sm text-gray-700 dark:text-gray-200">Required</span>
+                <span className="text-sm text-gray-700 dark:text-gray-200">{t('documentManager.badges.required')}</span>
               </label>
             </div>
           </div>
 
           <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Size: {(item.file.size / 1024 / 1024).toFixed(1)} MB • 
-            Type: {item.file.type || 'Unknown'}
+            {t('documentManager.upload.fileMeta', {
+              size: (item.file.size / 1024 / 1024).toFixed(1),
+              type: item.file.type || t('documentManager.upload.unknownType')
+            })}
           </div>
         </div>
       </div>
@@ -792,3 +860,7 @@ UploadQueueItem.propTypes = {
 };
 
 export default DocumentManager;
+
+
+
+

@@ -60,6 +60,9 @@
     "hideSensitive": "إخفاء الحساسة",
     "showSensitive": "إظهار الحساسة",
     "clearCache": "مسح الذاكرة المؤقتة",
+    "errorOccurred": "حدث خطأ",
+    "maskedValue": "••••••••",
+    "restartRequired": "مطلوب إعادة تشغيل: {{count}}",
     "restartRequired_one": "{{count}} إعادة تشغيل مطلوبة",
     "restartRequired_other": "{{count}} إعادات تشغيل مطلوبة",
     "noConfigurations": "لا توجد إعدادات",
@@ -112,7 +115,7 @@
     "server": "الخادم",
     "port": "المنفذ",
     "domain": "النطاق",
-    "baseDn": "Base DN",
+    "baseDn": "المسار الأساسي (Base DN)",
     "serviceAccountUsername": "اسم مستخدم حساب الخدمة",
     "serviceAccountPassword": "كلمة مرور حساب الخدمة",
     "passwordPlaceholderKeep": "اتركه فارغاً للإبقاء على كلمة المرور الحالية",
@@ -179,7 +182,10 @@
     "users": "مستخدمين",
     "availableForImport": "({{count}} متاح للاستيراد)",
     "previous": "السابق",
-    "next": "التالي"
+    "next": "التالي",
+    "roleStaff": "موظف",
+    "roleReceptionist": "موظف استقبال",
+    "roleAdministrator": "مسؤول"
   },
   "audit": {
     "title": "سجلات المراجعة",
@@ -392,8 +398,19 @@
         "emailInvalid": "تنسيق بريد إلكتروني غير صالح: {{emails}}",
         "phoneRequired": "أرقام الهاتف مطلوبة لتصعيد الرسائل القصيرة",
         "phoneInvalid": "تنسيق هاتف غير صالح: {{phones}}"
-      }
-    }
+      },
+      "actionDescriptions": {
+        "escalateToUser": "تصعيد التنبيه إلى مستخدم محدد",
+        "escalateToRole": "تصعيد التنبيه إلى جميع المستخدمين ذوي دور محدد",
+        "sendEmail": "إرسال إشعارات بريد إلكتروني إلى العناوين المحددة",
+        "sendSms": "إرسال إشعارات SMS إلى أرقام الهواتف المحددة",
+        "createHighPriorityAlert": "إنشاء تنبيه عالي الأولوية في النظام",
+        "logCriticalEvent": "تسجيل الحدث كحدث نظامي حرج"
+      },
+      "configPlaceholder": "{\"key\": \"value\"}"
+    },
+    "bulkMessage_one": "هل تريد {{action}} {{count}} قاعدة تصعيد محددة؟",
+    "bulkMessage_other": "هل تريد {{action}} {{count}} قاعدة تصعيد محددة؟"
   },
   "roles": {
     "title": "إدارة الأدوار",
@@ -424,7 +441,50 @@
     "editTooltipFull": "تعديل تفاصيل الدور",
     "deactivateTooltip": "إلغاء تفعيل الدور",
     "viewTooltip": "عرض وإدارة تفاصيل الدور",
-    "edit": "تعديل",
+    "edit": {
+      "title": "تعديل الدور: {{name}}",
+      "roleDetails": "تفاصيل الدور",
+      "permissionsTab": "الصلاحيات ({{count}} محدد)",
+      "systemRoleWarning": "دور النظام - تعديل محدود",
+      "systemRoleDesc": "أدوار النظام لها تعديل مقيّد. يمكنك فقط تعديل خصائص العرض (الاسم والوصف واللون والأيقونة).",
+      "roleNameReadonly": "اسم الدور (لا يمكن تغييره)",
+      "displayName": "اسم العرض",
+      "displayNameHelper": "الاسم الظاهر للمستخدم في واجهة المستخدم",
+      "description": "الوصف",
+      "descriptionPlaceholder": "صف غرض الدور ومسؤولياته",
+      "displayOrder": "ترتيب العرض",
+      "displayOrderHelper": "ترتيب ظهور هذا الدور في القوائم (الأرقام الأصغر تظهر أولاً)",
+      "color": "اللون",
+      "icon": "الأيقونة (إيموجي أو نص)",
+      "iconHelper": "إيموجي أو نص قصير لتمثيل الدور بصرياً",
+      "activeLabel": "نشط (أزل التحديد لإلغاء تفعيل هذا الدور)",
+      "inactive": "غير نشط",
+      "preview": "معاينة:",
+      "searchPermissions": "ابحث في الصلاحيات...",
+      "allCategories": "جميع الفئات",
+      "noPermissions": "لا توجد صلاحيات",
+      "adjustSearch": "جرّب تعديل البحث أو الفلتر",
+      "selectAll": "تحديد الكل",
+      "deselectAll": "إلغاء تحديد الكل",
+      "selectedOf": "{{selected}} من {{total}} محدد",
+      "permissionsSelected": "{{count}} صلاحية محددة",
+      "cancel": "إلغاء",
+      "backToDetails": "العودة إلى التفاصيل",
+      "updateRole": "تحديث الدور",
+      "validationError": "يرجى إصلاح أخطاء التحقق",
+      "noRoleSelected": "لم يتم تحديد دور",
+      "updatedSuccess": "تم تحديث الدور \"{{name}}\" مع {{count}} صلاحية",
+      "updatedSuccessSimple": "تم تحديث الدور \"{{name}}\" بنجاح",
+      "permissionUpdateReason": "تم تحديث الصلاحيات للدور {{name}}",
+      "failedUpdate": "فشل تحديث الدور",
+      "validation": {
+        "displayNameRequired": "اسم العرض مطلوب",
+        "displayNameLengthError": "لا يمكن أن يتجاوز اسم العرض 150 حرفاً",
+        "descriptionLengthError": "لا يمكن أن يتجاوز الوصف 500 حرف",
+        "colorError": "يجب أن يكون اللون لوناً سداسياً صالحاً (مثال: #3B82F6)",
+        "iconLengthError": "لا يمكن أن تتجاوز الأيقونة 50 حرفاً"
+      }
+    },
     "delete": "حذف",
     "details": {
       "backToRoles": "العودة إلى الأدوار",
@@ -446,6 +506,7 @@
       "cancel": "إلغاء",
       "saveChanges": "حفظ التغييرات",
       "permissionsUpdated": "تم تحديث صلاحيات الدور بنجاح",
+      "permissionUpdateReason": "تم تحديث الصلاحيات للدور {{name}}",
       "failedUpdate": "فشل تحديث الصلاحيات"
     },
     "create": {
@@ -488,49 +549,6 @@
         "displayNameLengthError": "لا يمكن أن يتجاوز اسم العرض 150 حرفاً",
         "descriptionLengthError": "لا يمكن أن يتجاوز الوصف 500 حرف",
         "hierarchyLevelError": "يجب أن يكون مستوى التسلسل الهرمي بين 1 و 10",
-        "colorError": "يجب أن يكون اللون لوناً سداسياً صالحاً (مثال: #3B82F6)",
-        "iconLengthError": "لا يمكن أن تتجاوز الأيقونة 50 حرفاً"
-      }
-    },
-    "edit": {
-      "title": "تعديل الدور: {{name}}",
-      "roleDetails": "تفاصيل الدور",
-      "permissionsTab": "الصلاحيات ({{count}} محدد)",
-      "systemRoleWarning": "دور النظام - تعديل محدود",
-      "systemRoleDesc": "أدوار النظام لها تعديل مقيّد. يمكنك فقط تعديل خصائص العرض (الاسم والوصف واللون والأيقونة).",
-      "roleNameReadonly": "اسم الدور (لا يمكن تغييره)",
-      "displayName": "اسم العرض",
-      "displayNameHelper": "الاسم الظاهر للمستخدم في واجهة المستخدم",
-      "description": "الوصف",
-      "descriptionPlaceholder": "صف غرض الدور ومسؤولياته",
-      "displayOrder": "ترتيب العرض",
-      "displayOrderHelper": "ترتيب ظهور هذا الدور في القوائم (الأرقام الأصغر تظهر أولاً)",
-      "color": "اللون",
-      "icon": "الأيقونة (إيموجي أو نص)",
-      "iconHelper": "إيموجي أو نص قصير لتمثيل الدور بصرياً",
-      "activeLabel": "نشط (أزل التحديد لإلغاء تفعيل هذا الدور)",
-      "inactive": "غير نشط",
-      "preview": "معاينة:",
-      "searchPermissions": "ابحث في الصلاحيات...",
-      "allCategories": "جميع الفئات",
-      "noPermissions": "لا توجد صلاحيات",
-      "adjustSearch": "جرّب تعديل البحث أو الفلتر",
-      "selectAll": "تحديد الكل",
-      "deselectAll": "إلغاء تحديد الكل",
-      "selectedOf": "{{selected}} من {{total}} محدد",
-      "permissionsSelected": "{{count}} صلاحية محددة",
-      "cancel": "إلغاء",
-      "backToDetails": "العودة إلى التفاصيل",
-      "updateRole": "تحديث الدور",
-      "validationError": "يرجى إصلاح أخطاء التحقق",
-      "noRoleSelected": "لم يتم تحديد دور",
-      "updatedSuccess": "تم تحديث الدور \"{{name}}\" مع {{count}} صلاحية",
-      "updatedSuccessSimple": "تم تحديث الدور \"{{name}}\" بنجاح",
-      "failedUpdate": "فشل تحديث الدور",
-      "validation": {
-        "displayNameRequired": "اسم العرض مطلوب",
-        "displayNameLengthError": "لا يمكن أن يتجاوز اسم العرض 150 حرفاً",
-        "descriptionLengthError": "لا يمكن أن يتجاوز الوصف 500 حرف",
         "colorError": "يجب أن يكون اللون لوناً سداسياً صالحاً (مثال: #3B82F6)",
         "iconLengthError": "لا يمكن أن تتجاوز الأيقونة 50 حرفاً"
       }
@@ -638,7 +656,21 @@
       "country": "البلد",
       "cancel": "إلغاء",
       "create": "إنشاء",
-      "update": "تحديث"
+      "update": "تحديث",
+      "companyNamePlaceholder": "مثال: شركة أكمي",
+      "companyCodePlaceholder": "مثال: ACME",
+      "industryPlaceholder": "مثال: التقنية",
+      "employeeCountPlaceholder": "مثال: 100",
+      "websitePlaceholder": "https://example.com",
+      "taxIdPlaceholder": "مثال: 12-3456789",
+      "contactPersonNamePlaceholder": "مثال: أحمد علي",
+      "contactEmailPlaceholder": "contact@example.com",
+      "contactPhonePlaceholder": "+1 (555) 123-4567",
+      "street1Placeholder": "مثال: 123 الشارع الرئيسي",
+      "cityPlaceholder": "مثال: الرياض",
+      "stateProvincePlaceholder": "مثال: الرياض",
+      "postalCodePlaceholder": "مثال: 11564",
+      "countryPlaceholder": "مثال: المملكة العربية السعودية"
     },
     "failedLoad": "فشل تحميل الشركات",
     "failedCreate": "فشل إنشاء الشركة",
@@ -713,7 +745,13 @@
       "locationPlaceholder": "مثال: مبنى أ، الطابق 3",
       "cancel": "إلغاء",
       "create": "إنشاء",
-      "update": "تحديث"
+      "update": "تحديث",
+      "departmentNamePlaceholder": "مثال: الموارد البشرية",
+      "departmentCodePlaceholder": "مثال: HR",
+      "budgetPlaceholder": "مثال: 50000",
+      "displayOrderPlaceholder": "0",
+      "departmentEmailPlaceholder": "department@example.com",
+      "departmentPhonePlaceholder": "+1 (555) 123-4567"
     },
     "failedLoad": "فشل تحميل الأقسام",
     "failedCreate": "فشل إنشاء القسم",
@@ -780,9 +818,97 @@
     "deleteMessageGeneric": "هل تريد حذف هذا الموقع؟",
     "bulkDeleteTitle": "حذف المواقع المحددة",
     "bulkDeleteMessage": "هل تريد حذف {{count}} موقع؟ سيؤدي ذلك إلى إلغاء تفعيل المواقع مع الحفاظ على البيانات التاريخية.",
-    "deleteSelected": "حذف المحدد",
     "deleteConfirm": "حذف",
-    "cancel": "إلغاء"
+    "cancel": "إلغاء",
+    "typeGeneral": "عام",
+    "typeBadge": {
+      "floor": "ط",
+      "room": "غ"
+    },
+    "types": {
+      "building": "مبنى",
+      "floor": "طابق",
+      "room": "غرفة",
+      "zone": "منطقة",
+      "parking": "موقف",
+      "other": "أخرى"
+    },
+    "form": {
+      "sections": {
+        "basicInfo": "المعلومات الأساسية",
+        "typeHierarchy": "النوع والهيكل",
+        "capacityAccess": "السعة والتحكم بالوصول",
+        "preview": "معاينة"
+      },
+      "fields": {
+        "name": "اسم الموقع",
+        "code": "رمز الموقع",
+        "description": "الوصف",
+        "locationType": "نوع الموقع",
+        "parentLocation": "الموقع الأب",
+        "building": "المبنى",
+        "floor": "الطابق",
+        "zone": "المنطقة",
+        "maxCapacity": "الحد الأقصى للسعة",
+        "accessLevel": "مستوى الوصول",
+        "displayOrder": "ترتيب العرض",
+        "requiresEscort": "يتطلب مرافقة للزوار",
+        "isActive": "نشط (متاح للاختيار)"
+      },
+      "placeholders": {
+        "name": "مثال: قاعة اجتماعات A، مبنى 1، طابق 2",
+        "code": "مثال: CONF-A، B1-F2-R101",
+        "description": "وصف اختياري للموقع...",
+        "building": "مثال: المبنى الرئيسي، البرج A",
+        "floor": "مثال: 1، 2، B1، ميزانين",
+        "zone": "مثال: الجناح الشمالي، الجهة الشرقية",
+        "maxCapacity": "اتركه فارغاً إذا لم يوجد حد",
+        "displayOrder": "ترتيب اختياري"
+      },
+      "help": {
+        "code": "معرّف فريد اختياري (حروف، أرقام، شرطات، وشرطات سفلية)",
+        "maxCapacity": "الحد الأقصى لعدد الأشخاص المسموح به",
+        "displayOrder": "الأرقام الأقل تظهر أولاً"
+      },
+      "options": {
+        "noParent": "بدون موقع أب (موقع جذري)"
+      },
+      "loadingLocations": "جاري تحميل المواقع...",
+      "descriptionCount": "{{count}}/500 حرف",
+      "accessLevels": {
+        "standard": "وصول قياسي",
+        "medium": "أمن متوسط",
+        "high": "أمن عالٍ",
+        "restricted": "وصول مقيّد"
+      },
+      "preview": {
+        "fallbackName": "اسم الموقع",
+        "maxLabel": "الحد الأقصى: {{count}}",
+        "accessBadge": "وصول {{level}}",
+        "escortRequired": "مرافقة مطلوبة"
+      },
+      "actions": {
+        "create": "إنشاء موقع",
+        "update": "تحديث الموقع"
+      },
+      "validation": {
+        "nameRequired": "اسم الموقع مطلوب",
+        "nameMin": "يجب أن يكون اسم الموقع 2 أحرف على الأقل",
+        "nameMax": "يجب أن يكون اسم الموقع أقل من 100 حرف",
+        "codeInvalid": "يجب أن يحتوي رمز الموقع على حروف وأرقام وشرطات وشرطات سفلية فقط",
+        "descriptionMax": "يجب أن يكون الوصف أقل من 500 حرف",
+        "displayOrderInvalid": "يجب أن يكون ترتيب العرض رقماً",
+        "maxCapacityInvalid": "يجب أن تكون السعة القصوى رقماً موجباً",
+        "floorMax": "يجب أن يكون الطابق أقل من 20 حرفاً",
+        "buildingMax": "يجب أن يكون اسم المبنى أقل من 100 حرف",
+        "zoneMax": "يجب أن تكون المنطقة أقل من 50 حرفاً",
+        "parentSelf": "لا يمكن أن يكون الموقع أباً لنفسه"
+      }
+    },
+    "bulkSelected_one": "{{count}} موقع محدد",
+    "bulkSelected_other": "{{count}} موقع محدد",
+    "bulkDeleteMessage_one": "هل تريد حذف {{count}} موقع؟ سيؤدي ذلك إلى إلغاء تفعيل المواقع مع الحفاظ على البيانات التاريخية.",
+    "bulkDeleteMessage_other": "هل تريد حذف {{count}} موقع؟ سيؤدي ذلك إلى إلغاء تفعيل المواقع مع الحفاظ على البيانات التاريخية."
   },
   "timeSlots": {
     "title": "الفترات الزمنية",
@@ -861,7 +987,73 @@
     "failedCreate": "فشل إنشاء الفترة الزمنية: {{error}}",
     "failedUpdate": "فشل تحديث الفترة الزمنية: {{error}}",
     "failedDelete": "فشل حذف الفترة الزمنية: {{error}}",
-    "bulkFailed": "فشل الإجراء المجمّع: {{error}}"
+    "bulkFailed": "فشل الإجراء المجمّع: {{error}}",
+    "form": {
+      "sections": {
+        "basicInfo": "المعلومات الأساسية",
+        "capacitySettings": "السعة والإعدادات",
+        "activeDays": "جدول الأيام النشطة"
+      },
+      "fields": {
+        "name": "اسم الفترة الزمنية",
+        "startTime": "وقت البداية",
+        "endTime": "وقت النهاية",
+        "maxVisitors": "الحد الأقصى للزوار",
+        "bufferMinutes": "دقائق الفاصل",
+        "displayOrder": "ترتيب العرض",
+        "activeDays": "اختر الأيام النشطة",
+        "enableTimeSlot": "تفعيل الفترة الزمنية"
+      },
+      "placeholders": {
+        "name": "مثال: الجلسة الصباحية"
+      },
+      "help": {
+        "location": "اختياري: التعيين لموقع محدد",
+        "bufferMinutes": "الوقت بين المواعيد",
+        "displayOrder": "ترتيب الظهور في القوائم",
+        "activeDays": "اختر الأيام التي تتوفر فيها هذه الفترة الزمنية",
+        "enableTimeSlot": "الفترات النشطة متاحة للجدولة"
+      },
+      "validationErrorsTitle": "أخطاء التحقق",
+      "durationValue": "{{count}} دقيقة",
+      "selectTimes": "اختر الأوقات",
+      "selectedDaysCount": "تم اختيار {{count}} يوم:",
+      "selectedDaysCount_one": "تم اختيار {{count}} يوم:",
+      "selectedDaysCount_other": "تم اختيار {{count}} أيام:",
+      "selectAtLeastOneDay": "يرجى اختيار يوم واحد على الأقل لهذه الفترة الزمنية",
+      "noSpecificLocation": "بدون موقع محدد",
+      "days": {
+        "monday": "الاثنين",
+        "tuesday": "الثلاثاء",
+        "wednesday": "الأربعاء",
+        "thursday": "الخميس",
+        "friday": "الجمعة",
+        "saturday": "السبت",
+        "sunday": "الأحد"
+      },
+      "daysShort": {
+        "monday": "اثن",
+        "tuesday": "ثلث",
+        "wednesday": "أرب",
+        "thursday": "خمي",
+        "friday": "جمع",
+        "saturday": "سبت",
+        "sunday": "أحد"
+      },
+      "validation": {
+        "nameRequired": "اسم الفترة الزمنية مطلوب",
+        "startTimeRequired": "وقت البداية مطلوب",
+        "endTimeRequired": "وقت النهاية مطلوب",
+        "endAfterStart": "يجب أن يكون وقت النهاية بعد وقت البداية",
+        "maxVisitorsMin": "يجب أن يكون الحد الأقصى للزوار 1 على الأقل",
+        "activeDaysRequired": "يرجى اختيار يوم نشط واحد على الأقل",
+        "activeDaysInvalid": "تم اكتشاف اختيار أيام غير صالح. يرجى إعادة اختيار الأيام."
+      }
+    },
+    "bulkSelected_one": "{{count}} فترة زمنية محددة",
+    "bulkSelected_other": "{{count}} فترة زمنية محددة",
+    "bulkConfirmMessage_one": "هل تريد {{action}} {{count}} فترة زمنية؟",
+    "bulkConfirmMessage_other": "هل تريد {{action}} {{count}} فترة زمنية؟"
   },
   "visitPurposes": {
     "title": "أغراض الزيارة",
@@ -911,7 +1103,9 @@
       "usedIn": "مستخدم في {{count}} دعوة",
       "lastUsed": "آخر استخدام: {{time}}",
       "close": "إغلاق",
-      "edit": "تعديل"
+      "edit": "تعديل",
+      "usedIn_one": "مستخدم في {{count}} دعوة",
+      "usedIn_other": "مستخدم في {{count}} دعوة"
     },
     "createTitle": "إنشاء غرض زيارة",
     "editTitle": "تعديل غرض الزيارة",
@@ -920,8 +1114,67 @@
     "deleteMessageGeneric": "هل تريد حذف غرض الزيارة هذا؟",
     "bulkDeleteTitle": "حذف الأغراض المحددة",
     "bulkDeleteMessage": "هل تريد حذف {{count}} غرض زيارة؟ سيؤدي ذلك إلى إلغاء تفعيل الأغراض مع الحفاظ على البيانات التاريخية.",
-    "deleteSelected": "حذف المحدد",
     "deleteConfirm": "حذف",
-    "cancel": "إلغاء"
+    "cancel": "إلغاء",
+    "form": {
+      "sections": {
+        "basicInfo": "المعلومات الأساسية",
+        "configuration": "الإعدادات",
+        "appearance": "المظهر",
+        "preview": "معاينة"
+      },
+      "fields": {
+        "name": "اسم الغرض",
+        "description": "الوصف",
+        "requiresApproval": "يتطلب موافقة المسؤول",
+        "isActive": "نشط (متاح للاختيار)",
+        "displayOrder": "ترتيب العرض",
+        "color": "اللون",
+        "customColorCode": "رمز لون مخصص",
+        "iconName": "اسم الأيقونة"
+      },
+      "placeholders": {
+        "name": "مثال: اجتماع، تسليم، مقابلة",
+        "description": "وصف اختياري لغرض الزيارة...",
+        "displayOrder": "ترتيب اختياري (الأرقام الأقل تظهر أولاً)",
+        "iconName": "معرّف أيقونة اختياري"
+      },
+      "help": {
+        "iconName": "حرف واحد أو اسم أيقونة لأغراض العرض"
+      },
+      "descriptionCount": "{{count}}/500 حرف",
+      "colors": {
+        "gray": "رمادي",
+        "blue": "أزرق",
+        "green": "أخضر",
+        "yellow": "أصفر",
+        "red": "أحمر",
+        "purple": "بنفسجي",
+        "cyan": "سماوي",
+        "orange": "برتقالي"
+      },
+      "preview": {
+        "defaultIcon": "?",
+        "fallbackName": "اسم الغرض",
+        "approvalRequired": "موافقة مطلوبة",
+        "noApprovalRequired": "لا تتطلب موافقة"
+      },
+      "actions": {
+        "create": "إنشاء غرض",
+        "update": "تحديث الغرض"
+      },
+      "validation": {
+        "nameRequired": "اسم الغرض مطلوب",
+        "nameMin": "يجب أن يكون اسم الغرض حرفين على الأقل",
+        "nameMax": "يجب أن يكون اسم الغرض أقل من 100 حرف",
+        "descriptionMax": "يجب أن يكون الوصف أقل من 500 حرف",
+        "displayOrderInvalid": "يجب أن يكون ترتيب العرض رقماً",
+        "colorInvalid": "يجب أن يكون رمز اللون قيمة hex صالحة (مثال: #6B7280)"
+      }
+    },
+    "bulkSelected_one": "{{count}} غرض محدد",
+    "bulkSelected_other": "{{count}} غرض محدد",
+    "bulkDeleteMessage_one": "هل تريد حذف {{count}} غرض زيارة؟ سيؤدي ذلك إلى إلغاء تفعيل الأغراض مع الحفاظ على البيانات التاريخية.",
+    "bulkDeleteMessage_other": "هل تريد حذف {{count}} غرض زيارة؟ سيؤدي ذلك إلى إلغاء تفعيل الأغراض مع الحفاظ على البيانات التاريخية."
   }
 }

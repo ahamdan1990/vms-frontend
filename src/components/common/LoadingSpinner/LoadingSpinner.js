@@ -310,7 +310,7 @@ export const LoadingProgress = ({
         />
       </div>
       {showPercentage && (
-        <div className="text-right mt-1">
+        <div className="text-end mt-1">
           <span className="text-sm text-gray-600">{Math.round(progress)}%</span>
         </div>
       )}

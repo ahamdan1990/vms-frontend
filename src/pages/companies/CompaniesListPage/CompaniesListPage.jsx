@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 import { usePermissions } from '../../../hooks/usePermissions';
 
 // Services
@@ -33,6 +33,7 @@ import {
  * Manages company CRUD operations with search, filtering, and verification
  */
 const CompaniesListPage = () => {
+  const { t } = useTranslation('system');
   // Hooks
   const { isAdmin, systemConfig } = usePermissions();
 
@@ -86,12 +87,12 @@ const CompaniesListPage = () => {
         }
       }
     } catch (err) {
-      setError(err.message || 'Failed to load companies');
+      setError(err.message || t('companies.failedLoad'));
       console.error('Error loading companies:', err);
     } finally {
       setLoading(false);
     }
-  }, [pagination.pageNumber, pagination.pageSize, filters]);
+  }, [pagination.pageNumber, pagination.pageSize, filters, t]);
 
   // Load companies on mount and when filters change
   useEffect(() => {
@@ -120,7 +121,7 @@ const CompaniesListPage = () => {
       setFormData(null);
       await loadCompanies();
     } catch (err) {
-      setError(err.message || 'Failed to create company');
+      setError(err.message || t('companies.failedCreate'));
       console.error('Error creating company:', err);
     } finally {
       setFormLoading(false);
@@ -138,7 +139,7 @@ const CompaniesListPage = () => {
       setFormData(null);
       await loadCompanies();
     } catch (err) {
-      setError(err.message || 'Failed to update company');
+      setError(err.message || t('companies.failedUpdate'));
       console.error('Error updating company:', err);
     } finally {
       setFormLoading(false);
@@ -155,7 +156,7 @@ const CompaniesListPage = () => {
       setCurrentCompany(null);
       await loadCompanies();
     } catch (err) {
-      setError(err.message || 'Failed to delete company');
+      setError(err.message || t('companies.failedDelete'));
       console.error('Error deleting company:', err);
     } finally {
       setFormLoading(false);
@@ -169,7 +170,7 @@ const CompaniesListPage = () => {
       await companyService.verifyCompany(companyId);
       await loadCompanies();
     } catch (err) {
-      setError(err.message || 'Failed to verify company');
+      setError(err.message || t('companies.failedVerify'));
       console.error('Error verifying company:', err);
     }
   };
@@ -178,7 +179,7 @@ const CompaniesListPage = () => {
   const columns = [
     {
       key: 'name',
-      header: 'Company',
+      header: t('companies.columns.company'),
       sortable: true,
       render: (value, company) => (
         <div>
@@ -198,7 +199,7 @@ const CompaniesListPage = () => {
     },
     {
       key: 'industry',
-      header: 'Industry',
+      header: t('companies.columns.industry'),
       sortable: true,
       render: (value, company) => (
         <span className="text-sm text-gray-900">
@@ -208,7 +209,7 @@ const CompaniesListPage = () => {
     },
     {
       key: 'contactPersonName',
-      header: 'Contact Person',
+      header: t('companies.columns.contactPerson'),
       render: (value, company) => (
         <div className="text-sm text-gray-900">
           {company.contactPersonName ? (
@@ -235,7 +236,7 @@ const CompaniesListPage = () => {
     },
     {
       key: 'isVerified',
-      header: 'Verification',
+      header: t('companies.columns.verification'),
       sortable: true,
       render: (value, company) => (
         <div className="flex items-center gap-2">
@@ -243,15 +244,15 @@ const CompaniesListPage = () => {
             variant={company.isVerified ? 'success' : 'secondary'}
             size="sm"
           >
-            {company.isVerified ? 'Verified' : 'Unverified'}
+            {company.isVerified ? t('companies.verified') : t('companies.unverified')}
           </Badge>
           {!company.isVerified && canUpdate && (
             <button
               onClick={() => handleVerifyCompany(company.id)}
               className="text-blue-600 hover:text-blue-900 text-xs font-medium"
-              title="Verify company"
+              title={t('companies.verify')}
             >
-              Verify
+              {t('companies.verify')}
             </button>
           )}
         </div>
@@ -259,7 +260,7 @@ const CompaniesListPage = () => {
     },
     {
       key: 'visitorCount',
-      header: 'Visitors',
+      header: t('companies.columns.visitors'),
       sortable: true,
       render: (value, company) => (
         <span className="text-sm font-medium text-gray-900">
@@ -269,20 +270,20 @@ const CompaniesListPage = () => {
     },
     {
       key: 'isActive',
-      header: 'Status',
+      header: t('companies.columns.status'),
       sortable: true,
       render: (value, company) => (
         <Badge
           variant={company.isActive ? 'success' : 'secondary'}
           size="sm"
         >
-          {company.isActive ? 'Active' : 'Inactive'}
+          {company.isActive ? t('companies.active') : t('companies.inactive')}
         </Badge>
       )
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('companies.columns.actions'),
       width: '120px',
       sortable: false,
       render: (value, company) => (
@@ -293,7 +294,7 @@ const CompaniesListPage = () => {
               setShowViewModal(true);
             }}
             className="text-gray-600 hover:text-gray-900 transition-colors"
-            title="View details"
+            title={t('common:buttons.view')}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -308,7 +309,7 @@ const CompaniesListPage = () => {
                 setShowEditModal(true);
               }}
               className="text-blue-600 hover:text-blue-900 transition-colors"
-              title="Edit company"
+              title={t('common:buttons.edit')}
             >
               <PencilIcon className="w-4 h-4" />
             </button>
@@ -320,7 +321,7 @@ const CompaniesListPage = () => {
                 setShowDeleteModal(true);
               }}
               className="text-red-600 hover:text-red-900 transition-colors"
-              title="Delete company"
+              title={t('common:buttons.delete')}
             >
               <TrashIcon className="w-4 h-4" />
             </button>
@@ -333,10 +334,10 @@ const CompaniesListPage = () => {
   const handleResetFilters = () => {
     setSearchInput('');
     setFilters({
-      searchTerm: '',
-      isVerified: null,
-      sortBy: 'Name',
-      sortDirection: 'asc'
+          searchTerm: '',
+          isVerified: null,
+          sortBy: 'Name',
+          sortDirection: 'asc'
     });
     setPagination(prev => ({ ...prev, pageNumber: 1 }));
   };
@@ -345,8 +346,8 @@ const CompaniesListPage = () => {
     return (
       <div className="text-center py-12">
         <XCircleIcon className="w-12 h-12 text-red-500 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-gray-900">Access Denied</h2>
-        <p className="text-gray-500 mt-2">You don't have permission to view companies</p>
+        <h2 className="text-xl font-bold text-gray-900">{t('companies.accessDenied')}</h2>
+        <p className="text-gray-500 mt-2">{t('companies.accessDeniedDesc')}</p>
       </div>
     );
   }
@@ -356,9 +357,9 @@ const CompaniesListPage = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Companies</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('companies.title')}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Manage company information and verify company details
+            {t('companies.subtitle')}
           </p>
         </div>
         {canCreate && (
@@ -369,7 +370,7 @@ const CompaniesListPage = () => {
             }}
             icon={<PlusIcon className="w-5 h-5" />}
           >
-            Add Company
+            {t('companies.createButton')}
           </Button>
         )}
       </div>
@@ -387,10 +388,10 @@ const CompaniesListPage = () => {
           <div className="flex-1">
             <Input
               type="text"
-              placeholder="Search companies..."
+              placeholder={t('companies.searchPlaceholder')}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              icon={<MagnifyingGlassIcon className="w-5 h-5" />}
+              leftIcon={<MagnifyingGlassIcon className="w-5 h-5" />}
             />
           </div>
 
@@ -400,7 +401,7 @@ const CompaniesListPage = () => {
               onClick={() => setShowFilters(!showFilters)}
               icon={<FunnelIcon className="w-5 h-5" />}
             >
-              Filters
+              {t('companies.filters')}
             </Button>
 
             {filters.searchTerm && (
@@ -408,7 +409,7 @@ const CompaniesListPage = () => {
                 variant="ghost"
                 onClick={handleResetFilters}
               >
-                Clear Filters
+                {t('companies.clearFilters')}
               </Button>
             )}
           </div>
@@ -426,7 +427,7 @@ const CompaniesListPage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Verification Status
+                    {t('companies.verificationStatus')}
                   </label>
                   <select
                     value={filters.isVerified === null ? '' : filters.isVerified}
@@ -438,15 +439,15 @@ const CompaniesListPage = () => {
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">All</option>
-                    <option value="true">Verified</option>
-                    <option value="false">Unverified</option>
+                    <option value="">{t('companies.all')}</option>
+                    <option value="true">{t('companies.verified')}</option>
+                    <option value="false">{t('companies.unverified')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sort By
+                    {t('companies.sortBy')}
                   </label>
                   <select
                     value={filters.sortBy}
@@ -455,16 +456,16 @@ const CompaniesListPage = () => {
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="Name">Name</option>
-                    <option value="Code">Code</option>
-                    <option value="CreatedOn">Created Date</option>
-                    <option value="VisitorCount">Visitor Count</option>
+                    <option value="Name">{t('companies.sortByName')}</option>
+                    <option value="Code">{t('companies.sortByCode')}</option>
+                    <option value="CreatedOn">{t('companies.sortByCreatedDate')}</option>
+                    <option value="VisitorCount">{t('companies.sortByVisitorCount')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sort Direction
+                    {t('companies.sortDirection')}
                   </label>
                   <select
                     value={filters.sortDirection}
@@ -473,8 +474,8 @@ const CompaniesListPage = () => {
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="asc">Ascending</option>
-                    <option value="desc">Descending</option>
+                    <option value="asc">{t('companies.ascending')}</option>
+                    <option value="desc">{t('companies.descending')}</option>
                   </select>
                 </div>
               </div>
@@ -492,15 +493,15 @@ const CompaniesListPage = () => {
         ) : companies.length === 0 ? (
           <div className="text-center py-12">
             <BuildingOffice2Icon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900">No companies found</h3>
-            <p className="text-gray-500 mt-2">Get started by creating a new company</p>
+            <h3 className="text-lg font-medium text-gray-900">{t('companies.emptyMessage')}</h3>
+            <p className="text-gray-500 mt-2">{t('companies.emptyDesc')}</p>
           </div>
         ) : (
           <Table
             data={companies}
             columns={columns}
             loading={loading}
-            emptyMessage="No companies found"
+            emptyMessage={t('companies.emptyMessage')}
             className="companies-table"
           />
         )}
@@ -513,32 +514,32 @@ const CompaniesListPage = () => {
           setShowViewModal(false);
           setViewingCompany(null);
         }}
-        title="Company Details"
+        title={t('companies.details.title')}
         size="lg"
       >
         {viewingCompany && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Company Name</label>
+                <label className="block text-sm font-medium text-gray-700">{t('companies.details.companyName')}</label>
                 <p className="mt-1 text-sm text-gray-900">{viewingCompany.name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Company Code</label>
+                <label className="block text-sm font-medium text-gray-700">{t('companies.details.companyCode')}</label>
                 <p className="mt-1 text-sm text-gray-900">{viewingCompany.code}</p>
               </div>
             </div>
 
             {viewingCompany.industry && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Industry</label>
+                <label className="block text-sm font-medium text-gray-700">{t('companies.details.industry')}</label>
                 <p className="mt-1 text-sm text-gray-900">{viewingCompany.industry}</p>
               </div>
             )}
 
             {viewingCompany.description && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <label className="block text-sm font-medium text-gray-700">{t('companies.details.description')}</label>
                 <p className="mt-1 text-sm text-gray-900">{viewingCompany.description}</p>
               </div>
             )}
@@ -546,19 +547,19 @@ const CompaniesListPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {viewingCompany.contactPersonName && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Contact Person</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('companies.details.contactPerson')}</label>
                   <p className="mt-1 text-sm text-gray-900">{viewingCompany.contactPersonName}</p>
                 </div>
               )}
               {viewingCompany.email && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('companies.details.email')}</label>
                   <p className="mt-1 text-sm text-gray-900">{viewingCompany.email}</p>
                 </div>
               )}
               {viewingCompany.phoneNumber && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Phone</label>
+                  <label className="block text-sm font-medium text-gray-700">{t('companies.details.phone')}</label>
                   <p className="mt-1 text-sm text-gray-900">{viewingCompany.phoneNumber}</p>
                 </div>
               )}
@@ -566,18 +567,18 @@ const CompaniesListPage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Verification Status</label>
+                <label className="block text-sm font-medium text-gray-700">{t('companies.details.verificationStatus')}</label>
                 <div className="mt-1">
                   <Badge variant={viewingCompany.isVerified ? 'success' : 'secondary'} size="sm">
-                    {viewingCompany.isVerified ? 'Verified' : 'Unverified'}
+                    {viewingCompany.isVerified ? t('companies.verified') : t('companies.unverified')}
                   </Badge>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <label className="block text-sm font-medium text-gray-700">{t('companies.details.status')}</label>
                 <div className="mt-1">
                   <Badge variant={viewingCompany.isActive ? 'success' : 'secondary'} size="sm">
-                    {viewingCompany.isActive ? 'Active' : 'Inactive'}
+                    {viewingCompany.isActive ? t('companies.active') : t('companies.inactive')}
                   </Badge>
                 </div>
               </div>
@@ -591,7 +592,7 @@ const CompaniesListPage = () => {
                   setViewingCompany(null);
                 }}
               >
-                Close
+                {t('companies.details.close')}
               </Button>
               {canUpdate && (
                 <Button
@@ -602,7 +603,7 @@ const CompaniesListPage = () => {
                     setShowEditModal(true);
                   }}
                 >
-                  Edit
+                  {t('companies.details.edit')}
                 </Button>
               )}
             </div>
@@ -619,7 +620,7 @@ const CompaniesListPage = () => {
           setFormData(null);
           setCurrentCompany(null);
         }}
-        title={showCreateModal ? 'Create Company' : 'Edit Company'}
+        title={showCreateModal ? t('companies.createTitle') : t('companies.editTitle')}
         size="lg"
       >
         <CompanyForm
@@ -644,14 +645,14 @@ const CompaniesListPage = () => {
           setCurrentCompany(null);
         }}
         onConfirm={handleDeleteCompany}
-        title="Delete Company"
+        title={t('companies.deleteTitle')}
         message={
           currentCompany
-            ? `Are you sure you want to delete "${currentCompany.name}"? This cannot be undone.`
-            : 'Are you sure you want to delete this company?'
+            ? t('companies.deleteMessage', { name: currentCompany.name })
+            : t('common:confirm.delete')
         }
-        confirmText="Delete"
-        cancelText="Cancel"
+        confirmText={t('companies.deleteConfirm')}
+        cancelText={t('companies.cancel')}
         variant="danger"
         loading={formLoading}
       />
@@ -661,6 +662,7 @@ const CompaniesListPage = () => {
 
 // Company Form Component
 const CompanyForm = ({ initialData, onSubmit, onCancel, loading, error }) => {
+  const { t } = useTranslation('system');
   const [formState, setFormState] = useState(initialData || {
     name: '',
     code: '',
@@ -697,9 +699,9 @@ const CompanyForm = ({ initialData, onSubmit, onCancel, loading, error }) => {
   };
 
   const tabs = [
-    { id: 'basic', label: 'Basic Info', icon: '🏢' },
-    { id: 'contact', label: 'Contact', icon: '📞' },
-    { id: 'address', label: 'Address', icon: '📍' }
+    { id: 'basic', label: t('companies.form.tabBasic') },
+    { id: 'contact', label: t('companies.form.tabContact') },
+    { id: 'address', label: t('companies.form.tabAddress') }
   ];
 
   return (
@@ -723,7 +725,6 @@ const CompanyForm = ({ initialData, onSubmit, onCancel, loading, error }) => {
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}
           >
-            <span className="me-1.5">{tab.icon}</span>
             {tab.label}
           </button>
         ))}
@@ -737,7 +738,7 @@ const CompanyForm = ({ initialData, onSubmit, onCancel, loading, error }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Company Name <span className="text-red-500">*</span>
+                  {t('companies.form.companyName')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -746,13 +747,13 @@ const CompanyForm = ({ initialData, onSubmit, onCancel, loading, error }) => {
                   value={formState.name || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., Acme Corporation"
+                  placeholder={t('companies.form.companyNamePlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Company Code <span className="text-red-500">*</span>
+                  {t('companies.form.companyCode')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -761,7 +762,7 @@ const CompanyForm = ({ initialData, onSubmit, onCancel, loading, error }) => {
                   value={formState.code || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., ACME"
+                  placeholder={t('companies.form.companyCodePlaceholder')}
                   disabled={!!initialData}
                 />
               </div>
@@ -769,19 +770,19 @@ const CompanyForm = ({ initialData, onSubmit, onCancel, loading, error }) => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Industry</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('companies.form.industry')}</label>
                 <input
                   type="text"
                   name="industry"
                   value={formState.industry || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., Technology"
+                  placeholder={t('companies.form.industryPlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Employee Count</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('companies.form.employeeCount')}</label>
                 <input
                   type="number"
                   name="employeeCount"
@@ -789,46 +790,46 @@ const CompanyForm = ({ initialData, onSubmit, onCancel, loading, error }) => {
                   onChange={handleChange}
                   min="1"
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., 100"
+                  placeholder={t('companies.form.employeeCountPlaceholder')}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Website</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('companies.form.website')}</label>
                 <input
                   type="url"
                   name="website"
                   value={formState.website || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://example.com"
+                  placeholder={t('companies.form.websitePlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Tax ID / Registration Number</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('companies.form.taxId')}</label>
                 <input
                   type="text"
                   name="taxId"
                   value={formState.taxId || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., 12-3456789"
+                  placeholder={t('companies.form.taxIdPlaceholder')}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('companies.form.descriptionLabel')}</label>
               <textarea
                 name="description"
                 value={formState.description || ''}
                 onChange={handleChange}
                 rows={3}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Brief description of the company..."
+                placeholder={t('companies.form.descriptionPlaceholder')}
               />
             </div>
           </div>
@@ -838,38 +839,38 @@ const CompanyForm = ({ initialData, onSubmit, onCancel, loading, error }) => {
         {activeTab === 'contact' && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Person Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('companies.form.contactPersonName')}</label>
               <input
                 type="text"
                 name="contactPersonName"
                 value={formState.contactPersonName || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., John Doe"
+                placeholder={t('companies.form.contactPersonNamePlaceholder')}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('companies.form.contactEmail')}</label>
               <input
                 type="email"
                 name="email"
                 value={formState.email || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="contact@example.com"
+                placeholder={t('companies.form.contactEmailPlaceholder')}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Phone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('companies.form.contactPhone')}</label>
               <input
                 type="tel"
                 name="phoneNumber"
                 value={formState.phoneNumber || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="+1 (555) 123-4567"
+                placeholder={t('companies.form.contactPhonePlaceholder')}
               />
             </div>
           </div>
@@ -879,77 +880,77 @@ const CompanyForm = ({ initialData, onSubmit, onCancel, loading, error }) => {
         {activeTab === 'address' && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Street Address 1</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('companies.form.street1')}</label>
               <input
                 type="text"
                 name="street1"
                 value={formState.street1 || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., 123 Main Street"
+                placeholder={t('companies.form.street1Placeholder')}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Street Address 2</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('companies.form.street2')}</label>
               <input
                 type="text"
                 name="street2"
                 value={formState.street2 || ''}
                 onChange={handleChange}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Suite, Floor, Building (optional)"
+                placeholder={t('companies.form.street2Placeholder')}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">City</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('companies.form.city')}</label>
                 <input
                   type="text"
                   name="city"
                   value={formState.city || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., New York"
+                  placeholder={t('companies.form.cityPlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">State / Province</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('companies.form.stateProvince')}</label>
                 <input
                   type="text"
                   name="state"
                   value={formState.state || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., NY"
+                  placeholder={t('companies.form.stateProvincePlaceholder')}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Postal Code</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('companies.form.postalCode')}</label>
                 <input
                   type="text"
                   name="postalCode"
                   value={formState.postalCode || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., 10001"
+                  placeholder={t('companies.form.postalCodePlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Country</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('companies.form.country')}</label>
                 <input
                   type="text"
                   name="country"
                   value={formState.country || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g., United States"
+                  placeholder={t('companies.form.countryPlaceholder')}
                 />
               </div>
             </div>
@@ -960,10 +961,10 @@ const CompanyForm = ({ initialData, onSubmit, onCancel, loading, error }) => {
       {/* Action Buttons */}
       <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
         <Button variant="outline" onClick={onCancel} type="button">
-          Cancel
+          {t('companies.form.cancel')}
         </Button>
         <Button type="submit" loading={loading}>
-          {initialData ? 'Update' : 'Create'}
+          {initialData ? t('companies.form.update') : t('companies.form.create')}
         </Button>
       </div>
     </form>

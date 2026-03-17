@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // Redux imports
 import {
@@ -95,7 +96,7 @@ import {
 // Utils
 import formatters from '../../../utils/formatters';
 import { extractErrorMessage } from '../../../utils/errorUtils';
-import { InvitationStatus, InvitationStatusLabels } from '../../../constants/invitationStatus';
+import { InvitationStatus } from '../../../constants/invitationStatus';
 
 /**
  * Comprehensive Invitations List Component
@@ -104,6 +105,7 @@ import { InvitationStatus, InvitationStatusLabels } from '../../../constants/inv
  */
 const InvitationsList = () => {
   const dispatch = useDispatch();
+  const { t } = useTranslation(['invitations', 'common']);
 
   // Redux selectors
   const invitations = useSelector(selectInvitationsList);
@@ -280,6 +282,18 @@ const InvitationsList = () => {
 
   // Status badge helper — status values from API are camelCase strings
   const getStatusBadge = (invitation) => {
+    const statusLabelKeys = {
+      [InvitationStatus.Draft]: 'common:status.draft',
+      [InvitationStatus.Submitted]: 'common:status.submitted',
+      [InvitationStatus.UnderReview]: 'common:status.underReview',
+      [InvitationStatus.Approved]: 'common:status.approved',
+      [InvitationStatus.Rejected]: 'common:status.rejected',
+      [InvitationStatus.Cancelled]: 'common:status.cancelled',
+      [InvitationStatus.Expired]: 'common:status.expired',
+      [InvitationStatus.Active]: 'common:status.active',
+      [InvitationStatus.Completed]: 'common:status.completed'
+    };
+
     const statusConfig = {
       [InvitationStatus.Draft]: { variant: 'secondary', icon: DocumentDuplicateIcon },
       [InvitationStatus.Submitted]: { variant: 'info', icon: ClockIconSolid },
@@ -298,7 +312,7 @@ const InvitationsList = () => {
     return (
       <Badge variant={config.variant} size="sm" className="flex items-center gap-1">
         <IconComponent className="w-3 h-3" />
-        <span>{InvitationStatusLabels[invitation.status] ?? invitation.status}</span>
+        <span>{t(statusLabelKeys[invitation.status] || 'common:status.draft')}</span>
       </Badge>
     );
   };
@@ -306,11 +320,11 @@ const InvitationsList = () => {
   // Type badge helper
   const getTypeBadge = (invitation) => {
     const typeConfig = {
-      Single: { variant: 'info', text: 'Single' },
-      Group: { variant: 'primary', text: 'Group' },
-      Recurring: { variant: 'warning', text: 'Recurring' },
-      WalkIn: { variant: 'secondary', text: 'Walk-in' },
-      BulkImport: { variant: 'info', text: 'Bulk' }
+      Single: { variant: 'info', text: t('type.single') },
+      Group: { variant: 'primary', text: t('type.group') },
+      Recurring: { variant: 'warning', text: t('type.recurring') },
+      WalkIn: { variant: 'secondary', text: t('type.walkIn') },
+      BulkImport: { variant: 'info', text: t('type.bulk') }
     };
 
     const config = typeConfig[invitation.type] || typeConfig.Single;
@@ -320,7 +334,7 @@ const InvitationsList = () => {
   // Visitor display helper
   const formatVisitorInfo = (invitation) => {
     const visitor = invitation.visitor;
-    if (!visitor) return 'Unknown Visitor';
+    if (!visitor) return t('unknownVisitor');
 
     return (
       <div className="flex items-center gap-2">
@@ -344,7 +358,7 @@ const InvitationsList = () => {
   // Host display helper
   const formatHostInfo = (invitation) => {
     const host = invitation.host;
-    if (!host) return 'Unknown Host';
+    if (!host) return t('unknownHost');
 
     return (
       <div className="text-sm">
@@ -374,7 +388,7 @@ const InvitationsList = () => {
         </div>
         {duration && (
           <div className="text-gray-500">
-            Duration: {duration}h
+            {t('details.fields.durationHours', { hours: duration })}
           </div>
         )}
       </div>
@@ -384,7 +398,7 @@ const InvitationsList = () => {
   // Location display helper
   const formatLocationInfo = (invitation) => {
     const location = invitation.location;
-    if (!location) return 'No location specified';
+    if (!location) return t('noLocation');
 
     return (
       <div className="text-sm">
@@ -422,7 +436,7 @@ const InvitationsList = () => {
     },
     {
       key: 'invitation',
-      header: 'Invitation',
+      header: t('table.columns.invitation'),
       sortable: true,
       className: 'min-w-[250px]',
       render: (_, invitation) => {
@@ -444,48 +458,48 @@ const InvitationsList = () => {
     },
     {
       key: 'visitor',
-      header: 'Visitor',
+      header: t('table.columns.visitor'),
       sortable: true,
       className: 'min-w-[200px]',
       render: (_, invitation) => formatVisitorInfo(invitation)
     },
     {
       key: 'host',
-      header: 'Host',
+      header: t('table.columns.host'),
       sortable: true,
       className: 'min-w-[150px]',
       render: (_, invitation) => formatHostInfo(invitation)
     },
     {
       key: 'schedule',
-      header: 'Schedule',
+      header: t('table.columns.schedule'),
       sortable: true,
       className: 'min-w-[180px]',
       render: (_, invitation) => formatVisitTime(invitation)
     },
     {
       key: 'location',
-      header: 'Location',
+      header: t('table.columns.location'),
       sortable: true,
       className: 'min-w-[150px]',
       render: (_, invitation) => formatLocationInfo(invitation)
     },
     {
       key: 'status',
-      header: 'Status',
+      header: t('table.columns.status'),
       sortable: true,
       className: 'min-w-[120px]',
       render: (_, invitation) => getStatusBadge(invitation)
     },
     {
       key: 'actions',
-      header: 'Actions',
+      header: t('table.columns.actions'),
       sortable: false,
       className: 'min-w-[120px]',
       render: (_, invitation) => {
         return (
           <div className="flex items-center gap-1">
-            <Tooltip content="View Details">
+            <Tooltip content={t('tooltips.viewDetails')}>
               <Button
                 variant="ghost"
                 size="sm"
@@ -495,7 +509,7 @@ const InvitationsList = () => {
             </Tooltip>
 
             {invitation.canBeModified && (
-              <Tooltip content="Edit">
+              <Tooltip content={t('actions.edit')}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -506,7 +520,7 @@ const InvitationsList = () => {
             )}
 
             {isAdmin && invitation.status === InvitationStatus.Submitted && (
-              <Tooltip content="Assign to Review">
+              <Tooltip content={t('actions.assignToReview')}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -518,7 +532,7 @@ const InvitationsList = () => {
             )}
 
             {(invitation.status === InvitationStatus.Submitted || invitation.status === InvitationStatus.UnderReview) && (
-              <Tooltip content="Approve/Reject">
+              <Tooltip content={t('actions.approveReject')}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -529,7 +543,7 @@ const InvitationsList = () => {
             )}
 
             {invitation.isApproved && (
-              <Tooltip content="QR Code">
+              <Tooltip content={t('actions.qr')}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -540,7 +554,7 @@ const InvitationsList = () => {
             )}
 
             {invitation.canBeCancelled && (
-              <Tooltip content="Delete">
+              <Tooltip content={t('actions.delete')}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -555,14 +569,18 @@ const InvitationsList = () => {
       }
     }
   ];
+
+  const bulkActionLabel = bulkAction
+    ? t(`actions.${bulkAction}`, { defaultValue: bulkAction })
+    : '';
   // Main render
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Invitations</h1>
-          <p className="text-gray-600">Manage visitor invitations and approvals</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('pageTitle')}</h1>
+          <p className="text-gray-600">{t('pageSubtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           <Button
@@ -570,13 +588,13 @@ const InvitationsList = () => {
             onClick={() => setShowFilters(!showFilters)}
             icon={<FunnelIcon className="w-4 h-4" />}
           >
-            Filters
+            {t('filters.title')}
           </Button>
           <Button
             onClick={handleCreateInvitation}
             icon={<PlusIcon className="w-4 h-4" />}
           >
-            Create Invitation
+            {t('createButton')}
           </Button>
         </div>
       </div>
@@ -590,7 +608,7 @@ const InvitationsList = () => {
                 <DocumentDuplicateIcon className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total</p>
+                <p className="text-sm font-medium text-gray-600">{t('stats.total')}</p>
                 <p className="text-2xl font-bold text-gray-900">{statistics.total}</p>
               </div>
             </div>
@@ -602,7 +620,7 @@ const InvitationsList = () => {
                 <ClockIconSolid className="w-6 h-6 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Pending</p>
+                <p className="text-sm font-medium text-gray-600">{t('stats.pending')}</p>
                 <p className="text-2xl font-bold text-gray-900">{statistics.pendingApproval}</p>
               </div>
             </div>
@@ -614,7 +632,7 @@ const InvitationsList = () => {
                 <CheckCircleIcon className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Approved</p>
+                <p className="text-sm font-medium text-gray-600">{t('stats.approved')}</p>
                 <p className="text-2xl font-bold text-gray-900">{statistics.byStatus.approved}</p>
               </div>
             </div>
@@ -626,7 +644,7 @@ const InvitationsList = () => {
                 <UserIcon className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Today</p>
+                <p className="text-sm font-medium text-gray-600">{t('stats.activeToday')}</p>
                 <p className="text-2xl font-bold text-gray-900">{statistics.activeToday}</p>
               </div>
             </div>
@@ -638,7 +656,7 @@ const InvitationsList = () => {
                 <XCircleIcon className="w-6 h-6 text-red-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Rejected</p>
+                <p className="text-sm font-medium text-gray-600">{t('stats.rejected')}</p>
                 <p className="text-2xl font-bold text-gray-900">{statistics.byStatus.rejected}</p>
               </div>
             </div>
@@ -658,7 +676,7 @@ const InvitationsList = () => {
             onClick={() => dispatch(clearError())}
             className="mt-2 text-red-600"
           >
-            Dismiss
+            {t('common:buttons.dismiss')}
           </Button>
         </div>
       )}
@@ -676,51 +694,51 @@ const InvitationsList = () => {
             <Card className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Input
-                  label="Search"
+                  label={t('common:buttons.search')}
                   type="text"
                   value={filters.searchTerm}
                   onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
-                  placeholder="Search invitations..."
-                  icon={<MagnifyingGlassIcon className="w-4 h-4" />}
+                  placeholder={t('search.placeholder')}
+                  leftIcon={<MagnifyingGlassIcon className="w-4 h-4" />}
                 />
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
+                    {t('filters.status')}
                   </label>
                   <select
                     value={filters.status || ''}
                     onChange={(e) => handleFilterChange('status', e.target.value || null)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">All Statuses</option>
-                    <option value={InvitationStatus.Draft}>Draft</option>
-                    <option value={InvitationStatus.Submitted}>Submitted</option>
-                    <option value={InvitationStatus.UnderReview}>Under Review</option>
-                    <option value={InvitationStatus.Approved}>Approved</option>
-                    <option value={InvitationStatus.Rejected}>Rejected</option>
-                    <option value={InvitationStatus.Cancelled}>Cancelled</option>
-                    <option value={InvitationStatus.Expired}>Expired</option>
-                    <option value={InvitationStatus.Active}>Active</option>
-                    <option value={InvitationStatus.Completed}>Completed</option>
+                    <option value="">{t('filters.allStatuses')}</option>
+                    <option value={InvitationStatus.Draft}>{t('common:status.draft')}</option>
+                    <option value={InvitationStatus.Submitted}>{t('common:status.submitted')}</option>
+                    <option value={InvitationStatus.UnderReview}>{t('common:status.underReview')}</option>
+                    <option value={InvitationStatus.Approved}>{t('common:status.approved')}</option>
+                    <option value={InvitationStatus.Rejected}>{t('common:status.rejected')}</option>
+                    <option value={InvitationStatus.Cancelled}>{t('common:status.cancelled')}</option>
+                    <option value={InvitationStatus.Expired}>{t('common:status.expired')}</option>
+                    <option value={InvitationStatus.Active}>{t('common:status.active')}</option>
+                    <option value={InvitationStatus.Completed}>{t('common:status.completed')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Type
+                    {t('filters.type')}
                   </label>
                   <select
                     value={filters.type || ''}
                     onChange={(e) => handleFilterChange('type', e.target.value || null)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">All Types</option>
-                    <option value="Single">Single</option>
-                    <option value="Group">Group</option>
-                    <option value="Recurring">Recurring</option>
-                    <option value="WalkIn">Walk-in</option>
-                    <option value="BulkImport">Bulk Import</option>
+                    <option value="">{t('filters.allTypes')}</option>
+                    <option value="Single">{t('type.single')}</option>
+                    <option value="Group">{t('type.group')}</option>
+                    <option value="Recurring">{t('type.recurring')}</option>
+                    <option value="WalkIn">{t('type.walkIn')}</option>
+                    <option value="BulkImport">{t('type.bulk')}</option>
                   </select>
                 </div>
 
@@ -730,21 +748,21 @@ const InvitationsList = () => {
                     onClick={handleResetFilters}
                     icon={<ArrowPathIcon className="w-4 h-4" />}
                   >
-                    Reset
+                    {t('actions.reset')}
                   </Button>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <Input
-                  label="Start Date"
+                  label={t('filters.startDate')}
                   type="date"
                   value={filters.startDate}
                   onChange={(e) => handleFilterChange('startDate', e.target.value)}
                 />
 
                 <Input
-                  label="End Date"
+                  label={t('filters.endDate')}
                   type="date"
                   value={filters.endDate}
                   onChange={(e) => handleFilterChange('endDate', e.target.value)}
@@ -759,7 +777,7 @@ const InvitationsList = () => {
                     onChange={(e) => handleFilterChange('pendingApprovalsOnly', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <span className="text-sm text-gray-700">Pending Approvals Only</span>
+                  <span className="text-sm text-gray-700">{t('filters.pendingOnly')}</span>
                 </label>
 
                 <label className="flex items-center gap-2">
@@ -769,7 +787,7 @@ const InvitationsList = () => {
                     onChange={(e) => handleFilterChange('activeOnly', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <span className="text-sm text-gray-700">Active Only</span>
+                  <span className="text-sm text-gray-700">{t('filters.activeOnly')}</span>
                 </label>
 
                 <label className="flex items-center gap-2">
@@ -779,7 +797,7 @@ const InvitationsList = () => {
                     onChange={(e) => handleFilterChange('expiredOnly', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <span className="text-sm text-gray-700">Expired Only</span>
+                  <span className="text-sm text-gray-700">{t('filters.expiredOnly')}</span>
                 </label>
 
                 <label className="flex items-center gap-2">
@@ -789,7 +807,7 @@ const InvitationsList = () => {
                     onChange={(e) => handleFilterChange('includeDeleted', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <span className="text-sm text-gray-700">Include Deleted</span>
+                  <span className="text-sm text-gray-700">{t('filters.includeDeleted')}</span>
                 </label>
               </div>
             </Card>
@@ -803,7 +821,9 @@ const InvitationsList = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-gray-700">
-                {selectedInvitations.length} invitation{selectedInvitations.length !== 1 ? 's' : ''} selected
+                {selectedInvitations.length === 1
+                  ? t('bulk.selected', { count: selectedInvitations.length })
+                  : t('bulk.selected_plural', { count: selectedInvitations.length })}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -813,7 +833,7 @@ const InvitationsList = () => {
                 onClick={() => handleBulkAction('approve')}
                 icon={<CheckIcon className="w-4 h-4" />}
               >
-                Approve
+                {t('bulk.approve')}
               </Button>
               <Button
                 variant="outline"
@@ -821,7 +841,7 @@ const InvitationsList = () => {
                 onClick={() => handleBulkAction('reject')}
                 icon={<XMarkIcon className="w-4 h-4" />}
               >
-                Reject
+                {t('bulk.reject')}
               </Button>
               <Button
                 variant="outline"
@@ -829,7 +849,7 @@ const InvitationsList = () => {
                 onClick={() => handleBulkAction('cancel')}
                 icon={<XMarkIcon className="w-4 h-4" />}
               >
-                Cancel
+                {t('bulk.cancel')}
               </Button>
               <Button
                 variant="outline"
@@ -838,14 +858,14 @@ const InvitationsList = () => {
                 className="text-red-600 border-red-300 hover:bg-red-50"
                 icon={<TrashIcon className="w-4 h-4" />}
               >
-                Delete
+                {t('bulk.delete')}
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => dispatch(clearSelections())}
               >
-                Clear Selection
+                {t('bulk.clearSelection')}
               </Button>
             </div>
           </div>
@@ -870,7 +890,7 @@ const InvitationsList = () => {
               onSort={handleSort}
               sortBy={filters.sortBy}
               sortDirection={filters.sortDirection}
-              emptyMessage="No invitations found"
+              emptyMessage={t('table.emptyMessage')}
               hover
               bordered
               className="invitations-table"
@@ -893,16 +913,16 @@ const InvitationsList = () => {
         ) : (
           <div className="text-center py-12">
             <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No invitations</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">{t('empty.noInvitations')}</h3>
             <p className="mt-1 text-sm text-gray-500">
-              Get started by creating a new invitation.
+              {t('empty.getStarted')}
             </p>
             <div className="mt-6">
               <Button
                 onClick={handleCreateInvitation}
                 icon={<PlusIcon className="w-5 h-5" />}
               >
-                Create Invitation
+                {t('createButton')}
               </Button>
             </div>
           </div>
@@ -917,9 +937,11 @@ const InvitationsList = () => {
           setBulkAction('');
         }}
         onConfirm={handleConfirmBulkAction}
-        title={`${bulkAction.charAt(0).toUpperCase() + bulkAction.slice(1)} Invitations`}
-        message={`Are you sure you want to ${bulkAction} ${selectedInvitations.length} selected invitation${selectedInvitations.length !== 1 ? 's' : ''}?`}
-        confirmText={bulkAction.charAt(0).toUpperCase() + bulkAction.slice(1)}
+        title={t('confirmBulk.title', { action: bulkActionLabel })}
+        message={selectedInvitations.length === 1
+          ? t('confirmBulk.message', { action: bulkActionLabel, count: selectedInvitations.length })
+          : t('confirmBulk.message_plural', { action: bulkActionLabel, count: selectedInvitations.length })}
+        confirmText={t(`actions.${bulkAction}`, { defaultValue: bulkAction })}
         variant={bulkAction === 'delete' ? 'danger' : 'primary'}
         loading={approvalLoading || deleteLoading}
       />

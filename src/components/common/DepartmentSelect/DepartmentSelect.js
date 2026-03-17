@@ -2,21 +2,25 @@ import { useState, useEffect } from 'react';
 import departmentService from '../../../services/departmentService';
 import { BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import { useTranslation } from 'react-i18next';
 
 const DepartmentSelect = ({
   value,
   onChange,
-  label = 'Department',
-  placeholder = 'Select a department...',
+  label = '',
+  placeholder = '',
   required = false,
   disabled = false,
   error = null,
   showHierarchy = true,
   className = ''
 }) => {
+  const { t } = useTranslation(['system', 'common']);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+  const resolvedLabel = label || t('system:departments.columns.department');
+  const resolvedPlaceholder = placeholder || t('system:departments.parentDepartment');
 
   useEffect(() => {
     fetchDepartments();
@@ -58,7 +62,7 @@ const DepartmentSelect = ({
     } catch (err) {
       console.error('❌ [DepartmentSelect] Error fetching departments:', err);
       console.error('❌ [DepartmentSelect] Error details:', err.response?.data || err.message);
-      setLoadError('Failed to load departments');
+      setLoadError(t('system:departments.failedLoad'));
       setDepartments([]);
     } finally {
       setLoading(false);
@@ -118,9 +122,9 @@ const DepartmentSelect = ({
 
   return (
     <div className={`relative ${className}`}>
-      {label && (
+      {resolvedLabel && (
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          {label}
+          {resolvedLabel}
           {required && <span className="text-red-500 ms-1">*</span>}
         </label>
       )}
@@ -135,7 +139,7 @@ const DepartmentSelect = ({
           onChange={(e) => onChange(e.target.value ? parseInt(e.target.value) : null)}
           disabled={disabled || loading}
           className={`
-            block w-full pl-10 pr-10 py-2
+            block w-full ps-10 pe-10 py-2
             border rounded-lg
             bg-white dark:bg-gray-800
             text-gray-900 dark:text-white
@@ -145,17 +149,17 @@ const DepartmentSelect = ({
             appearance-none
           `}
         >
-          <option value="">{loading ? 'Loading...' : placeholder}</option>
+          <option value="">{loading ? t('common:loading.data') : resolvedPlaceholder}</option>
           {hierarchicalOptions.map((option) => (
             <option key={option.value} value={option.value}>
-              {showHierarchy && option.level > 0 && '└─ '.repeat(option.level)}
+              {showHierarchy && option.level > 0 && '-- '.repeat(option.level)}
               {option.label}
               {option.code && ` (${option.code})`}
             </option>
           ))}
         </select>
 
-        <div className="absolute inset-y-0 end-0 flex items-center pr-3 pointer-events-none">
+        <div className="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
           {loading ? (
             <LoadingSpinner size="sm" />
           ) : (
@@ -185,7 +189,7 @@ const DepartmentSelect = ({
                 )}
                 {selectedDept.managerName && (
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    • Manager: {selectedDept.managerName}
+                    • {t('system:departments.columns.manager')}: {selectedDept.managerName}
                   </span>
                 )}
               </div>
