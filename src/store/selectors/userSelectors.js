@@ -131,7 +131,7 @@ export const selectStaffUsers = createSelector(
 
 export const selectOperatorUsers = createSelector(
   [selectUsersList],
-  (users) => users.filter(user => user.role === 'Operator')
+  (users) => users.filter(user => user.role === 'Receptionist')
 );
 
 export const selectUsersNeedingPasswordChange = createSelector(

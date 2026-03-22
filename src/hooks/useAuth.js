@@ -234,7 +234,7 @@ export const useAuth = () => {
         if (isAuthenticated) {
           console.log('🔄 Refreshing permissions from backend...');
           try {
-            await dispatch(getCurrentUser());
+            await dispatch(getCurrentUser({ silent: true }));
             console.log('✅ Permissions refreshed successfully');
           } catch (error) {
             console.error('❌ Failed to refresh permissions:', error);

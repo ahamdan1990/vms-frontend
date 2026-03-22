@@ -47,7 +47,7 @@ export const ESCALATION_ACTIONS = {
 // User Roles for target roles
 export const TARGET_ROLES = {
   Staff: 'Staff',
-  Operator: 'Operator', 
+  Operator: 'Receptionist', 
   Administrator: 'Administrator',
   Security: 'Security',
   Manager: 'Manager'

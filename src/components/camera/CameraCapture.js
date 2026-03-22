@@ -60,8 +60,7 @@ const CameraCapture = ({
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           width: { ideal: maxWidth },
-          height: { ideal: maxHeight },
-          facingMode: 'user' // Front-facing camera for visitor photos
+          height: { ideal: maxHeight }
         },
         audio: false
       });

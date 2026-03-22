@@ -156,7 +156,8 @@ const userService = {
       postalCode: userData.postalCode || null,
       country: userData.country || null,
       latitude: userData.latitude || null,
-      longitude: userData.longitude || null
+      longitude: userData.longitude || null,
+      requiresApprovalOverride: userData.requiresApprovalOverride !== undefined ? userData.requiresApprovalOverride : null
     });
     
     return extractApiData(response);

@@ -196,6 +196,8 @@
       "lastNameRequired": "الاسم الأخير مطلوب",
       "phoneNumber": "رقم الهاتف",
       "phoneRequired": "رقم الهاتف مطلوب",
+      "email": "البريد الإلكتروني",
+      "emailRequired": "البريد الإلكتروني مطلوب",
       "emailOptional": "البريد الإلكتروني (اختياري)",
       "companyOptional": "الشركة (اختيارية)",
       "companyPlaceholder": "شركة ABC",

@@ -91,7 +91,7 @@ export const selectIsStaff = createSelector(
 
 export const selectIsOperator = createSelector(
   [selectUserRole],
-  (role) => role === 'Operator'
+  (role) => role === 'Receptionist'
 );
 
 export const selectRoleHierarchy = createSelector(
@@ -99,7 +99,7 @@ export const selectRoleHierarchy = createSelector(
   (role) => {
     const hierarchy = {
       'Staff': 1,
-      'Operator': 2,
+      'Receptionist': 2,
       'Administrator': 3
     };
     return hierarchy[role] || 0;
@@ -432,7 +432,7 @@ export const selectDashboardAccess = createSelector(
   [selectUserRole, selectPermissions],
   (role, permissions) => ({
     canViewBasicDashboard: permissions?.includes(DASHBOARD_PERMISSIONS.VIEW_BASIC) || Boolean(role),
-    canViewOperationsDashboard: permissions?.includes(DASHBOARD_PERMISSIONS.VIEW_OPERATIONS) || role === 'Operator' || role === 'Administrator',
+    canViewOperationsDashboard: permissions?.includes(DASHBOARD_PERMISSIONS.VIEW_OPERATIONS) || role === 'Receptionist' || role === 'Administrator',
     canViewAdminDashboard: permissions?.includes(DASHBOARD_PERMISSIONS.VIEW_ADMIN) || role === 'Administrator',
     canViewAnalytics: permissions?.includes(DASHBOARD_PERMISSIONS.VIEW_ANALYTICS) || role === 'Administrator'
   })

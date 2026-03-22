@@ -301,6 +301,9 @@ const WalkInForm = ({
     if (!visitorData.phoneNumber?.trim()) {
       errors.phoneNumber = t('walkInForm.step2.phoneRequired');
     }
+    if (!visitorData.email?.trim()) {
+      errors.email = t('walkInForm.step2.emailRequired');
+    }
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -831,12 +834,14 @@ const WalkInForm = ({
       />
 
       <Input
-        label={t('walkInForm.step2.emailOptional')}
+        label={t('walkInForm.step2.email')}
         type="email"
         placeholder={t('walkInForm.step2.emailPlaceholder')}
         value={visitorData.email}
         onChange={(e) => handleVisitorDataChange('email', e.target.value)}
         leftIcon={<EnvelopeIcon className="w-5 h-5" />}
+        error={validationErrors.email}
+        required
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

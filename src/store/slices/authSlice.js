@@ -315,8 +315,11 @@ const authSlice = createSlice({
 
     // Get current user
     builder
-      .addCase(getCurrentUser.pending, (state) => {
-        state.loading = true;
+      .addCase(getCurrentUser.pending, (state, action) => {
+        // Don't show loading spinner for silent background refreshes
+        if (!action.meta.arg?.silent) {
+          state.loading = true;
+        }
         state.error = null;
       })
       .addCase(getCurrentUser.fulfilled, (state, action) => {

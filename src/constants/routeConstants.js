@@ -321,14 +321,14 @@ export const ROUTE_METADATA = {
     title: 'Dashboard',
     breadcrumb: 'Dashboard',
     requiresAuth: true,
-    roles: ['Staff', 'Operator', 'Administrator']
+    roles: ['Staff', 'Receptionist', 'Administrator']
   },
 
   [DASHBOARD_ROUTES.RECEPTIONIST]: {
     title: 'Receptionist Dashboard',
     breadcrumb: 'Receptionist',
     requiresAuth: true,
-    roles: ['Operator', 'Administrator'],
+    roles: ['Receptionist', 'Administrator'],
     permissions: ['CheckIn.Process']
   },
 
@@ -336,7 +336,7 @@ export const ROUTE_METADATA = {
     title: 'Visitor Analytics',
     breadcrumb: 'Analytics',
     requiresAuth: true,
-    roles: ['Staff', 'Operator', 'Administrator'],
+    roles: ['Staff', 'Receptionist', 'Administrator'],
     permissions: ['Visitor.Read']
   },
 
@@ -352,7 +352,7 @@ export const ROUTE_METADATA = {
     title: 'Integrated Management',
     breadcrumb: 'Integrated Management',
     requiresAuth: true,
-    roles: ['Operator', 'Administrator'],
+    roles: ['Receptionist', 'Administrator'],
     permissions: ['Visitor.Read']
   },
   
@@ -376,7 +376,7 @@ export const ROUTE_METADATA = {
     title: 'Visitors',
     breadcrumb: 'Visitors',
     requiresAuth: true,
-    roles: ['Staff', 'Operator', 'Administrator'],
+    roles: ['Staff', 'Receptionist', 'Administrator'],
     permissions: ['Visitor.Read']
   },
   
@@ -384,7 +384,7 @@ export const ROUTE_METADATA = {
     title: 'Create Visitor',
     breadcrumb: 'Create Visitor',
     requiresAuth: true,
-    roles: ['Staff', 'Operator', 'Administrator'],
+    roles: ['Staff', 'Receptionist', 'Administrator'],
     permissions: ['Visitor.Create']
   },
 
@@ -392,7 +392,7 @@ export const ROUTE_METADATA = {
     title: 'Camera Management',
     breadcrumb: 'Cameras',
     requiresAuth: true,
-    roles: ['Operator', 'Administrator'],
+    roles: ['Receptionist', 'Administrator'],
     permissions: ['Camera.Read']
   },
 
@@ -400,7 +400,7 @@ export const ROUTE_METADATA = {
     title: 'Camera Details',
     breadcrumb: 'Camera Details',
     requiresAuth: true,
-    roles: ['Operator', 'Administrator'],
+    roles: ['Receptionist', 'Administrator'],
     permissions: ['Camera.Read']
   },
 
@@ -408,7 +408,7 @@ export const ROUTE_METADATA = {
     title: 'Profile',
     breadcrumb: 'Profile',
     requiresAuth: true,
-    roles: ['Staff', 'Operator', 'Administrator']
+    roles: ['Staff', 'Receptionist', 'Administrator']
   },
   
   [SYSTEM_ROUTES.OVERVIEW]: {
@@ -471,14 +471,14 @@ export const ROUTE_METADATA = {
     title: 'Notifications',
     breadcrumb: 'Notifications',
     requiresAuth: true,
-    roles: ['Staff', 'Operator', 'Administrator']
+    roles: ['Staff', 'Receptionist', 'Administrator']
   },
   
   [CAPACITY_ROUTES.DASHBOARD]: {
     title: 'Capacity Dashboard',
     breadcrumb: 'Capacity',
     requiresAuth: true,
-    roles: ['Staff', 'Operator', 'Administrator'],
+    roles: ['Staff', 'Receptionist', 'Administrator'],
     permissions: ['Dashboard.ViewBasic']
   }
 };
@@ -491,40 +491,40 @@ export const NAVIGATION_MENU = {
       label: 'Dashboard',
       path: DASHBOARD_ROUTES.DEFAULT,
       icon: 'home',
-      roles: ['Staff', 'Operator', 'Administrator']
+      roles: ['Staff', 'Receptionist', 'Administrator']
     },
     {
       id: 'integrated-management',
       label: 'Integrated Management',
       path: DASHBOARD_ROUTES.INTEGRATED,
       icon: 'squares-2x2',
-      roles: ['Operator', 'Administrator']
+      roles: ['Receptionist', 'Administrator']
     },
     {
       id: 'receptionist',
       label: 'Receptionist',
       path: DASHBOARD_ROUTES.RECEPTIONIST,
       icon: 'user-check',
-      roles: ['Operator', 'Administrator']
+      roles: ['Receptionist', 'Administrator']
     },
     {
       id: 'invitations',
       label: 'Invitations',
       path: INVITATION_ROUTES.LIST,
       icon: 'mail',
-      roles: ['Staff', 'Operator', 'Administrator'],
+      roles: ['Staff', 'Receptionist', 'Administrator'],
       children: [
         {
           id: 'invitations-list',
           label: 'All Invitations',
           path: INVITATION_ROUTES.LIST,
-          roles: ['Operator', 'Administrator']
+          roles: ['Receptionist', 'Administrator']
         },
         {
           id: 'invitations-create',
           label: 'Create Invitation',
           path: INVITATION_ROUTES.CREATE,
-          roles: ['Staff', 'Operator', 'Administrator']
+          roles: ['Staff', 'Receptionist', 'Administrator']
         },
         {
           id: 'invitations-bulk',
@@ -539,19 +539,19 @@ export const NAVIGATION_MENU = {
       label: 'Visitors',
       path: VISITOR_ROUTES.LIST,
       icon: 'users',
-      roles: ['Staff', 'Operator', 'Administrator'],
+      roles: ['Staff', 'Receptionist', 'Administrator'],
       children: [
         {
           id: 'visitors-list',
           label: 'All Visitors',
           path: VISITOR_ROUTES.LIST,
-          roles: ['Staff', 'Operator', 'Administrator']
+          roles: ['Staff', 'Receptionist', 'Administrator']
         },
         {
           id: 'visitors-create',
           label: 'Add Visitor',
           path: VISITOR_ROUTES.CREATE,
-          roles: ['Staff', 'Operator', 'Administrator']
+          roles: ['Staff', 'Receptionist', 'Administrator']
         }
       ]
     },
@@ -560,19 +560,19 @@ export const NAVIGATION_MENU = {
       label: 'Cameras',
       path: CAMERA_ROUTES.LIST,
       icon: 'video-camera',
-      roles: ['Operator', 'Administrator'],
+      roles: ['Receptionist', 'Administrator'],
       children: [
         {
           id: 'cameras-list',
           label: 'All Cameras',
           path: CAMERA_ROUTES.LIST,
-          roles: ['Operator', 'Administrator']
+          roles: ['Receptionist', 'Administrator']
         },
         {
           id: 'cameras-health',
           label: 'Health Monitor',
           path: CAMERA_ROUTES.HEALTH,
-          roles: ['Operator', 'Administrator']
+          roles: ['Receptionist', 'Administrator']
         },
         {
           id: 'cameras-statistics',
@@ -587,21 +587,21 @@ export const NAVIGATION_MENU = {
       label: 'Check-in',
       path: CHECKIN_ROUTES.PROCESS,
       icon: 'clipboard-check',
-      roles: ['Operator', 'Administrator']
+      roles: ['Receptionist', 'Administrator']
     },
     {
       id: 'capacity',
       label: 'Capacity Monitor',
       path: CAPACITY_ROUTES.DASHBOARD,
       icon: 'chart-pie',
-      roles: ['Staff', 'Operator', 'Administrator']
+      roles: ['Staff', 'Receptionist', 'Administrator']
     },
     {
       id: 'analytics',
       label: 'Analytics',
       path: DASHBOARD_ROUTES.ANALYTICS,
       icon: 'chart-bar',
-      roles: ['Staff', 'Operator', 'Administrator']
+      roles: ['Staff', 'Receptionist', 'Administrator']
     },
     {
       id: 'reports',
@@ -738,8 +738,8 @@ export const ROUTE_GUARDS = {
   ROLE_PROTECTED_ROUTES: {
     [USER_ROUTES.BASE]: ['Administrator'],
     [SYSTEM_ROUTES.BASE]: ['Administrator'],
-    [CHECKIN_ROUTES.BASE]: ['Operator', 'Administrator'],
-    [VISITOR_ROUTES.BASE]: ['Operator', 'Administrator']
+    [CHECKIN_ROUTES.BASE]: ['Receptionist', 'Administrator'],
+    [VISITOR_ROUTES.BASE]: ['Receptionist', 'Administrator']
   }
 };
 

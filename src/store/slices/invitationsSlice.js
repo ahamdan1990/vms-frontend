@@ -895,16 +895,23 @@ const invitationsSlice = createSlice({
       .addCase(checkOutInvitation.fulfilled, (state, action) => {
         state.checkInLoading = false;
         const updatedInvitation = action.payload;
-        
+
         const index = state.list.findIndex(invitation => invitation.id === updatedInvitation.id);
         if (index !== -1) {
           state.list[index] = updatedInvitation;
         }
-        
+
+        // Update in activeInvitations in-place so stats (active count, avg duration) reflect checkout
+        // before the next getActiveInvitations refetch
+        const activeIndex = state.activeInvitations.findIndex(inv => inv.id === updatedInvitation.id);
+        if (activeIndex !== -1) {
+          state.activeInvitations[activeIndex] = updatedInvitation;
+        }
+
         if (state.currentInvitation && state.currentInvitation.id === updatedInvitation.id) {
           state.currentInvitation = updatedInvitation;
         }
-        
+
         state.checkInError = null;
         state.lastUpdated = Date.now();
         state.activeInvitationsLastFetch = null;

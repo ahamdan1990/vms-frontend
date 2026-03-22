@@ -119,7 +119,7 @@ export const FILTERS = {
   USER_ROLES: {
     ALL: '',
     STAFF: 'Staff',
-    OPERATOR: 'Operator',
+    OPERATOR: 'Receptionist',
     ADMINISTRATOR: 'Administrator'
   },
   INVITATION_STATUS: {

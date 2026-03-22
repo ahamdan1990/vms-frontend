@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Services
@@ -145,6 +146,7 @@ const InvitationsListPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation('invitations');
+  const { isOperator } = useAuth();
 
   // Invitations data
   const invitations = useSelector(selectInvitationsList);
@@ -772,6 +774,33 @@ const InvitationsListPage = () => {
       )
     },
     {
+      key: 'host',
+      header: t('table.columns.host'),
+      sortable: false,
+      className: 'min-w-[180px]',
+      render: (value, invitation) => {
+        const host = invitation.host;
+        if (!host) return <span className="text-sm text-gray-400 dark:text-gray-500">{t('unknownHost')}</span>;
+        return (
+          <div className="flex items-center gap-2">
+            <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+              <UserIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <div className="font-medium text-gray-900 dark:text-white text-sm">
+                {host.firstName} {host.lastName}
+              </div>
+              {host.email && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[140px]">
+                  {host.email}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+    },
+    {
       key: 'status',
       header: t('table.columns.status'),
       sortable: true,
@@ -852,8 +881,8 @@ const InvitationsListPage = () => {
               </button>
             )}
 
-            {/* Delete Button - Conditional */}
-            {invitation.canBeCancelled && (
+            {/* Delete Button - Hidden for Operators */}
+            {!isOperator && invitation.canBeCancelled && (
               <button
                 onClick={() => handleInvitationAction('delete', invitation)}
                 className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-700 dark:text-red-400 bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-md hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"

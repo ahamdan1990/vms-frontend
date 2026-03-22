@@ -57,21 +57,8 @@ const QrCodeScanner = ({
     }
   }, [devices, selectedDevice]);
 
-  useEffect(() => {
-    return () => {
-      if (isScanning) {
-        const stopAllTracks = async () => {
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            stream.getTracks().forEach(track => track.stop());
-          } catch {
-            // Ignore cleanup errors.
-          }
-        };
-        stopAllTracks();
-      }
-    };
-  }, [isScanning]);
+  // Note: Camera cleanup is handled by the @yudiel/react-qr-scanner Scanner component
+  // when it unmounts (isScanning becomes false). No manual getUserMedia cleanup needed here.
 
   const playSuccessBeep = useCallback(() => {
     try {

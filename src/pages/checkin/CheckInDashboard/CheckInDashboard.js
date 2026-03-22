@@ -121,7 +121,7 @@ const CheckInDashboard = () => {
 
   // Calculate stats when active invitations change
   useEffect(() => {
-    if (activeInvitations && activeInvitations.length > 0) {
+    if (activeInvitations) {
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 

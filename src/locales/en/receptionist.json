@@ -205,6 +205,8 @@
       "lastNameRequired": "Last name is required",
       "phoneNumber": "Phone Number",
       "phoneRequired": "Phone number is required",
+      "email": "Email",
+      "emailRequired": "Email is required",
       "emailOptional": "Email (Optional)",
       "companyOptional": "Company (Optional)",
       "companyPlaceholder": "ABC Corp",

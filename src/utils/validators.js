@@ -545,7 +545,7 @@ export const validateUserData = (userData, isUpdate = false) => {
 
   // Role validation
   if (!isUpdate || userData.hasOwnProperty('role')) {
-    const validRoles = ['Staff', 'Operator', 'Administrator'];
+    const validRoles = ['Staff', 'Receptionist', 'Administrator'];
     if (!isRequired(userData.role)) {
       errors.role = 'Role is required';
     } else if (!validRoles.includes(userData.role)) {

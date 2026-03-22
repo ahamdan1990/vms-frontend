@@ -7,7 +7,7 @@
 // Core role definitions (matches backend enum)
 export const ROLES = {
   STAFF: 'Staff',
-  OPERATOR: 'Operator',
+  OPERATOR: 'Receptionist',
   ADMINISTRATOR: 'Administrator'
 };
 
@@ -44,7 +44,7 @@ export const ROLE_METADATA = {
   },
   
   [ROLES.OPERATOR]: {
-    name: 'Operator',
+    name: 'Receptionist',
     displayName: 'Front Desk Operator',
     description: 'Front desk operators who handle check-ins, walk-ins, and visitor processing',
     color: '#3b82f6', // Blue
