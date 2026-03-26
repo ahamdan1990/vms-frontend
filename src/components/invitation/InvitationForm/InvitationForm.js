@@ -100,9 +100,8 @@ const InvitationForm = ({
     specialInstructions: '',
 
     // Requirements
-    requiresApproval: true,
     requiresEscort: false,
-    requiresBadge: true,
+    requiresBadge: false,
     needsParking: false,
     parkingInstructions: '',
 
@@ -145,9 +144,8 @@ const InvitationForm = ({
         message: initialData.message || '',
         expectedVisitorCount: initialData.expectedVisitorCount || 1,
         specialInstructions: initialData.specialInstructions || '',
-        requiresApproval: initialData.requiresApproval ?? true,
         requiresEscort: initialData.requiresEscort ?? false,
-        requiresBadge: initialData.requiresBadge ?? true,
+        requiresBadge: initialData.requiresBadge ?? false,
         needsParking: initialData.needsParking ?? false,
         parkingInstructions: initialData.parkingInstructions || '',
         templateId: initialData.templateId || null,
@@ -1247,19 +1245,6 @@ const InvitationForm = ({
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <label className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={formData.requiresApproval}
-                    onChange={(e) => handleChange('requiresApproval', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
-                  />
-                  <div>
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">{t('form.fields.requiresApproval')}</span>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('form.fields.requiresApprovalHint')}</p>
-                  </div>
-                </label>
-
                 <label className="flex items-center gap-3">
                   <input
                     type="checkbox"

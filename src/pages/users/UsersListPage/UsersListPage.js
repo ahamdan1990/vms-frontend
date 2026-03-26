@@ -9,6 +9,7 @@ import { usePermissions } from '../../../hooks/usePermissions';
 // Redux actions and selectors
 import {
   getUsers,
+  getUserById,
   createUser,
   updateUser,
   deleteUser,
@@ -355,10 +356,18 @@ const UsersListPage = () => {
           dispatch(getUserStats());
           break;
 
-        case 'edit':
+        case 'edit': {
+          // Open the modal immediately with list data so the UI responds fast,
+          // then fetch the full UserDto (which includes requiresApprovalOverride and
+          // other fields not present in the list DTO) and replace it.
           setCurrentEditUser(user);
           dispatch(showEditModal(user));
+          const fullUserResult = await dispatch(getUserById(user.id));
+          if (fullUserResult.payload) {
+            setCurrentEditUser(fullUserResult.payload);
+          }
           break;
+        }
 
         case 'delete':
           setCurrentDeleteUser(user);

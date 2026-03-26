@@ -169,8 +169,10 @@ const VisitorForm = ({
     locationId: null,
     visitPurposeId: null,
     message: '',
-    requiresApproval: true,
-    requiresEscort: false
+    requiresEscort: false,
+    requiresBadge: false,
+    needsParking: false,
+    parkingInstructions: ''
   });
   const [invitationErrors, setInvitationErrors] = useState({});
   const [touchedInvitation, setTouchedInvitation] = useState({});
@@ -2047,20 +2049,29 @@ const VisitorForm = ({
                     <label className="flex items-center gap-3">
                       <input
                         type="checkbox"
-                        checked={invitationData.requiresApproval}
-                        onChange={(e) => handleInvitationChange('requiresApproval', e.target.checked)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900"
-                      />
-                      <span className="text-sm text-gray-700 dark:text-gray-200">{t('form.invitation.requiresApproval')}</span>
-                    </label>
-                    <label className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
                         checked={invitationData.requiresEscort}
                         onChange={(e) => handleInvitationChange('requiresEscort', e.target.checked)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900"
                       />
                       <span className="text-sm text-gray-700 dark:text-gray-200">{t('form.invitation.requiresEscort')}</span>
+                    </label>
+                    <label className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={invitationData.requiresBadge}
+                        onChange={(e) => handleInvitationChange('requiresBadge', e.target.checked)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900"
+                      />
+                      <span className="text-sm text-gray-700 dark:text-gray-200">{t('form.invitation.requiresBadge')}</span>
+                    </label>
+                    <label className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={invitationData.needsParking}
+                        onChange={(e) => handleInvitationChange('needsParking', e.target.checked)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900"
+                      />
+                      <span className="text-sm text-gray-700 dark:text-gray-200">{t('form.invitation.needsParking')}</span>
                     </label>
                   </div>
                 </div>
@@ -2228,13 +2239,16 @@ const VisitorForm = ({
             <div>
               <span className="font-medium text-gray-700 dark:text-gray-200">{t('form.review.labels.requirements')}:</span>
               <div className="ms-2 flex gap-3">
-                {invitationData.requiresApproval && (
-                  <Badge variant="warning" size="sm">{t('form.invitation.requiresApproval')}</Badge>
-                )}
                 {invitationData.requiresEscort && (
                   <Badge variant="info" size="sm">{t('form.invitation.requiresEscort')}</Badge>
                 )}
-                {!invitationData.requiresApproval && !invitationData.requiresEscort && (
+                {invitationData.requiresBadge && (
+                  <Badge variant="secondary" size="sm">{t('form.invitation.requiresBadge')}</Badge>
+                )}
+                {invitationData.needsParking && (
+                  <Badge variant="success" size="sm">{t('form.invitation.needsParking')}</Badge>
+                )}
+                {!invitationData.requiresEscort && !invitationData.requiresBadge && !invitationData.needsParking && (
                   <span className="text-gray-500 dark:text-gray-400">{t('form.review.none')}</span>
                 )}
               </div>

@@ -146,7 +146,7 @@ const InvitationsListPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation('invitations');
-  const { isOperator } = useAuth();
+  const { isOperator, isAdmin } = useAuth();
 
   // Invitations data
   const invitations = useSelector(selectInvitationsList);
@@ -1681,11 +1681,7 @@ const InvitationsListPage = () => {
             </div>
             <span>{t('details.requirements')}</span>
           </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-sm">
-            <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
-              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresApproval ? 'bg-yellow-500 dark:bg-yellow-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
-              <span className="truncate text-gray-900 dark:text-white">{t('details.fields.requiresApproval')}</span>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-sm">
             <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
               <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresEscort ? 'bg-red-500 dark:bg-red-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
               <span className="truncate text-gray-900 dark:text-white">{t('details.fields.requiresEscort')}</span>

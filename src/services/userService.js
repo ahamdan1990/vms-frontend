@@ -126,27 +126,27 @@ const userService = {
    * Requires: User.Update permission
    */
   async updateUser(id, userData) {
-    const response = await apiClient.put(USER_ENDPOINTS.BY_ID(id), {
+    const payload = {
       firstName: userData.firstName,
       lastName: userData.lastName,
       email: userData.email,
-      
+
       // Enhanced phone fields
       phoneNumber: userData.phoneNumber || null,
       phoneCountryCode: userData.phoneCountryCode || null,
       phoneType: userData.phoneType || 'Mobile',
-      
+
       role: userData.role,
       status: userData.status,
       department: userData.department || null,
       jobTitle: userData.jobTitle || null,
       employeeId: userData.employeeId || null,
-      
+
       // User preferences
       timeZone: userData.timeZone || 'UTC',
       language: userData.language || 'en-US',
       theme: userData.theme || 'light',
-      
+
       // Enhanced address fields
       addressType: userData.addressType || 'Home',
       street1: userData.street1 || null,
@@ -157,9 +157,15 @@ const userService = {
       country: userData.country || null,
       latitude: userData.latitude || null,
       longitude: userData.longitude || null,
-      requiresApprovalOverride: userData.requiresApprovalOverride !== undefined ? userData.requiresApprovalOverride : null
-    });
-    
+      // Only include when the field was explicitly present in the source data.
+      // Sending null when the field was simply absent from a list DTO would
+      // silently overwrite a previously saved override with null.
+      requiresApprovalOverride: userData.requiresApprovalOverride !== undefined
+        ? userData.requiresApprovalOverride
+        : null
+    };
+
+    const response = await apiClient.put(USER_ENDPOINTS.BY_ID(id), payload);
     return extractApiData(response);
   },
 
