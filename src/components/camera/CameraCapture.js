@@ -50,53 +50,57 @@ const CameraCapture = ({
   const startCamera = useCallback(async () => {
     if (isCameraActive || loading) return;
 
+    const constraints = {
+      video: {
+        width: { ideal: maxWidth },
+        height: { ideal: maxHeight }
+      },
+      audio: false
+    };
+
+    const acquireStream = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        streamRef.current = stream;
+        try {
+          await videoRef.current.play();
+        } catch (playError) {
+          console.warn('Video play failed:', playError);
+        }
+        setCameraPermission('granted');
+      } else {
+        stream.getTracks().forEach(track => track.stop());
+        throw Object.assign(new Error('Camera preview unavailable. Please try again.'), { name: 'PreviewUnavailable' });
+      }
+    };
+
     try {
       setLoading(true);
       setError(null);
       setIsCameraActive(true);
 
-      console.log('📷 Starting camera capture...');
-      // Request camera permission and stream
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: maxWidth },
-          height: { ideal: maxHeight }
-        },
-        audio: false
-      });
-
-      console.log('✅ Camera stream obtained:', stream.active);
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-
-        // Explicitly play the video
-        try {
-          await videoRef.current.play();
-          console.log('✅ Video playing');
-        } catch (playError) {
-          console.warn('Video play failed:', playError);
+      try {
+        await acquireStream();
+      } catch (firstError) {
+        if (firstError.name === 'NotReadableError') {
+          // Camera may still be releasing from a previous component — wait and retry once
+          await new Promise(resolve => setTimeout(resolve, 600));
+          await acquireStream();
+        } else {
+          throw firstError;
         }
-
-        setCameraPermission('granted');
-        console.log('✅ Camera active state set');
-      } else {
-        console.error('❌ Video ref is null');
-        stream.getTracks().forEach(track => track.stop());
-        setIsCameraActive(false);
-        setError('Camera preview unavailable. Please try again.');
       }
     } catch (error) {
-      console.error('❌ Camera access error:', error);
-
       if (error.name === 'NotAllowedError') {
         setError('Camera access denied. Please enable camera permissions and try again.');
         setCameraPermission('denied');
       } else if (error.name === 'NotFoundError') {
         setError('No camera found. Please ensure a camera is connected.');
       } else if (error.name === 'NotReadableError') {
-        setError('Camera is being used by another application.');
+        setError('Camera is being used by another application. Please close other apps using the camera and try again.');
+      } else if (error.name === 'PreviewUnavailable') {
+        setError(error.message);
       } else {
         setError('Unable to access camera. Please check your camera settings.');
       }
