@@ -3,10 +3,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import {
   fetchNotifications,
   acknowledgeNotificationAsync,
-  markNotificationAsRead,
   removeNotification,
   fetchNotificationStats,
   clearNotifications,
@@ -45,6 +45,7 @@ import { BellIcon as BellIconSolid } from '@heroicons/react/24/solid';
 
 // Utils
 import formatters from '../../utils/formatters';
+import { getNotificationNavigationPath } from '../../utils/notificationUtils';
 
 /**
  * Advanced Notification Center with Real-time SignalR Integration
@@ -58,6 +59,7 @@ const NotificationCenter = ({
 }) => {
   const { t } = useTranslation('notifications');
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   
   // Redux state - FIX: Extract lastSyncTime from root level, not from stats
   const {
@@ -118,19 +120,21 @@ const NotificationCenter = ({
   });
 
   // Mark notification as read
-  const markAsRead = useCallback((notificationId) => {
-    dispatch(markNotificationAsRead(notificationId));
+  const markAsRead = useCallback(async (notificationId) => {
+    await dispatch(acknowledgeNotificationAsync({ notificationId })).unwrap();
   }, [dispatch]);
 
   // Mark all as read
-  const markAllAsRead = useCallback(() => {
+  const markAllAsRead = useCallback(async () => {
     const unreadNotificationIds = notifications
       .filter(n => !n.read)
       .map(n => n.id);
 
-    unreadNotificationIds.forEach(id => {
-      dispatch(markNotificationAsRead(id));
-    });
+    await Promise.all(
+      unreadNotificationIds.map(id => dispatch(acknowledgeNotificationAsync({ notificationId: id })).unwrap())
+    );
+
+    dispatch(fetchNotifications());
   }, [dispatch, notifications]);
 
   // Clear all notifications (delete from backend)
@@ -151,7 +155,7 @@ const NotificationCenter = ({
     
     // Mark as read when action is taken
     if (!notification.read) {
-      markAsRead(notification.id);
+      await markAsRead(notification.id);
     }
 
     // Handle specific actions
@@ -159,8 +163,7 @@ const NotificationCenter = ({
       switch (action.action) {
         case 'acknowledge':
           await dispatch(acknowledgeNotificationAsync({ 
-            notificationId: notification.id, 
-            notes: t('center.acknowledgeNote')
+            notificationId: notification.id
           })).unwrap();
           
           // Force refresh notifications after acknowledgment
@@ -179,7 +182,7 @@ const NotificationCenter = ({
         case 'view_visitor':
           // Navigate to visitor profile
           if (action.visitorId) {
-            window.location.href = `/visitors/${action.visitorId}`;
+            navigate(`/visitors/${action.visitorId}`);
           }
           break;
           
@@ -192,13 +195,23 @@ const NotificationCenter = ({
           
         case 'contact_security':
           // Contact security team
-          window.location.href = '/security/contact';
+          navigate('/security/contact');
           break;
           
         case 'view_invitation':
-          if (action.invitationId || notification.data?.invitationId) {
-            const invitationId = action.invitationId || notification.data.invitationId;
-            window.location.href = `/invitations/${invitationId}`;
+          {
+            const overrideNotification = {
+              ...notification,
+              data: {
+                ...(notification.data || {}),
+                invitationId: action.invitationId || notification.data?.invitationId
+              }
+            };
+
+            const navigationPath = getNotificationNavigationPath(overrideNotification);
+            if (navigationPath) {
+              navigate(navigationPath);
+            }
           }
           break;
           
@@ -209,14 +222,13 @@ const NotificationCenter = ({
     } catch (error) {
       console.error('Error handling notification action:', error);
     }
-  }, [dispatch, markAsRead, removeNotificationHandler, host, t]);
+  }, [dispatch, markAsRead, removeNotificationHandler, host, navigate, t]);
 
   // Enhanced acknowledge handler for direct acknowledge button
   const handleDirectAcknowledge = useCallback(async (notificationId) => {
     try {
       await dispatch(acknowledgeNotificationAsync({ 
-        notificationId, 
-        notes: t('center.directAcknowledgeNote')
+        notificationId
       })).unwrap();
       
       // Force refresh notifications after acknowledgment
@@ -231,7 +243,18 @@ const NotificationCenter = ({
     } catch (error) {
       console.error('❌ Failed to acknowledge notification:', error);
     }
-  }, [dispatch, host, t]);
+  }, [dispatch, host]);
+
+  const handleNotificationOpen = useCallback(async (notification) => {
+    if (!notification.read) {
+      await handleDirectAcknowledge(notification.id);
+    }
+
+    const navigationPath = getNotificationNavigationPath(notification);
+    if (navigationPath) {
+      navigate(navigationPath);
+    }
+  }, [handleDirectAcknowledge, navigate]);
 
   // Get notification icon
   const getNotificationIcon = (type, priority) => {
@@ -349,6 +372,7 @@ const NotificationCenter = ({
             ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
             : 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-700'
         } ${isCardView ? 'shadow-sm hover:shadow-md' : 'hover:shadow-sm'}`}
+        onClick={() => handleNotificationOpen(notification)}
       >
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0 mt-1">
@@ -421,7 +445,10 @@ const NotificationCenter = ({
                 <Button
                   size="xs"
                   variant="primary"
-                  onClick={() => executeNotificationAction(notification.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    executeNotificationAction(notification.id);
+                  }}
                   icon={<CheckIcon className="w-3 h-3" />}
                   title={getNotificationAction(notification.id) === 'acknowledge' ? 'Acknowledge' : 'Mark as Read'}
                   className="shadow-sm"
@@ -430,13 +457,16 @@ const NotificationCenter = ({
             )}
 
             {/* Remove Button */}
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={() => removeNotificationHandler(notification.id)}
-              icon={<XMarkIcon className="w-3 h-3" />}
-              title="Remove notification"
-              className="text-gray-400 hover:text-red-500 hover:bg-red-50"
+              <Button
+                size="xs"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeNotificationHandler(notification.id);
+                }}
+                icon={<XMarkIcon className="w-3 h-3" />}
+                title="Remove notification"
+                className="text-gray-400 hover:text-red-500 hover:bg-red-50"
             />
 
             {/* Acknowledged Status Indicator */}

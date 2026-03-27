@@ -1,6 +1,7 @@
 // src/store/slices/notificationSlice.js - UNIFIED NOTIFICATION SYSTEM
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { notificationService } from '../../services/notificationService';
+import { normalizeNotification } from '../../utils/notificationUtils';
 
 // Notification types with consistent naming
 export const NOTIFICATION_TYPES = {
@@ -189,7 +190,7 @@ const notificationSlice = createSlice({
   reducers: {
     // === PERSISTENT NOTIFICATIONS ===
     addNotification: (state, action) => {
-      const notification = {
+      const notification = normalizeNotification({
         id: action.payload.id || Date.now().toString(),
         type: action.payload.type || NOTIFICATION_TYPES.INFO,
         title: action.payload.title,
@@ -197,10 +198,14 @@ const notificationSlice = createSlice({
         priority: action.payload.priority || PRIORITIES.MEDIUM,
         timestamp: action.payload.timestamp || new Date().toISOString(),
         read: false,
+        acknowledged: false,
         persistent: true,
         actions: action.payload.actions || [],
-        data: action.payload.data || null
-      };
+        data: action.payload.data || null,
+        payloadData: action.payload.payloadData || null,
+        relatedEntityType: action.payload.relatedEntityType || null,
+        relatedEntityId: action.payload.relatedEntityId || null
+      });
 
       state.notifications.unshift(notification);
       state.unreadCount += 1;
@@ -298,7 +303,7 @@ const notificationSlice = createSlice({
 
     // === REAL-TIME NOTIFICATIONS ===
     addRealTimeNotification: (state, action) => {
-      const notification = {
+      const notification = normalizeNotification({
         id: action.payload.id || Date.now().toString(),
         type: action.payload.type || NOTIFICATION_TYPES.INFO,
         title: action.payload.title,
@@ -306,10 +311,14 @@ const notificationSlice = createSlice({
         priority: action.payload.priority || PRIORITIES.MEDIUM,
         timestamp: action.payload.timestamp || new Date().toISOString(),
         read: false,
+        acknowledged: false,
         persistent: true,
         actions: action.payload.actions || [],
-        data: action.payload.data || null
-      };
+        data: action.payload.data || null,
+        payloadData: action.payload.payloadData || null,
+        relatedEntityType: action.payload.relatedEntityType || null,
+        relatedEntityId: action.payload.relatedEntityId || null
+      });
 
       // Add to notifications
       state.notifications.unshift(notification);
@@ -343,22 +352,9 @@ const notificationSlice = createSlice({
       })
       .addCase(fetchNotifications.fulfilled, (state, action) => {
         state.loading = false;
-        
+
         // Transform backend notification data to frontend format
-        state.notifications = action.payload.items.map(notification => ({
-          ...notification,
-          // Map backend isAcknowledged to frontend read property
-          read: notification.isAcknowledged || notification.read || false,
-          acknowledged: notification.isAcknowledged || notification.acknowledged || false,
-          // Preserve backend timestamps and data
-          acknowledgedOn: notification.acknowledgedOn,
-          acknowledgedBy: notification.acknowledgedBy,
-          acknowledgedByName: notification.acknowledgedByName,
-          // Map other potential field differences
-          timestamp: notification.createdOn || notification.timestamp,
-          type: notification.type || 'info',
-          priority: notification.priority || 'medium'
-        }));
+        state.notifications = action.payload.items.map(notification => normalizeNotification(notification));
         
         // Calculate unread count based on properly mapped read status
         state.unreadCount = state.notifications.filter(n => !n.read).length;
@@ -389,6 +385,7 @@ const notificationSlice = createSlice({
         const notification = state.notifications.find(n => n.id === action.payload);
         if (notification && !notification.read) {
           notification.read = true;
+          notification.acknowledged = true;
           notification.acknowledgedOn = new Date().toISOString();
           state.unreadCount = Math.max(0, state.unreadCount - 1);
         }

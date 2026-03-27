@@ -24,9 +24,11 @@ class NotificationEventHandler {
       ['VisitorDelayed', this.handleVisitorDelayed.bind(this)],
       ['VisitorNoShow', this.handleVisitorNoShow.bind(this)],
       ['InvitationExpired', this.handleInvitationExpired.bind(this)],
+      ['OperatorAlert', this.handleOperatorAlert.bind(this)],
 
       // Host Hub Events
       ['UserNotification', this.handleUserNotification.bind(this)],
+      ['RoleNotification', this.handleRoleNotification.bind(this)],
       ['InvitationStatusUpdate', this.handleInvitationStatusUpdate.bind(this)],
       ['VisitorCheckIn', this.handleVisitorCheckIn.bind(this)],
       ['VisitorCheckOut', this.handleVisitorCheckOut.bind(this)],
@@ -117,6 +119,10 @@ class NotificationEventHandler {
 
   handleOperatorRegistered(data) {
     store.dispatch(showSuccessToast('Connected', 'You are now online as an operator'));
+  }
+
+  handleOperatorAlert(data) {
+    this.handleGenericNotification(data, 'operator_alert', 'Operator Alert');
   }
 
   handleVisitorArrival(data) {
@@ -262,15 +268,12 @@ class NotificationEventHandler {
     console.log('Host registered:', data);
   }
 
+  handleRoleNotification(data) {
+    this.handleGenericNotification(data, 'role_notification', 'Notification');
+  }
+
   handleUserNotification(data) {
-    store.dispatch(addNotificationWithDesktop({
-      type: data.Type || 'visitor_update',
-      title: data.Title || 'Visitor Update',
-      message: data.Message,
-      priority: data.Priority?.toLowerCase() || 'medium',
-      data: data,
-      actions: data.actions || []
-    }));
+    this.handleGenericNotification(data, 'visitor_update', 'Visitor Update');
   }
 
   handleInvitationStatusUpdate(data) {
@@ -287,6 +290,7 @@ class NotificationEventHandler {
         : `Your invitation has been ${data.Approved ? 'approved' : 'rejected'}`);
 
     store.dispatch(addNotificationWithDesktop({
+      id: data.alertId || data.id,
       type,
       title,
       message,
@@ -295,6 +299,21 @@ class NotificationEventHandler {
       actions: [
         { label: 'View Details', action: 'view_invitation' }
       ]
+    }));
+  }
+
+  handleGenericNotification(data, fallbackType = 'info', fallbackTitle = 'Notification') {
+    store.dispatch(addNotificationWithDesktop({
+      id: data.alertId || data.id,
+      type: data.type || data.Type || fallbackType,
+      title: data.title || data.Title || fallbackTitle,
+      message: data.message || data.Message,
+      priority: (data.priority || data.Priority)?.toLowerCase() || 'medium',
+      data,
+      relatedEntityType: data.relatedEntityType || data.RelatedEntityType,
+      relatedEntityId: data.relatedEntityId || data.RelatedEntityId,
+      payloadData: data.payloadData || data.PayloadData,
+      actions: data.actions || []
     }));
   }
 

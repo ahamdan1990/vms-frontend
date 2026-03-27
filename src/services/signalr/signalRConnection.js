@@ -133,7 +133,7 @@ class SignalRConnectionManager {
       hubs.push('admin');
     }
 
-    if (userRole === 'operator' || userRole === 'Receptionist') {
+    if (userRole === 'operator' || userRole === 'receptionist') {
       hubs.push('operator');
     }
 

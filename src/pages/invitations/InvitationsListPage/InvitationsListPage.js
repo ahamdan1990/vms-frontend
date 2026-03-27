@@ -831,8 +831,8 @@ const InvitationsListPage = () => {
               <span>{t('actions.view')}</span>
             </button>
 
-            {/* Edit Button - Conditional */}
-            {invitation.canBeModified && (
+            {/* Edit Button - Admin only */}
+            {isAdmin && invitation.canBeModified && (
               <button
                 onClick={() => handleInvitationAction('edit', invitation)}
                 className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
@@ -843,8 +843,8 @@ const InvitationsListPage = () => {
               </button>
             )}
 
-            {/* Approve Button - For pending and rejected invitations */}
-            {canBeApproved(invitation) && (
+            {/* Approve/Reject Buttons - Admin only */}
+            {isAdmin && canBeApproved(invitation) && (
               <>
                 <button
                   onClick={() => handleInvitationAction('approve', invitation)}
@@ -1237,25 +1237,29 @@ const InvitationsListPage = () => {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                    onClick={() => handleBulkAction('approve')}
-                    icon={<CheckIcon className="w-4 h-4" />}
-                    className="bg-white text-green-700 border-green-300 hover:bg-green-50 font-medium"
-                  >
-                    {t('bulk.approve')}
-                  </Button>
+              {isAdmin && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleBulkAction('approve')}
+                  icon={<CheckIcon className="w-4 h-4" />}
+                  className="bg-white text-green-700 border-green-300 hover:bg-green-50 font-medium"
+                >
+                  {t('bulk.approve')}
+                </Button>
+              )}
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleBulkAction('reject')}
-                    icon={<XMarkIcon className="w-4 h-4" />}
-                    className="bg-white text-orange-700 border-orange-300 hover:bg-orange-50 font-medium"
-                  >
-                    {t('bulk.reject')}
-                  </Button>
+              {isAdmin && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleBulkAction('reject')}
+                  icon={<XMarkIcon className="w-4 h-4" />}
+                  className="bg-white text-orange-700 border-orange-300 hover:bg-orange-50 font-medium"
+                >
+                  {t('bulk.reject')}
+                </Button>
+              )}
 
                   <Button
                     variant="outline"
@@ -1501,8 +1505,8 @@ const InvitationsListPage = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-2 lg:ms-4 shrink-0">
-              {/* Approve/Reject for pending and rejected invitations */}
-              {canBeApproved(currentInvitation) && (
+              {/* Approve/Reject for pending and rejected invitations - Admin only */}
+              {isAdmin && canBeApproved(currentInvitation) && (
                 <>
                   <button
                     onClick={() => handleApproveInvitation(
@@ -1549,8 +1553,8 @@ const InvitationsListPage = () => {
                 </button>
               )}
 
-              {/* Edit Button */}
-              {currentInvitation.canBeModified && (
+              {/* Edit Button - Admin only */}
+              {isAdmin && currentInvitation.canBeModified && (
                 <button
                   onClick={() => {
                     handleCloseDetailsModal();

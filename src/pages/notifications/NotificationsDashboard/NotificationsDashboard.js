@@ -6,13 +6,11 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { useSignalR } from '../../../hooks/useSignalR';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 // Redux actions
 import {
   fetchNotifications,
-  markNotificationAsRead,
-  markAllAsRead,
   clearNotifications,
   acknowledgeNotificationAsync,
   fetchNotificationStats,
@@ -63,6 +61,7 @@ import { BellIcon as BellIconSolid, ExclamationTriangleIcon as ExclamationTriang
 // Utils
 import { formatDateTime, formatRelativeTime } from '../../../utils/formatters';
 import { extractErrorMessage } from '../../../utils/errorUtils';
+import { getNotificationNavigationPath } from '../../../utils/notificationUtils';
 
 // Constants
 import { NOTIFICATION_PERMISSIONS } from '../../../constants/permissions';
@@ -74,6 +73,7 @@ import { NOTIFICATION_PERMISSIONS } from '../../../constants/permissions';
  */
 const NotificationsDashboard = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const { hasPermission } = usePermissions();
   const { t } = useTranslation('notifications');
@@ -251,26 +251,50 @@ const NotificationsDashboard = () => {
     }
   };
 
-  const handleMarkAsRead = (notificationId) => {
+  const handleMarkAsRead = async (notificationId) => {
     if (!canAcknowledge) return;
-    
-    dispatch(markNotificationAsRead(notificationId));
-    
-    // Update statistics after marking as read
-    if (canViewStats) {
-      dispatch(fetchNotificationStats());
-    }
+
+    await handleAcknowledge(notificationId);
   };
 
-  const handleMarkAllAsRead = () => {
+  const handleMarkAllAsRead = async () => {
     if (!canAcknowledge) return;
-    dispatch(markAllAsRead());
-    dispatch(addToast({
-      type: 'success',
-      title: t('toast.markAllReadTitle'),
-      message: t('toast.markAllReadMessage', { count: unreadCount }),
-      duration: 3000
-    }));
+
+    const unreadNotificationIds = notifications
+      .filter(notification => !notification.read)
+      .map(notification => notification.id);
+
+    if (unreadNotificationIds.length === 0) {
+      return;
+    }
+
+    try {
+      await Promise.all(
+        unreadNotificationIds.map(notificationId =>
+          dispatch(acknowledgeNotificationAsync({ notificationId })).unwrap()
+        )
+      );
+
+      await dispatch(fetchNotifications());
+
+      if (canViewStats) {
+        dispatch(fetchNotificationStats());
+      }
+
+      dispatch(addToast({
+        type: 'success',
+        title: t('toast.markAllReadTitle'),
+        message: t('toast.markAllReadMessage', { count: unreadNotificationIds.length }),
+        duration: 3000
+      }));
+    } catch (error) {
+      dispatch(addToast({
+        type: 'error',
+        title: t('toast.acknowledgeFailed'),
+        message: extractErrorMessage(error),
+        duration: 5000
+      }));
+    }
   };
 
   const handleBulkAction = () => {
@@ -281,15 +305,18 @@ const NotificationsDashboard = () => {
   const handleConfirmBulkAction = async () => {
     const count = selectedNotifications.length;
 
-    try {
-      if (bulkAction === 'markRead') {
-        // Mark all as read synchronously
-        selectedNotifications.forEach(id => {
-          dispatch(markNotificationAsRead(id));
-        });
+      try {
+        if (bulkAction === 'markRead') {
+          const promises = selectedNotifications.map(id =>
+            dispatch(acknowledgeNotificationAsync({ notificationId: id })).unwrap()
+          );
 
-        dispatch(addToast({
-          type: 'success',
+          await Promise.all(promises);
+
+          await dispatch(fetchNotifications());
+
+          dispatch(addToast({
+            type: 'success',
           title: t('bulk.complete'),
           message: t('bulk.markedRead', { count }),
           duration: 3000
@@ -383,6 +410,35 @@ const NotificationsDashboard = () => {
       ...prev,
       [notificationId]: false
     }));
+  };
+
+  const handleNotificationOpen = async (notification) => {
+    if (!notification.read && canAcknowledge) {
+      await handleAcknowledge(notification.id);
+    }
+
+    const navigationPath = getNotificationNavigationPath(notification);
+    if (navigationPath) {
+      navigate(navigationPath);
+    }
+  };
+
+  const handleNotificationActionClick = async (notification, action) => {
+    if (action?.action === 'acknowledge') {
+      await handleAcknowledge(notification.id);
+      return;
+    }
+
+    const overrideNotification = {
+      ...notification,
+      data: {
+        ...(notification.data || {}),
+        invitationId: action?.invitationId || notification.data?.invitationId,
+        visitorId: action?.visitorId || notification.data?.visitorId
+      }
+    };
+
+    await handleNotificationOpen(overrideNotification);
   };
 
   // Helper functions
@@ -482,7 +538,7 @@ const NotificationsDashboard = () => {
       className={`border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer ${
         !notification.read ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
       } ${selectedNotifications.includes(notification.id) ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}`}
-      onClick={() => !notification.read && handleMarkAsRead(notification.id)}
+      onClick={() => handleNotificationOpen(notification)}
     >
       <div className="flex items-start gap-3">
         {/* Selection checkbox */}
@@ -637,8 +693,7 @@ const NotificationsDashboard = () => {
                   variant="outline"
                   onClick={(e) => {
                     e.stopPropagation();
-                    // Handle notification action - you can extend this based on your needs
-                    console.log('Notification action:', action, notification);
+                    handleNotificationActionClick(notification, action);
                   }}
                 >
                   {action.label}
