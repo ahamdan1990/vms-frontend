@@ -4,8 +4,18 @@
  */
 
 // Base API configuration
+// Priority: runtime config.js (installer) → env var (dev) → localhost fallback
+const getRuntimeApiUrl = () => {
+  const runtimeUrl = window.VMS_CONFIG?.apiUrl;
+  // If installer wrote a real URL (not the placeholder), use it
+  if (runtimeUrl && runtimeUrl !== '%%API_URL%%' && runtimeUrl !== '') {
+    return runtimeUrl;
+  }
+  return process.env.REACT_APP_API_URL || 'http://localhost:5000';
+};
+
 export const API_CONFIG = {
-  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
+  BASE_URL: getRuntimeApiUrl(),
   TIMEOUT: parseInt(process.env.REACT_APP_API_TIMEOUT) || 30000,
   VERSION: 'v1'
 };
@@ -211,6 +221,8 @@ export const INVITATION_ENDPOINTS = {
   VALIDATE_QR: '/api/invitations/qr-code/validate', // Fixed path
   CHECK_IN: '/api/invitations/check-in',
   CHECK_OUT: (id) => `/api/invitations/${id}/check-out`,
+  REQUEST_LATE_CHECKIN: (id) => `/api/invitations/${id}/request-late-checkin`,
+  OVERRIDE_CHECKIN: (id) => `/api/invitations/${id}/override-checkin`,
   RESEND: (id) => `/api/invitations/${id}/resend`,
   TEMPLATES: '/api/invitations/templates',
   BULK_CREATE: '/api/invitations/bulk',
@@ -283,6 +295,7 @@ export const SIGNALR_ENDPOINTS = {
 // Dashboard endpoints  
 export const DASHBOARD_ENDPOINTS = {
   METRICS: '/api/dashboard/metrics',
+  COMPLETED_TODAY: '/api/dashboard/receptionist/completed-today',
   SYSTEM_HEALTH: '/health'
 };
 

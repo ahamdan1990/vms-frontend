@@ -20,7 +20,7 @@ class NotificationEventHandler {
       ['FRSystemOffline', this.handleFRSystemOffline.bind(this)],
       ['CapacityAlert', this.handleCapacityAlert.bind(this)],
       ['AlertAcknowledged', this.handleAlertAcknowledged.bind(this)],
-      ['OperatorRegistered', this.handleOperatorRegistered.bind(this)],
+      // ['OperatorRegistered', this.handleOperatorRegistered.bind(this)],
       ['VisitorDelayed', this.handleVisitorDelayed.bind(this)],
       ['VisitorNoShow', this.handleVisitorNoShow.bind(this)],
       ['InvitationExpired', this.handleInvitationExpired.bind(this)],

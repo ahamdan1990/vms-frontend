@@ -1,10 +1,10 @@
 // src/pages/dashboard/UnifiedDashboard/UnifiedDashboard.js
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePermissions } from '../../../hooks/usePermissions';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setPageTitle } from '../../../store/slices/uiSlice';
 
 // Import existing page components - NO CHANGES TO THESE
@@ -22,6 +22,7 @@ import Badge from '../../../components/common/Badge/Badge';
 
 // Services
 import dashboardService from '../../../services/dashboardService';
+import { notificationService } from '../../../services/notificationService';
 import useRealTimeDashboard from '../../../hooks/useRealTimeDashboard';
 
 // Import role constants
@@ -58,6 +59,7 @@ const UnifiedDashboard = () => {
   const dispatch = useDispatch();
   const { t } = useTranslation('dashboard');
   const { user, userRole, userName } = useAuth();
+  const unreadNotificationCount = useSelector((state) => state.notifications.unreadCount);
   const { 
     checkin, 
     visitor, 
@@ -70,6 +72,7 @@ const UnifiedDashboard = () => {
   // Navigation and UI state
   const [activeView, setActiveView] = useState('overview');
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notificationAlertCount, setNotificationAlertCount] = useState(0);
   
   // Real-time dashboard data using SignalR
   const {
@@ -100,12 +103,40 @@ const UnifiedDashboard = () => {
     lastUpdate: lastUpdated,
     loading: isLoading
   };
+  const effectiveNotificationAlertCount = Math.max(notificationAlertCount, unreadNotificationCount || 0);
+
+  const loadNotificationAlertCount = useCallback(async () => {
+    try {
+      const response = await notificationService.getNotifications({
+        pageIndex: 0,
+        pageSize: 1,
+        isAcknowledged: false
+      });
+
+      const totalCount = response?.data?.totalCount ?? response?.totalCount ?? 0;
+      setNotificationAlertCount(totalCount);
+    } catch (error) {
+      console.error('Failed to load notification alert count:', error);
+      setNotificationAlertCount(0);
+    }
+  }, []);
 
   // Set initial view based on user role
   useEffect(() => {
     dispatch(setPageTitle(t('pageTitle')));
     setActiveView(getDefaultView());
   }, [dispatch, userRole]);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadNotificationAlertCount();
+    }
+  }, [loadNotificationAlertCount, user?.id]);
+
+  const handleCloseNotifications = useCallback(() => {
+    setShowNotifications(false);
+    loadNotificationAlertCount();
+  }, [loadNotificationAlertCount]);
 
   /**
    * Navigation Configuration
@@ -266,7 +297,7 @@ const UnifiedDashboard = () => {
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{t('stats.alerts')}</h3>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{transformedSystemStats.overdueVisitors + transformedSystemStats.systemAlerts}</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{effectiveNotificationAlertCount}</p>
               <p className="text-xs text-red-600 dark:text-red-400 font-medium mt-1">{t('stats.requireAttention')}</p>
             </div>
             <div className="w-12 h-12 bg-red-50 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
@@ -506,7 +537,7 @@ const UnifiedDashboard = () => {
         {showNotifications && (
           <NotificationCenter
             isOpen={showNotifications}
-            onClose={() => setShowNotifications(false)}
+            onClose={handleCloseNotifications}
           />
         )}
       </AnimatePresence>

@@ -31,6 +31,7 @@ const CapacityValidator = ({
   locationId,
   timeSlotId,
   dateTime,
+  endDateTime = null,
   expectedVisitors = 1,
   isVipRequest = false,
   excludeInvitationId = null,
@@ -58,6 +59,7 @@ const CapacityValidator = ({
         locationId,
         timeSlotId,
         dateTime,
+        endDateTime,
         expectedVisitors,
         isVipRequest,
         excludeInvitationId
@@ -66,7 +68,7 @@ const CapacityValidator = ({
       dispatch(validateCapacity(validationRequest));
       setHasValidated(true);
     }, 500),
-    [locationId, timeSlotId, dateTime, expectedVisitors, isVipRequest, excludeInvitationId, dispatch]
+    [locationId, timeSlotId, dateTime, endDateTime, expectedVisitors, isVipRequest, excludeInvitationId, dispatch]
   );
 
   useEffect(() => {
@@ -295,6 +297,7 @@ CapacityValidator.propTypes = {
   locationId: PropTypes.number,
   timeSlotId: PropTypes.number,
   dateTime: PropTypes.string,
+  endDateTime: PropTypes.string,
   expectedVisitors: PropTypes.number,
   isVipRequest: PropTypes.bool,
   excludeInvitationId: PropTypes.number,

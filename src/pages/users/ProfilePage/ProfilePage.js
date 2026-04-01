@@ -1,5 +1,6 @@
 // src/pages/users/ProfilePage/ProfilePage.js
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -39,6 +40,7 @@ import ProfilePhotoUpload from '../../../components/common/ProfilePhotoUpload/Pr
  */
 const ProfilePage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const toast = useToast();
   const { t } = useTranslation(['users', 'common']);
   const {
@@ -389,14 +391,8 @@ const ProfilePage = () => {
       }
 
       await dispatch(changePassword(passwordData)).unwrap();
-      toast.success(t('common:alerts.success'), t('users:profile.notifications.passwordSuccess'));
-      setIsChangingPassword(false);
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      });
-      setPasswordErrors({});
+      // Backend invalidated all sessions on password change — must re-login
+      navigate('/login', { replace: true, state: { passwordChanged: true } });
     } catch (error) {
       toast.error(t('common:alerts.error'), error);
     }

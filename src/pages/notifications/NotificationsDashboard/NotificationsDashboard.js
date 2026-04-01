@@ -1,5 +1,5 @@
 // src/pages/notifications/NotificationsDashboard/NotificationsDashboard.js
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -13,12 +13,12 @@ import {
   fetchNotifications,
   clearNotifications,
   acknowledgeNotificationAsync,
+  deleteNotificationAsync,
   fetchNotificationStats,
   updateSettings,
   addToast,
   removeToast,
-  updateLastSyncTime,
-  initializeNotifications
+  updateLastSyncTime
 } from '../../../store/slices/notificationSlice';
 
 // Page title action
@@ -61,10 +61,30 @@ import { BellIcon as BellIconSolid, ExclamationTriangleIcon as ExclamationTriang
 // Utils
 import { formatDateTime, formatRelativeTime } from '../../../utils/formatters';
 import { extractErrorMessage } from '../../../utils/errorUtils';
-import { getNotificationNavigationPath } from '../../../utils/notificationUtils';
+import { getNotificationNavigationPath, matchesNotificationKey, normalizeNotificationKey } from '../../../utils/notificationUtils';
 
 // Constants
 import { NOTIFICATION_PERMISSIONS } from '../../../constants/permissions';
+
+const NOTIFICATIONS_PAGE_FETCH_PARAMS = {
+  pageSize: 100,
+  includeExpired: true
+};
+
+const PRIORITY_FILTER_OPTIONS = ['emergency', 'critical', 'high', 'medium', 'low'];
+
+const humanizeNotificationLabel = (value) => {
+  if (typeof value !== 'string' || value.trim() === '') {
+    return '';
+  }
+
+  return value
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+};
 
 /**
  * Notifications Dashboard Page
@@ -81,6 +101,9 @@ const NotificationsDashboard = () => {
   // Local state
   const [searchInput, setSearchInput] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [priorityFilter, setPriorityFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [dateRangeFilter, setDateRangeFilter] = useState('');
   const [selectedNotifications, setSelectedNotifications] = useState([]);
   const [bulkAction, setBulkAction] = useState('');
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
@@ -108,6 +131,10 @@ const NotificationsDashboard = () => {
     settings,
     lastSyncTime
   } = useSelector(state => state.notifications);
+
+  const refreshNotifications = useCallback(() => {
+    return dispatch(fetchNotifications(NOTIFICATIONS_PAGE_FETCH_PARAMS));
+  }, [dispatch]);
 
   // Get real-time SignalR connection status with reactive polling
   const { areConnectionsHealthy, getConnectionHealth } = useSignalR();
@@ -139,36 +166,141 @@ const NotificationsDashboard = () => {
 
   // Computed values
   const hasSelectedNotifications = selectedNotifications.length > 0;
+  const isNotificationAcknowledged = (notification) => Boolean(notification?.read || notification?.acknowledged);
+  const getNotificationDate = (notification) => {
+    const notificationDate = new Date(notification.timestamp || notification.createdOn);
+    return Number.isNaN(notificationDate.getTime()) ? null : notificationDate;
+  };
+  const getNotificationPriorityLabel = (priority) => {
+    const normalizedPriority = normalizeNotificationKey(priority);
+
+    if (!normalizedPriority) {
+      return humanizeNotificationLabel(priority);
+    }
+
+    return t(`priority.${normalizedPriority}`, {
+      defaultValue: humanizeNotificationLabel(priority)
+    });
+  };
+  const getNotificationTypeLabel = (type) => {
+    const normalizedType = normalizeNotificationKey(type);
+
+    switch (normalizedType) {
+      case 'invitationcreated':
+        return t('types.invitationCreated', { defaultValue: humanizeNotificationLabel(type) });
+      case 'invitationapproved':
+        return t('types.invitationApproved', { defaultValue: humanizeNotificationLabel(type) });
+      case 'invitationrejected':
+        return t('types.invitationRejected', { defaultValue: humanizeNotificationLabel(type) });
+      case 'invitationpendingapproval':
+        return t('types.approvalRequired', { defaultValue: humanizeNotificationLabel(type) });
+      case 'visitorarrival':
+        return t('types.visitorArrival', { defaultValue: humanizeNotificationLabel(type) });
+      case 'visitorcheckedin':
+        return t('types.visitorCheckedIn', { defaultValue: humanizeNotificationLabel(type) });
+      case 'visitorcheckedout':
+        return t('types.visitorCheckedOut', { defaultValue: humanizeNotificationLabel(type) });
+      case 'visitoroverstay':
+        return t('types.visitorOverstay', { defaultValue: humanizeNotificationLabel(type) });
+      case 'systemalert':
+      case 'frsystemoffline':
+        return t('types.systemAlert', { defaultValue: humanizeNotificationLabel(type) });
+      case 'securityalert':
+      case 'blacklistalert':
+      case 'unknownface':
+      case 'emergencyalert':
+        return t('types.securityAlert', { defaultValue: humanizeNotificationLabel(type) });
+      default:
+        return humanizeNotificationLabel(type);
+    }
+  };
+  const typeFilterOptions = notifications
+    .reduce((options, notification) => {
+      const rawType = notification?.type;
+      const normalizedType = normalizeNotificationKey(rawType);
+
+      if (!normalizedType || options.some((option) => option.key === normalizedType)) {
+        return options;
+      }
+
+      return [
+        ...options,
+        {
+          key: normalizedType,
+          value: rawType,
+          label: getNotificationTypeLabel(rawType)
+        }
+      ];
+    }, [])
+    .sort((left, right) => left.label.localeCompare(right.label));
+  const selectedNotificationItems = notifications.filter(notification => selectedNotifications.includes(notification.id));
+  const canClearSelected = selectedNotificationItems.length > 0 &&
+    selectedNotificationItems.every(notification => isNotificationAcknowledged(notification));
+  const hasActiveFilters = Boolean(searchInput || priorityFilter || typeFilter || dateRangeFilter);
   const filteredNotifications = notifications.filter(notification => {
-    // Tab-based filtering with proper acknowledged handling
-    if (activeTab === 'unread' && notification.read) return false;
-    if (activeTab === 'acknowledged' && !notification.read && !notification.acknowledged) return false;
-    
-    // Search filter
+    const notificationIsAcknowledged = isNotificationAcknowledged(notification);
+
+    if (activeTab === 'unread' && notificationIsAcknowledged) return false;
+    if (activeTab === 'acknowledged' && !notificationIsAcknowledged) return false;
+    if (priorityFilter && !matchesNotificationKey(notification.priority, priorityFilter)) return false;
+    if (typeFilter && !matchesNotificationKey(notification.type, typeFilter)) return false;
+
+    if (dateRangeFilter) {
+      const notificationDate = getNotificationDate(notification);
+      if (!notificationDate) return false;
+
+      const now = new Date();
+      const startOfToday = new Date(now);
+      startOfToday.setHours(0, 0, 0, 0);
+
+      if (dateRangeFilter === 'today' && notificationDate < startOfToday) return false;
+
+      if (dateRangeFilter === 'week') {
+        const startOfWeek = new Date(startOfToday);
+        const dayOfWeek = startOfWeek.getDay();
+        const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        startOfWeek.setDate(startOfWeek.getDate() - daysFromMonday);
+
+        if (notificationDate < startOfWeek) return false;
+      }
+
+      if (dateRangeFilter === 'month') {
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        if (notificationDate < startOfMonth) return false;
+      }
+    }
+
     if (searchInput) {
       const searchTerm = searchInput.toLowerCase();
-      return (
+      const notificationTypeLabel = getNotificationTypeLabel(notification.type).toLowerCase();
+
+      if (!(
         notification.title?.toLowerCase().includes(searchTerm) ||
         notification.message?.toLowerCase().includes(searchTerm) ||
-        notification.type?.toLowerCase().includes(searchTerm)
-      );
+        notification.type?.toLowerCase().includes(searchTerm) ||
+        notificationTypeLabel.includes(searchTerm)
+      )) {
+        return false;
+      }
     }
-    
+
     return true;
   });
+  const allFilteredSelected = filteredNotifications.length > 0 &&
+    filteredNotifications.every(notification => selectedNotifications.includes(notification.id));
 
   // Initialize page and notifications
   useEffect(() => {
     dispatch(setPageTitle(t('pageTitle')));
     
     if (canReadOwn || canReadAll) {
-      dispatch(initializeNotifications());
-      dispatch(fetchNotifications());
+      refreshNotifications();
       if (canViewStats) {
         dispatch(fetchNotificationStats());
       }
     }
-  }, [dispatch, canReadOwn, canReadAll, canViewStats]);
+  }, [dispatch, canReadOwn, canReadAll, canViewStats, refreshNotifications, t]);
 
   // Auto-refresh notifications
   useEffect(() => {
@@ -176,13 +308,13 @@ const NotificationsDashboard = () => {
 
     const interval = setInterval(() => {
       if (canReadOwn || canReadAll) {
-        dispatch(fetchNotifications());
+        refreshNotifications();
         dispatch(updateLastSyncTime());
       }
     }, refreshInterval);
 
     return () => clearInterval(interval);
-  }, [dispatch, refreshInterval, canReadOwn, canReadAll]);
+  }, [dispatch, refreshInterval, canReadOwn, canReadAll, refreshNotifications]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -196,13 +328,34 @@ const NotificationsDashboard = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    setSelectedNotifications(prev => {
+      const nextSelection = prev.filter(id => notifications.some(notification => notification.id === id));
+      return nextSelection.length === prev.length ? prev : nextSelection;
+    });
+  }, [notifications]);
+
+  useEffect(() => {
+    if (bulkAction === 'clear' && !canClearSelected) {
+      setBulkAction('');
+    }
+  }, [bulkAction, canClearSelected]);
+
   // Event handlers
   const handleSearch = (value) => {
     setSearchInput(value);
   };
 
+  const handleClearFilters = () => {
+    setSearchInput('');
+    setActiveTab('all');
+    setPriorityFilter('');
+    setTypeFilter('');
+    setDateRangeFilter('');
+  };
+
   const handleRefresh = () => {
-    dispatch(fetchNotifications());
+    refreshNotifications();
     if (canViewStats) {
       dispatch(fetchNotificationStats());
     }
@@ -222,7 +375,7 @@ const NotificationsDashboard = () => {
       await dispatch(acknowledgeNotificationAsync({ notificationId, notes })).unwrap();
       
       // Force refresh notifications to ensure UI reflects backend state
-      await dispatch(fetchNotifications());
+      await refreshNotifications();
       
       // Update statistics
       if (canViewStats) {
@@ -261,7 +414,7 @@ const NotificationsDashboard = () => {
     if (!canAcknowledge) return;
 
     const unreadNotificationIds = notifications
-      .filter(notification => !notification.read)
+      .filter(notification => !isNotificationAcknowledged(notification))
       .map(notification => notification.id);
 
     if (unreadNotificationIds.length === 0) {
@@ -275,7 +428,7 @@ const NotificationsDashboard = () => {
         )
       );
 
-      await dispatch(fetchNotifications());
+      await refreshNotifications();
 
       if (canViewStats) {
         dispatch(fetchNotificationStats());
@@ -299,6 +452,7 @@ const NotificationsDashboard = () => {
 
   const handleBulkAction = () => {
     if (!hasSelectedNotifications || !bulkAction) return;
+    if (bulkAction === 'clear' && !canClearSelected) return;
     setShowBulkConfirm(true);
   };
 
@@ -313,7 +467,7 @@ const NotificationsDashboard = () => {
 
           await Promise.all(promises);
 
-          await dispatch(fetchNotifications());
+          await refreshNotifications();
 
           dispatch(addToast({
             type: 'success',
@@ -331,12 +485,26 @@ const NotificationsDashboard = () => {
         await Promise.all(promises);
 
         // Refresh notifications to reflect backend state
-        await dispatch(fetchNotifications());
+        await refreshNotifications();
 
         dispatch(addToast({
           type: 'success',
           title: t('bulk.complete'),
           message: t('bulk.acknowledgedAll', { count }),
+          duration: 3000
+        }));
+      } else if (bulkAction === 'clear') {
+        const promises = selectedNotifications.map(id =>
+          dispatch(deleteNotificationAsync(id)).unwrap()
+        );
+
+        await Promise.all(promises);
+        await refreshNotifications();
+
+        dispatch(addToast({
+          type: 'success',
+          title: t('bulk.complete'),
+          message: t('bulk.cleared', { count }),
           duration: 3000
         }));
       }
@@ -358,6 +526,33 @@ const NotificationsDashboard = () => {
       setSelectedNotifications([]);
       setBulkAction('');
       setShowBulkConfirm(false);
+    }
+  };
+
+  const handleClearNotification = async (notificationId) => {
+    try {
+      await dispatch(deleteNotificationAsync(notificationId)).unwrap();
+      await refreshNotifications();
+
+      if (canViewStats) {
+        dispatch(fetchNotificationStats());
+      }
+
+      dispatch(addToast({
+        type: 'success',
+        title: t('toast.clearedTitle'),
+        message: t('toast.clearedMessage'),
+        duration: 3000
+      }));
+
+      setSelectedNotifications(prev => prev.filter(id => id !== notificationId));
+    } catch (error) {
+      dispatch(addToast({
+        type: 'error',
+        title: t('toast.clearFailed'),
+        message: extractErrorMessage(error),
+        duration: 5000
+      }));
     }
   };
 
@@ -413,7 +608,7 @@ const NotificationsDashboard = () => {
   };
 
   const handleNotificationOpen = async (notification) => {
-    if (!notification.read && canAcknowledge) {
+    if (!isNotificationAcknowledged(notification) && canAcknowledge) {
       await handleAcknowledge(notification.id);
     }
 
@@ -443,36 +638,41 @@ const NotificationsDashboard = () => {
 
   // Helper functions
   const getNotificationIcon = (type, priority) => {
+    const normalizedType = normalizeNotificationKey(type);
+    const normalizedPriority = normalizeNotificationKey(priority);
     const iconClass = `w-5 h-5 ${
-      priority === 'Critical' || priority === 'Emergency' 
+      normalizedPriority === 'critical' || normalizedPriority === 'emergency' 
         ? 'text-red-500' 
-        : priority === 'High' 
+        : normalizedPriority === 'high' 
           ? 'text-orange-500' 
-          : priority === 'Medium' 
+          : normalizedPriority === 'medium' 
             ? 'text-yellow-500' 
             : 'text-blue-500'
     }`;
     
-    switch (type) {
-      case 'VisitorArrival':
-      case 'VisitorCheckedIn':
+    switch (normalizedType) {
+      case 'visitorarrival':
+      case 'visitorcheckedin':
         return <UserPlusIcon className={iconClass} />;
-      case 'VisitorCheckedOut':
+      case 'visitorcheckedout':
         return <UserMinusIcon className={iconClass} />;
-      case 'VisitorOverstay':
+      case 'visitoroverstay':
         return <ClockIcon className="w-5 h-5 text-yellow-500" />;
-      case 'BlacklistAlert':
-      case 'UnknownFace':
-      case 'EmergencyAlert':
+      case 'blacklistalert':
+      case 'unknownface':
+      case 'emergencyalert':
+      case 'securityalert':
         return <ShieldExclamationIcon className="w-5 h-5 text-red-500" />;
-      case 'SystemAlert':
-      case 'FRSystemOffline':
+      case 'systemalert':
+      case 'frsystemoffline':
         return <Cog6ToothIcon className={iconClass} />;
-      case 'InvitationApproved':
+      case 'invitationapproved':
         return <CheckIcon className="w-5 h-5 text-green-500" />;
-      case 'InvitationRejected':
+      case 'invitationrejected':
         return <XMarkIcon className="w-5 h-5 text-red-500" />;
-      case 'InvitationPendingApproval':
+      case 'invitationpendingapproval':
+      case 'invitationcreated':
+      case 'invitationsent':
         return <EnvelopeIcon className={iconClass} />;
       default:
         return <InformationCircleIcon className={iconClass} />;
@@ -480,7 +680,7 @@ const NotificationsDashboard = () => {
   };
 
   const getPriorityColor = (priority) => {
-    switch (priority?.toLowerCase()) {
+    switch (normalizeNotificationKey(priority)) {
       case 'emergency':
       case 'critical':
         return 'red';
@@ -496,19 +696,20 @@ const NotificationsDashboard = () => {
   };
 
   const getTypeColor = (type) => {
-    switch (type) {
-      case 'security_alert':
-      case 'BlacklistAlert':
-      case 'EmergencyAlert':
+    const normalizedType = normalizeNotificationKey(type);
+
+    switch (normalizedType) {
+      case 'securityalert':
+      case 'blacklistalert':
+      case 'emergencyalert':
         return 'red';
-      case 'visitor_checkin':
-      case 'VisitorCheckedIn':
+      case 'visitorcheckin':
+      case 'visitorcheckedin':
         return 'green';
-      case 'visitor_overdue':
-      case 'VisitorOverstay':
+      case 'visitoroverdue':
+      case 'visitoroverstay':
         return 'yellow';
-      case 'system_alert':
-      case 'SystemAlert':
+      case 'systemalert':
         return 'gray';
       default:
         return 'blue';
@@ -520,191 +721,210 @@ const NotificationsDashboard = () => {
       case 'all':
         return notifications.length;
       case 'unread':
-        return notifications.filter(n => !n.read).length; // Use read property which now correctly maps from isAcknowledged
+        return notifications.filter(notification => !isNotificationAcknowledged(notification)).length;
       case 'acknowledged':
-        return notifications.filter(n => n.read || n.acknowledged).length; // Count both read and acknowledged
+        return notifications.filter(notification => isNotificationAcknowledged(notification)).length;
       default:
         return 0;
     }
   };
 
   // Render functions
-  const renderNotificationCard = (notification) => (
-    <motion.div
-      key={notification.id}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className={`border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer ${
-        !notification.read ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
-      } ${selectedNotifications.includes(notification.id) ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}`}
-      onClick={() => handleNotificationOpen(notification)}
-    >
-      <div className="flex items-start gap-3">
-        {/* Selection checkbox */}
-        <div className="flex-shrink-0 mt-1">
-          <input
-            type="checkbox"
-            checked={selectedNotifications.includes(notification.id)}
-            onChange={(e) => {
-              e.stopPropagation();
-              handleNotificationSelect(notification.id, e.target.checked);
-            }}
-            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-        </div>
+  const renderNotificationCard = (notification) => {
+    const notificationIsAcknowledged = isNotificationAcknowledged(notification);
 
-        {/* Notification icon */}
-        <div className="flex-shrink-0 mt-1">
-          {getNotificationIcon(notification.type, notification.priority)}
-        </div>
+    return (
+      <motion.div
+        key={notification.id}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className={`border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer ${
+          !notificationIsAcknowledged ? 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
+        } ${selectedNotifications.includes(notification.id) ? 'ring-2 ring-blue-500 dark:ring-blue-400' : ''}`}
+        onClick={() => handleNotificationOpen(notification)}
+      >
+        <div className="flex items-start gap-3">
+          {/* Selection checkbox */}
+          <div className="flex-shrink-0 mt-1">
+            <input
+              type="checkbox"
+              checked={selectedNotifications.includes(notification.id)}
+              onClick={(event) => event.stopPropagation()}
+              onChange={(event) => {
+                event.stopPropagation();
+                handleNotificationSelect(notification.id, event.target.checked);
+              }}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+          </div>
 
-        {/* Notification content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h4 className="text-sm font-medium text-gray-900 dark:text-white">
-                  {notification.title}
-                </h4>
-                <Badge color={getPriorityColor(notification.priority)} size="xs">
-                  {notification.priority}
-                </Badge>
-                {!notification.read && (
-                  <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full"></div>
+          {/* Notification icon */}
+          <div className="flex-shrink-0 mt-1">
+            {getNotificationIcon(notification.type, notification.priority)}
+          </div>
+
+          {/* Notification content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                    {notification.title}
+                  </h4>
+                  <Badge color={getPriorityColor(notification.priority)} size="xs">
+                    {getNotificationPriorityLabel(notification.priority)}
+                  </Badge>
+                  {!notificationIsAcknowledged && (
+                    <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full"></div>
+                  )}
+                </div>
+
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  {notification.message}
+                </p>
+
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {formatRelativeTime(new Date(notification.timestamp || notification.createdOn))}
+                </p>
+
+                {/* Related Entity Information */}
+                {notification.data && (
+                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                    {notification.data.visitorName && (
+                      <p><strong>{t('card.visitor')}</strong> {notification.data.visitorName}</p>
+                    )}
+                    {notification.data.company && (
+                      <p><strong>{t('card.company')}</strong> {notification.data.company}</p>
+                    )}
+                    {notification.data.hostName && (
+                      <p><strong>{t('card.host')}</strong> {notification.data.hostName}</p>
+                    )}
+                    {notification.data.location && (
+                      <p><strong>{t('card.location')}</strong> {notification.data.location}</p>
+                    )}
+                  </div>
                 )}
               </div>
 
-              <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                {notification.message}
-              </p>
+              {/* Enhanced Actions with Dropdown */}
+              <div className="flex items-center gap-1 ms-2">
+                {!notificationIsAcknowledged && canAcknowledge && (
+                  <div className="relative notification-dropdown">
+                    {/* Action Dropdown Toggle */}
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleActionDropdown(notification.id);
+                      }}
+                      className="flex items-center gap-1"
+                    >
+                      <span className="text-xs">
+                        {getNotificationAction(notification.id) === 'acknowledge' ? t('card.acknowledge') : t('card.markAsRead')}
+                      </span>
+                      <ChevronDownIcon className="w-3 h-3" />
+                    </Button>
 
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {formatRelativeTime(new Date(notification.timestamp || notification.createdOn))}
-              </p>
+                    {/* Dropdown Menu */}
+                    {showActionDropdowns[notification.id] && (
+                      <div className="absolute end-0 mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50">
+                        <div className="py-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setNotificationAction(notification.id, 'markRead');
+                              setShowActionDropdowns(prev => ({ ...prev, [notification.id]: false }));
+                            }}
+                            className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 ${
+                              getNotificationAction(notification.id) === 'markRead' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
+                            }`}
+                          >
+                            <CheckIcon className="w-3 h-3" />
+                            <span>{t('card.markAsRead')}</span>
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setNotificationAction(notification.id, 'acknowledge');
+                              setShowActionDropdowns(prev => ({ ...prev, [notification.id]: false }));
+                            }}
+                            className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 ${
+                              getNotificationAction(notification.id) === 'acknowledge' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
+                            }`}
+                          >
+                            <CheckCircleIcon className="w-3 h-3" />
+                            <span>{t('card.acknowledge')}</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
-              {/* Related Entity Information */}
-              {notification.data && (
-                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 space-y-1">
-                  {notification.data.visitorName && (
-                    <p><strong>{t('card.visitor')}</strong> {notification.data.visitorName}</p>
-                  )}
-                  {notification.data.company && (
-                    <p><strong>{t('card.company')}</strong> {notification.data.company}</p>
-                  )}
-                  {notification.data.hostName && (
-                    <p><strong>{t('card.host')}</strong> {notification.data.hostName}</p>
-                  )}
-                  {notification.data.location && (
-                    <p><strong>{t('card.location')}</strong> {notification.data.location}</p>
-                  )}
-                </div>
-              )}
+                {/* Execute Action Button */}
+                {!notificationIsAcknowledged && canAcknowledge && (
+                  <Button
+                    size="xs"
+                    variant="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      executeNotificationAction(notification.id);
+                    }}
+                    className="ms-2"
+                  >
+                    {t('card.execute')}
+                  </Button>
+                )}
+
+                {/* Show acknowledged status */}
+                {notificationIsAcknowledged && (
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 text-green-600">
+                      <CheckCircleIcon className="w-4 h-4" />
+                      <span className="text-xs">{t('card.acknowledged')}</span>
+                    </div>
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleClearNotification(notification.id);
+                      }}
+                      className="flex items-center gap-1"
+                    >
+                      <TrashIcon className="w-3 h-3" />
+                      <span>{t('card.clear')}</span>
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Enhanced Actions with Dropdown */}
-            <div className="flex items-center gap-1 ms-2">
-              {!notification.read && canAcknowledge && (
-                <div className="relative notification-dropdown">
-                  {/* Action Dropdown Toggle */}
+            {/* Action Buttons from notification data */}
+            {notification.actions && notification.actions.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {notification.actions.map((action, index) => (
                   <Button
+                    key={index}
                     size="xs"
                     variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleActionDropdown(notification.id);
+                      handleNotificationActionClick(notification, action);
                     }}
-                    className="flex items-center gap-1"
                   >
-                    <span className="text-xs">
-                      {getNotificationAction(notification.id) === 'acknowledge' ? t('card.acknowledge') : t('card.markAsRead')}
-                    </span>
-                    <ChevronDownIcon className="w-3 h-3" />
+                    {action.label}
                   </Button>
-
-                  {/* Dropdown Menu */}
-                  {showActionDropdowns[notification.id] && (
-                    <div className="absolute end-0 mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50">
-                      <div className="py-1">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setNotificationAction(notification.id, 'markRead');
-                            setShowActionDropdowns(prev => ({ ...prev, [notification.id]: false }));
-                          }}
-                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 ${
-                            getNotificationAction(notification.id) === 'markRead' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
-                          }`}
-                        >
-                          <CheckIcon className="w-3 h-3" />
-                          <span>{t('card.markAsRead')}</span>
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setNotificationAction(notification.id, 'acknowledge');
-                            setShowActionDropdowns(prev => ({ ...prev, [notification.id]: false }));
-                          }}
-                          className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 ${
-                            getNotificationAction(notification.id) === 'acknowledge' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
-                          }`}
-                        >
-                          <CheckCircleIcon className="w-3 h-3" />
-                          <span>{t('card.acknowledge')}</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {/* Execute Action Button */}
-              {!notification.read && canAcknowledge && (
-                <Button
-                  size="xs"
-                  variant="primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    executeNotificationAction(notification.id);
-                  }}
-                  className="ms-2"
-                >
-                  {t('card.execute')}
-                </Button>
-              )}
-              
-              {/* Show acknowledged status */}
-              {notification.read && (
-                <div className="flex items-center gap-1 text-green-600">
-                  <CheckCircleIcon className="w-4 h-4" />
-                  <span className="text-xs">{t('card.acknowledged')}</span>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
-
-          {/* Action Buttons from notification data */}
-          {notification.actions && notification.actions.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {notification.actions.map((action, index) => (
-                <Button
-                  key={index}
-                  size="xs"
-                  variant="outline"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleNotificationActionClick(notification, action);
-                  }}
-                >
-                  {action.label}
-                </Button>
-              ))}
-            </div>
-          )}
         </div>
-      </div>
-    </motion.div>
-  );
+      </motion.div>
+    );
+  };
 
   // Render loading state
   if (!canReadOwn && !canReadAll) {
@@ -807,7 +1027,7 @@ const NotificationsDashboard = () => {
               <div className="ms-4">
                 <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('stats.critical')}</h3>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {notifications.filter(n => n.priority === 'Critical' || n.priority === 'Emergency').length}
+                  {notifications.filter(n => matchesNotificationKey(n.priority, ['critical', 'emergency'])).length}
                 </p>
               </div>
             </div>
@@ -899,6 +1119,9 @@ const NotificationsDashboard = () => {
                   <option value="">{t('bulkActions.selectAction')}</option>
                   <option value="markRead">{t('bulkActions.markAsRead')}</option>
                   <option value="acknowledge">{t('bulkActions.acknowledge')}</option>
+                  {canClearSelected && (
+                    <option value="clear">{t('bulkActions.clear')}</option>
+                  )}
                 </Select>
 
                 <Button
@@ -925,39 +1148,42 @@ const NotificationsDashboard = () => {
               >
                 <Select
                   label={t('filters_panel.priority')}
-                  value=""
-                  onChange={() => {}}
+                  value={priorityFilter}
+                  onChange={(event) => setPriorityFilter(event.target.value)}
                   placeholder={t('filters_panel.allPriorities')}
                   size="sm"
                 >
-                  <option value="Emergency">{t('priority.emergency')}</option>
-                  <option value="Critical">{t('priority.critical')}</option>
-                  <option value="High">{t('priority.high')}</option>
-                  <option value="Medium">{t('priority.medium')}</option>
-                  <option value="Low">{t('priority.low')}</option>
+                  <option value="">{t('filters_panel.allPriorities')}</option>
+                  {PRIORITY_FILTER_OPTIONS.map(priority => (
+                    <option key={priority} value={priority}>
+                      {getNotificationPriorityLabel(priority)}
+                    </option>
+                  ))}
                 </Select>
 
                 <Select
                   label={t('filters_panel.type')}
-                  value=""
-                  onChange={() => {}}
+                  value={typeFilter}
+                  onChange={(event) => setTypeFilter(event.target.value)}
                   placeholder={t('filters_panel.allTypes')}
                   size="sm"
                 >
-                  <option value="VisitorArrival">{t('types.visitorArrival')}</option>
-                  <option value="VisitorCheckedIn">{t('types.visitorCheckedIn')}</option>
-                  <option value="VisitorOverstay">{t('types.visitorOverstay')}</option>
-                  <option value="SystemAlert">{t('types.systemAlert')}</option>
-                  <option value="SecurityAlert">{t('types.securityAlert')}</option>
+                  <option value="">{t('filters_panel.allTypes')}</option>
+                  {typeFilterOptions.map(option => (
+                    <option key={option.key} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </Select>
 
                 <Select
                   label={t('filters_panel.dateRange')}
-                  value=""
-                  onChange={() => {}}
+                  value={dateRangeFilter}
+                  onChange={(event) => setDateRangeFilter(event.target.value)}
                   placeholder={t('filters_panel.allTime')}
                   size="sm"
                 >
+                  <option value="">{t('filters_panel.allTime')}</option>
                   <option value="today">{t('filters_panel.today')}</option>
                   <option value="week">{t('filters_panel.thisWeek')}</option>
                   <option value="month">{t('filters_panel.thisMonth')}</option>
@@ -967,10 +1193,7 @@ const NotificationsDashboard = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      setSearchInput('');
-                      setActiveTab('all');
-                    }}
+                    onClick={handleClearFilters}
                     className="w-full"
                   >
                     {t('filters_panel.clearFilters')}
@@ -986,7 +1209,7 @@ const NotificationsDashboard = () => {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={selectedNotifications.length === filteredNotifications.length}
+                  checked={allFilteredSelected}
                   onChange={(e) => handleSelectAll(e.target.checked)}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
@@ -1048,17 +1271,19 @@ const NotificationsDashboard = () => {
               description={
                 searchInput
                   ? t('noNotificationsSearch', { search: searchInput })
+                  : hasActiveFilters
+                    ? t('noNotificationsFiltered')
                   : activeTab === 'unread'
                     ? t('allCaughtUp')
                     : t('noNotificationsDisplay')
               }
               action={
-                searchInput && (
+                hasActiveFilters && (
                   <Button
                     variant="outline"
-                    onClick={() => handleSearch('')}
+                    onClick={handleClearFilters}
                   >
-                    {t('clearSearch')}
+                    {searchInput ? t('clearSearch') : t('filters_panel.clearFilters')}
                   </Button>
                 )
               }
@@ -1102,7 +1327,9 @@ const NotificationsDashboard = () => {
                     {t('bulk.confirmDesc', {
                       action: bulkAction === 'markRead'
                         ? t('bulk.actionMarkRead')
-                        : t('bulk.actionAcknowledge'),
+                        : bulkAction === 'acknowledge'
+                          ? t('bulk.actionAcknowledge')
+                          : t('bulk.actionClear'),
                       count: selectedNotifications.length,
                     })}
                   </p>

@@ -45,7 +45,17 @@ import { BellIcon as BellIconSolid } from '@heroicons/react/24/solid';
 
 // Utils
 import formatters from '../../utils/formatters';
-import { getNotificationNavigationPath } from '../../utils/notificationUtils';
+import { getNotificationNavigationPath, matchesNotificationKey, normalizeNotificationKey } from '../../utils/notificationUtils';
+
+const NOTIFICATION_CENTER_FETCH_PARAMS = {
+  pageSize: 50
+};
+
+const NOTIFICATION_FILTER_TYPES = {
+  visitors: ['VisitorArrival', 'VisitorCheckedIn', 'VisitorCheckedOut', 'VisitorOverstay'],
+  security: ['BlacklistAlert', 'UnknownFace', 'EmergencyAlert', 'SecurityAlert'],
+  system: ['SystemAlert', 'FRSystemOffline', 'MaintenanceNotice']
+};
 
 /**
  * Advanced Notification Center with Real-time SignalR Integration
@@ -80,21 +90,28 @@ const NotificationCenter = ({
   const [viewMode, setViewMode] = useState('list'); // 'list', 'card'
   const [notificationActions, setNotificationActions] = useState({}); // { notificationId: 'markRead'|'acknowledge' }
 
+  const getFetchParams = useCallback(() => {
+    if (filter === 'unread') {
+      return {
+        ...NOTIFICATION_CENTER_FETCH_PARAMS,
+        isAcknowledged: false
+      };
+    }
+
+    return NOTIFICATION_CENTER_FETCH_PARAMS;
+  }, [filter]);
+
+  const refreshNotifications = useCallback(() => {
+    return dispatch(fetchNotifications(getFetchParams()));
+  }, [dispatch, getFetchParams]);
+
   // Load notifications on mount and when filter changes
   useEffect(() => {
     if (isOpen) {
-      const filterParams = {};
-      
-      if (filter === 'unread') {
-        filterParams.isAcknowledged = false;
-      } else if (filter !== 'all') {
-        filterParams.alertType = filter;
-      }
-
-      dispatch(fetchNotifications(filterParams));
+      refreshNotifications();
       dispatch(fetchNotificationStats());
     }
-  }, [dispatch, isOpen, filter]);
+  }, [dispatch, isOpen, refreshNotifications]);
 
   // Real-time connection status indicator
   useEffect(() => {
@@ -108,15 +125,8 @@ const NotificationCenter = ({
   const filteredNotifications = notifications.filter(notification => {
     if (filter === 'all') return true;
     if (filter === 'unread') return !notification.read;
-    
-    // Map filter to notification types
-    const typeMap = {
-      'visitors': ['VisitorArrival', 'VisitorCheckedIn', 'VisitorCheckedOut', 'VisitorOverstay'],
-      'security': ['BlacklistAlert', 'UnknownFace', 'EmergencyAlert', 'SecurityAlert'],
-      'system': ['SystemAlert', 'FRSystemOffline', 'MaintenanceNotice']
-    };
-    
-    return typeMap[filter]?.includes(notification.type) || false;
+
+    return matchesNotificationKey(notification.type, NOTIFICATION_FILTER_TYPES[filter] || []);
   });
 
   // Mark notification as read
@@ -134,8 +144,9 @@ const NotificationCenter = ({
       unreadNotificationIds.map(id => dispatch(acknowledgeNotificationAsync({ notificationId: id })).unwrap())
     );
 
-    dispatch(fetchNotifications());
-  }, [dispatch, notifications]);
+    await refreshNotifications();
+    dispatch(fetchNotificationStats());
+  }, [dispatch, notifications, refreshNotifications]);
 
   // Clear all notifications (delete from backend)
   const handleClearAll = useCallback(() => {
@@ -154,7 +165,7 @@ const NotificationCenter = ({
     console.log('Notification action:', action, notification);
     
     // Mark as read when action is taken
-    if (!notification.read) {
+    if (!notification.read && action.action !== 'acknowledge') {
       await markAsRead(notification.id);
     }
 
@@ -167,12 +178,8 @@ const NotificationCenter = ({
           })).unwrap();
           
           // Force refresh notifications after acknowledgment
-          dispatch(fetchNotifications());
-          
-          // Also acknowledge via SignalR if available
-          if (host?.acknowledgeNotification) {
-            await host.acknowledgeNotification(notification.id);
-          }
+          await refreshNotifications();
+          dispatch(fetchNotificationStats());
           break;
           
         case 'dismiss':
@@ -222,7 +229,7 @@ const NotificationCenter = ({
     } catch (error) {
       console.error('Error handling notification action:', error);
     }
-  }, [dispatch, markAsRead, removeNotificationHandler, host, navigate, t]);
+  }, [dispatch, markAsRead, refreshNotifications, removeNotificationHandler, navigate]);
 
   // Enhanced acknowledge handler for direct acknowledge button
   const handleDirectAcknowledge = useCallback(async (notificationId) => {
@@ -232,18 +239,14 @@ const NotificationCenter = ({
       })).unwrap();
       
       // Force refresh notifications after acknowledgment
-      dispatch(fetchNotifications());
-      
-      // Also acknowledge via SignalR if available
-      if (host?.acknowledgeNotification) {
-        await host.acknowledgeNotification(notificationId);
-      }
+      await refreshNotifications();
+      dispatch(fetchNotificationStats());
       
       console.log('✅ Notification acknowledged successfully');
     } catch (error) {
       console.error('❌ Failed to acknowledge notification:', error);
     }
-  }, [dispatch, host]);
+  }, [dispatch, refreshNotifications]);
 
   const handleNotificationOpen = useCallback(async (notification) => {
     if (!notification.read) {
@@ -258,26 +261,31 @@ const NotificationCenter = ({
 
   // Get notification icon
   const getNotificationIcon = (type, priority) => {
-    const iconClass = `w-5 h-5 ${priority === 'Critical' || priority === 'Emergency' ? 'text-red-500' : priority === 'High' ? 'text-orange-500' : priority === 'Medium' ? 'text-yellow-500' : 'text-blue-500'}`;
-    
-    switch (type) {
-      case 'VisitorArrival':
-      case 'VisitorCheckedIn':
+    const normalizedPriority = normalizeNotificationKey(priority);
+    const normalizedType = normalizeNotificationKey(type);
+    const iconClass = `w-5 h-5 ${normalizedPriority === 'critical' || normalizedPriority === 'emergency' ? 'text-red-500' : normalizedPriority === 'high' ? 'text-orange-500' : normalizedPriority === 'medium' ? 'text-yellow-500' : 'text-blue-500'}`;
+
+    switch (normalizedType) {
+      case 'visitorarrival':
+      case 'visitorcheckedin':
         return <UserPlusIcon className={iconClass} />;
-      case 'VisitorCheckedOut':
+      case 'visitorcheckedout':
         return <UserMinusIcon className={iconClass} />;
-      case 'VisitorOverstay':
+      case 'visitoroverstay':
         return <ClockIcon className="w-5 h-5 text-yellow-500" />;
-      case 'BlacklistAlert':
-      case 'UnknownFace':
-      case 'EmergencyAlert':
+      case 'blacklistalert':
+      case 'unknownface':
+      case 'emergencyalert':
+      case 'securityalert':
         return <ShieldExclamationIcon className="w-5 h-5 text-red-500" />;
-      case 'SystemAlert':
-      case 'FRSystemOffline':
+      case 'systemalert':
+      case 'frsystemoffline':
         return <ExclamationTriangleIcon className="w-5 h-5 text-orange-500" />;
-      case 'MaintenanceNotice':
+      case 'maintenancenotice':
         return <Cog6ToothIcon className="w-5 h-5 text-gray-500" />;
-      case 'InvitationSent':
+      case 'invitationsent':
+      case 'invitationcreated':
+      case 'invitationpendingapproval':
         return <EnvelopeIcon className="w-5 h-5 text-blue-500" />;
       default:
         return <BellIcon className={iconClass} />;
@@ -602,7 +610,7 @@ const NotificationCenter = ({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => dispatch(fetchNotifications())}
+              onClick={() => refreshNotifications()}
               className="mt-2"
             >
               {t('center.retry')}
@@ -659,7 +667,7 @@ const NotificationCenter = ({
             <Button
               size="xs"
               variant="ghost"
-              onClick={() => dispatch(fetchNotifications())}
+              onClick={() => refreshNotifications()}
               icon={<ArrowPathIcon className="w-3 h-3" />}
               title={t('refresh')}
             />

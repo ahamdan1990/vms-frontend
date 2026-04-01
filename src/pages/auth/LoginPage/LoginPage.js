@@ -1,6 +1,6 @@
 // src/pages/auth/LoginPage/LoginPage.js
 import React, { useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../hooks/useAuth';
@@ -21,7 +21,9 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const { login, loading, error } = useAuth();
+  const passwordChangedSuccess = location.state?.passwordChanged === true;
   const { setThemeMode } = useTheme();
   const { t } = useTranslation('auth');
 
@@ -206,6 +208,22 @@ const LoginPage = () => {
               {t('login.subtitle')}
             </p>
           </motion.div>
+
+          {/* Password changed success banner */}
+          {passwordChangedSuccess && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 flex items-start gap-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 px-4 py-3"
+            >
+              <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-sm text-green-700 dark:text-green-300">
+                {t('login.passwordChangedSuccess', 'Password changed successfully. Please sign in with your new password.')}
+              </p>
+            </motion.div>
+          )}
 
           {/* Login Form */}
           <motion.div

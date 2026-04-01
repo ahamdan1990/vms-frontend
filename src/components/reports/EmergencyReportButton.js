@@ -22,6 +22,7 @@ import Modal from '../common/Modal/Modal';
 import Card from '../common/Card/Card';
 import LoadingSpinner from '../common/LoadingSpinner/LoadingSpinner';
 import Badge from '../common/Badge/Badge';
+import formatters from '../../utils/formatters';
 
 // Permissions
 import { EMERGENCY_PERMISSIONS } from '../../constants/permissions';
@@ -139,7 +140,7 @@ const EmergencyReportButton = ({ className = '' }) => {
                   <div>
                     <div className="text-sm text-gray-600 font-medium">Updated</div>
                     <div className="text-sm font-bold text-gray-900">
-                      {new Date(reportData.lastUpdated).toLocaleTimeString()}
+                      {formatters.formatTime(reportData.lastUpdated)}
                     </div>
                   </div>
                 </Card>
@@ -178,7 +179,7 @@ const EmergencyReportButton = ({ className = '' }) => {
                                 <span>Host: {occupant.hostName}</span>
                               </div>
                               <div className="text-xs text-gray-500 mt-1">
-                                <span>Checked in: {new Date(occupant.checkedInAt).toLocaleString()}</span>
+                                <span>Checked in: {formatters.formatDateTime(occupant.checkedInAt)}</span>
                                 <span className="mx-2">•</span>
                                 <span>{occupant.minutesOnSite} min on-site</span>
                               </div>

@@ -57,6 +57,7 @@
     "selectAction": "Select action...",
     "markAsRead": "Mark as Read",
     "acknowledge": "Acknowledge",
+    "clear": "Clear",
     "apply": "Apply ({{count}})",
     "selectAll": "Select all ({{count}})",
     "selected": "{{count}} selected",
@@ -81,6 +82,7 @@
     "location": "Location:",
     "markAsRead": "Mark as Read",
     "acknowledge": "Acknowledge",
+    "clear": "Clear",
     "execute": "Execute",
     "acknowledged": "Acknowledged",
     "dismiss": "Dismiss"
@@ -88,6 +90,7 @@
   "loading": "Loading notifications...",
   "noNotifications": "No notifications found",
   "noNotificationsSearch": "No notifications match your search criteria \"{{search}}\"",
+  "noNotificationsFiltered": "No notifications match the current filters",
   "allCaughtUp": "You're all caught up! No unread notifications.",
   "noNotificationsDisplay": "No notifications to display",
   "clearSearch": "Clear search",
@@ -96,10 +99,12 @@
     "confirmDesc": "Are you sure you want to {{action}} {{count}} notification(s)?",
     "actionMarkRead": "mark as read",
     "actionAcknowledge": "acknowledge",
+    "actionClear": "clear",
     "confirm": "Confirm",
     "complete": "Bulk Action Complete",
     "markedRead": "{{count}} notification(s) marked as read",
     "acknowledgedAll": "{{count}} notification(s) acknowledged",
+    "cleared": "{{count}} notification(s) cleared",
     "failed": "Bulk Action Failed"
   },
   "center": {
@@ -145,6 +150,9 @@
     "acknowledgedTitle": "Notification Acknowledged",
     "acknowledgedMessage": "Notification has been acknowledged successfully",
     "acknowledgeFailed": "Acknowledgment Failed",
+    "clearedTitle": "Notification Cleared",
+    "clearedMessage": "Notification has been cleared successfully",
+    "clearFailed": "Clear Failed",
     "markAllReadTitle": "All Notifications Marked as Read",
     "markAllReadMessage": "{{count}} notifications marked as read"
   }

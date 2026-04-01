@@ -1,6 +1,7 @@
 import apiClient, { extractApiData } from './apiClient';
 import { INVITATION_ENDPOINTS, buildQueryString } from './apiEndpoints';
 import { InvitationStatus } from '../constants/invitationStatus';
+import { toLocalDateString } from '../utils/dateUtils';
 
 /**
  * Invitation management service matching the backend API endpoints exactly
@@ -242,6 +243,26 @@ const invitationService = {
     return extractApiData(response);
   },
 
+  /**
+   * Requests host consent for a late check-in on an expired invitation
+   * POST /api/invitations/{id}/request-late-checkin
+   * Requires: CheckIn.Process permission
+   */
+  async requestLateCheckIn(id, notes = '') {
+    const response = await apiClient.post(INVITATION_ENDPOINTS.REQUEST_LATE_CHECKIN(id), { notes });
+    return extractApiData(response);
+  },
+
+  /**
+   * Force check-in override for an expired invitation (admin/operator only)
+   * POST /api/invitations/{id}/override-checkin
+   * Requires: CheckIn.Override permission
+   */
+  async overrideCheckIn(id, notes = '') {
+    const response = await apiClient.post(INVITATION_ENDPOINTS.OVERRIDE_CHECKIN(id), { notes });
+    return extractApiData(response);
+  },
+
   // Utility Methods
 
   /**
@@ -327,17 +348,11 @@ const invitationService = {
   },
 
   /**
-   * Gets active invitations (today's visits)
+   * Gets visitors currently in the building.
    */
   async getActiveInvitations() {
-    const today = new Date();
-    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-
     return this.getInvitations({
       activeOnly: true,
-      startDate: startOfDay.toISOString(),
-      endDate: endOfDay.toISOString(),
       sortBy: 'ScheduledStartTime',
       sortDirection: 'asc'
     });
@@ -373,10 +388,10 @@ const invitationService = {
   async getUpcomingInvitations() {
     const today = new Date();
     const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-
+  
     return this.getInvitations({
-      startDate: today.toISOString(),
-      endDate: nextWeek.toISOString(),
+      startDate: toLocalDateString(today),
+      endDate: toLocalDateString(nextWeek),
       status: InvitationStatus.Approved,
       sortBy: 'ScheduledStartTime',
       sortDirection: 'asc'

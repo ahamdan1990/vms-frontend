@@ -9,31 +9,10 @@
     <meta name="keywords" content="visitor management, security, facial recognition, check-in, enterprise" />
     <meta name="author" content="VMS Development Team" />
     
-    <!-- Security headers -->
-    <meta http-equiv="Content-Security-Policy" content="
-      default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval';
-      worker-src 'self' blob:;
-      child-src 'self' blob:;
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      img-src 'self' data: blob: https: http://localhost:5000 https://localhost:7000 http://192.168.0.59:5000 https://192.168.0.59:7000;
-      font-src 'self' data: https://fonts.gstatic.com;
-      media-src 'self' data: blob:;
-      connect-src 'self'
-        http://localhost:5000
-        https://localhost:7000
-        http://192.168.0.59:5000
-        https://192.168.0.59:7000
-        ws://localhost:5000
-        wss://localhost:7000
-        ws://192.168.0.59:5000
-        wss://192.168.0.59:7000
-        https://fastly.jsdelivr.net
-        https://cdn.jsdelivr.net;
-      frame-src 'self' blob:;
-      object-src 'none';
-    " />
-
+    <!-- Security headers are set as HTTP response headers by SecurityHeadersMiddleware.
+         A CSP meta tag is intentionally omitted: static meta tags use 'self' which
+         breaks API calls when the app is accessed via IP or localhost while the API
+         is on a named host (e.g. https://ahworkstation). -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="DENY" />
     <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
@@ -47,8 +26,6 @@
     <meta name="apple-mobile-web-app-title" content="VMS" />
     
     <!-- Preload critical resources -->
-    <link rel="preconnect" href="https://192.168.0.59:7000" />
-    <link rel="dns-prefetch" href="https://192.168.0.59:7000" />
     <!-- Favicon and app icons -->
     <!-- link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png" /-->
     <!-- link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png" /-->
@@ -120,6 +97,8 @@
         font-size: 14px;
       }
     </style>
+    <!-- Runtime config: written by the installer with the server's API URL -->
+    <script src="%PUBLIC_URL%/config.js"></script>
   </head>
   <body>
     <noscript>

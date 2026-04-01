@@ -18,7 +18,9 @@ import {
   CheckCircleIcon,
   InformationCircleIcon,
   PhoneIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  BellAlertIcon,
+  ShieldExclamationIcon
 } from '@heroicons/react/24/outline';
 import {
   CheckCircleIcon as CheckCircleIconSolid,
@@ -39,6 +41,11 @@ const InvitationDetailsModal = ({
   invitation,
   error,
   onConfirmCheckIn,
+  onRequestLateCheckIn,
+  onOverrideCheckIn,
+  canOverride = false,
+  lateCheckInRequested = false,
+  lateCheckInLoading = false,
   loading = false
 }) => {
   const { t } = useTranslation('checkin');
@@ -224,7 +231,7 @@ const InvitationDetailsModal = ({
           </div>
         )}
 
-        {!isApproved && !isCheckedIn && !isCompleted && (
+        {!isApproved && !isExpired && !isCheckedIn && !isCompleted && (
           <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-800 rounded-lg p-4 flex items-start">
             <ExclamationTriangleIconSolid className="h-6 w-6 text-red-600 dark:text-red-400 me-3 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
@@ -366,10 +373,44 @@ const InvitationDetailsModal = ({
           </div>
         )}
 
+        {isExpired && !isCheckedIn && !isCompleted && lateCheckInRequested && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 flex items-center gap-2">
+            <BellAlertIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+            <p className="text-sm text-blue-800 dark:text-blue-300 font-medium">
+              {t('invitationModal.lateCheckIn.requestSent')}
+            </p>
+          </div>
+        )}
+
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <Button variant="outline" onClick={onClose} disabled={loading}>
+          <Button variant="outline" onClick={onClose} disabled={loading || lateCheckInLoading}>
             {canCheckIn ? t('common:buttons.cancel') : t('common:buttons.close')}
           </Button>
+
+          {isExpired && !isCheckedIn && !isCompleted && canOverride && (
+            <Button
+              variant="danger"
+              onClick={() => onOverrideCheckIn && onOverrideCheckIn(notes)}
+              loading={lateCheckInLoading}
+              icon={<ShieldExclamationIcon className="h-5 w-5" />}
+              iconPosition="left"
+            >
+              {t('invitationModal.actions.overrideCheckIn')}
+            </Button>
+          )}
+
+          {isExpired && !isCheckedIn && !isCompleted && !canOverride && !lateCheckInRequested && (
+            <Button
+              variant="warning"
+              onClick={() => onRequestLateCheckIn && onRequestLateCheckIn(notes)}
+              loading={lateCheckInLoading}
+              icon={<BellAlertIcon className="h-5 w-5" />}
+              iconPosition="left"
+            >
+              {t('invitationModal.actions.requestHostConsent')}
+            </Button>
+          )}
+
           {canCheckIn && (
             <Button
               variant="primary"
@@ -393,6 +434,11 @@ InvitationDetailsModal.propTypes = {
   invitation: PropTypes.object,
   error: PropTypes.object,
   onConfirmCheckIn: PropTypes.func.isRequired,
+  onRequestLateCheckIn: PropTypes.func,
+  onOverrideCheckIn: PropTypes.func,
+  canOverride: PropTypes.bool,
+  lateCheckInRequested: PropTypes.bool,
+  lateCheckInLoading: PropTypes.bool,
   loading: PropTypes.bool
 };
 

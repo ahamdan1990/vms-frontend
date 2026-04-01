@@ -344,8 +344,16 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(changePassword.fulfilled, (state) => {
+        // Backend always invalidates all sessions on password change.
+        // Mirror that by clearing auth state so no stale "authenticated"
+        // flag lingers in Redux (AuthGuard will redirect to /login).
         state.loading = false;
+        state.isAuthenticated = false;
+        state.user = null;
+        state.permissions = [];
+        state.sessions = [];
         state.passwordChangeRequired = false;
+        state.twoFactorRequired = false;
         state.error = null;
       })
       .addCase(changePassword.rejected, (state, action) => {

@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import visitorService from '../../../services/visitorService';
 import invitationService from '../../../services/invitationService';
 import userService from '../../../services/userService';
+import companyService from '../../../services/companyService';
 
 // Redux
 import { getLocations } from '../../../store/slices/locationsSlice';
@@ -22,8 +23,10 @@ import Button from '../../common/Button/Button';
 import Input from '../../common/Input/Input';
 import Badge from '../../common/Badge/Badge';
 import Card from '../../common/Card/Card';
+import Modal from '../../common/Modal/Modal';
 import LoadingSpinner from '../../common/LoadingSpinner/LoadingSpinner';
 import AutocompleteInput from '../../common/AutocompleteInput/AutocompleteInput';
+import CompanyAutocomplete from '../../common/CompanyAutocomplete/CompanyAutocomplete';
 import DocumentScanner from '../../scanner/DocumentScanner';
 
 // Icons
@@ -96,8 +99,12 @@ const WalkInForm = ({
     phoneCountryCode: '961',
     email: '',
     company: '',
+    companyId: null,
     jobTitle: ''
   });
+  const [showCreateCompanyModal, setShowCreateCompanyModal] = useState(false);
+  const [creatingCompany, setCreatingCompany] = useState(false);
+  const [newCompanyDraft, setNewCompanyDraft] = useState({ name: '', code: '' });
 
   // Step 3: Visit data state
   const [visitData, setVisitData] = useState({
@@ -286,6 +293,32 @@ const WalkInForm = ({
         delete newErrors[field];
         return newErrors;
       });
+    }
+  };
+
+  const handleCompanySelect = (company) => {
+    if (company) {
+      setVisitorData(prev => ({ ...prev, company: company.name, companyId: company.id }));
+    } else {
+      setVisitorData(prev => ({ ...prev, company: '', companyId: null }));
+    }
+  };
+
+  const handleCreateCompany = async (e) => {
+    e.preventDefault();
+    if (!newCompanyDraft.name.trim() || !newCompanyDraft.code.trim()) return;
+    try {
+      setCreatingCompany(true);
+      const result = await companyService.createCompany(newCompanyDraft);
+      const newCompany = result.company || result;
+      handleCompanySelect(newCompany);
+      setShowCreateCompanyModal(false);
+      setNewCompanyDraft({ name: '', code: '' });
+      toast.success(t('walkInForm.step2.companyCreated', { name: newCompanyDraft.name }));
+    } catch (err) {
+      toast.error(t('walkInForm.step2.companyCreateFailed'));
+    } finally {
+      setCreatingCompany(false);
     }
   };
 
@@ -845,12 +878,16 @@ const WalkInForm = ({
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
+        <CompanyAutocomplete
           label={t('walkInForm.step2.companyOptional')}
+          value={visitorData.companyId ? { id: visitorData.companyId, name: visitorData.company } : visitorData.company}
+          onChange={handleCompanySelect}
+          onCreateNew={(searchTerm) => {
+            setNewCompanyDraft({ name: searchTerm, code: '' });
+            setShowCreateCompanyModal(true);
+          }}
           placeholder={t('walkInForm.step2.companyPlaceholder')}
-          value={visitorData.company}
-          onChange={(e) => handleVisitorDataChange('company', e.target.value)}
-          leftIcon={<BuildingOfficeIcon className="w-5 h-5" />}
+          showCreateOption={true}
         />
         <Input
           label={t('walkInForm.step2.jobTitleOptional')}
@@ -1207,6 +1244,56 @@ const WalkInForm = ({
           </div>
         </div>
       )}
+
+      {/* Create Company Modal */}
+      <Modal
+        isOpen={showCreateCompanyModal}
+        onClose={() => { setShowCreateCompanyModal(false); setNewCompanyDraft({ name: '', code: '' }); }}
+        title={t('walkInForm.step2.createCompanyTitle', 'New Company')}
+        size="sm"
+      >
+        <form onSubmit={handleCreateCompany} className="space-y-4 p-1">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {t('walkInForm.step2.companyName', 'Company Name')} <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={newCompanyDraft.name}
+              onChange={(e) => setNewCompanyDraft(prev => ({ ...prev, name: e.target.value }))}
+              required
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder={t('walkInForm.step2.companyNamePlaceholder', 'e.g. Acme Corp')}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {t('walkInForm.step2.companyCode', 'Company Code')} <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={newCompanyDraft.code}
+              onChange={(e) => setNewCompanyDraft(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
+              required
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder={t('walkInForm.step2.companyCodePlaceholder', 'e.g. ACME')}
+            />
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => { setShowCreateCompanyModal(false); setNewCompanyDraft({ name: '', code: '' }); }}
+            >
+              {t('common:actions.cancel', 'Cancel')}
+            </Button>
+            <Button type="submit" variant="primary" size="sm" loading={creatingCompany}>
+              {t('walkInForm.step2.createCompany', 'Create Company')}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

@@ -20,6 +20,7 @@ import {
   selectInvitationsCheckInError,
   selectCheckInData
 } from '../../../store/selectors/invitationSelectors';
+import { selectIsAdmin, selectIsOperator } from '../../../store/selectors/authSelectors';
 
 // Components
 import Card from '../../../components/common/Card/Card';
@@ -78,6 +79,9 @@ const CheckInDashboard = () => {
   const activeInvitations = useSelector(selectActiveInvitations);
   const activeInvitationsLoading = useSelector(selectActiveInvitationsLoading);
   const checkInLoading = useSelector(selectInvitationsCheckInLoading);
+  const isAdmin = useSelector(selectIsAdmin);
+  const isOperator = useSelector(selectIsOperator);
+  const canOverride = isAdmin || isOperator;
   const checkInError = useSelector(selectInvitationsCheckInError);
   const checkInData = useSelector(selectCheckInData);
 
@@ -91,6 +95,8 @@ const CheckInDashboard = () => {
   const [invitationDetailsData, setInvitationDetailsData] = useState(null);
   const [invitationDetailsError, setInvitationDetailsError] = useState(null);
   const [loadingInvitationDetails, setLoadingInvitationDetails] = useState(false);
+  const [lateCheckInRequested, setLateCheckInRequested] = useState(false);
+  const [lateCheckInLoading, setLateCheckInLoading] = useState(false);
   const [autoCheckInMode, setAutoCheckInMode] = useState(false); // Toggle for auto vs manual check-in
   const [checkInStats, setCheckInStats] = useState({
     todayCheckIns: 0,
@@ -225,6 +231,7 @@ const CheckInDashboard = () => {
       setLoadingInvitationDetails(true);
       setInvitationDetailsError(null);
       setInvitationDetailsData(null);
+      setLateCheckInRequested(false);
 
       try {
         // Fetch invitation details without checking in
@@ -315,6 +322,61 @@ const CheckInDashboard = () => {
         message: errorMessage || 'Check-in failed',
         details: getErrorDetails(errorMessage)
       });
+    }
+  };
+
+  // Handle late check-in consent request (expired invitations)
+  const handleRequestLateCheckIn = async (notes = '') => {
+    if (!invitationDetailsData?.id) return;
+    setLateCheckInLoading(true);
+    try {
+      await invitationService.requestLateCheckIn(invitationDetailsData.id, notes);
+      setLateCheckInRequested(true);
+      toast.success(
+        t('lateCheckIn.requestSentTitle', 'Request Sent'),
+        t('lateCheckIn.requestSentMessage', 'Host has been notified and will respond shortly.'),
+        { duration: 5000 }
+      );
+    } catch (error) {
+      console.error('Late check-in request failed:', error);
+      const errorMessage = extractErrorMessage(error);
+      setInvitationDetailsError({
+        message: errorMessage || 'Failed to send late check-in request',
+        details: null
+      });
+    } finally {
+      setLateCheckInLoading(false);
+    }
+  };
+
+  // Handle override check-in for expired invitations (admin/operator)
+  const handleOverrideCheckIn = async (notes = '') => {
+    if (!invitationDetailsData?.id) return;
+    setLateCheckInLoading(true);
+    try {
+      const result = await invitationService.overrideCheckIn(invitationDetailsData.id, notes);
+      setShowInvitationDetailsModal(false);
+      setInvitationDetailsData(null);
+      setInvitationDetailsError(null);
+      setLateCheckInRequested(false);
+
+      const visitorName = result?.visitor?.fullName || 'Visitor';
+      const invitationNumber = result?.invitationNumber || 'N/A';
+      toast.success(
+        t('lateCheckIn.overrideSuccessTitle', 'Override Check-In Complete'),
+        t('success.toastMessage', { name: visitorName, number: invitationNumber }),
+        { duration: 5000 }
+      );
+      await dispatch(getActiveInvitations());
+    } catch (error) {
+      console.error('Override check-in failed:', error);
+      const errorMessage = extractErrorMessage(error);
+      setInvitationDetailsError({
+        message: errorMessage || 'Override check-in failed',
+        details: null
+      });
+    } finally {
+      setLateCheckInLoading(false);
     }
   };
 
@@ -666,10 +728,16 @@ const CheckInDashboard = () => {
           setShowInvitationDetailsModal(false);
           setInvitationDetailsData(null);
           setInvitationDetailsError(null);
+          setLateCheckInRequested(false);
         }}
         invitation={invitationDetailsData}
         error={invitationDetailsError}
         onConfirmCheckIn={handleConfirmCheckIn}
+        onRequestLateCheckIn={handleRequestLateCheckIn}
+        onOverrideCheckIn={handleOverrideCheckIn}
+        canOverride={canOverride}
+        lateCheckInRequested={lateCheckInRequested}
+        lateCheckInLoading={lateCheckInLoading}
         loading={checkInLoading || loadingInvitationDetails}
       />
 

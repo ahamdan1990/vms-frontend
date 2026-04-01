@@ -57,6 +57,7 @@
     "selectAction": "اختر إجراء...",
     "markAsRead": "تحديد كمقروء",
     "acknowledge": "تأكيد",
+    "clear": "مسح",
     "apply": "تطبيق ({{count}})",
     "selectAll": "تحديد الكل ({{count}})",
     "selected": "{{count}} محدد",
@@ -81,6 +82,7 @@
     "location": "الموقع:",
     "markAsRead": "تحديد كمقروء",
     "acknowledge": "تأكيد",
+    "clear": "مسح",
     "execute": "تنفيذ",
     "acknowledged": "تم التأكيد",
     "dismiss": "إغلاق"
@@ -88,6 +90,7 @@
   "loading": "جارٍ تحميل الإشعارات...",
   "noNotifications": "لا توجد إشعارات",
   "noNotificationsSearch": "لا توجد إشعارات تطابق بحثك \"{{search}}\"",
+  "noNotificationsFiltered": "لا توجد إشعارات تطابق عوامل التصفية الحالية",
   "allCaughtUp": "أنت محدّث! لا توجد إشعارات غير مقروءة.",
   "noNotificationsDisplay": "لا توجد إشعارات للعرض",
   "clearSearch": "مسح البحث",
@@ -96,10 +99,12 @@
     "confirmDesc": "هل أنت متأكد من {{action}} {{count}} إشعار(ات)؟",
     "actionMarkRead": "تحديد كمقروء",
     "actionAcknowledge": "تأكيد",
+    "actionClear": "مسح",
     "confirm": "تأكيد",
     "complete": "اكتمل الإجراء الجماعي",
     "markedRead": "تم تحديد {{count}} إشعار(ات) كمقروء",
     "acknowledgedAll": "تم تأكيد {{count}} إشعار(ات)",
+    "cleared": "تم مسح {{count}} إشعار(ات)",
     "failed": "فشل الإجراء الجماعي"
   },
   "center": {
@@ -145,6 +150,9 @@
     "acknowledgedTitle": "تم تأكيد الإشعار",
     "acknowledgedMessage": "تم تأكيد الإشعار بنجاح",
     "acknowledgeFailed": "فشل التأكيد",
+    "clearedTitle": "تم مسح الإشعار",
+    "clearedMessage": "تم مسح الإشعار بنجاح",
+    "clearFailed": "فشل المسح",
     "markAllReadTitle": "تم تحديد جميع الإشعارات كمقروءة",
     "markAllReadMessage": "تم تحديد {{count}} إشعار كمقروء"
   }

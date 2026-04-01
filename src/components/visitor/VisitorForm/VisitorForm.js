@@ -1219,21 +1219,21 @@ const VisitorForm = ({
               onBlur={() => handleBlur('phoneCountryCode')}
               className="w-32 px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
             >
-              <option value="961">ðŸ‡±ðŸ‡§ +961</option>
-              <option value="963">ðŸ‡¸ðŸ‡¾ +963</option>
-              <option value="962">ðŸ‡¯ðŸ‡´ +962</option>
-              <option value="972">ðŸ‡®ðŸ‡± +972</option>
-              <option value="90">ðŸ‡¹ðŸ‡· +90</option>
-              <option value="20">ðŸ‡ªðŸ‡¬ +20</option>
-              <option value="966">ðŸ‡¸ðŸ‡¦ +966</option>
-              <option value="971">ðŸ‡¦ðŸ‡ª +971</option>
-              <option value="965">ðŸ‡°ðŸ‡¼ +965</option>
-              <option value="974">ðŸ‡¶ðŸ‡¦ +974</option>
-              <option value="1">ðŸ‡ºðŸ‡¸ +1</option>
-              <option value="44">ðŸ‡¬ðŸ‡§ +44</option>
-              <option value="33">ðŸ‡«ðŸ‡· +33</option>
-              <option value="49">ðŸ‡©ðŸ‡ª +49</option>
-              <option value="39">ðŸ‡®ðŸ‡¹ +39</option>
+              <option value="961">LB +961</option>
+              <option value="963">SY +963</option>
+              <option value="962">JO +962</option>
+              <option value="972">IL +972</option>
+              <option value="90">TR +90</option>
+              <option value="20">EG +20</option>
+              <option value="966">SA +966</option>
+              <option value="971">AE +971</option>
+              <option value="965">KW +965</option>
+              <option value="974">QA +974</option>
+              <option value="1">US +1</option>
+              <option value="44">GB +44</option>
+              <option value="33">FR +33</option>
+              <option value="49">DE +49</option>
+              <option value="39">IT +39</option>
             </select>
 
             {/* Phone Number Input */}

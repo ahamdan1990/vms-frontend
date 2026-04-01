@@ -138,14 +138,25 @@ export const createActiveVisitorColumns = ({
   onViewDetails,
   onQuickCheckIn,
   onQuickCheckOut,
-  showSelection = false
+  onVisitorClick,
+  showSelection = false,
+  selectedIds = null,
+  onSelectInvitation = null
 } = {}) => {
   const columns = [
     {
       key: 'visitor',
       header: translate(t, 'common:activeVisitors.columns.visitor', 'Visitor'),
       sortable: true,
-      render: (value, invitation) => formatVisitorInfo(invitation, t)
+      render: (value, invitation) => onVisitorClick ? (
+        <button
+          type="button"
+          onClick={() => onVisitorClick(invitation)}
+          className="text-start hover:opacity-80 transition-opacity"
+        >
+          {formatVisitorInfo(invitation, t)}
+        </button>
+      ) : formatVisitorInfo(invitation, t)
     },
     {
       key: 'visit',
@@ -199,10 +210,11 @@ export const createActiveVisitorColumns = ({
             {onQuickCheckOut && isCheckedIn && (
               <button
                 onClick={() => onQuickCheckOut(invitation)}
-                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200 transition-colors"
+                className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded bg-blue-600 hover:bg-blue-700 text-white transition-colors"
                 title={translate(t, 'common:activeVisitors.actions.checkOut', 'Check Out')}
               >
-                <ArrowLeftOnRectangleIcon className="w-4 h-4" />
+                <ArrowLeftOnRectangleIcon className="w-3.5 h-3.5" />
+                {translate(t, 'common:activeVisitors.actions.checkOut', 'Check Out')}
               </button>
             )}
           </div>
@@ -217,14 +229,20 @@ export const createActiveVisitorColumns = ({
       header: '',
       width: '50px',
       sortable: false,
-      render: () => (
-        <input
-          type="checkbox"
-          checked={false}
-          onChange={() => {}}
-          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-        />
-      )
+      render: (value, invitation) => {
+        const isCheckedIn = invitation.checkedInAt && !invitation.checkedOutAt;
+        if (!isCheckedIn) return null;
+        const isSelected = selectedIds ? selectedIds.has(invitation.id) : false;
+        return (
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => onSelectInvitation && onSelectInvitation(invitation.id)}
+            onClick={(e) => e.stopPropagation()}
+            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+          />
+        );
+      }
     });
   }
 

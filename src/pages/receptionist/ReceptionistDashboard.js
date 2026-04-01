@@ -62,7 +62,8 @@ import {
   ArrowLeftOnRectangleIcon,
   XCircleIcon,
   ArrowDownTrayIcon,
-  UserIcon
+  UserIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import {
   CheckCircleIcon as CheckCircleIconSolid,
@@ -70,12 +71,15 @@ import {
 } from '@heroicons/react/24/solid';
 
 import { extractErrorMessage } from '../../utils/errorUtils';
+import formatters from '../../utils/formatters';
+import { toLocalDateString } from '../../utils/dateUtils';
 import {
   createActiveVisitorColumns,
   formatVisitorInfo,
   formatVisitInfo,
   formatCheckInStatus,
-  getStatusBadge
+  getStatusBadge,
+  parseUtcDate
 } from '../../components/visitor/activeVisitorUtils';
 
 /**
@@ -91,7 +95,7 @@ const ReceptionistDashboard = () => {
   const toast = useToast();
   const { t } = useTranslation(['receptionist', 'common']);
   const { isConnected, host, operator, security, admin } = useSignalR();
-  const { emergency, report: reportPermissions } = usePermissions();
+  const { emergency, report: reportPermissions, checkin: checkinPermissions } = usePermissions();
 
   // Redux selectors
   const activeInvitationsFromRedux = useSelector(selectActiveInvitations);
@@ -130,12 +134,20 @@ const ReceptionistDashboard = () => {
   const [invitationDetailsData, setInvitationDetailsData] = useState(null);
   const [invitationDetailsError, setInvitationDetailsError] = useState(null);
   const [loadingInvitationDetails, setLoadingInvitationDetails] = useState(false);
+  const [lateCheckInRequested, setLateCheckInRequested] = useState(false);
+  const [lateCheckInLoading, setLateCheckInLoading] = useState(false);
   const [autoCheckInMode, setAutoCheckInMode] = useState(false);
 
   // Active visitors state
   const [expandedVisitorId, setExpandedVisitorId] = useState(null);
   const [visitorDocuments, setVisitorDocuments] = useState({});
   const [loadingDocuments, setLoadingDocuments] = useState({});
+  const [activeVisitorSearch, setActiveVisitorSearch] = useState('');
+  const [visitorListView, setVisitorListView] = useState('active');
+  const [completedTodayVisitors, setCompletedTodayVisitors] = useState([]);
+  const [completedTodayLoading, setCompletedTodayLoading] = useState(false);
+  const [selectedInvitationIds, setSelectedInvitationIds] = useState(new Set());
+  const [selectedInvitationForSummary, setSelectedInvitationForSummary] = useState(null);
 
   // Document preview state
   const [selectedDocument, setSelectedDocument] = useState(null);
@@ -179,40 +191,64 @@ const ReceptionistDashboard = () => {
   }, [todayStats.overdueVisitors, toast]);
 
   const loadDashboardData = async () => {
+    setCompletedTodayLoading(true);
+
     try {
-      const metricsResponse = await dashboardService.getDashboardData();
-      const metricsData = metricsResponse?.data || metricsResponse || {};
+      const today = toLocalDateString(new Date());
+      const [metricsResult, todayInvitationsResult, completedTodayResult] = await Promise.allSettled([
+        dashboardService.getDashboardData(),
+        invitationService.getInvitations({
+          startDate: today,
+          endDate: today,
+          pageSize: 1000
+        }),
+        dashboardService.getCompletedTodayVisitors()
+      ]);
 
-      const now = new Date();
-      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+      const nextStats = {};
 
-      const todayInvitationsResponse = await invitationService.getInvitations({
-        startDate: startOfDay.toISOString(),
-        endDate: endOfDay.toISOString(),
-        pageSize: 1000
-      });
+      if (metricsResult.status === 'fulfilled') {
+        const metricsData = metricsResult.value?.data || metricsResult.value || {};
+        nextStats.overdueVisitors = metricsData.overdueVisitors ?? 0;
+      } else {
+        console.error('Failed to load dashboard metrics:', metricsResult.reason);
+      }
 
-      // Extract items from the response - extractApiData already unwraps the data layer
-      const todayInvitations = todayInvitationsResponse?.items || todayInvitationsResponse || [];
-      const checkedInToday = todayInvitations.filter(inv => inv.checkedInAt);
-      const pendingCheckOutToday = checkedInToday.filter(inv => !inv.checkedOutAt);
-      const walkInsToday = todayInvitations.filter(inv => (inv.type || '').toLowerCase() === 'walkin');
+      if (todayInvitationsResult.status === 'fulfilled') {
+        const todayInvitationsResponse = todayInvitationsResult.value;
+        const todayInvitations = todayInvitationsResponse?.items || todayInvitationsResponse || [];
+        const checkedInToday = todayInvitations.filter(inv => inv.checkedInAt);
+        const pendingCheckOutToday = checkedInToday.filter(inv => !inv.checkedOutAt);
+        const walkInsToday = todayInvitations.filter(inv => (inv.type || '').toLowerCase() === 'walkin');
 
-      const stats = {
-        expectedVisitors: todayInvitations.length,
-        checkedIn: checkedInToday.length,
-        pendingCheckOut: pendingCheckOutToday.length,
-        walkIns: walkInsToday.length,
-        overdueVisitors: metricsData.overdueVisitors ?? 0
-      };
+        Object.assign(nextStats, {
+          expectedVisitors: todayInvitations.length,
+          checkedIn: checkedInToday.length,
+          pendingCheckOut: pendingCheckOutToday.length,
+          walkIns: walkInsToday.length
+        });
+      } else {
+        console.error('Failed to load today invitations:', todayInvitationsResult.reason);
+      }
 
-      setTodayStats(prev => ({
-        ...prev,
-        ...stats
-      }));
+      if (completedTodayResult.status === 'fulfilled') {
+        const completedTodayData = completedTodayResult.value?.items || completedTodayResult.value || [];
+        setCompletedTodayVisitors(completedTodayData);
+      } else {
+        console.error('Failed to load completed-today visitors:', completedTodayResult.reason);
+        setCompletedTodayVisitors([]);
+      }
+
+      if (Object.keys(nextStats).length > 0) {
+        setTodayStats(prev => ({
+          ...prev,
+          ...nextStats
+        }));
+      }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
+    } finally {
+      setCompletedTodayLoading(false);
     }
   };
 
@@ -492,14 +528,18 @@ const ReceptionistDashboard = () => {
       if (walkInData.scannedDocuments && walkInData.scannedDocuments.length > 0) {
         try {
           for (const doc of walkInData.scannedDocuments) {
-            await visitorDocumentService.uploadVisitorDocument(visitor.id, doc.file || doc.blob, {
-              description: t('receptionist:walkIn.walkInDocumentDescription', {
-                type: doc.documentType || t('receptionist:walkIn.defaultDocumentType')
-              }),
-              documentType: doc.documentType || t('receptionist:walkIn.defaultDocumentType'),
-              isSensitive: true,
-              isRequired: false
-            });
+            const docType = doc.documentType || t('receptionist:walkIn.defaultDocumentType');
+            await visitorDocumentService.uploadVisitorDocument(
+              visitor.id,
+              doc.file || doc.blob,
+              docType,   // title (3rd positional arg)
+              docType,   // documentType (4th positional arg)
+              {
+                description: t('receptionist:walkIn.walkInDocumentDescription', { type: docType }),
+                isSensitive: true,
+                isRequired: false
+              }
+            );
           }
         } catch (docError) {
           console.warn('Failed to upload scanned documents:', docError);
@@ -527,7 +567,7 @@ const ReceptionistDashboard = () => {
         subject: t('receptionist:walkIn.walkInSubject', {
           purpose: visitData.visitPurposeName || t('receptionist:walkIn.defaultPurpose')
         }),
-        type: 'walkin',  // Identify walk-ins with distinct type
+        type: 'walkIn',  // Identify walk-ins with distinct type
         expectedVisitorCount: 1,
         scheduledStartTime: new Date().toISOString(),
         scheduledEndTime: new Date(Date.now() + visitData.duration * 60 * 1000).toISOString(),
@@ -536,18 +576,8 @@ const ReceptionistDashboard = () => {
         notes: visitData.notes || t('receptionist:systemNotes.walkInRegistered')
       });
       
-      // Step 4: Auto-approve (receptionist has permission)
-      try {
-        await invitationService.approveInvitation(
-          invitation.id,
-          t('receptionist:systemNotes.walkInAutoApproved')
-        );
-      } catch (approvalError) {
-        console.warn('Could not auto-approve walk-in:', approvalError);
-        // Continue anyway - may need manual approval
-      }
-
-      // Step 5: Immediate check-in
+      // Step 4: Immediate check-in
+      // (Walk-ins are auto-approved by the backend — no separate approve call needed)
       let checkInResult;
       try {
         checkInResult = await dispatch(checkInInvitation({
@@ -564,7 +594,7 @@ const ReceptionistDashboard = () => {
         );
       }
 
-      // Step 6: Show success message with badge printing option
+      // Step 5: Show success message with badge printing option
       const visitorName = `${visitor.firstName} ${visitor.lastName}`;
 
       toast.success(
@@ -666,6 +696,7 @@ const ReceptionistDashboard = () => {
       setLoadingInvitationDetails(true);
       setInvitationDetailsError(null);
       setInvitationDetailsData(null);
+      setLateCheckInRequested(false);
 
       try {
         const invitationDetails = await invitationService.getInvitationByReference(qrData);
@@ -747,6 +778,56 @@ const ReceptionistDashboard = () => {
     }
   };
 
+  // Handle late check-in consent request (expired invitations)
+  const handleRequestLateCheckIn = async (notes = '') => {
+    if (!invitationDetailsData?.id) return;
+    setLateCheckInLoading(true);
+    try {
+      await invitationService.requestLateCheckIn(invitationDetailsData.id, notes);
+      setLateCheckInRequested(true);
+      toast.success(
+        t('receptionist:toasts.lateCheckInRequestSent', 'Request Sent'),
+        t('receptionist:toasts.lateCheckInRequestSentDesc', 'Host has been notified and will respond shortly.'),
+        { duration: 5000 }
+      );
+    } catch (error) {
+      console.error('Late check-in request failed:', error);
+      toast.error(
+        t('receptionist:toasts.lateCheckInRequestFailed', 'Request Failed'),
+        extractErrorMessage(error),
+        { duration: 6000 }
+      );
+    } finally {
+      setLateCheckInLoading(false);
+    }
+  };
+
+  // Handle override check-in for expired invitations
+  const handleOverrideCheckIn = async (notes = '') => {
+    if (!invitationDetailsData?.id) return;
+    setLateCheckInLoading(true);
+    try {
+      const result = await invitationService.overrideCheckIn(invitationDetailsData.id, notes);
+      setShowInvitationDetailsModal(false);
+      setInvitationDetailsData(null);
+      setInvitationDetailsError(null);
+      setLateCheckInRequested(false);
+
+      toast.success(
+        t('receptionist:toasts.checkInSuccessful'),
+        t('receptionist:toasts.checkInSuccessDesc', { name: result?.visitor?.fullName || t('receptionist:activeVisitors.visitorLabel') }),
+        { duration: 5000 }
+      );
+      await dispatch(getActiveInvitations());
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Override check-in failed:', error);
+      toast.error(t('receptionist:toasts.checkInFailed'), extractErrorMessage(error), { duration: 6000 });
+    } finally {
+      setLateCheckInLoading(false);
+    }
+  };
+
   const handleQuickCheckIn = async (invitation) => {
     try {
       await dispatch(checkInInvitation({
@@ -778,6 +859,62 @@ const ReceptionistDashboard = () => {
       console.error('Check-out failed:', error);
       toast.error(t('receptionist:toasts.checkOutFailed'), extractErrorMessage(error));
     }
+  };
+
+  // Clear selection when search filter changes
+  React.useEffect(() => {
+    setSelectedInvitationIds(new Set());
+  }, [activeVisitorSearch, visitorListView]);
+
+  // Toggle individual row selection
+  const handleSelectInvitation = (id) => {
+    setSelectedInvitationIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  // Toggle all checked-in visitors
+  const handleSelectAll = (invitations) => {
+    const checkableIds = invitations
+      .filter(inv => inv.checkedInAt && !inv.checkedOutAt)
+      .map(inv => inv.id);
+    const allSelected = checkableIds.every(id => selectedInvitationIds.has(id));
+    if (allSelected) {
+      setSelectedInvitationIds(new Set());
+    } else {
+      setSelectedInvitationIds(new Set(checkableIds));
+    }
+  };
+
+  // Bulk check-out selected visitors
+  const handleBulkCheckOut = async () => {
+    const ids = Array.from(selectedInvitationIds);
+    if (ids.length === 0) return;
+    let successCount = 0;
+    let failCount = 0;
+    for (const id of ids) {
+      try {
+        await dispatch(checkOutInvitation({ id, notes: t('receptionist:systemNotes.manualCheckOut') })).unwrap();
+        successCount++;
+      } catch {
+        failCount++;
+      }
+    }
+    setSelectedInvitationIds(new Set());
+    if (successCount > 0) {
+      toast.success(
+        t('receptionist:toasts.bulkCheckOutSuccess', { count: successCount }),
+        successCount === 1 ? t('receptionist:toasts.checkOutSuccessDesc') : `${successCount} visitors checked out`
+      );
+    }
+    if (failCount > 0) {
+      toast.error(t('receptionist:toasts.bulkCheckOutPartialFail', { count: failCount }), `${failCount} check-out(s) failed`);
+    }
+    loadDashboardData();
+    dispatch(getActiveInvitations());
   };
 
   // Handle document scanning
@@ -876,24 +1013,51 @@ const ReceptionistDashboard = () => {
     }
   };
 
+  const isCompletedTodayView = visitorListView === 'completed';
+  const visitorListSource = isCompletedTodayView
+    ? completedTodayVisitors
+    : (activeInvitationsFromRedux || []);
+
+  const filteredVisitorInvitations = visitorListSource.filter(inv => {
+    if (!activeVisitorSearch.trim()) return true;
+    const q = activeVisitorSearch.toLowerCase();
+    const visitor = inv.visitor;
+    const visitorName = (visitor?.fullName || `${visitor?.firstName || ''} ${visitor?.lastName || ''}`).toLowerCase();
+    const company = (visitor?.company || '').toLowerCase();
+    const hostName = (inv.host?.fullName || '').toLowerCase();
+    return visitorName.includes(q) || company.includes(q) || hostName.includes(q);
+  });
+
+  const checkableCount = isCompletedTodayView
+    ? 0
+    : filteredVisitorInvitations.filter(inv => inv.checkedInAt && !inv.checkedOutAt).length;
+  const allFilteredSelected = !isCompletedTodayView &&
+    checkableCount > 0 &&
+    filteredVisitorInvitations
+      .filter(inv => inv.checkedInAt && !inv.checkedOutAt)
+      .every(inv => selectedInvitationIds.has(inv.id));
+
   const activeVisitorsColumns = createActiveVisitorColumns({
     t,
+    onVisitorClick: (invitation) => setSelectedInvitationForSummary(invitation),
     onViewDetails: (invitation) => handleToggleVisitorDetails(invitation.visitor?.id),
-    onQuickCheckIn: handleQuickCheckIn,
-    onQuickCheckOut: (invitation) => handleCheckOut(invitation.id),
-    showSelection: true
+    onQuickCheckIn: isCompletedTodayView ? null : handleQuickCheckIn,
+    onQuickCheckOut: isCompletedTodayView ? null : (invitation) => handleCheckOut(invitation.id),
+    showSelection: !isCompletedTodayView,
+    selectedIds: selectedInvitationIds,
+    onSelectInvitation: handleSelectInvitation
   });
 
   const renderActiveVisitorCard = (invitation) => (
     <Card key={invitation.id} className="p-4 space-y-4">
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex-1 min-w-0">{formatVisitorInfo(invitation)}</div>
-          {getStatusBadge(invitation)}
+          <div className="flex-1 min-w-0">{formatVisitorInfo(invitation, t)}</div>
+          {getStatusBadge(invitation, t)}
         </div>
         <div className="space-y-3">
-          {formatVisitInfo(invitation)}
-          {formatCheckInStatus(invitation)}
+          {formatVisitInfo(invitation, t)}
+          {formatCheckInStatus(invitation, t)}
         </div>
       </div>
       {renderMobileActionButtons(invitation)}
@@ -939,6 +1103,17 @@ const ReceptionistDashboard = () => {
   };
 
   const showCompactActiveView = isMobile;
+  const currentVisitorListLoading = isCompletedTodayView ? completedTodayLoading : activeInvitationsLoading;
+  const currentVisitorListEmptyTitle = activeVisitorSearch
+    ? t('receptionist:activeVisitors.noSearchResults', 'No visitors match your search')
+    : isCompletedTodayView
+      ? t('receptionist:activeVisitors.noCompletedToday', 'No visitors completed today')
+      : t('receptionist:activeVisitors.noActiveVisitors');
+  const currentVisitorListEmptyDescription = activeVisitorSearch
+    ? t('receptionist:activeVisitors.noSearchResultsDesc', 'Try a different name, company or host')
+    : isCompletedTodayView
+      ? t('receptionist:activeVisitors.noCompletedTodayDesc', 'Visitors who check in and check out today will appear here.')
+      : t('receptionist:activeVisitors.noActiveVisitorsDesc');
 
   // Render stats cards
   const renderStatsCards = () => (
@@ -1321,30 +1496,109 @@ const ReceptionistDashboard = () => {
             exit={{ opacity: 0, y: -20 }}
           >
             <Card>
-              {activeInvitationsLoading ? (
+              <div className="mb-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setVisitorListView('active')}
+                  className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                    !isCompletedTodayView
+                      ? 'border-blue-600 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-900/30 dark:text-blue-200'
+                      : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  {t('receptionist:activeVisitors.currentlyInBuilding', 'Currently In Building')}
+                  <span className="rounded-full bg-black/5 px-2 py-0.5 text-xs dark:bg-white/10">
+                    {(activeInvitationsFromRedux || []).length}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVisitorListView('completed')}
+                  className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                    isCompletedTodayView
+                      ? 'border-blue-600 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-900/30 dark:text-blue-200'
+                      : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  {t('receptionist:activeVisitors.completedToday', 'Completed Today')}
+                  <span className="rounded-full bg-black/5 px-2 py-0.5 text-xs dark:bg-white/10">
+                    {completedTodayVisitors.length}
+                  </span>
+                </button>
+              </div>
+
+              {/* Search + Bulk Actions Bar */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-4">
+                <div className="relative flex-1">
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={activeVisitorSearch}
+                    onChange={(e) => setActiveVisitorSearch(e.target.value)}
+                    placeholder={t('receptionist:activeVisitors.searchPlaceholder', 'Search by visitor, company or host…')}
+                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {activeVisitorSearch && (
+                    <button
+                      onClick={() => setActiveVisitorSearch('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                    >
+                      <XCircleIcon className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {!isCompletedTodayView && checkableCount > 0 && (
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={allFilteredSelected}
+                        onChange={() => handleSelectAll(filteredVisitorInvitations)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      {t('receptionist:activeVisitors.selectAll', 'Select All')}
+                    </label>
+
+                    {selectedInvitationIds.size > 0 && (
+                      <button
+                        onClick={handleBulkCheckOut}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                      >
+                        <ArrowLeftOnRectangleIcon className="w-4 h-4" />
+                        {t('receptionist:activeVisitors.checkOutSelected', 'Check Out Selected')} ({selectedInvitationIds.size})
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {currentVisitorListLoading ? (
                 <div className="flex justify-center items-center py-12">
                   <LoadingSpinner size="lg" />
                 </div>
-              ) : activeInvitationsFromRedux && activeInvitationsFromRedux.length > 0 ? (
+              ) : filteredVisitorInvitations.length > 0 ? (
                 showCompactActiveView ? (
                   <div className="space-y-4">
-                    {activeInvitationsFromRedux.map(renderActiveVisitorCard)}
+                    {filteredVisitorInvitations.map(renderActiveVisitorCard)}
                   </div>
                 ) : (
                   <div className="-mx-4 sm:mx-0 overflow-x-auto">
                     <Table
-                      data={activeInvitationsFromRedux}
+                      data={filteredVisitorInvitations}
                       columns={activeVisitorsColumns}
-                      emptyMessage={t('receptionist:activeVisitors.noActiveVisitorsTable')}
+                      emptyMessage={currentVisitorListEmptyTitle}
                     />
                   </div>
                 )
               ) : (
                 <div className="text-center py-12">
                   <UserIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">{t('receptionist:activeVisitors.noActiveVisitors')}</h3>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+                    {currentVisitorListEmptyTitle}
+                  </h3>
                   <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {t('receptionist:activeVisitors.noActiveVisitorsDesc')}
+                    {currentVisitorListEmptyDescription}
                   </p>
                 </div>
               )}
@@ -1554,10 +1808,16 @@ const ReceptionistDashboard = () => {
           setShowInvitationDetailsModal(false);
           setInvitationDetailsData(null);
           setInvitationDetailsError(null);
+          setLateCheckInRequested(false);
         }}
         invitation={invitationDetailsData}
         error={invitationDetailsError}
         onConfirmCheckIn={handleConfirmCheckIn}
+        onRequestLateCheckIn={handleRequestLateCheckIn}
+        onOverrideCheckIn={handleOverrideCheckIn}
+        canOverride={checkinPermissions?.canManualOverride}
+        lateCheckInRequested={lateCheckInRequested}
+        lateCheckInLoading={lateCheckInLoading}
         loading={loadingInvitationDetails}
       />
 
@@ -1570,6 +1830,151 @@ const ReceptionistDashboard = () => {
           onClose={handleClosePreview}
         />
       )}
+
+      {/* Visitor Summary Modal */}
+      {selectedInvitationForSummary && (() => {
+        const inv = selectedInvitationForSummary;
+        const visitor = inv.visitor;
+        const isCheckedIn = inv.checkedInAt && !inv.checkedOutAt;
+
+        const getElapsed = (from) => {
+          if (!from) return null;
+          const parsedFrom = parseUtcDate(from);
+          if (!parsedFrom) return null;
+
+          const ms = Date.now() - parsedFrom.getTime();
+          const h = Math.floor(ms / 3600000);
+          const m = Math.floor((ms % 3600000) / 60000);
+          return h > 0 ? `${h}h ${m}m` : `${m}m`;
+        };
+
+        const elapsed = isCheckedIn ? getElapsed(inv.checkedInAt) : null;
+
+        return (
+          <Modal
+            isOpen={!!selectedInvitationForSummary}
+            onClose={() => setSelectedInvitationForSummary(null)}
+            title={t('receptionist:activeVisitors.summaryTitle', 'Visitor Summary')}
+            size="md"
+          >
+            <div className="p-4 space-y-5">
+              {/* Header: avatar + name */}
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                  {visitor?.photoUrl ? (
+                    <img src={visitor.photoUrl} alt={visitor.fullName} className="w-16 h-16 rounded-full object-cover" />
+                  ) : (
+                    <UserIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {visitor?.fullName || `${visitor?.firstName || ''} ${visitor?.lastName || ''}`.trim() || '—'}
+                  </h3>
+                  {visitor?.jobTitle && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{visitor.jobTitle}</p>
+                  )}
+                  {visitor?.company && (
+                    <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1 mt-0.5">
+                      <UsersIcon className="w-3.5 h-3.5" />
+                      {visitor.company}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Contact */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                {(visitor?.email?.value || visitor?.email) && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-0.5">
+                      {t('receptionist:activeVisitors.summaryEmail', 'Email')}
+                    </p>
+                    <p className="text-gray-900 dark:text-white">{visitor.email?.value || visitor.email}</p>
+                  </div>
+                )}
+                {visitor?.phoneNumber && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-0.5">
+                      {t('receptionist:activeVisitors.summaryPhone', 'Phone')}
+                    </p>
+                    <p className="text-gray-900 dark:text-white">
+                      {visitor.phoneCountryCode ? `+${visitor.phoneCountryCode} ` : ''}{visitor.phoneNumber}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Visit details */}
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2 text-sm">
+                {(inv.subject || inv.purpose) && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">{t('receptionist:activeVisitors.summaryPurpose', 'Purpose')}</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{inv.subject || inv.purpose}</span>
+                  </div>
+                )}
+                {inv.host?.fullName && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">{t('receptionist:activeVisitors.summaryHost', 'Host')}</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{inv.host.fullName}</span>
+                  </div>
+                )}
+                {inv.location?.name && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">{t('receptionist:activeVisitors.summaryLocation', 'Location')}</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{inv.location.name}</span>
+                  </div>
+                )}
+                {inv.checkedInAt && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">{t('receptionist:activeVisitors.summaryCheckedIn', 'Checked In')}</span>
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {formatters.formatTime(inv.checkedInAt)}
+                      {elapsed && <span className="text-gray-400 dark:text-gray-500 font-normal ms-1">({elapsed})</span>}
+                    </span>
+                  </div>
+                )}
+                {inv.checkedOutAt && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500 dark:text-gray-400">{t('receptionist:activeVisitors.summaryCheckedOut', 'Checked Out')}</span>
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {formatters.formatTime(inv.checkedOutAt)}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-gray-500 dark:text-gray-400">{t('receptionist:activeVisitors.summaryStatus', 'Status')}</span>
+                  <span>{getStatusBadge(inv, t)}</span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 pt-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedInvitationForSummary(null)}
+                >
+                  {t('common:actions.close', 'Close')}
+                </Button>
+                {isCheckedIn && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    icon={<ArrowLeftOnRectangleIcon className="w-4 h-4" />}
+                    onClick={() => {
+                      handleCheckOut(inv.id);
+                      setSelectedInvitationForSummary(null);
+                    }}
+                  >
+                    {t('receptionist:activeVisitors.checkOut', 'Check Out')}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </Modal>
+        );
+      })()}
     </div>
   );
 };

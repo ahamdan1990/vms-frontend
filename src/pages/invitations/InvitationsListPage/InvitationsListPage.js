@@ -1686,17 +1686,32 @@ const InvitationsListPage = () => {
             <span>{t('details.requirements')}</span>
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-sm">
-            <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
-              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresEscort ? 'bg-red-500 dark:bg-red-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
-              <span className="truncate text-gray-900 dark:text-white">{t('details.fields.requiresEscort')}</span>
+            <div className="flex items-center justify-between gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
+              <div className="flex items-center gap-2">
+                <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresEscort ? 'bg-red-500 dark:bg-red-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
+                <span className="truncate text-gray-900 dark:text-white">{t('details.fields.requiresEscort')}</span>
+              </div>
+              <span className={`text-xs font-medium ${currentInvitation.requiresEscort ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                {currentInvitation.requiresEscort ? t('common:yes', 'Yes') : t('common:no', 'No')}
+              </span>
             </div>
-            <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
-              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresBadge ? 'bg-blue-500 dark:bg-blue-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
-              <span className="truncate text-gray-900 dark:text-white">{t('details.fields.requiresBadge')}</span>
+            <div className="flex items-center justify-between gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
+              <div className="flex items-center gap-2">
+                <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.requiresBadge ? 'bg-blue-500 dark:bg-blue-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
+                <span className="truncate text-gray-900 dark:text-white">{t('details.fields.requiresBadge')}</span>
+              </div>
+              <span className={`text-xs font-medium ${currentInvitation.requiresBadge ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                {currentInvitation.requiresBadge ? t('common:yes', 'Yes') : t('common:no', 'No')}
+              </span>
             </div>
-            <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
-              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.needsParking ? 'bg-green-500 dark:bg-green-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
-              <span className="truncate text-gray-900 dark:text-white">{t('details.fields.needsParking')}</span>
+            <div className="flex items-center justify-between gap-2 bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
+              <div className="flex items-center gap-2">
+                <span className={`w-3 h-3 rounded-full flex-shrink-0 ${currentInvitation.needsParking ? 'bg-green-500 dark:bg-green-400' : 'bg-gray-300 dark:bg-gray-600'}`}></span>
+                <span className="truncate text-gray-900 dark:text-white">{t('details.fields.needsParking')}</span>
+              </div>
+              <span className={`text-xs font-medium ${currentInvitation.needsParking ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                {currentInvitation.needsParking ? t('common:yes', 'Yes') : t('common:no', 'No')}
+              </span>
             </div>
           </div>
 

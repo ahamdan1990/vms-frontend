@@ -49,13 +49,15 @@ import locationService from '../../services/locationService';
 import visitPurposeService from '../../services/visitPurposeService';
 import departmentService from '../../services/departmentService';
 import userService from '../../services/userService';
+import formatters from '../../utils/formatters';
+import { parseLocalDateString, toLocalDateString } from '../../utils/dateUtils';
 
 /**
  * Admin Reports Page
  * Comprehensive reporting interface with advanced filtering, statistics, and export capabilities
  */
 const AdminReportsPage = () => {
-  const { t, i18n } = useTranslation('reports');
+  const { t } = useTranslation('reports');
   const dispatch = useDispatch();
   const { hasPermission } = usePermissions();
 
@@ -219,7 +221,7 @@ const AdminReportsPage = () => {
 
   const formatDateTime = (value) => {
     if (!value) return '-';
-    return new Date(value).toLocaleString(i18n.language === 'ar' ? 'ar' : 'en-US');
+    return formatters.formatDateTime(value);
   };
 
   // Table columns
@@ -255,6 +257,17 @@ const AdminReportsPage = () => {
       key: 'visitPurpose',
       header: t('table.columns.purpose'),
       sortable: false
+    },
+    {
+      key: 'scheduledStartTime',
+      header: t('table.columns.scheduled', { defaultValue: 'Scheduled' }),
+      sortable: true,
+      render: (value, row) => (
+        <div>
+          <div className="text-sm text-gray-900 dark:text-gray-100">{formatDateTime(row.scheduledStartTime)}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">{formatDateTime(row.scheduledEndTime)}</div>
+        </div>
+      )
     },
     {
       key: 'checkedInAt',
@@ -364,10 +377,10 @@ const AdminReportsPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <DateRangePicker
                     label={t('filters.dateRange')}
-                    startDate={filters.startDate ? new Date(filters.startDate) : null}
-                    endDate={filters.endDate ? new Date(filters.endDate) : null}
-                    onStartDateChange={(date) => handleFilterChange('startDate', date?.toISOString())}
-                    onEndDateChange={(date) => handleFilterChange('endDate', date?.toISOString())}
+                    startDate={parseLocalDateString(filters.startDate)}
+                    endDate={parseLocalDateString(filters.endDate)}
+                    onStartDateChange={(date) => handleFilterChange('startDate', toLocalDateString(date))}
+                    onEndDateChange={(date) => handleFilterChange('endDate', toLocalDateString(date))}
                     isClearable
                   />
 

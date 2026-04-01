@@ -17,6 +17,7 @@ const capacityService = {
       locationId: params.locationId,
       timeSlotId: params.timeSlotId,
       dateTime: params.dateTime,
+      endDateTime: params.endDateTime,
       expectedVisitors: params.expectedVisitors || 1,
       isVipRequest: params.isVipRequest || false,
       excludeInvitationId: params.excludeInvitationId

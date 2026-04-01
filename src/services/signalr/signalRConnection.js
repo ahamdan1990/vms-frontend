@@ -14,7 +14,10 @@ class SignalRConnectionManager {
     this.initializationPromise = null;
     this.reconnectAttempts = new Map();
     this.maxReconnectAttempts = 5;
-    this.baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    const runtimeUrl = window.VMS_CONFIG?.apiUrl;
+    this.baseUrl = (runtimeUrl && runtimeUrl !== '%%API_URL%%' && runtimeUrl !== '')
+      ? runtimeUrl
+      : (process.env.REACT_APP_API_URL || 'http://localhost:5000');
     
     // Initialize event handler registry
     this.eventHandlers = EventHandlerRegistry;

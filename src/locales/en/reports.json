@@ -81,6 +81,7 @@
       "host": "Host",
       "location": "Location",
       "purpose": "Purpose",
+      "scheduled": "Scheduled",
       "checkIn": "Check-In",
       "checkOut": "Check-Out",
       "durationMinutes": "Duration (min)",

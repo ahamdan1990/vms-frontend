@@ -5,7 +5,9 @@ import { REPORT_ENDPOINTS } from './apiEndpoints';
  * Helper function to download a file from blob response
  */
 const downloadFile = (response, defaultFileName) => {
-  const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
+  // Prepend UTF-8 BOM so Excel opens the file with correct encoding (prevents Arabic/Unicode garbling)
+  const bom = '\uFEFF';
+  const blob = new Blob([bom, response.data], { type: 'text/csv;charset=utf-8;' });
   const disposition = response.headers['content-disposition'] || '';
   const match = disposition.match(/filename="?([^"]+)"?/i);
   const fileName = match?.[1] || defaultFileName;
@@ -18,6 +20,15 @@ const downloadFile = (response, defaultFileName) => {
   link.click();
   document.body.removeChild(link);
   window.URL.revokeObjectURL(url);
+};
+
+const getClientTimeZone = () => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
+  } catch (error) {
+    console.warn('Unable to resolve client timezone for export:', error);
+    return undefined;
+  }
 };
 
 /**
@@ -43,8 +54,13 @@ const reportService = {
    * @param {number} params.locationId Location filter.
    */
   async exportInBuildingReport(params = {}) {
+    const exportParams = {
+      ...params,
+      timeZone: params.timeZone || getClientTimeZone()
+    };
+
     const response = await apiClient.get(REPORT_ENDPOINTS.IN_BUILDING_EXPORT, {
-      params,
+      params: exportParams,
       responseType: 'blob'
     });
 
@@ -84,8 +100,13 @@ const reportService = {
    * @param {Object} params Same filter parameters as getComprehensiveReport.
    */
   async exportComprehensiveReport(params = {}) {
+    const exportParams = {
+      ...params,
+      timeZone: params.timeZone || getClientTimeZone()
+    };
+
     const response = await apiClient.get(REPORT_ENDPOINTS.COMPREHENSIVE_EXPORT, {
-      params,
+      params: exportParams,
       responseType: 'blob'
     });
 
@@ -114,8 +135,13 @@ const reportService = {
    * @param {Object} params Same filter parameters as getStatistics.
    */
   async exportStatistics(params = {}) {
+    const exportParams = {
+      ...params,
+      timeZone: params.timeZone || getClientTimeZone()
+    };
+
     const response = await apiClient.get(REPORT_ENDPOINTS.STATISTICS_EXPORT, {
-      params,
+      params: exportParams,
       responseType: 'blob'
     });
 

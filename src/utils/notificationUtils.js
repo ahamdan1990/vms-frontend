@@ -39,6 +39,24 @@ const toNumber = (value) => {
   return null;
 };
 
+export const normalizeNotificationKey = (value) => {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  return value.trim().replace(/[\s_-]+/g, '').toLowerCase();
+};
+
+export const matchesNotificationKey = (value, candidates) => {
+  const normalizedValue = normalizeNotificationKey(value);
+  if (!normalizedValue) {
+    return false;
+  }
+
+  const candidateList = Array.isArray(candidates) ? candidates : [candidates];
+  return candidateList.some((candidate) => normalizeNotificationKey(candidate) === normalizedValue);
+};
+
 export const parseNotificationPayload = (payloadData) => {
   if (isObject(payloadData)) {
     return payloadData;

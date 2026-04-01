@@ -81,6 +81,7 @@
       "host": "المضيف",
       "location": "الموقع",
       "purpose": "الغرض",
+      "scheduled": "الموعد المجدول",
       "checkIn": "تسجيل الدخول",
       "checkOut": "تسجيل الخروج",
       "durationMinutes": "المدة (دقيقة)",

@@ -5,6 +5,7 @@ import auditService from './auditService';
 import capacityService from './capacityService';
 import analyticsService from './analyticsService';
 import { DASHBOARD_ENDPOINTS } from './apiEndpoints';
+import { toLocalDateString } from '../utils/dateUtils';
 
 /**
  * Dashboard service for aggregating data from multiple APIs
@@ -41,8 +42,8 @@ const dashboardService = {
       todayEnd.setHours(23, 59, 59, 999);
 
       const todayInvitationStats = await invitationService.getInvitationStatistics({
-        startDate: todayStart.toISOString(),
-        endDate: todayEnd.toISOString()
+        startDate: toLocalDateString(todayStart),
+        endDate: toLocalDateString(todayEnd)
       });
 
       return {
@@ -82,6 +83,13 @@ const dashboardService = {
       console.info('Using fallback method for dashboard data');
       return await this.getDashboardDataFallback();
     }
+  },
+
+  async getCompletedTodayVisitors(locationId = null) {
+    const response = await apiClient.get(DASHBOARD_ENDPOINTS.COMPLETED_TODAY, {
+      params: locationId ? { locationId } : undefined
+    });
+    return extractApiData(response);
   },
 
   /**
@@ -268,8 +276,8 @@ const dashboardService = {
       weekAgo.setDate(weekAgo.getDate() - 7);
       
       const weeklyStats = await invitationService.getInvitationStatistics({
-        startDate: weekAgo.toISOString(),
-        endDate: new Date().toISOString()
+        startDate: toLocalDateString(weekAgo),
+        endDate: toLocalDateString(new Date())
       });
 
       // This would ideally come from check-in time analysis

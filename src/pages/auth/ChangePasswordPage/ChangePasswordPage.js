@@ -15,7 +15,7 @@ const ChangePasswordPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t } = useTranslation('auth');
-  const { changePassword, user, userRole, loading } = useAuth();
+  const { changePassword, logoutImmediate, user, userRole, loading } = useAuth();
   
   const [formData, setFormData] = useState({
     currentPassword: '',
@@ -112,16 +112,24 @@ const ChangePasswordPage = () => {
       };
 
       const result = await changePassword(passwordData);
-      
-      if (result.payload && result.payload.isSuccess) {
-        // Success - redirect to appropriate dashboard
-        const dashboardPath = getDashboardPath(userRole);
-        navigate(dashboardPath, { replace: true });
+
+      // Success is indicated by the action being fulfilled, NOT by result.payload.isSuccess —
+      // the backend returns { success: true, data: null } so extractApiData yields null.
+      if (result.type === 'auth/changePassword/fulfilled') {
+        // Backend always invalidates all sessions on password change.
+        // Clear local auth state and redirect to login so the user
+        // authenticates with the new password.
+        logoutImmediate();
+        navigate('/login', {
+          replace: true,
+          state: { passwordChanged: true }
+        });
       } else {
-        // Handle API errors
-        const errorMessage = result.payload?.errorMessage ||
-                           result.error?.message ||
-                           t('validation.unexpectedError');
+        // Rejected — extract the server's error message
+        const errorMessage = result.payload?.message ||
+                             result.payload?.errorMessage ||
+                             result.error?.message ||
+                             t('validation.unexpectedError');
         setFormErrors({ submit: errorMessage });
       }
     } catch (error) {

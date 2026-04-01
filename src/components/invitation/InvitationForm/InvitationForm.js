@@ -1,9 +1,10 @@
 // src/components/invitation/InvitationForm/InvitationForm.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { debounce } from 'lodash';
 
 // Components
 import Button from '../../common/Button/Button';
@@ -24,6 +25,10 @@ import visitorService from '../../../services/visitorService';
 import { selectVisitorsList } from '../../../store/selectors/visitorSelectors';
 import { selectLocationsList } from '../../../store/selectors/locationSelectors';
 import { selectVisitPurposesList } from '../../../store/selectors/visitPurposeSelectors';
+import { selectIsOperator, selectUser } from '../../../store/selectors/authSelectors';
+
+// Services (additional)
+import userService from '../../../services/userService';
 
 // Redux actions
 import { createLocation, getActiveLocations } from '../../../store/slices/locationsSlice';
@@ -42,7 +47,8 @@ import {
   ExclamationCircleIcon,
   CheckCircleIcon,
   InformationCircleIcon,
-  XMarkIcon
+  XMarkIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 
 // Utils
@@ -69,6 +75,8 @@ const InvitationForm = ({
   const visitors = useSelector(selectVisitorsList);
   const locations = useSelector(selectLocationsList);
   const visitPurposes = useSelector(selectVisitPurposesList);
+  const isOperator = useSelector(selectIsOperator);
+  const currentUser = useSelector(selectUser);
 
   // Location creation modal state
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -107,7 +115,10 @@ const InvitationForm = ({
 
     // Template and submission
     templateId: null,
-    submitForApproval: false
+    submitForApproval: false,
+
+    // Host (only used when operator creates an invitation)
+    hostId: null
   });
 
   // Time slot state
@@ -124,7 +135,11 @@ const InvitationForm = ({
   const [selectedVisitors, setSelectedVisitors] = useState([]); // For group invitations
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedVisitPurpose, setSelectedVisitPurpose] = useState(null);
-  
+  const [selectedHost, setSelectedHost] = useState(null);
+  const [hostSearchTerm, setHostSearchTerm] = useState('');
+  const [hostSearchResults, setHostSearchResults] = useState([]);
+  const [searchingHosts, setSearchingHosts] = useState(false);
+
   // Capacity validation state
   const [capacityValid, setCapacityValid] = useState(true);
   const [capacityResult, setCapacityResult] = useState(null);
@@ -270,20 +285,32 @@ const InvitationForm = ({
   // Fetch available time slots when location and date change
   useEffect(() => {
     const fetchAvailableTimeSlots = async () => {
-      // Only fetch if we have both location and start time
-      if (!formData.locationId || !formData.scheduledStartTime) {
+      // Require at least a location to fetch slots
+      if (!formData.locationId) {
         setAvailableTimeSlots([]);
         return;
       }
 
       try {
         setLoadingTimeSlots(true);
-        const date = new Date(formData.scheduledStartTime).toISOString();
 
-        const slots = await timeSlotsService.getAvailableTimeSlots({
-          date,
-          locationId: formData.locationId
-        });
+        let slots;
+        if (formData.scheduledStartTime) {
+          // Date is known — fetch with availability counts for that specific date
+          const date = new Date(formData.scheduledStartTime).toISOString();
+          slots = await timeSlotsService.getAvailableTimeSlots({
+            date,
+            locationId: formData.locationId
+          });
+        } else {
+          // No date yet — fetch all active slots for the location
+          const result = await timeSlotsService.getTimeSlots({
+            locationId: formData.locationId,
+            activeOnly: true,
+            pageSize: 100
+          });
+          slots = result?.items || [];
+        }
 
         setAvailableTimeSlots(slots || []);
 
@@ -517,14 +544,61 @@ const InvitationForm = ({
     handleChange('visitPurposeId', visitPurpose?.id || null);
   };
 
+  // Debounced host search (for Receptionist creating an invitation)
+  const debouncedHostSearch = useCallback(
+    debounce(async (searchTerm) => {
+      if (!searchTerm || searchTerm.length < 2) {
+        setHostSearchResults([]);
+        return;
+      }
+      setSearchingHosts(true);
+      try {
+        const response = await userService.searchHosts(searchTerm, { limit: 10 });
+        const hosts = Array.isArray(response)
+          ? response
+          : response?.items || response?.data?.items || [];
+        setHostSearchResults(hosts);
+      } catch (error) {
+        console.error('Host search failed:', error);
+        setHostSearchResults([]);
+      } finally {
+        setSearchingHosts(false);
+      }
+    }, 300),
+    []
+  );
+
+  const handleHostSearch = (value) => {
+    setHostSearchTerm(value);
+    debouncedHostSearch(value);
+  };
+
+  const handleHostSelect = (host) => {
+    setSelectedHost(host);
+    const displayName = host.fullName || `${host.firstName || ''} ${host.lastName || ''}`.trim() || host.email || '';
+    setHostSearchTerm(displayName);
+    setHostSearchResults([]);
+    handleChange('hostId', host.id);
+  };
+
+  const handleClearHost = () => {
+    setSelectedHost(null);
+    setHostSearchTerm('');
+    setHostSearchResults([]);
+    handleChange('hostId', null);
+  };
+
   // Handle time slot selection
   const handleTimeSlotSelect = (timeSlot) => {
     setSelectedTimeSlot(timeSlot);
     handleChange('timeSlotId', timeSlot?.id || null);
 
     // If a time slot is selected, update start and end times based on the slot's times
-    if (timeSlot && formData.scheduledStartTime) {
-      const currentDate = new Date(formData.scheduledStartTime);
+    if (timeSlot) {
+      // Use existing date if set, otherwise default to today
+      const currentDate = formData.scheduledStartTime
+        ? new Date(formData.scheduledStartTime)
+        : new Date();
 
       // Parse the time slot's start time (format: "HH:MM:SS")
       const [startHours, startMinutes] = timeSlot.startTime.split(':').map(Number);
@@ -664,7 +738,9 @@ const InvitationForm = ({
     const submissionData = {
       ...formData,
       scheduledStartTime: new Date(formData.scheduledStartTime).toISOString(),
-      scheduledEndTime: new Date(formData.scheduledEndTime).toISOString()
+      scheduledEndTime: new Date(formData.scheduledEndTime).toISOString(),
+      // Include hostId only when set (operator selected a different host)
+      hostId: formData.hostId || undefined
     };
 
     try {
@@ -698,6 +774,10 @@ const InvitationForm = ({
     // Format for datetime-local input (local time, not UTC)
     handleChange('scheduledStartTime', formatDateTimeForLocalInput(startDate));
     handleChange('scheduledEndTime', formatDateTimeForLocalInput(endDate));
+
+    // Clear selected time slot since the user manually chose a preset time
+    setSelectedTimeSlot(null);
+    handleChange('timeSlotId', null);
   };
 
   // Helper to format datetime for datetime-local input (local time)
@@ -782,6 +862,76 @@ const InvitationForm = ({
               maxLength={200}
               placeholder={t('form.fields.subjectPlaceholder')}
             />
+
+            {/* Host Selection — visible to Receptionist (operator) only when creating a new invitation */}
+            {isOperator && !isEdit && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {t('form.fields.host', 'Host')} <span className="text-red-500">*</span>
+                </label>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                  {t('form.fields.hostHint', 'Select the staff member who is hosting this visitor. Leave blank to assign yourself as host.')}
+                </p>
+                {selectedHost ? (
+                  <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
+                        <UserIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {selectedHost.fullName || `${selectedHost.firstName || ''} ${selectedHost.lastName || ''}`.trim()}
+                        </p>
+                        {selectedHost.email && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{selectedHost.email}</p>
+                        )}
+                      </div>
+                    </div>
+                    <Button type="button" variant="ghost" size="sm" onClick={handleClearHost} icon={<XMarkIcon className="w-4 h-4" />}>
+                      {t('common:buttons.change', 'Change')}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <Input
+                      placeholder={t('form.fields.searchHostPlaceholder', 'Search by name or email… (type 2+ characters)')}
+                      value={hostSearchTerm}
+                      onChange={(e) => handleHostSearch(e.target.value)}
+                      leftIcon={<MagnifyingGlassIcon className="w-4 h-4" />}
+                    />
+                    {searchingHosts && (
+                      <div className="absolute end-3 top-3">
+                        <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                    {hostSearchResults.length > 0 && (
+                      <div className="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-52 overflow-y-auto">
+                        {hostSearchResults.map((host, index) => {
+                          const displayName = host.fullName || `${host.firstName || ''} ${host.lastName || ''}`.trim() || host.email || '';
+                          return (
+                            <button
+                              key={host.id ?? host.email ?? index}
+                              type="button"
+                              onClick={() => handleHostSelect(host)}
+                              className="w-full text-start p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
+                            >
+                              <p className="text-sm font-medium text-gray-900 dark:text-white">{displayName}</p>
+                              {host.email && <p className="text-xs text-gray-500 dark:text-gray-400">{host.email}</p>}
+                              {host.department && <p className="text-xs text-gray-400 dark:text-gray-500">{host.department}</p>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {!selectedHost && currentUser && (
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    {t('form.fields.hostSelfHint', 'If no host is selected, you ({{name}}) will be set as the host.', { name: currentUser.fullName || currentUser.firstName })}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Visitor Selection */}
             {formData.type === 'Single' ? (
@@ -1031,7 +1181,12 @@ const InvitationForm = ({
                 label={t('form.fields.startDateTime')}
                 type="datetime-local"
                 value={formData.scheduledStartTime}
-                onChange={(e) => handleChange('scheduledStartTime', e.target.value)}
+                onChange={(e) => {
+                  handleChange('scheduledStartTime', e.target.value);
+                  // Manual edit breaks time slot association
+                  setSelectedTimeSlot(null);
+                  handleChange('timeSlotId', null);
+                }}
                 onBlur={() => handleBlur('scheduledStartTime')}
                 error={touched.scheduledStartTime ? formErrors.scheduledStartTime : undefined}
                 min={new Date().toISOString().slice(0, 16)} // Prevent past dates
@@ -1049,7 +1204,12 @@ const InvitationForm = ({
                 label={t('form.fields.endDateTime')}
                 type="datetime-local"
                 value={formData.scheduledEndTime}
-                onChange={(e) => handleChange('scheduledEndTime', e.target.value)}
+                onChange={(e) => {
+                  handleChange('scheduledEndTime', e.target.value);
+                  // Manual edit breaks time slot association
+                  setSelectedTimeSlot(null);
+                  handleChange('timeSlotId', null);
+                }}
                 onBlur={() => handleBlur('scheduledEndTime')}
                 error={touched.scheduledEndTime ? formErrors.scheduledEndTime : undefined}
                 min={formData.scheduledStartTime || new Date().toISOString().slice(0, 16)} // Must be after start time
@@ -1112,7 +1272,7 @@ const InvitationForm = ({
         </Card>
 
         {/* Time Slot Selection */}
-        {formData.locationId && formData.scheduledStartTime && (
+        {formData.locationId && (
           <Card className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <ClockIcon className="w-6 h-6 text-blue-600" />
@@ -1223,7 +1383,8 @@ const InvitationForm = ({
             <CapacityValidator
               locationId={formData.locationId}
               timeSlotId={formData.timeSlotId}
-              dateTime={formData.scheduledStartTime}
+              dateTime={formData.scheduledStartTime ? new Date(formData.scheduledStartTime).toISOString() : null}
+              endDateTime={formData.scheduledEndTime ? new Date(formData.scheduledEndTime).toISOString() : null}
               expectedVisitors={formData.expectedVisitorCount || 1}
               isVipRequest={false}
               excludeInvitationId={isEdit ? initialData?.id : null}
