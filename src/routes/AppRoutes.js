@@ -47,6 +47,7 @@ import {
   USER_PERMISSIONS,
   INVITATION_PERMISSIONS,
   VISITOR_PERMISSIONS,
+  COMPANY_PERMISSIONS,
   CHECKIN_PERMISSIONS,
   SYSTEM_CONFIG_PERMISSIONS,
   AUDIT_PERMISSIONS,
@@ -575,7 +576,7 @@ const AppRoutes = () => {
         path={SYSTEM_ROUTES.COMPANIES}
         element={
           <AuthGuard>
-            <PermissionGuard permission={SYSTEM_CONFIG_PERMISSIONS.READ}>
+            <PermissionGuard permission={COMPANY_PERMISSIONS.READ}>
               <Layout>
                 <Suspense fallback={<LoadingFallback />}>
                   <CompaniesListPage />

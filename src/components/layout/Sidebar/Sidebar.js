@@ -166,6 +166,7 @@ const Sidebar = () => {
     invitation: invitationPermissions,
     calendar: calendarPermissions,
     visitor: visitorPermissions,
+    company: companyPermissions,
     checkin: checkinPermissions,
     report: reportPermissions,
     systemConfig: systemPermissions,
@@ -287,7 +288,7 @@ const Sidebar = () => {
         {
           name: t('system.companies'),
           href: '/system/companies',
-          show: systemPermissions.canRead || isAdmin
+          show: companyPermissions.canRead || isAdmin
         },
         {
           name: t('system.departments'),

@@ -32,6 +32,7 @@ import { selectVisitPurposesList } from '../../../store/selectors/visitPurposeSe
 
 // Hooks
 import { useToast } from '../../../hooks/useNotifications';
+import { usePermissions } from '../../../hooks/usePermissions';
 
 // Utils and validation
 import { extractErrorMessage } from '../../../utils/errorUtils';
@@ -79,6 +80,8 @@ const VisitorForm = ({
   const { t } = useTranslation(['visitors', 'common']);
   
   const dispatch = useDispatch();
+  const { company: companyPermissions } = usePermissions();
+  const canCreateCompany = companyPermissions.canCreate;
   
   // Redux selectors
   const locations = useSelector(selectLocationsList);
@@ -756,6 +759,9 @@ const VisitorForm = ({
   };
 
   const handleCreateNewCompany = (searchTerm) => {
+    if (!canCreateCompany) {
+      return;
+    }
     setShowCreateCompanyModal(true);
   };
 
@@ -1278,21 +1284,23 @@ const VisitorForm = ({
               label={t('fields.company')}
               value={selectedCompany}
               onChange={handleCompanySelect}
-              onCreateNew={handleCreateNewCompany}
+              onCreateNew={canCreateCompany ? handleCreateNewCompany : undefined}
               placeholder={t('form.placeholders.companySearch')}
               error={touched.company ? formErrors.company : undefined}
               showCreateOption={false}
             />
           </div>
-          <button
-            type="button"
-            onClick={() => setShowCreateCompanyModal(true)}
-            disabled={loading}
-            className="h-[42px] px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title={t('form.company.createButtonTitle')}
-          >
-            <PlusIcon className="w-5 h-5" />
-          </button>
+          {canCreateCompany && (
+            <button
+              type="button"
+              onClick={() => setShowCreateCompanyModal(true)}
+              disabled={loading}
+              className="h-[42px] px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title={t('form.company.createButtonTitle')}
+            >
+              <PlusIcon className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         <Input
@@ -2782,7 +2790,6 @@ VisitorForm.propTypes = {
 };
 
 export default VisitorForm;
-
 
 
 

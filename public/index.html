@@ -10,9 +10,8 @@
     <meta name="author" content="VMS Development Team" />
     
     <!-- Security headers are set as HTTP response headers by SecurityHeadersMiddleware.
-         A CSP meta tag is intentionally omitted: static meta tags use 'self' which
-         breaks API calls when the app is accessed via IP or localhost while the API
-         is on a named host (e.g. https://ahworkstation). -->
+         A CSP meta tag is intentionally omitted so IIS/runtime deployment can keep
+         the SPA, API, and SignalR on the same effective origin. -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="DENY" />
     <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
@@ -97,7 +96,7 @@
         font-size: 14px;
       }
     </style>
-    <!-- Runtime config: written by the installer with the server's API URL -->
+    <!-- Runtime config: written by the installer. Production defaults to same-origin. -->
     <script src="%PUBLIC_URL%/config.js"></script>
   </head>
   <body>

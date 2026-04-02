@@ -64,10 +64,12 @@ import Pagination from '../../../components/common/Pagination/Pagination';
 import Modal, { ConfirmModal } from '../../../components/common/Modal/Modal';
 import UserForm from '../../../components/forms/UserForm/UserForm';
 import Tooltip from '../../../components/common/Tooltip/Tooltip';
+import ImportUsersModal from '../../../components/users/ImportUsersModal/ImportUsersModal';
 
 // Icons
 import {
   PlusIcon,
+  ArrowUpTrayIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
   ArrowPathIcon,
@@ -90,6 +92,13 @@ import {
 
 // Utils
 import { extractErrorMessage } from '../../../utils/errorUtils';
+
+// Import users modal state
+import {
+  openImportModal,
+  closeImportModal,
+  selectImportIsOpen,
+} from '../../../store/slices/importUsersSlice';
 
 /**
  * Professional Users List Page with comprehensive user management
@@ -120,6 +129,7 @@ const UsersListPage = () => {
   const isCreateModalOpen = useSelector(selectShowCreateModal);
   const isEditModalOpen = useSelector(selectShowEditModal);
   const isDeleteModalOpen = useSelector(selectShowDeleteModal);
+  const isImportModalOpen = useSelector(selectImportIsOpen);
 
   // Error states
   const createError = useSelector(selectUsersCreateError);
@@ -689,6 +699,15 @@ const UsersListPage = () => {
         <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
           {userPermissions.canCreate && (
             <Button
+              variant="outline"
+              onClick={() => dispatch(openImportModal())}
+              icon={<ArrowUpTrayIcon className="w-5 h-5" />}
+            >
+              Import Users
+            </Button>
+          )}
+          {userPermissions.canCreate && (
+            <Button
               onClick={() => dispatch(showCreateModal())}
               loading={loading}
               icon={<PlusIcon className="w-5 h-5" />}
@@ -1103,6 +1122,9 @@ const UsersListPage = () => {
         variant={bulkAction === 'delete' ? 'danger' : 'warning'}
         loading={loading}
       />
+
+      {/* Import Users Modal */}
+      {isImportModalOpen && <ImportUsersModal />}
     </div>
   );
 };

@@ -12,6 +12,7 @@ import {
   USER_PERMISSIONS,
   INVITATION_PERMISSIONS,
   VISITOR_PERMISSIONS,
+  COMPANY_PERMISSIONS,
   CHECKIN_PERMISSIONS,
   NOTIFICATION_PERMISSIONS,
   EMERGENCY_PERMISSIONS,
@@ -154,6 +155,19 @@ export const usePermissions = () => {
       VISITOR_PERMISSIONS.CREATE,
       VISITOR_PERMISSIONS.UPDATE,
       VISITOR_PERMISSIONS.DELETE
+    ])
+  }), [hasPermission, hasAnyPermission]);
+
+  // Company Management Permissions
+  const companyPermissions = useMemo(() => ({
+    canCreate: hasPermission(COMPANY_PERMISSIONS.CREATE),
+    canRead: hasPermission(COMPANY_PERMISSIONS.READ),
+    canUpdate: hasPermission(COMPANY_PERMISSIONS.UPDATE),
+    canDelete: hasPermission(COMPANY_PERMISSIONS.DELETE),
+    canManage: hasAnyPermission([
+      COMPANY_PERMISSIONS.CREATE,
+      COMPANY_PERMISSIONS.UPDATE,
+      COMPANY_PERMISSIONS.DELETE
     ])
   }), [hasPermission, hasAnyPermission]);
 
@@ -436,6 +450,7 @@ export const usePermissions = () => {
     user: userPermissions,
     invitation: invitationPermissions,
     visitor: visitorPermissions,
+    company: companyPermissions,
     checkin: checkinPermissions,
     notification: notificationPermissions,
     emergency: emergencyPermissions,

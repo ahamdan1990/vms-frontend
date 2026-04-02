@@ -4,14 +4,27 @@
  */
 
 // Base API configuration
-// Priority: runtime config.js (installer) → env var (dev) → localhost fallback
+// Priority: runtime config.js (installer) → env var (dev) → same-origin in production
+const normalizeBaseUrl = (value) => {
+  if (!value || value === '%%API_URL%%') {
+    return '';
+  }
+
+  return value.replace(/\/+$/, '');
+};
+
 const getRuntimeApiUrl = () => {
-  const runtimeUrl = window.VMS_CONFIG?.apiUrl;
-  // If installer wrote a real URL (not the placeholder), use it
-  if (runtimeUrl && runtimeUrl !== '%%API_URL%%' && runtimeUrl !== '') {
+  const runtimeUrl = normalizeBaseUrl(window.VMS_CONFIG?.apiUrl);
+  if (runtimeUrl) {
     return runtimeUrl;
   }
-  return process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+  const envUrl = normalizeBaseUrl(process.env.REACT_APP_API_URL);
+  if (envUrl) {
+    return envUrl;
+  }
+
+  return process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : '';
 };
 
 export const API_CONFIG = {
@@ -52,7 +65,12 @@ export const USER_ENDPOINTS = {
   UNLOCK: (id) => `/api/Users/${id}/unlock`,
   ACTIVITY: (id) => `/api/Users/${id}/activity`,
   RESET_PASSWORD: (id) => `/api/Users/${id}/reset-password`,
-  ROLES: '/api/Users/roles'
+  ROLES: '/api/Users/roles',
+  // Import
+  IMPORT: '/api/Users/import',
+  IMPORT_VALIDATE: '/api/Users/import/validate',
+  IMPORT_TEMPLATE: (format = 'xlsx') => `/api/Users/import/template?format=${format}`,
+  CHECK_DUPLICATES: '/api/Users/check-duplicates',
 };
 
 // System administration endpoints (for future implementation)
@@ -363,6 +381,18 @@ export const buildQueryString = (params = {}) => {
 };
 
 export const getFullUrl = (endpoint, baseUrl = API_CONFIG.BASE_URL) => {
+  if (!endpoint) {
+    return baseUrl;
+  }
+
+  if (/^https?:\/\//i.test(endpoint)) {
+    return endpoint;
+  }
+
+  if (!baseUrl) {
+    return endpoint;
+  }
+
   return `${baseUrl}${endpoint}`;
 };
 

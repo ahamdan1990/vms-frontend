@@ -84,6 +84,17 @@ export const VISITOR_PERMISSIONS = {
 };
 
 // ============================================================================
+// COMPANY MANAGEMENT
+// ============================================================================
+
+export const COMPANY_PERMISSIONS = {
+  CREATE: 'Company.Create',
+  READ: 'Company.Read',
+  UPDATE: 'Company.Update',
+  DELETE: 'Company.Delete'
+};
+
+// ============================================================================
 // VISITOR DOCUMENTS
 // ============================================================================
 
@@ -455,6 +466,7 @@ export const STAFF_PERMISSIONS = [
   // Visitors (Own only)
   VISITOR_PERMISSIONS.CREATE,
   VISITOR_PERMISSIONS.READ,
+  COMPANY_PERMISSIONS.READ,
 
   // Dashboard
   DASHBOARD_PERMISSIONS.VIEW_BASIC,
@@ -497,6 +509,8 @@ export const RECEPTIONIST_PERMISSIONS = [
   VISITOR_PERMISSIONS.READ_TODAY,
   VISITOR_PERMISSIONS.VIEW_HISTORY,
   VISITOR_PERMISSIONS.CREATE, // For walk-ins
+  COMPANY_PERMISSIONS.READ,
+  COMPANY_PERMISSIONS.CREATE,
 
   // QR Code
   QR_CODE_PERMISSIONS.SCAN,
@@ -535,6 +549,7 @@ export const ALL_PERMISSIONS = {
   ...USER_PERMISSIONS,
   ...INVITATION_PERMISSIONS,
   ...VISITOR_PERMISSIONS,
+  ...COMPANY_PERMISSIONS,
   ...VISITOR_DOCUMENT_PERMISSIONS,
   ...VISITOR_NOTE_PERMISSIONS,
   ...EMERGENCY_CONTACT_PERMISSIONS,
@@ -612,6 +627,7 @@ export default {
   USER_PERMISSIONS,
   INVITATION_PERMISSIONS,
   VISITOR_PERMISSIONS,
+  COMPANY_PERMISSIONS,
   VISITOR_DOCUMENT_PERMISSIONS,
   VISITOR_NOTE_PERMISSIONS,
   EMERGENCY_CONTACT_PERMISSIONS,

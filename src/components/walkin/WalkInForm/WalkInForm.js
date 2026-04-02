@@ -1,5 +1,5 @@
 // src/components/walkin/WalkInForm/WalkInForm.js
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -54,6 +54,8 @@ import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/sol
 // Utils
 import { extractErrorMessage } from '../../../utils/errorUtils';
 import { useToast } from '../../../hooks/useNotifications';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { InvitationStatus } from '../../../constants/invitationStatus';
 
 /**
  * Walk-In Form Component
@@ -73,6 +75,8 @@ const WalkInForm = ({
   const { t } = useTranslation('receptionist');
   const dispatch = useDispatch();
   const toast = useToast();
+  const { company: companyPermissions } = usePermissions();
+  const canCreateCompany = companyPermissions.canCreate;
 
   // Redux selectors
   const locations = useSelector(selectLocationsList);
@@ -123,6 +127,15 @@ const WalkInForm = ({
   const [hostSearchResults, setHostSearchResults] = useState([]);
   const [searchingHosts, setSearchingHosts] = useState(false);
   const [provisioningHostKey, setProvisioningHostKey] = useState(null);
+  const [hostBusyStatus, setHostBusyStatus] = useState({
+    loading: false,
+    checkedHostId: null,
+    activeVisits: [],
+    error: null
+  });
+  const [showHostBusyConfirm, setShowHostBusyConfirm] = useState(false);
+  const [pendingSubmissionData, setPendingSubmissionData] = useState(null);
+  const hostBusyRequestIdRef = useRef(0);
 
   // Document scanning state
   const [scannedDocuments, setScannedDocuments] = useState([]);
@@ -306,7 +319,7 @@ const WalkInForm = ({
 
   const handleCreateCompany = async (e) => {
     e.preventDefault();
-    if (!newCompanyDraft.name.trim() || !newCompanyDraft.code.trim()) return;
+    if (!newCompanyDraft.name.trim() || !newCompanyDraft.code.trim() || !canCreateCompany) return;
     try {
       setCreatingCompany(true);
       const result = await companyService.createCompany(newCompanyDraft);
@@ -316,7 +329,7 @@ const WalkInForm = ({
       setNewCompanyDraft({ name: '', code: '' });
       toast.success(t('walkInForm.step2.companyCreated', { name: newCompanyDraft.name }));
     } catch (err) {
-      toast.error(t('walkInForm.step2.companyCreateFailed'));
+      toast.error(extractErrorMessage(err, t('walkInForm.step2.companyCreateFailed')));
     } finally {
       setCreatingCompany(false);
     }
@@ -467,6 +480,96 @@ const WalkInForm = ({
     }
   };
 
+  const getVisitorDisplayName = useCallback((invitation) => {
+    const visitor = invitation?.visitor;
+    const fullName = visitor?.fullName || `${visitor?.firstName || ''} ${visitor?.lastName || ''}`.trim();
+    return fullName || visitor?.email || t('walkInForm.step3.unknownVisitor');
+  }, [t]);
+
+  const getDistinctActiveVisitorNames = useCallback((activeVisits) => {
+    return activeVisits
+      .map(getVisitorDisplayName)
+      .filter(Boolean)
+      .filter((name, index, allNames) => allNames.indexOf(name) === index);
+  }, [getVisitorDisplayName]);
+
+  const getActiveVisitorSummary = useCallback((activeVisits) => {
+    const distinctNames = getDistinctActiveVisitorNames(activeVisits);
+
+    if (distinctNames.length <= 3) {
+      return distinctNames.join(', ');
+    }
+
+    return `${distinctNames.slice(0, 3).join(', ')} +${distinctNames.length - 3}`;
+  }, [getDistinctActiveVisitorNames]);
+
+  const loadHostBusyStatus = useCallback(async (hostId, options = {}) => {
+    const { showLoader = true } = options;
+
+    if (!hostId) {
+      const emptyState = {
+        loading: false,
+        checkedHostId: null,
+        activeVisits: [],
+        error: null
+      };
+      setHostBusyStatus(emptyState);
+      return emptyState;
+    }
+
+    const requestId = hostBusyRequestIdRef.current + 1;
+    hostBusyRequestIdRef.current = requestId;
+
+    if (showLoader) {
+      setHostBusyStatus(prev => ({
+        ...prev,
+        loading: true,
+        checkedHostId: hostId,
+        error: null
+      }));
+    }
+
+    try {
+      const response = await invitationService.getInvitations({
+        hostId,
+        pageSize: 100,
+        sortBy: 'ScheduledStartTime',
+        sortDirection: 'desc'
+      });
+
+      const invitations = Array.isArray(response)
+        ? response
+        : response?.items || response?.data?.items || [];
+
+      const activeVisits = invitations.filter(invitation => invitation?.status === InvitationStatus.Active);
+      const nextState = {
+        loading: false,
+        checkedHostId: hostId,
+        activeVisits,
+        error: null
+      };
+
+      if (hostBusyRequestIdRef.current === requestId) {
+        setHostBusyStatus(nextState);
+      }
+
+      return nextState;
+    } catch (hostStatusError) {
+      const nextState = {
+        loading: false,
+        checkedHostId: hostId,
+        activeVisits: [],
+        error: extractErrorMessage(hostStatusError) || t('walkInForm.step3.hostStatusUnavailable')
+      };
+
+      if (hostBusyRequestIdRef.current === requestId) {
+        setHostBusyStatus(nextState);
+      }
+
+      return nextState;
+    }
+  }, [t]);
+
   const validateVisitData = () => {
     const errors = {};
 
@@ -480,6 +583,23 @@ const WalkInForm = ({
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
+
+  useEffect(() => {
+    if (!visitData.hostId) {
+      hostBusyRequestIdRef.current += 1;
+      setHostBusyStatus({
+        loading: false,
+        checkedHostId: null,
+        activeVisits: [],
+        error: null
+      });
+      setShowHostBusyConfirm(false);
+      setPendingSubmissionData(null);
+      return;
+    }
+
+    loadHostBusyStatus(visitData.hostId);
+  }, [visitData.hostId, loadHostBusyStatus]);
 
   // ===== DOCUMENT SCANNING =====
 
@@ -517,6 +637,43 @@ const WalkInForm = ({
     }
   };
 
+  const buildSubmissionData = useCallback(() => ({
+    existingVisitorId: existingVisitor?.id || null,
+    visitorData: {
+      ...visitorData,
+      photo: initialPhoto
+    },
+    visitData: {
+      ...visitData,
+      // Default purpose to "Walk-in" if not selected
+      visitPurposeId: visitData.visitPurposeId ||
+        visitPurposes.find(p => p.name.toLowerCase().includes('walk'))?.id ||
+        null
+    },
+    scannedDocuments
+  }), [existingVisitor, initialPhoto, scannedDocuments, visitData, visitPurposes, visitorData]);
+
+  const handleConfirmBusyHostCheckIn = async () => {
+    if (!pendingSubmissionData) {
+      setShowHostBusyConfirm(false);
+      return;
+    }
+
+    setShowHostBusyConfirm(false);
+    const submissionToProcess = pendingSubmissionData;
+    setPendingSubmissionData(null);
+    await onSubmit(submissionToProcess);
+  };
+
+  const handleCloseBusyHostConfirm = () => {
+    if (loading) {
+      return;
+    }
+
+    setShowHostBusyConfirm(false);
+    setPendingSubmissionData(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -524,22 +681,14 @@ const WalkInForm = ({
       return;
     }
 
-    // Prepare submission data
-    const submissionData = {
-      existingVisitorId: existingVisitor?.id || null,
-      visitorData: {
-        ...visitorData,
-        photo: initialPhoto
-      },
-      visitData: {
-        ...visitData,
-        // Default purpose to "Walk-in" if not selected
-        visitPurposeId: visitData.visitPurposeId ||
-          visitPurposes.find(p => p.name.toLowerCase().includes('walk'))?.id ||
-          null
-      },
-      scannedDocuments
-    };
+    const submissionData = buildSubmissionData();
+    const latestHostBusyStatus = await loadHostBusyStatus(visitData.hostId, { showLoader: false });
+
+    if (latestHostBusyStatus?.activeVisits?.length > 0) {
+      setPendingSubmissionData(submissionData);
+      setShowHostBusyConfirm(true);
+      return;
+    }
 
     await onSubmit(submissionData);
   };
@@ -882,12 +1031,12 @@ const WalkInForm = ({
           label={t('walkInForm.step2.companyOptional')}
           value={visitorData.companyId ? { id: visitorData.companyId, name: visitorData.company } : visitorData.company}
           onChange={handleCompanySelect}
-          onCreateNew={(searchTerm) => {
+          onCreateNew={canCreateCompany ? ((searchTerm) => {
             setNewCompanyDraft({ name: searchTerm, code: '' });
             setShowCreateCompanyModal(true);
-          }}
+          }) : undefined}
           placeholder={t('walkInForm.step2.companyPlaceholder')}
-          showCreateOption={true}
+          showCreateOption={canCreateCompany}
         />
         <Input
           label={t('walkInForm.step2.jobTitleOptional')}
@@ -1085,6 +1234,42 @@ const WalkInForm = ({
         )}
       </div>
 
+      {visitData.hostId && hostBusyStatus.loading && (
+        <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-200">
+          <LoadingSpinner size="sm" />
+          <span>{t('walkInForm.step3.checkingHostStatus')}</span>
+        </div>
+      )}
+
+      {visitData.hostId && !hostBusyStatus.loading && hostBusyStatus.activeVisits.length > 0 && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-700 dark:bg-amber-900/20">
+          <div className="flex items-start gap-3">
+            <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                {t('walkInForm.step3.hostBusyTitle')}
+              </p>
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                {t('walkInForm.step3.hostBusyMessage', {
+                  hostName: visitData.hostName,
+                  count: hostBusyStatus.activeVisits.length,
+                  visitors: getActiveVisitorSummary(hostBusyStatus.activeVisits)
+                })}
+              </p>
+              <p className="text-xs text-amber-700 dark:text-amber-300">
+                {t('walkInForm.step3.hostBusyHint')}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {visitData.hostId && !hostBusyStatus.loading && hostBusyStatus.error && (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+          {t('walkInForm.step3.hostStatusUnavailable')}
+        </div>
+      )}
+
       {/* Location Select */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -1244,6 +1429,72 @@ const WalkInForm = ({
           </div>
         </div>
       )}
+
+      <Modal
+        isOpen={showHostBusyConfirm}
+        onClose={handleCloseBusyHostConfirm}
+        title={t('walkInForm.step3.hostBusyConfirmTitle')}
+        size="md"
+      >
+        <div className="space-y-4">
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/20">
+            <div className="flex items-start gap-3">
+              <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
+                  {t('walkInForm.step3.hostBusyConfirmIntro', { hostName: visitData.hostName })}
+                </p>
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  {t('walkInForm.step3.hostBusyMessage', {
+                    hostName: visitData.hostName,
+                    count: hostBusyStatus.activeVisits.length,
+                    visitors: getActiveVisitorSummary(hostBusyStatus.activeVisits)
+                  })}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {hostBusyStatus.activeVisits.length > 0 && (
+            <div>
+              <p className="mb-2 text-sm font-medium text-gray-800 dark:text-gray-200">
+                {t('walkInForm.step3.hostBusyConfirmListLabel')}
+              </p>
+              <div className="space-y-2">
+                {getDistinctActiveVisitorNames(hostBusyStatus.activeVisits).map((visitorName) => (
+                  <div
+                    key={visitorName}
+                    className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+                  >
+                    {visitorName}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            {t('walkInForm.step3.hostBusyConfirmHint')}
+          </p>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              variant="outline"
+              onClick={handleCloseBusyHostConfirm}
+              disabled={loading}
+            >
+              {t('walkInForm.step3.hostBusyConfirmCancel')}
+            </Button>
+            <Button
+              onClick={handleConfirmBusyHostCheckIn}
+              loading={loading}
+              icon={<CheckCircleIcon className="w-4 h-4" />}
+            >
+              {t('walkInForm.step3.hostBusyConfirmContinue')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Create Company Modal */}
       <Modal

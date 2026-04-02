@@ -38,6 +38,7 @@ const CameraCapture = ({
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const autoStartTriggeredRef = useRef(false);
+  const startRequestIdRef = useRef(0);
 
   // State
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -46,9 +47,32 @@ const CameraCapture = ({
   const [loading, setLoading] = useState(false);
   const [cameraPermission, setCameraPermission] = useState('prompt'); // 'granted', 'denied', 'prompt'
 
+  const waitForVideoElement = useCallback(async (requestId) => {
+    let attempts = 0;
+    const maxAttempts = 60;
+
+    while (!videoRef.current) {
+      if (startRequestIdRef.current !== requestId) {
+        throw Object.assign(new Error('Camera start cancelled.'), { name: 'StartCancelled' });
+      }
+
+      attempts += 1;
+      if (attempts > maxAttempts) {
+        throw Object.assign(new Error('Camera preview unavailable. Please try again.'), { name: 'PreviewUnavailable' });
+      }
+
+      await new Promise(resolve => requestAnimationFrame(resolve));
+    }
+
+    return videoRef.current;
+  }, []);
+
   // Start camera stream
   const startCamera = useCallback(async () => {
     if (isCameraActive || loading) return;
+
+    const requestId = startRequestIdRef.current + 1;
+    startRequestIdRef.current = requestId;
 
     const constraints = {
       video: {
@@ -60,18 +84,25 @@ const CameraCapture = ({
 
     const acquireStream = async () => {
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+
+      try {
+        const videoElement = videoRef.current || await waitForVideoElement(requestId);
+
+        if (startRequestIdRef.current !== requestId) {
+          throw Object.assign(new Error('Camera start cancelled.'), { name: 'StartCancelled' });
+        }
+
+        videoElement.srcObject = stream;
         streamRef.current = stream;
         try {
-          await videoRef.current.play();
+          await videoElement.play();
         } catch (playError) {
           console.warn('Video play failed:', playError);
         }
         setCameraPermission('granted');
-      } else {
+      } catch (error) {
         stream.getTracks().forEach(track => track.stop());
-        throw Object.assign(new Error('Camera preview unavailable. Please try again.'), { name: 'PreviewUnavailable' });
+        throw error;
       }
     };
 
@@ -86,12 +117,19 @@ const CameraCapture = ({
         if (firstError.name === 'NotReadableError') {
           // Camera may still be releasing from a previous component — wait and retry once
           await new Promise(resolve => setTimeout(resolve, 600));
+          if (startRequestIdRef.current !== requestId) {
+            return;
+          }
           await acquireStream();
         } else {
           throw firstError;
         }
       }
     } catch (error) {
+      if (error.name === 'StartCancelled') {
+        return;
+      }
+
       if (error.name === 'NotAllowedError') {
         setError('Camera access denied. Please enable camera permissions and try again.');
         setCameraPermission('denied');
@@ -106,12 +144,15 @@ const CameraCapture = ({
       }
       setIsCameraActive(false);
     } finally {
-      setLoading(false);
+      if (startRequestIdRef.current === requestId) {
+        setLoading(false);
+      }
     }
-  }, [isCameraActive, loading, maxWidth, maxHeight]);
+  }, [isCameraActive, loading, maxWidth, maxHeight, waitForVideoElement]);
 
   // Stop camera stream
   const stopCamera = useCallback(() => {
+    startRequestIdRef.current += 1;
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
@@ -119,6 +160,7 @@ const CameraCapture = ({
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    setLoading(false);
     setIsCameraActive(false);
   }, []);
 
@@ -165,9 +207,10 @@ const CameraCapture = ({
         lastModified: Date.now()
       });
 
+      // Keep the preview URL owned by this component only.
+      // Callers should create their own preview URL from the returned File if needed.
       onPhotoCapture({
         file,
-        url: capturedPhoto.url,
         width: capturedPhoto.width,
         height: capturedPhoto.height
       });
@@ -196,10 +239,12 @@ const CameraCapture = ({
 
   // Check camera permission on mount
   useEffect(() => {
+    let permission;
+
     const checkPermission = async () => {
       try {
         if (navigator.permissions) {
-          const permission = await navigator.permissions.query({ name: 'camera' });
+          permission = await navigator.permissions.query({ name: 'camera' });
           setCameraPermission(permission.state);
 
           permission.onchange = () => {
@@ -212,6 +257,12 @@ const CameraCapture = ({
     };
 
     checkPermission();
+
+    return () => {
+      if (permission) {
+        permission.onchange = null;
+      }
+    };
   }, []);
 
   // Auto-start camera if autoStart prop is true

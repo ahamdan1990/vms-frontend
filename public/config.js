@@ -1,5 +1,5 @@
 // Runtime configuration — written by the installer.
-// DO NOT hardcode values here. The installer replaces %%API_URL%% during setup.
+// Leave apiUrl empty to keep the deployed app same-origin in IIS production.
 window.VMS_CONFIG = {
-  apiUrl: '%%API_URL%%'
+  apiUrl: ''
 };

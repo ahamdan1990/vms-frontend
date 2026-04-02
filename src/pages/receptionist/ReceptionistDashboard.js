@@ -155,7 +155,22 @@ const ReceptionistDashboard = () => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const overdueNotificationRef = useRef(0);
   const canExportInBuildingReport = emergency?.canExport || reportPermissions?.canExport;
-  const lastOverdueNotificationTime = useRef(null);
+
+  useEffect(() => {
+    if (!capturedPhoto?.url?.startsWith('blob:')) {
+      return undefined;
+    }
+
+    const previewUrl = capturedPhoto.url;
+    return () => {
+      URL.revokeObjectURL(previewUrl);
+    };
+  }, [capturedPhoto]);
+
+  const buildCapturedPhotoPreview = (photoData) => ({
+    ...photoData,
+    url: URL.createObjectURL(photoData.file)
+  });
 
   // Load dashboard data
   useEffect(() => {
@@ -166,25 +181,15 @@ const ReceptionistDashboard = () => {
   useEffect(() => {
     const current = todayStats.overdueVisitors ?? 0;
     const previous = overdueNotificationRef.current ?? 0;
-    const now = Date.now();
-    const fifteenMinutesInMs = 15 * 60 * 1000; // 15 minutes in milliseconds
 
-    // Check if 15 minutes have passed since the last notification
-    const canShowNotification = !lastOverdueNotificationTime.current ||
-                                 (now - lastOverdueNotificationTime.current) >= fifteenMinutesInMs;
-
-    if (current > 0 && canShowNotification) {
-      // Show notification if there are overdue visitors and 15 minutes have passed
+    if (current > previous) {
       toast.warning(
         t('receptionist:notifications.overdueTitle'),
         t('receptionist:notifications.overdueMessage', { count: current }),
         { duration: 7000 }
       );
-      lastOverdueNotificationTime.current = now;
     } else if (current === 0 && previous > 0) {
-      // Always show the "cleared" notification when all overdue visitors check out
       toast.success(t('receptionist:notifications.overdueCleared'), t('receptionist:notifications.overdueClearedDesc'), { duration: 4000 });
-      lastOverdueNotificationTime.current = null; // Reset timer when cleared
     }
 
     overdueNotificationRef.current = current;
@@ -349,7 +354,11 @@ const ReceptionistDashboard = () => {
           { duration: 3000 }
         );
 
-        // Continue the flow without blocking
+        // Face recognition is unavailable — accept photo as-is, no visitor lookup
+        setRecognizedVisitor(null);
+        setCapturedPhoto(buildCapturedPhotoPreview(photoData));
+        setShowCameraCapture(false);
+        return;
       } else if (!validationResult.faceDetected) {
         toast.error(
           t('receptionist:toasts.noFaceDetected'),
@@ -372,9 +381,12 @@ const ReceptionistDashboard = () => {
         if (recognizedVisitorData) {
           // Known visitor recognized!
           console.log('Returning visitor recognized:', recognizedVisitorData);
+          const visitorDisplayName = recognizedVisitorData.fullName ||
+            `${recognizedVisitorData.firstName || ''} ${recognizedVisitorData.lastName || ''}`.trim() ||
+            recognizedVisitorData.email || t('receptionist:toasts.unknownVisitor', 'visitor');
           toast.success(
             t('receptionist:toasts.returningVisitor'),
-            t('receptionist:toasts.returningVisitorDesc', { name: recognizedVisitorData.fullName }),
+            t('receptionist:toasts.returningVisitorDesc', { name: visitorDisplayName }),
             { duration: 5000 }
           );
           setRecognizedVisitor(recognizedVisitorData);
@@ -399,7 +411,7 @@ const ReceptionistDashboard = () => {
         setRecognizedVisitor(null);
       }
 
-      setCapturedPhoto(photoData);
+      setCapturedPhoto(buildCapturedPhotoPreview(photoData));
       setShowCameraCapture(false);
     } catch (error) {
       console.error('Failed to validate photo:', error);
@@ -529,9 +541,14 @@ const ReceptionistDashboard = () => {
         try {
           for (const doc of walkInData.scannedDocuments) {
             const docType = doc.documentType || t('receptionist:walkIn.defaultDocumentType');
+            // Wrap raw Blob in a named File so the backend extension validator accepts it
+            const rawBlob = doc.file instanceof File ? doc.file : doc.blob;
+            const uploadFile = rawBlob instanceof File
+              ? rawBlob
+              : new File([rawBlob], `document-${doc.id || Date.now()}.jpg`, { type: 'image/jpeg' });
             await visitorDocumentService.uploadVisitorDocument(
               visitor.id,
-              doc.file || doc.blob,
+              uploadFile,
               docType,   // title (3rd positional arg)
               docType,   // documentType (4th positional arg)
               {
@@ -625,6 +642,7 @@ const ReceptionistDashboard = () => {
       setShowWalkInForm(false);
       setShowCameraCapture(false);
       setCapturedPhoto(null);
+      setRecognizedVisitor(null);
 
       // Refresh dashboard data
       loadDashboardData();
@@ -968,18 +986,16 @@ const ReceptionistDashboard = () => {
 
     setExpandedVisitorId(visitorId);
 
-    // Load documents if not already loaded
-    if (!visitorDocuments[visitorId]) {
-      try {
-        setLoadingDocuments(prev => ({ ...prev, [visitorId]: true }));
-        const response = await visitorDocumentService.getVisitorDocuments(visitorId);
-        setVisitorDocuments(prev => ({ ...prev, [visitorId]: response.data || [] }));
-      } catch (error) {
-        console.error('Failed to load visitor documents:', error);
-        setVisitorDocuments(prev => ({ ...prev, [visitorId]: [] }));
-      } finally {
-        setLoadingDocuments(prev => ({ ...prev, [visitorId]: false }));
-      }
+    // Load documents — always fetch fresh on open (key may exist as stale [] from a prior bug)
+    try {
+      setLoadingDocuments(prev => ({ ...prev, [visitorId]: true }));
+      const docs = await visitorDocumentService.getVisitorDocuments(visitorId);
+      setVisitorDocuments(prev => ({ ...prev, [visitorId]: Array.isArray(docs) ? docs : (docs?.data ?? []) }));
+    } catch (error) {
+      console.error('Failed to load visitor documents:', error);
+      setVisitorDocuments(prev => ({ ...prev, [visitorId]: [] }));
+    } finally {
+      setLoadingDocuments(prev => ({ ...prev, [visitorId]: false }));
     }
   };
 

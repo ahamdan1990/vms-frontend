@@ -9,7 +9,7 @@ import { setPageTitle } from '../../../store/slices/uiSlice';
 import LoginForm from '../../../components/forms/LoginForm/LoginForm';
 import LanguageToggle from '../../../components/common/LanguageToggle/LanguageToggle';
 import { useTheme } from '../../../hooks/useTheme';
-import { API_CONFIG } from '../../../services/apiEndpoints';
+import { AUTH_ENDPOINTS, getFullUrl } from '../../../services/apiEndpoints';
 import { getCurrentUser } from '../../../store/slices/authSlice';
 import { startTokenRefresh } from '../../../services/apiClient';
 import tokenService from '../../../services/tokenService';
@@ -47,7 +47,7 @@ const LoginPage = () => {
         console.log('🔐 [LDAP] Starting LDAP authentication...');
 
         // Dispatch LDAP login command via API
-        const apiResponse = await fetch(`${API_CONFIG.BASE_URL}/api/Auth/ldap-login`, {
+        const apiResponse = await fetch(getFullUrl(AUTH_ENDPOINTS.LDAP_LOGIN), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -4,6 +4,7 @@ import { store } from '../../store/store';
 import { showSuccessToast, showErrorToast, showWarningToast } from '../../store/slices/notificationSlice';
 import { refreshToken } from '../apiClient';
 import tokenService from '../tokenService';
+import { API_CONFIG, getFullUrl } from '../apiEndpoints';
 import EventHandlerRegistry from './handlers';
 
 class SignalRConnectionManager {
@@ -14,10 +15,7 @@ class SignalRConnectionManager {
     this.initializationPromise = null;
     this.reconnectAttempts = new Map();
     this.maxReconnectAttempts = 5;
-    const runtimeUrl = window.VMS_CONFIG?.apiUrl;
-    this.baseUrl = (runtimeUrl && runtimeUrl !== '%%API_URL%%' && runtimeUrl !== '')
-      ? runtimeUrl
-      : (process.env.REACT_APP_API_URL || 'http://localhost:5000');
+    this.baseUrl = API_CONFIG.BASE_URL;
     
     // Initialize event handler registry
     this.eventHandlers = EventHandlerRegistry;
@@ -28,7 +26,7 @@ class SignalRConnectionManager {
    */
   async testAuthentication() {
     try {
-      const response = await fetch(`${this.baseUrl}/api/Auth/me`, {
+      const response = await fetch(getFullUrl('/api/Auth/me', this.baseUrl), {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -176,7 +174,7 @@ class SignalRConnectionManager {
       await refreshToken();
       const fingerprint = tokenService.getDeviceFingerprint();
 
-      const hubUrl = `${this.baseUrl}/hubs/${hubName}?deviceFingerprint=${fingerprint}`;
+      const hubUrl = `${getFullUrl(`/hubs/${hubName}`, this.baseUrl)}?deviceFingerprint=${encodeURIComponent(fingerprint)}`;
       
       const connection = new HubConnectionBuilder()
         .withUrl(hubUrl, {
@@ -247,7 +245,7 @@ class SignalRConnectionManager {
         console.error('Connection error details:', {
           message: error.message,
           statusCode: error.statusCode,
-          url: `${this.baseUrl}/hubs/${hubName}`,
+          url: getFullUrl(`/hubs/${hubName}`, this.baseUrl),
           hubName: hubName,
           errorType: error.constructor.name
         });
@@ -259,13 +257,10 @@ class SignalRConnectionManager {
           console.error('=================================================');
           console.error('The browser is blocking WebSocket connections due to CSP restrictions.');
           console.error('');
-          console.error('SOLUTION: Update your CSP to allow WebSocket connections');
+          console.error('SOLUTION: Allow same-origin WebSocket traffic for the deployed HTTPS host.');
           console.error('');
-          console.error('Add this to your public/index.html <meta> CSP tag:');
-          console.error('   ws://localhost:5000');
-          console.error('');
-          console.error('Or update your server CSP headers to include:');
-          console.error('   connect-src \'self\' ws://localhost:5000 wss://localhost:5000');
+          console.error('If you set CSP headers manually, ensure connect-src allows:');
+          console.error('   connect-src \'self\' wss:');
           console.error('=================================================');
           console.error('');
         }
